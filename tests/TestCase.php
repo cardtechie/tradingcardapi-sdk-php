@@ -2,9 +2,9 @@
 
 namespace CardTechie\TradingCardApiSdk\Tests;
 
+use CardTechie\TradingCardApiSdk\TradingCardApiSdkServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use CardTechie\TradingCardApiSdk\TradingCardApiSdkServiceProvider;
 
 class TestCase extends Orchestra
 {

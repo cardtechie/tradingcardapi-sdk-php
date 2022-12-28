@@ -2,9 +2,9 @@
 
 namespace CardTechie\TradingCardApiSdk;
 
+use CardTechie\TradingCardApiSdk\Commands\TradingCardApiSdkCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use CardTechie\TradingCardApiSdk\Commands\TradingCardApiSdkCommand;
 
 class TradingCardApiSdkServiceProvider extends PackageServiceProvider
 {
