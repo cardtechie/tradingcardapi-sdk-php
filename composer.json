@@ -1,17 +1,18 @@
 {
-    "name": ":vendor_slug/:package_slug",
-    "description": ":package_description",
+    "name": "cardtechie/tradingcardapi-sdk-php",
+    "description": "This is my package trading-card-api-sdk-php",
     "keywords": [
-        ":vendor_name",
+        "cardtechie",
         "laravel",
-        ":package_slug"
+        "tradingcardapi-sdk-php",
+        "tradingcardapi"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/cardtechie/tradingcardapi-sdk-php",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
+            "name": "Josh Harrison",
+            "email": "josh@cardtechie.com",
             "role": "Developer"
         }
     ],
@@ -35,13 +36,13 @@
     },
     "autoload": {
         "psr-4": {
-            "VendorName\\Skeleton\\": "src",
-            "VendorName\\Skeleton\\Database\\Factories\\": "database/factories"
+            "CardTechie\\TradingCardApiSdk\\": "src",
+            "CardTechie\\TradingCardApiSdk\\Database\\Factories\\": "database/factories"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "VendorName\\Skeleton\\Tests\\": "tests"
+            "CardTechie\\TradingCardApiSdk\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -61,10 +62,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "VendorName\\Skeleton\\SkeletonServiceProvider"
+                "CardTechie\\TradingCardApiSdk\\TradingCardApiSdkServiceProvider"
             ],
             "aliases": {
-                "Skeleton": "VendorName\\Skeleton\\Facades\\Skeleton"
+                "TradingCardApiSdk": "CardTechie\\TradingCardApiSdk\\Facades\\TradingCardApiSdk"
             }
         }
     },

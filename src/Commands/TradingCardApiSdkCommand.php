@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace CardTechie\TradingCardApiSdk\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class TradingCardApiSdkCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'tradingcardapi-sdk';
 
     public $description = 'My command';
 
