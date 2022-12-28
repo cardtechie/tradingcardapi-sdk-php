@@ -4,3 +4,5 @@ services:
   dev:
     build:
       context: ./
+    volumes:
+      - .:/var/www/app:consistent

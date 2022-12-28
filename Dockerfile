@@ -143,6 +143,9 @@ COPY ./.docker/config/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY ./.docker/config/nginx/nginx-site-dev.conf /etc/nginx/servers/default.conf
 
 WORKDIR "/var/www/app"
+# Copy in package code as late as possible, as it changes the most
+COPY --chown=www-data:www-data . .
+
 EXPOSE 80 443
 
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
