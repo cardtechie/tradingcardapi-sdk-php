@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton;
+namespace CardTechie\TradingCardApiSdk;
 
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use VendorName\Skeleton\Commands\SkeletonCommand;
+use CardTechie\TradingCardApiSdk\Commands\TradingCardApiSdkCommand;
 
-class SkeletonServiceProvider extends PackageServiceProvider
+class TradingCardApiSdkServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
@@ -16,10 +16,10 @@ class SkeletonServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name('skeleton')
+            ->name('tradingcardapi-sdk')
             ->hasConfigFile()
             ->hasViews()
-            ->hasMigration('create_skeleton_table')
-            ->hasCommand(SkeletonCommand::class);
+            ->hasMigration('create_tradingcardapi_sdk_table')
+            ->hasCommand(TradingCardApiSdkCommand::class);
     }
 }
