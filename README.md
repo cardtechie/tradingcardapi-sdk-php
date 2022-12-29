@@ -33,7 +33,7 @@ php artisan migrate
 You can publish the config file with:
 
 ```bash
-php artisan vendor:publish --tag="tradingcardapi-sdk-config"
+php artisan vendor:publish --tag="tradingcardapi-config"
 ```
 
 This is the contents of the published config file:

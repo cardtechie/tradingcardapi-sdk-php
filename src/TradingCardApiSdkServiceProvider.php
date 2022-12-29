@@ -17,7 +17,7 @@ class TradingCardApiSdkServiceProvider extends PackageServiceProvider
          */
         $package
             ->name('tradingcardapi-sdk')
-            ->hasConfigFile()
+            ->hasConfigFile('tradingcardapi')
             ->hasViews()
             ->hasMigration('create_tradingcardapi_sdk_table')
             ->hasCommand(TradingCardApiSdkCommand::class);
