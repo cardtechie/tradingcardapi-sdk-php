@@ -1,0 +1,182 @@
+<?php
+
+namespace CardTechie\TradingCardApiSdk\Models;
+
+/**
+ * Class Set
+ */
+class Set extends Model
+{
+    private $checklistIndex = null;
+
+    /**
+     * Retrieve the genre of the set.
+     *
+     * @return Genre|null
+     */
+    public function genre() : ?Genre
+    {
+        return $this->getRelationship('genres');
+    }
+
+    /**
+     * Retrieve the parent set.
+     *
+     * @return Set|null
+     */
+    public function parent() : ?Set
+    {
+        return $this->getRelationship('parentset');
+    }
+
+    /**
+     * Retrieve the manufacturer of the set.
+     *
+     * @return Manufacturer|null
+     */
+    public function manufacturer() : ?Manufacturer
+    {
+        return $this->getRelationship('manufacturers');
+    }
+
+    /**
+     * Retrieve the brand of the set.
+     *
+     * @return Brand|null
+     */
+    public function brand() : ?Brand
+    {
+        return $this->getRelationship('brands');
+    }
+
+    /**
+     * Retrieve the year of the set.
+     *
+     * @return Year|null
+     */
+    public function year() : ?Year
+    {
+        return $this->getRelationship('years');
+    }
+
+    /**
+     * Retrieve the subsets of the set.
+     *
+     * @return array
+     */
+    public function subsets() : array
+    {
+        if (array_key_exists('subsets', $this->relationships)) {
+            return $this->relationships['subsets'];
+        }
+
+        return [];
+    }
+
+    /**
+     * Retrieve the checklist of the set.
+     *
+     * @return array
+     */
+    public function checklist() : array
+    {
+        if (array_key_exists('checklist', $this->relationships)) {
+            return $this->relationships['checklist'];
+        }
+
+        return [];
+    }
+
+    /**
+     * Return how many cards are in the set currently.
+     *
+     * @return int|void
+     */
+    public function getCurrentCardCountAttribute() : int
+    {
+        return count($this->checklist());
+    }
+
+    /**
+     * Get the index of the current card in the checklist and save as a class prop
+     *
+     * @param Card $currentCard
+     */
+    private function setIndexInChecklist(Card $currentCard)
+    {
+        foreach ($this->relationships['checklist'] as $index => $card) {
+            if ($currentCard->id === $card->id) {
+                $this->checklistIndex = $index;
+            }
+        }
+    }
+
+    /**
+     * Retrieve the previous card of the card passed as an arg of the current set.
+     *
+     * @param Card $currentCard
+     *
+     * @return Card|null
+     */
+    public function previousCard(Card $currentCard) : ?Card
+    {
+        if (is_null($this->checklistIndex)) {
+            $this->setIndexInChecklist($currentCard);
+        }
+
+        if (!is_null($this->checklistIndex)) {
+            $index = $this->checklistIndex - 1;
+            if ($index >= 0) {
+                return $this->relationships['checklist'][$index];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieve the next card of the card passed as an arg of the current set.
+     *
+     * @param Card $currentCard
+     *
+     * @return Card|null
+     */
+    public function nextCard(Card $currentCard) : ?Card
+    {
+        if (is_null($this->checklistIndex)) {
+            $this->setIndexInChecklist($currentCard);
+        }
+
+        if (!is_null($this->checklistIndex)) {
+            $index = $this->checklistIndex + 1;
+            if ($index < count($this->relationships['checklist'])) {
+                return $this->relationships['checklist'][$index];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Set the relationships for the object
+     *
+     * @param array $relationships
+     */
+    // This is needed when we get the set list from the API
+    /*public function setRelationships(array $relationships) : void
+    {
+        foreach ($relationships as $type => $relationship) {
+            if ('genres' === $type) {
+                $this->relationships['genre'] = $relationship[0];
+            } elseif ('manufacturers' === $type) {
+                $this->relationships['manufacturer'] = $relationship[0];
+            } elseif ('years' === $type) {
+                $this->relationships['year'] = $relationship[0];
+            } elseif ('parentset' === $type) {
+                $this->relationships['parentset'] = $relationship[0];
+            } elseif ('checklist' === $type) {
+                $this->relationships['checklist'] = $relationship;
+            }
+        }
+    }*/
+}
