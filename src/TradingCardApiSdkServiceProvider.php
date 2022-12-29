@@ -16,8 +16,8 @@ class TradingCardApiSdkServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name('tradingcardapi-sdk')
-            ->hasConfigFile('tradingcardapi')
+            ->name('tradingcardapi')
+            ->hasConfigFile()
             ->hasViews()
             ->hasMigration('create_tradingcardapi_sdk_table')
             ->hasCommand(TradingCardApiSdkCommand::class);
