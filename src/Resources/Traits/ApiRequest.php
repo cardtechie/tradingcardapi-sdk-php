@@ -74,7 +74,7 @@ trait ApiRequest
             return;
         }
 
-        $config = config('api');
+        $config = config('tradingcardapi');
 
         $url = '/oauth/token';
         $headers = [
