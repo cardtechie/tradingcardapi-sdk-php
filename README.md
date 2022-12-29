@@ -43,6 +43,18 @@ php artisan vendor:publish --tag="tradingcardapi-sdk-views"
 
 ## Usage
 
+There is a facade available for use:
+
+```php
+$card = TradingCardApi::card()->get($id);
+```
+
+or a helper function if you prefer:
+
+```php
+$card = tradingcardapi()->card()->get($id);
+```
+
 ```php
 $tradingCardApiSdk = new CardTechie\TradingCardApiSdk();
 echo $tradingCardApiSdk->echoPhrase('Hello, CardTechie!');
