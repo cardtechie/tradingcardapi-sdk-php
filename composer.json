@@ -62,7 +62,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "CardTechie\\TradingCardApiSdk\\TradingCardApiSdkServiceProvider"
+                "CardTechie\\TradingCardApiSdk\\TradingCardApiServiceProvider"
             ],
             "aliases": {
                 "TradingCardApiSdk": "CardTechie\\TradingCardApiSdk\\Facades\\TradingCardApiSdk"
