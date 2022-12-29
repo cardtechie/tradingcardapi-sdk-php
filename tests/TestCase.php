@@ -2,7 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk\Tests;
 
-use CardTechie\TradingCardApiSdk\TradingCardApiSdkServiceProvider;
+use CardTechie\TradingCardApiSdk\TradingCardApiServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
 
@@ -20,7 +20,7 @@ class TestCase extends Orchestra
     protected function getPackageProviders($app)
     {
         return [
-            TradingCardApiSdkServiceProvider::class,
+            TradingCardApiServiceProvider::class,
         ];
     }
 

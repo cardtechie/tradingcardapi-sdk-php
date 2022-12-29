@@ -6,7 +6,7 @@ use CardTechie\TradingCardApiSdk\Commands\TradingCardApiSdkCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
-class TradingCardApiSdkServiceProvider extends PackageServiceProvider
+class TradingCardApiServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
@@ -16,7 +16,7 @@ class TradingCardApiSdkServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name('tradingcardapi-sdk')
+            ->name('tradingcardapi')
             ->hasConfigFile()
             ->hasViews()
             ->hasMigration('create_tradingcardapi_sdk_table')
