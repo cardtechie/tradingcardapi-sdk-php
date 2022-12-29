@@ -27,7 +27,10 @@ return [
     | Trading Card API Client ID
     |--------------------------------------------------------------------------
     |
-    | The ID of the client used to connect to the API.
+    | The ID of the client used to connect to the API. It is recommended
+    | that you do not add your client ID to the line below. Instead, add
+    | it to your environment file, so it doesn't get checked into your
+    | code repo.
     */
     'client_id' => env('TRADINGCARDAPI_CLIENT_ID', ''),
 
@@ -36,7 +39,10 @@ return [
     | Trading Card API Secret
     |--------------------------------------------------------------------------
     |
-    | The secret of the client used to connect to the API.
+    | The secret of the client used to connect to the API .It is recommended
+    | that you do not add your client secret to the line below. Instead, add
+    | it to your environment file, so it doesn't get checked into your
+    | code repo.
     */
     'client_secret' => env('TRADINGCARDAPI_CLIENT_SECRET', ''),
 
