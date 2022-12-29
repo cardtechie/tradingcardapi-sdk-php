@@ -2,12 +2,12 @@
 
 namespace CardTechie\TradingCardApiSdk;
 
-use App\Api\Resources\Card;
-use App\Api\Resources\Genre;
-use App\Api\Resources\Player;
-use App\Api\Resources\Playerteam;
-use App\Api\Resources\Set;
-use App\Api\Resources\Team;
+use CardTechie\TradingCardApiSdk\Resources\Card;
+use CardTechie\TradingCardApiSdk\Resources\Genre;
+use CardTechie\TradingCardApiSdk\Resources\Player;
+use CardTechie\TradingCardApiSdk\Resources\Playerteam;
+use CardTechie\TradingCardApiSdk\Resources\Set;
+use CardTechie\TradingCardApiSdk\Resources\Team;
 use GuzzleHttp\Client;
 
 /**
