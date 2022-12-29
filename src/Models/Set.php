@@ -14,7 +14,7 @@ class Set extends Model
      *
      * @return Genre|null
      */
-    public function genre() : ?Genre
+    public function genre(): ?Genre
     {
         return $this->getRelationship('genres');
     }
@@ -24,7 +24,7 @@ class Set extends Model
      *
      * @return Set|null
      */
-    public function parent() : ?Set
+    public function parent(): ?Set
     {
         return $this->getRelationship('parentset');
     }
@@ -34,7 +34,7 @@ class Set extends Model
      *
      * @return Manufacturer|null
      */
-    public function manufacturer() : ?Manufacturer
+    public function manufacturer(): ?Manufacturer
     {
         return $this->getRelationship('manufacturers');
     }
@@ -44,7 +44,7 @@ class Set extends Model
      *
      * @return Brand|null
      */
-    public function brand() : ?Brand
+    public function brand(): ?Brand
     {
         return $this->getRelationship('brands');
     }
@@ -54,7 +54,7 @@ class Set extends Model
      *
      * @return Year|null
      */
-    public function year() : ?Year
+    public function year(): ?Year
     {
         return $this->getRelationship('years');
     }
@@ -64,7 +64,7 @@ class Set extends Model
      *
      * @return array
      */
-    public function subsets() : array
+    public function subsets(): array
     {
         if (array_key_exists('subsets', $this->relationships)) {
             return $this->relationships['subsets'];
@@ -78,7 +78,7 @@ class Set extends Model
      *
      * @return array
      */
-    public function checklist() : array
+    public function checklist(): array
     {
         if (array_key_exists('checklist', $this->relationships)) {
             return $this->relationships['checklist'];
@@ -92,7 +92,7 @@ class Set extends Model
      *
      * @return int|void
      */
-    public function getCurrentCardCountAttribute() : int
+    public function getCurrentCardCountAttribute(): int
     {
         return count($this->checklist());
     }
@@ -100,7 +100,7 @@ class Set extends Model
     /**
      * Get the index of the current card in the checklist and save as a class prop
      *
-     * @param Card $currentCard
+     * @param  Card  $currentCard
      */
     private function setIndexInChecklist(Card $currentCard)
     {
@@ -114,17 +114,16 @@ class Set extends Model
     /**
      * Retrieve the previous card of the card passed as an arg of the current set.
      *
-     * @param Card $currentCard
-     *
+     * @param  Card  $currentCard
      * @return Card|null
      */
-    public function previousCard(Card $currentCard) : ?Card
+    public function previousCard(Card $currentCard): ?Card
     {
         if (is_null($this->checklistIndex)) {
             $this->setIndexInChecklist($currentCard);
         }
 
-        if (!is_null($this->checklistIndex)) {
+        if (! is_null($this->checklistIndex)) {
             $index = $this->checklistIndex - 1;
             if ($index >= 0) {
                 return $this->relationships['checklist'][$index];
@@ -137,17 +136,16 @@ class Set extends Model
     /**
      * Retrieve the next card of the card passed as an arg of the current set.
      *
-     * @param Card $currentCard
-     *
+     * @param  Card  $currentCard
      * @return Card|null
      */
-    public function nextCard(Card $currentCard) : ?Card
+    public function nextCard(Card $currentCard): ?Card
     {
         if (is_null($this->checklistIndex)) {
             $this->setIndexInChecklist($currentCard);
         }
 
-        if (!is_null($this->checklistIndex)) {
+        if (! is_null($this->checklistIndex)) {
             $index = $this->checklistIndex + 1;
             if ($index < count($this->relationships['checklist'])) {
                 return $this->relationships['checklist'][$index];
@@ -160,7 +158,7 @@ class Set extends Model
     /**
      * Set the relationships for the object
      *
-     * @param array $relationships
+     * @param  array  $relationships
      */
     // This is needed when we get the set list from the API
     /*public function setRelationships(array $relationships) : void

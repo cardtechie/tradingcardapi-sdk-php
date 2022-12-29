@@ -7,5 +7,4 @@ namespace CardTechie\TradingCardApiSdk\Models;
  */
 class Year extends Model
 {
-
 }

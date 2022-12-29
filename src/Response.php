@@ -25,7 +25,7 @@ class Response
     /**
      * Response constructor.
      *
-     * @param string $json
+     * @param  string  $json
      */
     public function __construct(string $json)
     {
@@ -41,24 +41,25 @@ class Response
     /**
      * Create the main object with all its attributes.
      */
-    private function instantiateMainObject() : void
+    private function instantiateMainObject(): void
     {
         $attributes = (array) $this->response->data->attributes;
         $attributes['id'] = $this->response->data->id;
 
         $type = ucfirst(Str::singular($this->response->data->type));
-        $class = "\\App\\Models\\" . $type;
+        $class = '\\App\\Models\\'.$type;
         $this->mainObject = new $class($attributes);
     }
 
     /**
      * Add any included objects and make them really easy to retrieve.
      */
-    private function parseIncluded() : void
+    private function parseIncluded(): void
     {
         $includes = [];
-        if (!property_exists($this->response, 'included')) {
+        if (! property_exists($this->response, 'included')) {
             $this->relationships = $includes;
+
             return;
         }
 
@@ -77,7 +78,7 @@ class Response
     /**
      * Convert the relationships into models.
      */
-    private function objectifyRelationships() : void
+    private function objectifyRelationships(): void
     {
         foreach ($this->relationships as $type => $theObjects) {
             foreach ($theObjects as $index => $attributes) {
@@ -87,7 +88,7 @@ class Response
                 } elseif ('Checklist' === $theType) {
                     $theType = 'Card';
                 }
-                $class = "\\App\\Models\\" . $theType;
+                $class = '\\App\\Models\\'.$theType;
                 $object = new $class($attributes);
 
                 $this->relationships[$type][$index] = $object;
@@ -100,7 +101,7 @@ class Response
      *
      * @return object
      */
-    public static function getMeta() : object
+    public static function getMeta(): object
     {
         return self::$meta;
     }
@@ -110,7 +111,7 @@ class Response
      *
      * @return object
      */
-    public static function getLinks() : object
+    public static function getLinks(): object
     {
         return self::$links;
     }
@@ -118,8 +119,7 @@ class Response
     /**
      * Parse the JSON and convert it into an object
      *
-     * @param string $json
-     *
+     * @param  string  $json
      * @return \Illuminate\Support\Collection|object
      */
     public static function parse(string $json)
@@ -134,10 +134,12 @@ class Response
             foreach ($response->data as $data) {
                 $objects[] = self::parseDataObject($data);
             }
+
             return collect($objects);
         } else {
             $object = self::parseDataObject($response->data);
             $object->setRelationships(self::getIncluded($response));
+
             return $object;
         }
     }
@@ -145,31 +147,30 @@ class Response
     /**
      * Retrieve the main object with all its attributes.
      *
-     * @param object $data
-     *
+     * @param  object  $data
      * @return object
      */
-    private static function parseDataObject(object $data) : object
+    private static function parseDataObject(object $data): object
     {
         $attributes = (array) $data->attributes;
         $attributes['id'] = $data->id;
 
         $type = ucfirst(Str::singular($data->type));
-        $class = "\\App\\Models\\" . $type;
+        $class = '\\App\\Models\\'.$type;
+
         return new $class($attributes);
     }
 
     /**
      * Get the included objects as an array
      *
-     * @param object $data
-     *
+     * @param  object  $data
      * @return array
      */
-    private static function getIncluded(object $data) : array
+    private static function getIncluded(object $data): array
     {
         $includes = [];
-        if (!property_exists($data, 'included')) {
+        if (! property_exists($data, 'included')) {
             return $includes;
         }
 
@@ -187,7 +188,7 @@ class Response
             } else {
                 $type = ucfirst(Str::singular($included->type));
             }
-            $class = "\\App\\Models\\" . $type;
+            $class = '\\App\\Models\\'.$type;
             $object = new $class($attributes);
 
             $includes[$included->type][] = $object;
@@ -201,11 +202,12 @@ class Response
      *
      * @param $data
      */
-    private static function parseMeta($data) : void
+    private static function parseMeta($data): void
     {
         $meta = new stdClass();
-        if (!property_exists($data, 'meta')) {
+        if (! property_exists($data, 'meta')) {
             self::$meta = $meta;
+
             return;
         }
 
@@ -217,11 +219,12 @@ class Response
      *
      * @param $data
      */
-    private static function parseLinks($data) : void
+    private static function parseLinks($data): void
     {
         $links = new stdClass();
-        if (!property_exists($data, 'links')) {
+        if (! property_exists($data, 'links')) {
             self::$links = $links;
+
             return;
         }
 

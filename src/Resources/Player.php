@@ -2,9 +2,9 @@
 
 namespace CardTechie\TradingCardApiSdk\Resources;
 
+use App\Models\Player as PlayerModel;
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
-use App\Models\Player as PlayerModel;
 use GuzzleHttp\Client;
 use Illuminate\Support\Collection;
 
@@ -18,7 +18,7 @@ class Player
     /**
      * Playerteam constructor.
      *
-     * @param Client $client
+     * @param  Client  $client
      */
     public function __construct(Client $client)
     {
@@ -28,13 +28,12 @@ class Player
     /**
      * Retrieve a list of players
      *
-     * @param array $params
-     *
+     * @param  array  $params
      * @return Collection
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function getList(array $params = []) : Collection
+    public function getList(array $params = []): Collection
     {
         $query = http_build_query($params);
         $url = sprintf('/players?%s', $query);
@@ -46,13 +45,12 @@ class Player
     /**
      * Create a player
      *
-     * @param array $attributes
-     *
+     * @param  array  $attributes
      * @return PlayerModel
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function create(array $attributes) : PlayerModel
+    public function create(array $attributes): PlayerModel
     {
         $request = [
             'json' => [
@@ -68,6 +66,7 @@ class Player
 
         $response = $this->makeRequest('/players', 'POST', $request);
         $formattedResponse = new Response(json_encode($response));
+
         return $formattedResponse->mainObject;
     }
 }

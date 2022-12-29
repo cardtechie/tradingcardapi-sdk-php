@@ -14,17 +14,17 @@ class Team extends Model implements Taxonomy
      *
      * @return string
      */
-    public function getNameAttribute() : ?string
+    public function getNameAttribute(): ?string
     {
-        return $this->location . ' ' . $this->mascot;
+        return $this->location.' '.$this->mascot;
     }
 
     // phpcs:disable
     /**
      * Build the taxonomy object
      *
-     * @param Object $taxonomy
-     * @param array $data
+     * @param  object  $taxonomy
+     * @param  array  $data
      */
     public static function build(object $taxonomy, array $data): object
     {
@@ -35,11 +35,10 @@ class Team extends Model implements Taxonomy
     /**
      * Get the object from the API
      *
-     * @param array $params
-     *
-     * @return Object
+     * @param  array  $params
+     * @return object
      */
-    public static function getFromApi(array $params) : Object
+    public static function getFromApi(array $params): object
     {
         $teams = TradingCardApi::team()->getList([
             'name' => $params['team'],

@@ -16,7 +16,7 @@ class Model
     /**
      * Model constructor.
      *
-     * @param array $attributes
+     * @param  array  $attributes
      */
     public function __construct(array $attributes = [])
     {
@@ -26,9 +26,9 @@ class Model
     /**
      * Set the relationships for the object
      *
-     * @param array $relationships
+     * @param  array  $relationships
      */
-    public function setRelationships(array $relationships) : void
+    public function setRelationships(array $relationships): void
     {
         $this->relationships = $relationships;
     }
@@ -38,7 +38,7 @@ class Model
      *
      * @return array
      */
-    public function getRelationships() : array
+    public function getRelationships(): array
     {
         return $this->relationships;
     }
@@ -47,12 +47,11 @@ class Model
      * Magic method to get attribute values from the attributes array.
      *
      * @param $name
-     *
      * @return mixed|null
      */
     public function __get($name)
     {
-        $method = 'get' . Str::studly($name) . 'Attribute';
+        $method = 'get'.Str::studly($name).'Attribute';
         if (method_exists($this, $method)) {
             return $this->$method();
         }
@@ -68,10 +67,9 @@ class Model
      * Magic method to see if the class variable exists.
      *
      * @param $name
-     *
      * @return bool
      */
-    public function __isset($name) : bool
+    public function __isset($name): bool
     {
         return isset($this->attributes[$name]);
     }
@@ -81,7 +79,6 @@ class Model
      *
      * @param $methodName
      * @param $arguments
-     *
      * @return \Illuminate\Support\Collection|mixed
      *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
@@ -94,8 +91,7 @@ class Model
     /**
      * Helper function to get a relationship of the model.
      *
-     * @param string $key
-     *
+     * @param  string  $key
      * @return mixed|null
      */
     protected function getRelationship(string $key)
@@ -110,8 +106,7 @@ class Model
     /**
      * Helper function to get the relationship and return it as an array
      *
-     * @param string $key
-     *
+     * @param  string  $key
      * @return mixed|null
      */
     protected function getRelationshipAsArray(string $key)
@@ -128,7 +123,7 @@ class Model
      *
      * @return string
      */
-    public function __toString() : string
+    public function __toString(): string
     {
         $output = $this->attributes;
 

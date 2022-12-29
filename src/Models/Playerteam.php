@@ -16,7 +16,7 @@ class Playerteam extends Model implements Taxonomy
     /**
      * Return the onCardable configuration array for this model.
      */
-    public function onCardable() : array
+    public function onCardable(): array
     {
         return [
             'name' => 'Player/Team',
@@ -26,12 +26,11 @@ class Playerteam extends Model implements Taxonomy
     /**
      * Build the taxonomy object
      *
-     * @param Object $taxonomy
-     * @param array $data
-     *
-     * @return Object
+     * @param  object  $taxonomy
+     * @param  array  $data
+     * @return object
      */
-    public static function build(Object $taxonomy, array $data) : Object
+    public static function build(object $taxonomy, array $data): object
     {
         $playerId = $taxonomy->player_id;
         $teamId = $taxonomy->team_id;
@@ -58,11 +57,10 @@ class Playerteam extends Model implements Taxonomy
     /**
      * Get the playerteam from the api
      *
-     * @param array $params
-     *
-     * @return Object
+     * @param  array  $params
+     * @return object
      */
-    public static function getFromApi(array $params) : Object
+    public static function getFromApi(array $params): object
     {
         // TODO Handle multiple players returned
         $player = Player::getFromApi([
@@ -91,11 +89,10 @@ class Playerteam extends Model implements Taxonomy
     /**
      * Prepare the on card relationships and return the object that matches the passed in data.
      *
-     * @param array $data
-     *
+     * @param  array  $data
      * @return Playerteam|null
      */
-    public static function prepare($data) : ?Object
+    public static function prepare($data): ?object
     {
         if (null === $data['player'] && null === $data['team']) {
             return null;
@@ -128,10 +125,10 @@ class Playerteam extends Model implements Taxonomy
     /**
      * Look up a player/team by player and team uuids.
      *
-     * @param string $player The player uuid
-     * @param string $team   The team uuid
+     * @param  string  $player The player uuid
+     * @param  string  $team   The team uuid
      */
-    public static function lookup($player, $team) : Playerteam
+    public static function lookup($player, $team): Playerteam
     {
         $results = PlayerTeam::where([
             ['player_id', '=', $player],
@@ -144,6 +141,7 @@ class Playerteam extends Model implements Taxonomy
                 'team_id' => $team,
             ]);
             $playerteam->save();
+
             return $playerteam;
         }
 
@@ -160,7 +158,7 @@ class Playerteam extends Model implements Taxonomy
      *
      * @return Player|null
      */
-    public function player() : ?Player
+    public function player(): ?Player
     {
         return $this->getRelationshipAsArray('player');
     }
@@ -170,7 +168,7 @@ class Playerteam extends Model implements Taxonomy
      *
      * @return Team|null
      */
-    public function team() : ?Team
+    public function team(): ?Team
     {
         return $this->getRelationshipAsArray('team');
     }

@@ -10,15 +10,15 @@ interface Taxonomy
     /**
      * Build the taxonomy object
      *
-     * @param Object $taxonomy
-     * @param array $data
+     * @param  object  $taxonomy
+     * @param  array  $data
      */
-    public static function build(Object $taxonomy, array $data) : Object;
+    public static function build(object $taxonomy, array $data): object;
 
     /**
      * Get the object from the API
      *
-     * @param array $params
+     * @param  array  $params
      */
-    public static function getFromApi(array $params) : Object;
+    public static function getFromApi(array $params): object;
 }

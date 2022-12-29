@@ -27,23 +27,22 @@ trait ApiRequest
     /**
      * Makes a request to a API endpoint or webpage and returns its response
      *
-     * @param string $url     Url of the api or webpage
-     * @param string $method  HTTP method
-     * @param array  $request Additional parameters to include in the request
-     * @param array  $headers HTTP headers
-     *
+     * @param  string  $url     Url of the api or webpage
+     * @param  string  $method  HTTP method
+     * @param  array  $request Additional parameters to include in the request
+     * @param  array  $headers HTTP headers
      * @return object
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function makeRequest(string $url, string $method = 'GET', array $request = [], array $headers = []) : object
+    public function makeRequest(string $url, string $method = 'GET', array $request = [], array $headers = []): object
     {
         $this->retrieveToken();
 
         $defaultRequest = [];
         $defaultHeaders = [
             'Accept' => 'application/json',
-            'Authorization' => 'Bearer ' . $this->token,
+            'Authorization' => 'Bearer '.$this->token,
             'X-TCAPI-Ignore-Status' => '1',
         ];
 
@@ -56,6 +55,7 @@ trait ApiRequest
         if (empty($body)) {
             return new stdClass();
         }
+
         return (object) json_decode($body);
     }
 
@@ -65,11 +65,12 @@ trait ApiRequest
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \Exception
      */
-    private function retrieveToken() : void
+    private function retrieveToken(): void
     {
         $tokenKey = 'tcapi_token';
         if (cache()->has($tokenKey)) {
             $this->token = cache()->get($tokenKey);
+
             return;
         }
 
@@ -103,13 +104,12 @@ trait ApiRequest
     /**
      * Perform the request with the client that has already been created.
      *
-     * @param string $url     Url of the api or webpage
-     * @param string $method  HTTP method
-     * @param array  $request The request
-     *
+     * @param  string  $url     Url of the api or webpage
+     * @param  string  $method  HTTP method
+     * @param  array  $request The request
      * @return ResponseInterface
      */
-    private function doRequest(string $url, string $method = 'GET', array $request = []) : ResponseInterface
+    private function doRequest(string $url, string $method = 'GET', array $request = []): ResponseInterface
     {
         return $this->client->request($method, $url, $request);
     }

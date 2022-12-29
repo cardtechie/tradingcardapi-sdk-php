@@ -40,7 +40,7 @@ class TradingCardApi
     /**
      * Retrieve the genre resource.
      */
-    public function genre() : Genre
+    public function genre(): Genre
     {
         return new Genre($this->client);
     }
@@ -48,7 +48,7 @@ class TradingCardApi
     /**
      * Retrieve the set resource.
      */
-    public function set() : Set
+    public function set(): Set
     {
         return new Set($this->client);
     }
@@ -56,7 +56,7 @@ class TradingCardApi
     /**
      * Retrieve the card resource.
      */
-    public function card() : Card
+    public function card(): Card
     {
         return new Card($this->client);
     }
@@ -64,7 +64,7 @@ class TradingCardApi
     /**
      * Retrieve the player resource.
      */
-    public function player() : Player
+    public function player(): Player
     {
         return new Player($this->client);
     }
@@ -72,7 +72,7 @@ class TradingCardApi
     /**
      * Retrieve the team resource.
      */
-    public function team() : Team
+    public function team(): Team
     {
         return new Team($this->client);
     }
@@ -80,7 +80,7 @@ class TradingCardApi
     /**
      * Retrieve the playerteam resource.
      */
-    public function playerteam() : Playerteam
+    public function playerteam(): Playerteam
     {
         return new Playerteam($this->client);
     }

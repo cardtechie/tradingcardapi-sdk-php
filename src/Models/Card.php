@@ -10,11 +10,12 @@ class Card extends Model
     /**
      * Format the number
      */
-    public function getNumberAttribute() : string
+    public function getNumberAttribute(): string
     {
         $parentSet = $this->set();
         if ($parentSet && $prefix = $parentSet->number_prefix) {
             $number = $this->attributes['number'];
+
             return substr($number, strlen($prefix));
         }
 
@@ -24,7 +25,7 @@ class Card extends Model
     /**
      * Get the number of the card unformatted
      */
-    public function getFullNumberAttribute() : string
+    public function getFullNumberAttribute(): string
     {
         return $this->attributes['number'];
     }
@@ -34,7 +35,7 @@ class Card extends Model
      *
      * @return array|null
      */
-    public function oncard() : ?array
+    public function oncard(): ?array
     {
         $key = 'oncard';
         if (array_key_exists($key, $this->relationships)) {
@@ -49,7 +50,7 @@ class Card extends Model
      *
      * @return array
      */
-    public function extraAttributes() : ?array
+    public function extraAttributes(): ?array
     {
         $key = 'attributes';
         if (array_key_exists($key, $this->relationships)) {
@@ -64,7 +65,7 @@ class Card extends Model
      *
      * @return Set|null
      */
-    public function set() : ?Set
+    public function set(): ?Set
     {
         return $this->getRelationship('set');
     }
@@ -72,9 +73,9 @@ class Card extends Model
     /**
      * Override the parent class implementation to correctly place all relationships.
      *
-     * @param array $relationships
+     * @param  array  $relationships
      */
-    public function setRelationships(array $relationships) : void
+    public function setRelationships(array $relationships): void
     {
         parent::setRelationships($relationships);
 

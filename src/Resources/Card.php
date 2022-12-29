@@ -2,9 +2,9 @@
 
 namespace CardTechie\TradingCardApiSdk\Resources;
 
+use App\Models\Card as CardModel;
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
-use App\Models\Card as CardModel;
 use GuzzleHttp\Client;
 
 /**
@@ -17,7 +17,7 @@ class Card
     /**
      * Card constructor.
      *
-     * @param Client $client
+     * @param  Client  $client
      */
     public function __construct(Client $client)
     {
@@ -27,14 +27,13 @@ class Card
     /**
      * Create the card with the passed in attributes
      *
-     * @param array $attributes
-     * @param array $relationships
-     *
+     * @param  array  $attributes
+     * @param  array  $relationships
      * @return CardModel
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function create(array $attributes = [], array $relationships = []) : CardModel
+    public function create(array $attributes = [], array $relationships = []): CardModel
     {
         $request = [
             'json' => [
@@ -54,20 +53,20 @@ class Card
 
         $response = $this->makeRequest('/cards', 'POST', $request);
         $formattedResponse = new Response(json_encode($response));
+
         return $formattedResponse->mainObject;
     }
 
     /**
      * Retrieve a set by ID
      *
-     * @param string $id
-     * @param array $params
-     *
+     * @param  string  $id
+     * @param  array  $params
      * @return CardModel
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function get(string $id, array $params = []) : CardModel
+    public function get(string $id, array $params = []): CardModel
     {
         $defaultParams = [
             'include' => '',
@@ -77,21 +76,21 @@ class Card
         $url = sprintf('/cards/%s?%s', $id, http_build_query($params));
         $response = $this->makeRequest($url);
         $formattedResponse = new Response(json_encode($response));
+
         return $formattedResponse->mainObject;
     }
 
     /**
      * Update the set
      *
-     * @param string $id
-     * @param array $attributes
-     * @param array $relationships
-     *
+     * @param  string  $id
+     * @param  array  $attributes
+     * @param  array  $relationships
      * @return CardModel
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function update(string $id, array $attributes = [], array $relationships = []) : CardModel
+    public function update(string $id, array $attributes = [], array $relationships = []): CardModel
     {
         $url = sprintf('/cards/%s', $id);
         $request = [
@@ -113,21 +112,21 @@ class Card
 
         $response = $this->makeRequest($url, 'PUT', $request);
         $formattedResponse = new Response(json_encode($response));
+
         return $formattedResponse->mainObject;
     }
 
     /**
      * Delete a card
      *
-     * @param string $id
-     *
+     * @param  string  $id
      * @return void
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function delete(string $id) : void
+    public function delete(string $id): void
     {
-        $url = '/cards/' . $id;
+        $url = '/cards/'.$id;
         $this->makeRequest($url, 'DELETE');
     }
 }
