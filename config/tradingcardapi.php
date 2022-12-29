@@ -45,6 +45,4 @@ return [
     | code repo.
     */
     'client_secret' => env('TRADINGCARDAPI_CLIENT_SECRET', ''),
-
-    'cards-connection' => env('CARDS_CONNECTION', 'cards'),
 ];
