@@ -12,15 +12,15 @@ use stdClass;
  */
 class Response
 {
-    private $response;
+    private object $response;
 
     public $mainObject;
 
     public $relationships;
 
-    private static $meta;
+    private static object $meta;
 
-    private static $links;
+    private static object $links;
 
     /**
      * Response constructor.
@@ -132,7 +132,9 @@ class Response
         if (is_array($response->data)) {
             $objects = [];
             foreach ($response->data as $data) {
-                $objects[] = self::parseDataObject($data);
+                $object = self::parseDataObject($data);
+                $object->setRelationships(self::getIncluded($response));
+                $objects[] = $object;
             }
 
             return collect($objects);

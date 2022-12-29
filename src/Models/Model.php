@@ -9,9 +9,9 @@ use Illuminate\Support\Str;
  */
 class Model
 {
-    public $attributes = [];
+    public array $attributes = [];
 
-    protected $relationships = [];
+    public array $relationships = [];
 
     /**
      * Model constructor.
@@ -51,7 +51,7 @@ class Model
      */
     public function __get($name)
     {
-        $method = 'get'.Str::studly($name).'Attribute';
+        $method = 'get' . Str::studly($name) . 'Attribute';
         if (method_exists($this, $method)) {
             return $this->$method();
         }
@@ -97,7 +97,12 @@ class Model
     protected function getRelationship(string $key)
     {
         if (array_key_exists($key, $this->relationships)) {
-            return $this->relationships[$key][0];
+            if (is_array($this->relationships[$key])) {
+                return $this->relationships[$key][0];
+            } else {
+                return $this->relationships[$key];
+            }
+
         }
 
         return null;
