@@ -47,7 +47,7 @@ class Response
         $attributes['id'] = $this->response->data->id;
 
         $type = ucfirst(Str::singular($this->response->data->type));
-        $class = '\\App\\Models\\'.$type;
+        $class = '\\CardTechie\\TradingCardApiSdk\\'.$type;
         $this->mainObject = new $class($attributes);
     }
 
