@@ -29,7 +29,7 @@ class TradingCardApi
      */
     public function __construct()
     {
-        $config = config('api');
+        $config = config('tradingcardapi');
 
         $this->client = new Client([
             'verify' => $config['ssl_verify'],
