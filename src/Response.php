@@ -88,7 +88,7 @@ class Response
                 } elseif ('Checklist' === $theType) {
                     $theType = 'Card';
                 }
-                $class = '\\App\\Models\\'.$theType;
+                $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$theType;
                 $object = new $class($attributes);
 
                 $this->relationships[$type][$index] = $object;
@@ -156,7 +156,7 @@ class Response
         $attributes['id'] = $data->id;
 
         $type = ucfirst(Str::singular($data->type));
-        $class = '\\App\\Models\\'.$type;
+        $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$type;
 
         return new $class($attributes);
     }
@@ -188,7 +188,7 @@ class Response
             } else {
                 $type = ucfirst(Str::singular($included->type));
             }
-            $class = '\\App\\Models\\'.$type;
+            $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$type;
             $object = new $class($attributes);
 
             $includes[$included->type][] = $object;
