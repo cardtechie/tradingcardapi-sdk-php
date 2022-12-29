@@ -2,7 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk\Resources;
 
-use App\Models\Team as TeamModel;
+use CardTechie\TradingCardApiSdk\Models\Team as TeamModel;
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
