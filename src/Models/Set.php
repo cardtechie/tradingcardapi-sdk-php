@@ -158,10 +158,10 @@ class Set extends Model
     /**
      * Set the relationships for the object
      *
-     * @param array $relationships
+     * @param  array  $relationships
      */
     // This is needed when we get the set list from the API
-    public function setRelationships(array $relationships) : void
+    public function setRelationships(array $relationships): void
     {
         parent::setRelationships($relationships);
 

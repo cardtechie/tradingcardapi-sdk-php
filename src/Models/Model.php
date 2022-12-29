@@ -51,7 +51,7 @@ class Model
      */
     public function __get($name)
     {
-        $method = 'get' . Str::studly($name) . 'Attribute';
+        $method = 'get'.Str::studly($name).'Attribute';
         if (method_exists($this, $method)) {
             return $this->$method();
         }
@@ -102,7 +102,6 @@ class Model
             } else {
                 return $this->relationships[$key];
             }
-
         }
 
         return null;
