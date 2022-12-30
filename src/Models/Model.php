@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
  */
 class Model
 {
-    public $attributes = [];
+    public array $attributes = [];
 
     public array $relationships = [];
 
@@ -129,7 +129,10 @@ class Model
      */
     public function __toString(): string
     {
-        $output = $this->attributes;
+        $output = [];
+        if ($this->attributes) {
+            $output = $this->attributes;
+        }
 
         foreach ($this->relationships as $type => $relations) {
             foreach ($relations as $relation) {
