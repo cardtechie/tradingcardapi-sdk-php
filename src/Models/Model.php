@@ -130,7 +130,7 @@ class Model
     public function __toString(): string
     {
         $output = [];
-        if ($this->attributes) {
+        if (property_exists($this, 'attributes')) {
             $output = $this->attributes;
         }
 
