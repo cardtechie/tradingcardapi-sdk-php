@@ -136,7 +136,9 @@ class Model
 
         foreach ($this->relationships as $type => $relations) {
             foreach ($relations as $relation) {
-                $output[$type][] = $relation->attributes;
+                if (property_exists($relation, 'attributes')) {
+                    $output[$type][] = $relation->attributes;
+                }
             }
         }
 
