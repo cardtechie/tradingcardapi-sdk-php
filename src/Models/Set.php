@@ -7,7 +7,7 @@ namespace CardTechie\TradingCardApiSdk\Models;
  */
 class Set extends Model
 {
-    private $checklistIndex = null;
+    private string $checklistIndex = '';
 
     /**
      * Retrieve the genre of the set.
@@ -161,20 +161,19 @@ class Set extends Model
      * @param  array  $relationships
      */
     // This is needed when we get the set list from the API
-    /*public function setRelationships(array $relationships) : void
+    public function setRelationships(array $relationships): void
     {
-        foreach ($relationships as $type => $relationship) {
-            if ('genres' === $type) {
-                $this->relationships['genre'] = $relationship[0];
-            } elseif ('manufacturers' === $type) {
-                $this->relationships['manufacturer'] = $relationship[0];
-            } elseif ('years' === $type) {
-                $this->relationships['year'] = $relationship[0];
-            } elseif ('parentset' === $type) {
-                $this->relationships['parentset'] = $relationship[0];
-            } elseif ('checklist' === $type) {
-                $this->relationships['checklist'] = $relationship;
+        parent::setRelationships($relationships);
+
+        if (array_key_exists('genres', $this->relationships)) {
+            // A set has one genre and one genre only
+            $genreId = $this->genre_id;
+            foreach ($this->relationships['genres'] as $index => $genre) {
+                if ($genreId === $genre->id) {
+                    $this->relationships['genre'] = $genre;
+                    unset($this->relationships['genres']);
+                }
             }
         }
-    }*/
+    }
 }

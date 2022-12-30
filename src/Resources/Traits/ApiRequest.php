@@ -25,7 +25,7 @@ trait ApiRequest
     private $client;
 
     /**
-     * Makes a request to a API endpoint or webpage and returns its response
+     * Makes a request to an API endpoint or webpage and returns its response
      *
      * @param  string  $url     Url of the api or webpage
      * @param  string  $method  HTTP method
@@ -43,7 +43,7 @@ trait ApiRequest
         $defaultHeaders = [
             'Accept' => 'application/json',
             'Authorization' => 'Bearer '.$this->token,
-            'X-TCAPI-Ignore-Status' => '1',
+            //'X-TCAPI-Ignore-Status' => '1',
         ];
 
         $theRequest = array_merge($defaultRequest, $request);
