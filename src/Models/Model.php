@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
  */
 class Model
 {
-    public array $attributes = [];
+    public $attributes = [];
 
     public array $relationships = [];
 
