@@ -129,11 +129,18 @@ class Model
      */
     public function __toString(): string
     {
-        $output = $this->attributes;
+        $output = [];
+        if (property_exists($this, 'attributes')) {
+            $output = $this->attributes;
+        }
 
         foreach ($this->relationships as $type => $relations) {
             foreach ($relations as $relation) {
-                $output[$type][] = $relation->attributes;
+                if (is_array($relation) && array_key_exists('attributes', $relation)) {
+                    $output[$type][] = $relation['attributes'];
+                } elseif (is_object($relation) && property_exists($relation, 'attributes')) {
+                    $output[$type][] = $relation->attributes;
+                }
             }
         }
 
