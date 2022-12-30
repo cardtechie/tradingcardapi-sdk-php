@@ -138,7 +138,7 @@ class Model
             foreach ($relations as $relation) {
                 if (is_array($relation) && array_key_exists('attributes', $relation)) {
                     $output[$type][] = $relation->attributes;
-                } else {
+                } else if (property_exists($relation, 'attributes')) {
                     $output[$type][] = $relation->attributes;
                 }
             }
