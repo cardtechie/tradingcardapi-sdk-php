@@ -7,6 +7,12 @@ namespace CardTechie\TradingCardApiSdk\Models;
  */
 class Card extends Model
 {
+    public $onCardables = [
+        PlayerTeam::class,
+        Player::class,
+        Team::class,
+    ];
+
     /**
      * Format the number
      */
