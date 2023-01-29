@@ -16,7 +16,7 @@ class Set extends Model
      */
     public function genre(): ?Genre
     {
-        return $this->getRelationship('genres');
+        return $this->getRelationship('genre');
     }
 
     /**
