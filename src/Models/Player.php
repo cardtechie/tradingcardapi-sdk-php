@@ -2,7 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk\Models;
 
-use CardTechie\TradingCardApiSdk\Facades\TradingCardApi;
+use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
 
 /**
  * Class Player
@@ -40,12 +40,12 @@ class Player extends Model implements Taxonomy
      */
     public static function getFromApi(array $params): object
     {
-        $player = TradingCardApi::player()->getList([
+        $player = TradingCardApiSdk::player()->getList([
             'full_name' => $params['player'],
         ]);
 
         if ($player->isEmpty()) {
-            $player = TradingCardApi::player()->create([
+            $player = TradingCardApiSdk::player()->create([
                 'full_name' => $params['player'],
             ]);
         }

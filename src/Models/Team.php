@@ -2,7 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk\Models;
 
-use CardTechie\TradingCardApiSdk\Facades\TradingCardApi;
+use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
 
 /**
  * Class Team
@@ -40,13 +40,13 @@ class Team extends Model implements Taxonomy
      */
     public static function getFromApi(array $params): object
     {
-        $teams = TradingCardApi::team()->getList([
+        $teams = TradingCardApiSdk::team()->getList([
             'name' => $params['team'],
             'limit' => 50,
         ]);
 
         if ($teams->isEmpty()) {
-            $team = TradingCardApi::team()->create([
+            $team = TradingCardApiSdk::team()->create([
                 'name' => $params['team'],
             ]);
 
@@ -66,7 +66,7 @@ class Team extends Model implements Taxonomy
         }
 
         if (is_null($selectedTeam)) {
-            $team = TradingCardApi::team()->create([
+            $team = TradingCardApiSdk::team()->create([
                 'name' => $params['team'],
             ]);
 
