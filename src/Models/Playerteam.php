@@ -2,7 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk\Models;
 
-use CardTechie\TradingCardApiSdk\Facades\TradingCardApi;
+use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
 use CardTechie\TradingCardApiSdk\Models\Traits\OnCardable;
 use Exception;
 
@@ -71,13 +71,13 @@ class Playerteam extends Model implements Taxonomy
             'team' => $params['team'],
         ]);
 
-        $playerteam = TradingCardApi::playerteam()->getList([
+        $playerteam = TradingCardApiSdk::playerteam()->getList([
             'player_id' => $player->id,
             'team_id' => $team->id,
         ]);
 
         if ($playerteam->isEmpty()) {
-            return TradingCardApi::playerteam()->create([
+            return TradingCardApiSdk::playerteam()->create([
                 'player_id' => $player->id,
                 'team_id' => $team->id,
             ]);
