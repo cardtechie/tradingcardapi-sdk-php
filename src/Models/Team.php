@@ -2,7 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk\Models;
 
-use CardTechie\TradingCardApiSdk\Facades\TradingCardApi;
+use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
 
 /**
  * Class Team
