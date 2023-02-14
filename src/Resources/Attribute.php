@@ -6,7 +6,6 @@ use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
 use Illuminate\Support\Collection;
-use stdClass;
 
 /**
  * Class Attribute

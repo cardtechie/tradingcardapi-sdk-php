@@ -47,7 +47,6 @@ class Model
      * Helper function to get a relationship of the model.
      *
      * @param  string  $key
-     *
      * @return mixed|null
      */
     protected function getRelationship(string $key): mixed
@@ -67,7 +66,6 @@ class Model
      * Helper function to get the relationship and return it as an array
      *
      * @param  string  $key
-     *
      * @return mixed|null
      */
     protected function getRelationshipAsArray(string $key): mixed
