@@ -44,6 +44,42 @@ class Model
     }
 
     /**
+     * Helper function to get a relationship of the model.
+     *
+     * @param  string  $key
+     *
+     * @return mixed|null
+     */
+    protected function getRelationship(string $key): mixed
+    {
+        if (array_key_exists($key, $this->relationships)) {
+            if (is_array($this->relationships[$key])) {
+                return $this->relationships[$key][0];
+            } else {
+                return $this->relationships[$key];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Helper function to get the relationship and return it as an array
+     *
+     * @param  string  $key
+     *
+     * @return mixed|null
+     */
+    protected function getRelationshipAsArray(string $key): mixed
+    {
+        if (array_key_exists($key, $this->relationships)) {
+            return $this->relationships[$key];
+        }
+
+        return null;
+    }
+
+    /**
      * Magic method to get attribute values from the attributes array.
      *
      * @param $name
@@ -86,40 +122,6 @@ class Model
     public function __call($methodName, $arguments)
     {
         //
-    }
-
-    /**
-     * Helper function to get a relationship of the model.
-     *
-     * @param  string  $key
-     * @return mixed|null
-     */
-    protected function getRelationship(string $key)
-    {
-        if (array_key_exists($key, $this->relationships)) {
-            if (is_array($this->relationships[$key])) {
-                return $this->relationships[$key][0];
-            } else {
-                return $this->relationships[$key];
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Helper function to get the relationship and return it as an array
-     *
-     * @param  string  $key
-     * @return mixed|null
-     */
-    protected function getRelationshipAsArray(string $key)
-    {
-        if (array_key_exists($key, $this->relationships)) {
-            return $this->relationships[$key];
-        }
-
-        return null;
     }
 
     /**
