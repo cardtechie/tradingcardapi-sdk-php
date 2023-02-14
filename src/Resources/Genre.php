@@ -3,6 +3,7 @@
 namespace CardTechie\TradingCardApiSdk\Resources;
 
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
+use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
 
 /**
@@ -31,6 +32,8 @@ class Genre
      */
     public function list()
     {
-        return $this->makeRequest('/genres');
+        $response = $this->makeRequest('/genres');
+
+        return Response::parse(json_encode($response));
     }
 }
