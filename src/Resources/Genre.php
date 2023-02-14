@@ -27,7 +27,6 @@ class Genre
      *
      * @return \stdClass
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function list()

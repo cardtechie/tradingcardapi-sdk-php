@@ -30,7 +30,6 @@ class Attribute
      *
      * @return Collection
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function list(): Collection
