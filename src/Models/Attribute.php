@@ -7,4 +7,5 @@ namespace CardTechie\TradingCardApiSdk\Models;
  */
 class Attribute extends Model
 {
+    //
 }

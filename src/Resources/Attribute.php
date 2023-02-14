@@ -3,7 +3,9 @@
 namespace CardTechie\TradingCardApiSdk\Resources;
 
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
+use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
+use Illuminate\Support\Collection;
 use stdClass;
 
 /**
@@ -26,13 +28,15 @@ class Attribute
     /**
      * Return a list of attributes.
      *
-     * @return stdClass
+     * @return Collection
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function list(): stdClass
+    public function list(): Collection
     {
-        return $this->makeRequest('/attributes');
+        $response = $this->makeRequest('/attributes');
+
+        return Response::parse(json_encode($response));
     }
 }
