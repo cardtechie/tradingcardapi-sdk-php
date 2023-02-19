@@ -17,8 +17,6 @@ class Set
 
     /**
      * Set constructor.
-     *
-     * @param  Client  $client
      */
     public function __construct(Client $client)
     {
@@ -28,8 +26,6 @@ class Set
     /**
      * Create the set with the passed in attributes
      *
-     * @param  array  $attributes
-     * @return SetModel
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -52,9 +48,6 @@ class Set
     /**
      * Retrieve a set by ID
      *
-     * @param  string  $id
-     * @param  array  $params
-     * @return SetModel
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -75,8 +68,6 @@ class Set
     /**
      * Retrieve a list of sets
      *
-     * @param  array  $params
-     * @return Collection
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -96,9 +87,6 @@ class Set
     /**
      * Update the set
      *
-     * @param  string  $id
-     * @param  array  $attributes
-     * @return SetModel
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -123,8 +111,6 @@ class Set
     /**
      * Add the missing cards (as empty cards) to the specified set
      *
-     * @param  string  $id
-     * @return object
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -138,9 +124,6 @@ class Set
     /**
      * Add the checklist to the set
      *
-     * @param  array  $request
-     * @param  string  $id
-     * @return object
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -154,8 +137,6 @@ class Set
     /**
      * Delete a set
      *
-     * @param  string  $id
-     * @return void
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */

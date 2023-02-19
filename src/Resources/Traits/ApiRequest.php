@@ -31,7 +31,6 @@ trait ApiRequest
      * @param  string  $method  HTTP method
      * @param  array  $request Additional parameters to include in the request
      * @param  array  $headers HTTP headers
-     * @return object
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -107,7 +106,6 @@ trait ApiRequest
      * @param  string  $url     Url of the api or webpage
      * @param  string  $method  HTTP method
      * @param  array  $request The request
-     * @return ResponseInterface
      */
     private function doRequest(string $url, string $method = 'GET', array $request = []): ResponseInterface
     {

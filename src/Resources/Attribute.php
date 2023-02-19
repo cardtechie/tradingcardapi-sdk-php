@@ -16,8 +16,6 @@ class Attribute
 
     /**
      * Attribute constructor.
-     *
-     * @param  Client  $client
      */
     public function __construct(Client $client)
     {
@@ -27,7 +25,6 @@ class Attribute
     /**
      * Return a list of attributes.
      *
-     * @return Collection
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */

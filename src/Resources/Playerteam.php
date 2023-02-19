@@ -17,8 +17,6 @@ class Playerteam
 
     /**
      * Playerteam constructor.
-     *
-     * @param  Client  $client
      */
     public function __construct(Client $client)
     {
@@ -28,8 +26,6 @@ class Playerteam
     /**
      * Retrieve a playerteam by player and/or team id
      *
-     * @param  array  $params
-     * @return Collection
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -45,8 +41,6 @@ class Playerteam
     /**
      * Create a playerteam
      *
-     * @param  array  $attributes
-     * @return PlayerteamModel
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */

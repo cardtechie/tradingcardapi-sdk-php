@@ -32,8 +32,6 @@ class Card extends Model
 
     /**
      * Retrieve array of objects on the card.
-     *
-     * @return array|null
      */
     public function oncard(): ?array
     {
@@ -62,8 +60,6 @@ class Card extends Model
 
     /**
      * Retrieve the set.
-     *
-     * @return Set|null
      */
     public function set(): ?Set
     {
@@ -72,8 +68,6 @@ class Card extends Model
 
     /**
      * Override the parent class implementation to correctly place all relationships.
-     *
-     * @param  array  $relationships
      */
     public function setRelationships(array $relationships): void
     {

@@ -24,8 +24,6 @@ class Response
 
     /**
      * Response constructor.
-     *
-     * @param  string  $json
      */
     public function __construct(string $json)
     {
@@ -98,8 +96,6 @@ class Response
 
     /**
      * Get the meta data from the response.
-     *
-     * @return object
      */
     public static function getMeta(): object
     {
@@ -108,8 +104,6 @@ class Response
 
     /**
      * Get the links data from the response.
-     *
-     * @return object
      */
     public static function getLinks(): object
     {
@@ -119,7 +113,6 @@ class Response
     /**
      * Parse the JSON and convert it into an object
      *
-     * @param  string  $json
      * @return \Illuminate\Support\Collection|object
      */
     public static function parse(string $json)
@@ -148,9 +141,6 @@ class Response
 
     /**
      * Retrieve the main object with all its attributes.
-     *
-     * @param  object  $data
-     * @return object
      */
     private static function parseDataObject(object $data): object
     {
@@ -165,9 +155,6 @@ class Response
 
     /**
      * Get the included objects as an array
-     *
-     * @param  object  $data
-     * @return array
      */
     private static function getIncluded(object $data): array
     {
@@ -201,8 +188,6 @@ class Response
 
     /**
      * Parse the meta from the response and set the $meta field of this class.
-     *
-     * @param $data
      */
     private static function parseMeta($data): void
     {
@@ -218,8 +203,6 @@ class Response
 
     /**
      * Parse the links from the response and set the $links field of this class.
-     *
-     * @param $data
      */
     private static function parseLinks($data): void
     {
