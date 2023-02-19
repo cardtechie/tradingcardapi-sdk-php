@@ -5,16 +5,17 @@ namespace CardTechie\TradingCardApiSdk\Resources;
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
+use Illuminate\Support\Collection;
 
 /**
- * Class Genre
+ * Class Attribute
  */
-class Genre
+class Attribute
 {
     use ApiRequest;
 
     /**
-     * Genre constructor.
+     * Attribute constructor.
      *
      * @param  Client  $client
      */
@@ -24,15 +25,15 @@ class Genre
     }
 
     /**
-     * Return a list of genres.
+     * Return a list of attributes.
      *
-     * @return \stdClass
+     * @return Collection
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function list()
+    public function list(): Collection
     {
-        $response = $this->makeRequest('/genres');
+        $response = $this->makeRequest('/attributes');
 
         return Response::parse(json_encode($response));
     }

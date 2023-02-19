@@ -7,4 +7,14 @@ namespace CardTechie\TradingCardApiSdk\Models;
  */
 class Attribute extends Model
 {
+    const OBJECT_TYPES = [
+        'card',
+        'set',
+    ];
+
+    const DATA_TYPES = [
+        'boolean',
+        'integer',
+        'string',
+    ];
 }

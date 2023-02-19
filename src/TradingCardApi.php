@@ -2,6 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk;
 
+use CardTechie\TradingCardApiSdk\Resources\Attribute;
 use CardTechie\TradingCardApiSdk\Resources\Card;
 use CardTechie\TradingCardApiSdk\Resources\Genre;
 use CardTechie\TradingCardApiSdk\Resources\Player;
@@ -83,5 +84,13 @@ class TradingCardApi
     public function playerteam(): Playerteam
     {
         return new Playerteam($this->client);
+    }
+
+    /**
+     * Retrieve the attribute resource.
+     */
+    public function attribute(): Attribute
+    {
+        return new Attribute($this->client);
     }
 }
