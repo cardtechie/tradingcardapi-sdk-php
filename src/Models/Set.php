@@ -75,8 +75,6 @@ class Set extends Model
 
     /**
      * Return how many cards are in the set currently.
-     *
-     * @return int
      */
     public function getCurrentCardCountAttribute(): int
     {
@@ -100,7 +98,7 @@ class Set extends Model
      */
     public function previousCard(Card $currentCard): ?Card
     {
-        if (!$this->checklistIndex) {
+        if (! $this->checklistIndex) {
             $this->setIndexInChecklist($currentCard);
         }
 
@@ -117,7 +115,7 @@ class Set extends Model
      */
     public function nextCard(Card $currentCard): ?Card
     {
-        if (!$this->checklistIndex) {
+        if (! $this->checklistIndex) {
             $this->setIndexInChecklist($currentCard);
         }
 
