@@ -7,7 +7,7 @@ namespace CardTechie\TradingCardApiSdk\Models;
  */
 class Set extends Model
 {
-    private string $checklistIndex = '';
+    private int $checklistIndex = 0;
 
     /**
      * Retrieve the genre of the set.
@@ -76,7 +76,7 @@ class Set extends Model
     /**
      * Return how many cards are in the set currently.
      *
-     * @return int|void
+     * @return int
      */
     public function getCurrentCardCountAttribute(): int
     {
@@ -86,7 +86,7 @@ class Set extends Model
     /**
      * Get the index of the current card in the checklist and save as a class prop
      */
-    private function setIndexInChecklist(Card $currentCard)
+    private function setIndexInChecklist(Card $currentCard): void
     {
         foreach ($this->relationships['checklist'] as $index => $card) {
             if ($currentCard->id === $card->id) {
@@ -100,15 +100,13 @@ class Set extends Model
      */
     public function previousCard(Card $currentCard): ?Card
     {
-        if (is_null($this->checklistIndex)) {
+        if (!$this->checklistIndex) {
             $this->setIndexInChecklist($currentCard);
         }
 
-        if (! is_null($this->checklistIndex)) {
-            $index = $this->checklistIndex - 1;
-            if ($index >= 0) {
-                return $this->relationships['checklist'][$index];
-            }
+        $index = $this->checklistIndex - 1;
+        if ($index >= 0) {
+            return $this->relationships['checklist'][$index];
         }
 
         return null;
@@ -119,15 +117,13 @@ class Set extends Model
      */
     public function nextCard(Card $currentCard): ?Card
     {
-        if (is_null($this->checklistIndex)) {
+        if (!$this->checklistIndex) {
             $this->setIndexInChecklist($currentCard);
         }
 
-        if (! is_null($this->checklistIndex)) {
-            $index = $this->checklistIndex + 1;
-            if ($index < count($this->relationships['checklist'])) {
-                return $this->relationships['checklist'][$index];
-            }
+        $index = $this->checklistIndex + 1;
+        if ($index < count($this->relationships['checklist'])) {
+            return $this->relationships['checklist'][$index];
         }
 
         return null;
