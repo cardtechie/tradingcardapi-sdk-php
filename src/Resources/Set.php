@@ -75,6 +75,7 @@ class Set
     {
         $defaultParams = [
             'limit' => 50,
+            'page' => 1,
         ];
         $params = array_merge($defaultParams, $params);
 
