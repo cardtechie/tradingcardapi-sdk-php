@@ -7,7 +7,6 @@ use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 
 /**
  * Class Set
