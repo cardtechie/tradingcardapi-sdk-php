@@ -6,6 +6,7 @@ use CardTechie\TradingCardApiSdk\Models\Set as SetModel;
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 /**
@@ -71,7 +72,7 @@ class Set
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function list(array $params = []): Collection
+    public function list(array $params = []): LengthAwarePaginator
     {
         $defaultParams = [
             'limit' => 50,
@@ -82,7 +83,10 @@ class Set
         $url = sprintf('/sets?%s', http_build_query($params));
         $response = $this->makeRequest($url);
 
-        return Response::parse(json_encode($response));
+        $totalPages = $response->meta->pagination->total;
+        $parsedResponse = Response::parse(json_encode($response));
+
+        return new LengthAwarePaginator($parsedResponse, $totalPages, $params['limit'], $params['page']);
     }
 
     /**
