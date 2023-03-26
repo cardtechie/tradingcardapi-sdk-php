@@ -48,7 +48,7 @@ class Attribute
 
         return $formattedResponse->mainObject;
     }
-    
+
     /**
      * Return a list of attributes.
      *
@@ -73,6 +73,30 @@ class Attribute
     {
         $url = sprintf('/attributes/%s', $id);
         $response = $this->makeRequest($url);
+        $formattedResponse = new Response(json_encode($response));
+
+        return $formattedResponse->mainObject;
+    }
+
+    /**
+     * Update the attribute
+     *
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function update(string $id, array $attributes): AttributeModel
+    {
+        $url = sprintf('/attributes/%s', $id);
+        $request = [
+            'json' => [
+                'data' => [
+                    'type' => 'attributes',
+                    'id' => $id,
+                    'attributes' => $attributes,
+                ],
+            ],
+        ];
+        $response = $this->makeRequest($url, 'PUT', $request);
         $formattedResponse = new Response(json_encode($response));
 
         return $formattedResponse->mainObject;
