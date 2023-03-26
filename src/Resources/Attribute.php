@@ -24,6 +24,32 @@ class Attribute
     }
 
     /**
+     * Create the attribute with the passed in attributes
+     *
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function create(array $attributes = []): AttributeModel
+    {
+        $request = [
+            'json' => [
+                'data' => [
+                    'type' => 'attributes',
+                ],
+            ],
+        ];
+
+        if (count($attributes)) {
+            $request['json']['data']['attributes'] = $attributes;
+        }
+
+        $response = $this->makeRequest('/attributes', 'POST', $request);
+        $formattedResponse = new Response(json_encode($response));
+
+        return $formattedResponse->mainObject;
+    }
+    
+    /**
      * Return a list of attributes.
      *
      *
