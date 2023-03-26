@@ -65,8 +65,6 @@ class Attribute
     /**
      * Retrieve an attribute.
      *
-     * @param string $id
-     * @return AttributeModel
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function get(string $id): AttributeModel
