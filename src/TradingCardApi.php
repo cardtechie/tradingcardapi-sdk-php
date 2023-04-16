@@ -2,6 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk;
 
+use CardTechie\TradingCardApiSdk\Models\ObjectAttribute;
 use CardTechie\TradingCardApiSdk\Resources\Attribute;
 use CardTechie\TradingCardApiSdk\Resources\Card;
 use CardTechie\TradingCardApiSdk\Resources\Genre;
@@ -92,5 +93,13 @@ class TradingCardApi
     public function attribute(): Attribute
     {
         return new Attribute($this->client);
+    }
+
+    /**
+     * Retrieve the object attribute resource.
+     */
+    public function objectAttribute(): ObjectAttribute
+    {
+        return new ObjectAttribute($this->client);
     }
 }
