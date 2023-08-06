@@ -81,7 +81,6 @@ class Card extends Model
                     foreach ($this->relationships['team'] as $index => $team) {
                         if ($teamId === $team->id) {
                             $ptRelationships['team'] = $this->relationships['team'][$index];
-                            unset($this->relationships['team'][$index]);
                         }
                     }
                 }
@@ -90,7 +89,6 @@ class Card extends Model
                     foreach ($this->relationships['player'] as $index => $player) {
                         if ($playerId === $player->id) {
                             $ptRelationships['player'] = $this->relationships['player'][$index];
-                            unset($this->relationships['player'][$index]);
                         }
                     }
                 }
@@ -108,7 +106,6 @@ class Card extends Model
                     foreach ($this->relationships[$type] as $index => $model) {
                         if ($modelId === $model->id) {
                             $oncardObjects[$type] = $this->relationships[$type][$index];
-                            unset($this->relationships[$type][$index]);
                         }
                     }
                 }
