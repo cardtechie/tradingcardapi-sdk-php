@@ -11,8 +11,6 @@ class Team extends Model implements Taxonomy
 {
     /**
      * Get the full name of the team
-     *
-     * @return string
      */
     public function getNameAttribute(): ?string
     {
@@ -22,9 +20,6 @@ class Team extends Model implements Taxonomy
     // phpcs:disable
     /**
      * Build the taxonomy object
-     *
-     * @param  object  $taxonomy
-     * @param  array  $data
      */
     public static function build(object $taxonomy, array $data): object
     {
@@ -34,9 +29,6 @@ class Team extends Model implements Taxonomy
 
     /**
      * Get the object from the API
-     *
-     * @param  array  $params
-     * @return object
      */
     public static function getFromApi(array $params): object
     {
@@ -54,7 +46,7 @@ class Team extends Model implements Taxonomy
         }
 
         $selectedTeam = null;
-        if (1 === $teams->count()) {
+        if ($teams->count() === 1) {
             $selectedTeam = $teams->first();
         } else {
             foreach ($teams as $team) {

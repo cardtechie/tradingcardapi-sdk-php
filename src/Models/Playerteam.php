@@ -25,10 +25,6 @@ class Playerteam extends Model implements Taxonomy
 
     /**
      * Build the taxonomy object
-     *
-     * @param  object  $taxonomy
-     * @param  array  $data
-     * @return object
      */
     public static function build(object $taxonomy, array $data): object
     {
@@ -56,9 +52,6 @@ class Playerteam extends Model implements Taxonomy
 
     /**
      * Get the playerteam from the api
-     *
-     * @param  array  $params
-     * @return object
      */
     public static function getFromApi(array $params): object
     {
@@ -94,7 +87,7 @@ class Playerteam extends Model implements Taxonomy
      */
     public static function prepare($data): ?object
     {
-        if (null === $data['player'] && null === $data['team']) {
+        if ($data['player'] === null && $data['team'] === null) {
             return null;
         }
 
@@ -125,8 +118,8 @@ class Playerteam extends Model implements Taxonomy
     /**
      * Look up a player/team by player and team uuids.
      *
-     * @param  string  $player The player uuid
-     * @param  string  $team   The team uuid
+     * @param  string  $player  The player uuid
+     * @param  string  $team  The team uuid
      */
     public static function lookup($player, $team): Playerteam
     {
@@ -155,8 +148,6 @@ class Playerteam extends Model implements Taxonomy
 
     /**
      * Retrieve the player.
-     *
-     * @return Player|null
      */
     public function player(): ?Player
     {
@@ -165,8 +156,6 @@ class Playerteam extends Model implements Taxonomy
 
     /**
      * Retrieve the team.
-     *
-     * @return Team|null
      */
     public function team(): ?Team
     {

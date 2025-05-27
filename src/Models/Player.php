@@ -11,8 +11,6 @@ class Player extends Model implements Taxonomy
 {
     /**
      * Return the full name of the player
-     *
-     * @return string
      */
     public function getFullNameAttribute(): ?string
     {
@@ -22,9 +20,6 @@ class Player extends Model implements Taxonomy
     // phpcs:disable
     /**
      * Build the taxonomy object
-     *
-     * @param  object  $taxonomy
-     * @param  array  $data
      */
     public static function build(object $taxonomy, array $data): object
     {
@@ -34,9 +29,6 @@ class Player extends Model implements Taxonomy
 
     /**
      * Get the object from the API
-     *
-     * @param  array  $params
-     * @return object
      */
     public static function getFromApi(array $params): object
     {

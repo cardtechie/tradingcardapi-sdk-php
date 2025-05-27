@@ -15,8 +15,6 @@ class Model
 
     /**
      * Model constructor.
-     *
-     * @param  array  $attributes
      */
     public function __construct(array $attributes = [])
     {
@@ -25,8 +23,6 @@ class Model
 
     /**
      * Set the relationships for the object
-     *
-     * @param  array  $relationships
      */
     public function setRelationships(array $relationships): void
     {
@@ -35,8 +31,6 @@ class Model
 
     /**
      * Return the array of relationships
-     *
-     * @return array
      */
     public function getRelationships(): array
     {
@@ -46,7 +40,6 @@ class Model
     /**
      * Magic method to get attribute values from the attributes array.
      *
-     * @param $name
      * @return mixed|null
      */
     public function __get($name)
@@ -65,9 +58,6 @@ class Model
 
     /**
      * Magic method to see if the class variable exists.
-     *
-     * @param $name
-     * @return bool
      */
     public function __isset($name): bool
     {
@@ -77,8 +67,6 @@ class Model
     /**
      * Magic method to get a relationship.
      *
-     * @param $methodName
-     * @param $arguments
      * @return \Illuminate\Support\Collection|mixed
      *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
@@ -91,7 +79,6 @@ class Model
     /**
      * Helper function to get a relationship of the model.
      *
-     * @param  string  $key
      * @return mixed|null
      */
     protected function getRelationship(string $key)
@@ -110,7 +97,6 @@ class Model
     /**
      * Helper function to get the relationship and return it as an array
      *
-     * @param  string  $key
      * @return mixed|null
      */
     protected function getRelationshipAsArray(string $key)
@@ -124,8 +110,6 @@ class Model
 
     /**
      * Convert the model to a string.
-     *
-     * @return string
      */
     public function __toString(): string
     {

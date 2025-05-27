@@ -16,8 +16,6 @@ class Card
 
     /**
      * Card constructor.
-     *
-     * @param  Client  $client
      */
     public function __construct(Client $client)
     {
@@ -27,9 +25,6 @@ class Card
     /**
      * Create the card with the passed in attributes
      *
-     * @param  array  $attributes
-     * @param  array  $relationships
-     * @return CardModel
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -60,9 +55,6 @@ class Card
     /**
      * Retrieve a set by ID
      *
-     * @param  string  $id
-     * @param  array  $params
-     * @return CardModel
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -83,10 +75,6 @@ class Card
     /**
      * Update the set
      *
-     * @param  string  $id
-     * @param  array  $attributes
-     * @param  array  $relationships
-     * @return CardModel
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -119,8 +107,6 @@ class Card
     /**
      * Delete a card
      *
-     * @param  string  $id
-     * @return void
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */

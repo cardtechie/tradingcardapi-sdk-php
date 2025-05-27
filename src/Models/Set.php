@@ -11,8 +11,6 @@ class Set extends Model
 
     /**
      * Retrieve the genre of the set.
-     *
-     * @return Genre|null
      */
     public function genre(): ?Genre
     {
@@ -21,8 +19,6 @@ class Set extends Model
 
     /**
      * Retrieve the parent set.
-     *
-     * @return Set|null
      */
     public function parent(): ?Set
     {
@@ -31,8 +27,6 @@ class Set extends Model
 
     /**
      * Retrieve the manufacturer of the set.
-     *
-     * @return Manufacturer|null
      */
     public function manufacturer(): ?Manufacturer
     {
@@ -41,8 +35,6 @@ class Set extends Model
 
     /**
      * Retrieve the brand of the set.
-     *
-     * @return Brand|null
      */
     public function brand(): ?Brand
     {
@@ -51,8 +43,6 @@ class Set extends Model
 
     /**
      * Retrieve the year of the set.
-     *
-     * @return Year|null
      */
     public function year(): ?Year
     {
@@ -61,8 +51,6 @@ class Set extends Model
 
     /**
      * Retrieve the subsets of the set.
-     *
-     * @return array
      */
     public function subsets(): array
     {
@@ -75,8 +63,6 @@ class Set extends Model
 
     /**
      * Retrieve the checklist of the set.
-     *
-     * @return array
      */
     public function checklist(): array
     {
@@ -99,8 +85,6 @@ class Set extends Model
 
     /**
      * Get the index of the current card in the checklist and save as a class prop
-     *
-     * @param  Card  $currentCard
      */
     private function setIndexInChecklist(Card $currentCard)
     {
@@ -113,9 +97,6 @@ class Set extends Model
 
     /**
      * Retrieve the previous card of the card passed as an arg of the current set.
-     *
-     * @param  Card  $currentCard
-     * @return Card|null
      */
     public function previousCard(Card $currentCard): ?Card
     {
@@ -135,9 +116,6 @@ class Set extends Model
 
     /**
      * Retrieve the next card of the card passed as an arg of the current set.
-     *
-     * @param  Card  $currentCard
-     * @return Card|null
      */
     public function nextCard(Card $currentCard): ?Card
     {
@@ -157,8 +135,6 @@ class Set extends Model
 
     /**
      * Set the relationships for the object
-     *
-     * @param  array  $relationships
      */
     // This is needed when we get the set list from the API
     public function setRelationships(array $relationships): void

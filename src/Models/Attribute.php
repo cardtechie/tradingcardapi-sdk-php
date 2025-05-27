@@ -5,6 +5,4 @@ namespace CardTechie\TradingCardApiSdk\Models;
 /**
  * Class Attribute
  */
-class Attribute extends Model
-{
-}
+class Attribute extends Model {}

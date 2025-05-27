@@ -5,6 +5,4 @@ namespace CardTechie\TradingCardApiSdk\Models;
 /**
  * Class Oncard
  */
-class Oncard extends Model
-{
-}
+class Oncard extends Model {}

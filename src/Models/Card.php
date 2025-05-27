@@ -38,8 +38,6 @@ class Card extends Model
 
     /**
      * Retrieve array of objects on the card.
-     *
-     * @return array|null
      */
     public function oncard(): ?array
     {
@@ -53,8 +51,6 @@ class Card extends Model
 
     /**
      * Retrieve array of extra attributes assigned to card
-     *
-     * @return array
      */
     public function extraAttributes(): ?array
     {
@@ -68,8 +64,6 @@ class Card extends Model
 
     /**
      * Retrieve the set.
-     *
-     * @return Set|null
      */
     public function set(): ?Set
     {
@@ -78,8 +72,6 @@ class Card extends Model
 
     /**
      * Override the parent class implementation to correctly place all relationships.
-     *
-     * @param  array  $relationships
      */
     public function setRelationships(array $relationships): void
     {
@@ -128,13 +120,13 @@ class Card extends Model
             }
         }
 
-        if (array_key_exists('team', $this->relationships) && 0 === count($this->relationships['team'])) {
+        if (array_key_exists('team', $this->relationships) && count($this->relationships['team']) === 0) {
             unset($this->relationships['team']);
         }
-        if (array_key_exists('player', $this->relationships) && 0 === count($this->relationships['player'])) {
+        if (array_key_exists('player', $this->relationships) && count($this->relationships['player']) === 0) {
             unset($this->relationships['player']);
         }
-        if (array_key_exists('playerteam', $this->relationships) && 0 === count($this->relationships['playerteam'])) {
+        if (array_key_exists('playerteam', $this->relationships) && count($this->relationships['playerteam']) === 0) {
             unset($this->relationships['playerteam']);
         }
     }
