@@ -97,6 +97,25 @@ All API resources follow the same pattern of being accessed through the main `Tr
 
 ## Important Reminders
 
+**CRITICAL DEVELOPMENT WORKFLOW**: After every code change, you MUST run the following checks:
+
+1. **Format Code**: `make format` (fixes formatting issues automatically)
+2. **Check Coverage**: `make test-coverage` (ensures 80%+ coverage is maintained)
+3. **Verify Quality**: `make check` (runs tests + analysis + format check)
+
+**Quality Standards Enforcement**:
+- All code must pass PHPStan Level 4 analysis with zero errors
+- All code must follow PSR-12 formatting standards via Laravel Pint
+- Test coverage must remain at 80% or higher
+- All tests must pass before considering changes complete
+
+**Quick Quality Commands**:
+```bash
+make format         # Fix all formatting issues
+make test-coverage  # Check test coverage percentage
+make check          # Verify all quality standards
+```
+
 **Always Update Documentation**: When making changes to the codebase, ensure the README.md is updated to reflect:
 - New features or functionality
 - Changed API methods or usage patterns  
