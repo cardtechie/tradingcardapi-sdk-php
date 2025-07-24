@@ -1,4 +1,4 @@
-FROM ubuntu:22.04 as dev
+FROM ubuntu:22.04 AS dev
 
 # Helper scripts
 COPY ./.docker/scripts/apt-install-min.sh /usr/local/bin/apt-install-min
