@@ -6,6 +6,9 @@ use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
 
 /**
  * Class Team
+ * 
+ * @property string $location
+ * @property string $mascot
  */
 class Team extends Model implements Taxonomy
 {
@@ -26,6 +29,7 @@ class Team extends Model implements Taxonomy
     public static function build(object $taxonomy, array $data): object
     {
         // TODO: Implement build() method.
+        return new \stdClass();
     }
     // phpcs:enable
 
@@ -44,7 +48,7 @@ class Team extends Model implements Taxonomy
                 'name' => $params['team'],
             ]);
 
-            return $team->first();
+            return $team;
         }
 
         $selectedTeam = null;
@@ -64,7 +68,7 @@ class Team extends Model implements Taxonomy
                 'name' => $params['team'],
             ]);
 
-            return $team->first();
+            return $team;
         }
 
         return $selectedTeam;

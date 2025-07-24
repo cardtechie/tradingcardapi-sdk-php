@@ -6,6 +6,9 @@ use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
 
 /**
  * Class Player
+ * 
+ * @property string|null $first_name
+ * @property string|null $last_name
  */
 class Player extends Model implements Taxonomy
 {
@@ -26,6 +29,7 @@ class Player extends Model implements Taxonomy
     public static function build(object $taxonomy, array $data): object
     {
         // TODO: Implement build() method.
+        return new \stdClass();
     }
     // phpcs:enable
 

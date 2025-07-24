@@ -20,7 +20,7 @@ trait ApiRequest
     /**
      * The client to make API requests
      *
-     * @var /Guzzle/Http/Client
+     * @var \GuzzleHttp\Client
      */
     private $client;
 

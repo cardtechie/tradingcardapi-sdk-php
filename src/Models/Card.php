@@ -4,6 +4,8 @@ namespace CardTechie\TradingCardApiSdk\Models;
 
 /**
  * Class Card
+ * 
+ * @property string $id
  */
 class Card extends Model
 {
