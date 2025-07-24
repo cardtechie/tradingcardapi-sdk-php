@@ -1,7 +1,7 @@
 <?php
 
-use CardTechie\TradingCardApiSdk\Resources\Team;
 use CardTechie\TradingCardApiSdk\Models\Team as TeamModel;
+use CardTechie\TradingCardApiSdk\Resources\Team;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -15,11 +15,11 @@ beforeEach(function () {
         'client_id' => 'test-client-id',
         'client_secret' => 'test-client-secret',
     ]);
-    
+
     // Pre-populate cache with token to avoid OAuth requests
     cache()->put('tcapi_token', 'test-token', 60);
-    
-    $this->mockHandler = new MockHandler();
+
+    $this->mockHandler = new MockHandler;
     $handlerStack = HandlerStack::create($this->mockHandler);
     $this->client = new Client(['handler' => $handlerStack]);
     $this->teamResource = new Team($this->client);
@@ -39,8 +39,8 @@ it('can get a list of teams', function () {
                     'attributes' => [
                         'name' => 'New York Yankees',
                         'location' => 'New York',
-                        'mascot' => 'Yankees'
-                    ]
+                        'mascot' => 'Yankees',
+                    ],
                 ],
                 [
                     'type' => 'teams',
@@ -48,10 +48,10 @@ it('can get a list of teams', function () {
                     'attributes' => [
                         'name' => 'Boston Red Sox',
                         'location' => 'Boston',
-                        'mascot' => 'Red Sox'
-                    ]
-                ]
-            ]
+                        'mascot' => 'Red Sox',
+                    ],
+                ],
+            ],
         ]))
     );
 
@@ -71,10 +71,10 @@ it('can get a list of teams with params', function () {
                     'attributes' => [
                         'name' => 'New York Yankees',
                         'location' => 'New York',
-                        'mascot' => 'Yankees'
-                    ]
-                ]
-            ]
+                        'mascot' => 'Yankees',
+                    ],
+                ],
+            ],
         ]))
     );
 
@@ -94,16 +94,16 @@ it('can create a team', function () {
                 'attributes' => [
                     'name' => 'Test Team',
                     'location' => 'Test City',
-                    'mascot' => 'Test Mascot'
-                ]
-            ]
+                    'mascot' => 'Test Mascot',
+                ],
+            ],
         ]))
     );
 
     $attributes = [
         'name' => 'Test Team',
         'location' => 'Test City',
-        'mascot' => 'Test Mascot'
+        'mascot' => 'Test Mascot',
     ];
 
     $result = $this->teamResource->create($attributes);
@@ -117,8 +117,8 @@ it('can create team without attributes', function () {
             'data' => [
                 'type' => 'teams',
                 'id' => '123',
-                'attributes' => []
-            ]
+                'attributes' => [],
+            ],
         ]))
     );
 

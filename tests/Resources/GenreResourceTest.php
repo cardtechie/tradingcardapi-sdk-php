@@ -14,11 +14,11 @@ beforeEach(function () {
         'client_id' => 'test-client-id',
         'client_secret' => 'test-client-secret',
     ]);
-    
+
     // Pre-populate cache with token to avoid OAuth requests
     cache()->put('tcapi_token', 'test-token', 60);
-    
-    $this->mockHandler = new MockHandler();
+
+    $this->mockHandler = new MockHandler;
     $handlerStack = HandlerStack::create($this->mockHandler);
     $this->client = new Client(['handler' => $handlerStack]);
     $this->genreResource = new Genre($this->client);
@@ -37,18 +37,18 @@ it('can get a list of genres', function () {
                     'id' => '123',
                     'attributes' => [
                         'name' => 'Baseball',
-                        'slug' => 'baseball'
-                    ]
+                        'slug' => 'baseball',
+                    ],
                 ],
                 [
                     'type' => 'genres',
                     'id' => '456',
                     'attributes' => [
                         'name' => 'Football',
-                        'slug' => 'football'
-                    ]
-                ]
-            ]
+                        'slug' => 'football',
+                    ],
+                ],
+            ],
         ]))
     );
 

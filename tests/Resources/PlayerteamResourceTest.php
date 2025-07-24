@@ -1,7 +1,7 @@
 <?php
 
-use CardTechie\TradingCardApiSdk\Resources\Playerteam;
 use CardTechie\TradingCardApiSdk\Models\Playerteam as PlayerteamModel;
+use CardTechie\TradingCardApiSdk\Resources\Playerteam;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -15,11 +15,11 @@ beforeEach(function () {
         'client_id' => 'test-client-id',
         'client_secret' => 'test-client-secret',
     ]);
-    
+
     // Pre-populate cache with token to avoid OAuth requests
     cache()->put('tcapi_token', 'test-token', 60);
-    
-    $this->mockHandler = new MockHandler();
+
+    $this->mockHandler = new MockHandler;
     $handlerStack = HandlerStack::create($this->mockHandler);
     $this->client = new Client(['handler' => $handlerStack]);
     $this->playerteamResource = new Playerteam($this->client);
@@ -38,18 +38,18 @@ it('can get a list of playerteams', function () {
                     'id' => '123',
                     'attributes' => [
                         'player_id' => '456',
-                        'team_id' => '789'
-                    ]
+                        'team_id' => '789',
+                    ],
                 ],
                 [
                     'type' => 'playerteams',
                     'id' => '456',
                     'attributes' => [
                         'player_id' => '111',
-                        'team_id' => '222'
-                    ]
-                ]
-            ]
+                        'team_id' => '222',
+                    ],
+                ],
+            ],
         ]))
     );
 
@@ -68,10 +68,10 @@ it('can get a list of playerteams with params', function () {
                     'id' => '123',
                     'attributes' => [
                         'player_id' => '456',
-                        'team_id' => '789'
-                    ]
-                ]
-            ]
+                        'team_id' => '789',
+                    ],
+                ],
+            ],
         ]))
     );
 
@@ -90,15 +90,15 @@ it('can create a playerteam', function () {
                 'id' => '123',
                 'attributes' => [
                     'player_id' => '456',
-                    'team_id' => '789'
-                ]
-            ]
+                    'team_id' => '789',
+                ],
+            ],
         ]))
     );
 
     $attributes = [
         'player_id' => '456',
-        'team_id' => '789'
+        'team_id' => '789',
     ];
 
     $result = $this->playerteamResource->create($attributes);
@@ -112,8 +112,8 @@ it('can create playerteam without attributes', function () {
             'data' => [
                 'type' => 'playerteams',
                 'id' => '123',
-                'attributes' => []
-            ]
+                'attributes' => [],
+            ],
         ]))
     );
 
