@@ -94,3 +94,14 @@ The SDK provides two main usage patterns:
 - Helper function: `tradingcardapi()->card()->get($id)`
 
 All API resources follow the same pattern of being accessed through the main `TradingCardApi` class and using the shared `ApiRequest` trait for HTTP communication.
+
+## Important Reminders
+
+**Always Update Documentation**: When making changes to the codebase, ensure the README.md is updated to reflect:
+- New features or functionality
+- Changed API methods or usage patterns  
+- Updated requirements or dependencies
+- Modified installation or configuration steps
+- New development commands or workflows
+
+The README.md is the public face of this repository and should always accurately represent the current state of the project.
