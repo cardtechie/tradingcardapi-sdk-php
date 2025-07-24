@@ -81,9 +81,9 @@ class Response
         foreach ($this->relationships as $type => $theObjects) {
             foreach ($theObjects as $index => $attributes) {
                 $theType = ucfirst(Str::singular($type));
-                if ('Parentset' === $theType || 'Subset' === $theType) {
+                if ($theType === 'Parentset' || $theType === 'Subset') {
                     $theType = 'Set';
-                } elseif ('Checklist' === $theType) {
+                } elseif ($theType === 'Checklist') {
                     $theType = 'Card';
                 }
                 $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$theType;
@@ -170,9 +170,9 @@ class Response
                 $attributes[$key] = $value;
             }
 
-            if ('parentset' == $included->type) {
+            if ($included->type == 'parentset') {
                 $type = 'Set';
-            } elseif ('checklist' === $included->type) {
+            } elseif ($included->type === 'checklist') {
                 $type = 'Card';
             } else {
                 $type = ucfirst(Str::singular($included->type));
@@ -191,7 +191,7 @@ class Response
      */
     private static function parseMeta($data): void
     {
-        $meta = new stdClass();
+        $meta = new stdClass;
         if (! property_exists($data, 'meta')) {
             self::$meta = $meta;
 
@@ -206,7 +206,7 @@ class Response
      */
     private static function parseLinks($data): void
     {
-        $links = new stdClass();
+        $links = new stdClass;
         if (! property_exists($data, 'links')) {
             self::$links = $links;
 
