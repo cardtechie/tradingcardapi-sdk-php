@@ -44,10 +44,33 @@ make pint           # Run Laravel Pint directly
 make up             # Start Docker containers
 make install        # Install composer dependencies
 make ci             # Run tests and analysis (CI tasks)
+make check          # Run all quality checks (tests + analysis + format check)
+make quality        # Run comprehensive quality checks with coverage
 make fix            # Format code and run analysis
 make all            # Install, test, analyse, and format
 make shell          # Access container shell
 make down           # Stop Docker containers
+```
+
+### Code Quality Standards
+This project maintains high code quality standards with automated checks:
+
+**Static Analysis**: PHPStan Level 4 with strict type checking
+**Code Style**: Laravel Pint for PSR-12 compliance
+**Testing**: Pest with minimum 80% coverage requirement
+**CI/CD**: Automated quality checks on all PRs and pushes
+
+**Pre-commit Setup** (Optional):
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+**Quality Commands**:
+```bash
+make check          # Quick quality check (tests + analysis + format check)
+make quality        # Full quality check with coverage
+make format-check   # Check code formatting without changes
 ```
 
 ### Package Development

@@ -68,8 +68,23 @@ pint: ## Run Laravel Pint directly
 	@make ensure-running
 	docker compose exec dev vendor/bin/pint
 
+# Quality assurance tasks
+check: ## Run all quality checks (tests + analysis + format check)
+	@make test
+	@make analyse
+	@make format-check
+
+quality: ## Run comprehensive quality checks with coverage
+	@make test-coverage
+	@make analyse
+	@make format-check
+
+format-check: ## Check if code formatting is correct (dry-run)
+	@make ensure-running
+	docker compose exec dev vendor/bin/pint --test
+
 # Combined tasks
-ci: test analyse ## Run continuous integration tasks (tests + analysis)
+ci: test analyse format-check ## Run continuous integration tasks (tests + analysis + format check)
 
 fix: format analyse ## Format code and run analysis
 

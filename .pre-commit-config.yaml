@@ -1,0 +1,38 @@
+repos:
+  - repo: local
+    hooks:
+      - id: php-lint
+        name: PHP Lint
+        entry: php -l
+        language: system
+        files: \.php$
+        
+      - id: phpstan
+        name: PHPStan
+        entry: make analyse
+        language: system
+        files: \.php$
+        pass_filenames: false
+        
+      - id: pint-check
+        name: Laravel Pint (Format Check)
+        entry: make format-check
+        language: system
+        files: \.php$
+        pass_filenames: false
+        
+      - id: pest-tests
+        name: Run Tests
+        entry: make test
+        language: system
+        files: \.php$
+        pass_filenames: false
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
