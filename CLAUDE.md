@@ -22,24 +22,59 @@ This is a Laravel package providing a PHP SDK for the Trading Card API. The pack
 
 ## Common Commands
 
+All commands should be run using the provided Makefile, which handles Docker container execution:
+
 ### Testing
 ```bash
-composer test                 # Run all tests using Pest
-composer test-coverage        # Run tests with coverage report
-vendor/bin/pest              # Direct Pest command
+make test           # Run all tests using Pest
+make test-coverage  # Run tests with coverage report
+make pest           # Run Pest directly
 ```
 
 ### Code Quality
 ```bash
-composer analyse             # Run PHPStan static analysis
-composer format              # Format code using Laravel Pint
-vendor/bin/phpstan analyse   # Direct PHPStan command
-vendor/bin/pint              # Direct Pint command
+make analyse        # Run PHPStan static analysis
+make format         # Format code using Laravel Pint
+make phpstan        # Run PHPStan directly
+make pint           # Run Laravel Pint directly
+```
+
+### Development Workflow
+```bash
+make up             # Start Docker containers
+make install        # Install composer dependencies
+make ci             # Run tests and analysis (CI tasks)
+make check          # Run all quality checks (tests + analysis + format check)
+make quality        # Run comprehensive quality checks with coverage
+make fix            # Format code and run analysis
+make all            # Install, test, analyse, and format
+make shell          # Access container shell
+make down           # Stop Docker containers
+```
+
+### Code Quality Standards
+This project maintains high code quality standards with automated checks:
+
+**Static Analysis**: PHPStan Level 4 with strict type checking
+**Code Style**: Laravel Pint for PSR-12 compliance
+**Testing**: Pest with minimum 80% coverage requirement
+**CI/CD**: Automated quality checks on all PRs and pushes
+
+**Pre-commit Setup** (Optional):
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+**Quality Commands**:
+```bash
+make check          # Quick quality check (tests + analysis + format check)
+make quality        # Full quality check with coverage
+make format-check   # Check code formatting without changes
 ```
 
 ### Package Development
 ```bash
-composer install                                              # Install dependencies
 php artisan vendor:publish --tag="tradingcardapi-config"     # Publish config file
 php artisan vendor:publish --tag="tradingcardapi-sdk-migrations" # Publish migrations
 php artisan vendor:publish --tag="tradingcardapi-sdk-views"  # Publish views
@@ -59,3 +94,33 @@ The SDK provides two main usage patterns:
 - Helper function: `tradingcardapi()->card()->get($id)`
 
 All API resources follow the same pattern of being accessed through the main `TradingCardApi` class and using the shared `ApiRequest` trait for HTTP communication.
+
+## Important Reminders
+
+**CRITICAL DEVELOPMENT WORKFLOW**: After every code change, you MUST run the following checks:
+
+1. **Format Code**: `make format` (fixes formatting issues automatically)
+2. **Check Coverage**: `make test-coverage` (ensures 80%+ coverage is maintained)
+3. **Verify Quality**: `make check` (runs tests + analysis + format check)
+
+**Quality Standards Enforcement**:
+- All code must pass PHPStan Level 4 analysis with zero errors
+- All code must follow PSR-12 formatting standards via Laravel Pint
+- Test coverage must remain at 80% or higher
+- All tests must pass before considering changes complete
+
+**Quick Quality Commands**:
+```bash
+make format         # Fix all formatting issues
+make test-coverage  # Check test coverage percentage
+make check          # Verify all quality standards
+```
+
+**Always Update Documentation**: When making changes to the codebase, ensure the README.md is updated to reflect:
+- New features or functionality
+- Changed API methods or usage patterns  
+- Updated requirements or dependencies
+- Modified installation or configuration steps
+- New development commands or workflows
+
+The README.md is the public face of this repository and should always accurately represent the current state of the project.

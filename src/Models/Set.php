@@ -4,6 +4,9 @@ namespace CardTechie\TradingCardApiSdk\Models;
 
 /**
  * Class Set
+ *
+ * @property string $number_prefix
+ * @property string $genre_id
  */
 class Set extends Model
 {

@@ -2,7 +2,6 @@
 
 namespace CardTechie\TradingCardApiSdk;
 
-use CardTechie\TradingCardApiSdk\Models\ObjectAttribute;
 use CardTechie\TradingCardApiSdk\Resources\Attribute;
 use CardTechie\TradingCardApiSdk\Resources\Card;
 use CardTechie\TradingCardApiSdk\Resources\Genre;
@@ -31,11 +30,11 @@ class TradingCardApi
      */
     public function __construct()
     {
-        $config = config('tradingcardapi');
+        $config = config('tradingcardapi') ?: [];
 
         $this->client = new Client([
-            'verify' => $config['ssl_verify'],
-            'base_uri' => $config['url'],
+            'verify' => $config['ssl_verify'] ?? true,
+            'base_uri' => $config['url'] ?? '',
         ]);
     }
 
@@ -93,13 +92,5 @@ class TradingCardApi
     public function attribute(): Attribute
     {
         return new Attribute($this->client);
-    }
-
-    /**
-     * Retrieve the object attribute resource.
-     */
-    public function objectAttribute(): ObjectAttribute
-    {
-        return new ObjectAttribute($this->client);
     }
 }

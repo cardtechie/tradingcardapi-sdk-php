@@ -20,17 +20,17 @@ trait ApiRequest
     /**
      * The client to make API requests
      *
-     * @var /Guzzle/Http/Client
+     * @var \GuzzleHttp\Client
      */
     private $client;
 
     /**
      * Makes a request to an API endpoint or webpage and returns its response
      *
-     * @param  string  $url     Url of the api or webpage
+     * @param  string  $url  Url of the api or webpage
      * @param  string  $method  HTTP method
-     * @param  array  $request Additional parameters to include in the request
-     * @param  array  $headers HTTP headers
+     * @param  array  $request  Additional parameters to include in the request
+     * @param  array  $headers  HTTP headers
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -52,7 +52,7 @@ trait ApiRequest
         $body = (string) $response->getBody();
 
         if (empty($body)) {
-            return new stdClass();
+            return new stdClass;
         }
 
         return (object) json_decode($body);
@@ -103,9 +103,9 @@ trait ApiRequest
     /**
      * Perform the request with the client that has already been created.
      *
-     * @param  string  $url     Url of the api or webpage
+     * @param  string  $url  Url of the api or webpage
      * @param  string  $method  HTTP method
-     * @param  array  $request The request
+     * @param  array  $request  The request
      */
     private function doRequest(string $url, string $method = 'GET', array $request = []): ResponseInterface
     {
