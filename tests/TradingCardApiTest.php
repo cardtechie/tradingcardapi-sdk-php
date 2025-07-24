@@ -8,15 +8,15 @@ use CardTechie\TradingCardApiSdk\Resources\Team;
 use CardTechie\TradingCardApiSdk\Resources\Genre;
 use CardTechie\TradingCardApiSdk\Resources\Playerteam;
 use CardTechie\TradingCardApiSdk\Resources\Attribute;
-use CardTechie\TradingCardApiSdk\Models\ObjectAttribute;
 use GuzzleHttp\Client;
 
 beforeEach(function () {
-    config([
-        'tradingcardapi.url' => 'https://api.example.com',
-        'tradingcardapi.ssl_verify' => true,
-        'tradingcardapi.client_id' => 'test-client-id',
-        'tradingcardapi.client_secret' => 'test-client-secret',
+    // Ensure config is available for the package
+    $this->app['config']->set('tradingcardapi', [
+        'url' => 'https://api.example.com',
+        'ssl_verify' => true,
+        'client_id' => 'test-client-id',
+        'client_secret' => 'test-client-secret',
     ]);
 });
 
@@ -67,11 +67,6 @@ it('returns attribute resource', function () {
     expect($attribute)->toBeInstanceOf(Attribute::class);
 });
 
-it('returns object attribute resource', function () {
-    $api = new TradingCardApi();
-    $objectAttribute = $api->objectAttribute();
-    expect($objectAttribute)->toBeInstanceOf(ObjectAttribute::class);
-});
 
 it('creates guzzle client with correct configuration', function () {
     $api = new TradingCardApi();

@@ -22,26 +22,36 @@ This is a Laravel package providing a PHP SDK for the Trading Card API. The pack
 
 ## Common Commands
 
+All commands should be run using the provided Makefile, which handles Docker container execution:
+
 ### Testing
-Tests should be run within the Docker container to ensure proper PHP environment:
 ```bash
-docker-compose exec app composer test                 # Run all tests using Pest
-docker-compose exec app composer test-coverage        # Run tests with coverage report
-docker-compose exec app vendor/bin/pest              # Direct Pest command
+make test           # Run all tests using Pest
+make test-coverage  # Run tests with coverage report
+make pest           # Run Pest directly
 ```
 
 ### Code Quality
-Code quality tools should also be run within the Docker container:
 ```bash
-docker-compose exec app composer analyse             # Run PHPStan static analysis
-docker-compose exec app composer format              # Format code using Laravel Pint
-docker-compose exec app vendor/bin/phpstan analyse   # Direct PHPStan command
-docker-compose exec app vendor/bin/pint              # Direct Pint command
+make analyse        # Run PHPStan static analysis
+make format         # Format code using Laravel Pint
+make phpstan        # Run PHPStan directly
+make pint           # Run Laravel Pint directly
+```
+
+### Development Workflow
+```bash
+make up             # Start Docker containers
+make install        # Install composer dependencies
+make ci             # Run tests and analysis (CI tasks)
+make fix            # Format code and run analysis
+make all            # Install, test, analyse, and format
+make shell          # Access container shell
+make down           # Stop Docker containers
 ```
 
 ### Package Development
 ```bash
-composer install                                              # Install dependencies
 php artisan vendor:publish --tag="tradingcardapi-config"     # Publish config file
 php artisan vendor:publish --tag="tradingcardapi-sdk-migrations" # Publish migrations
 php artisan vendor:publish --tag="tradingcardapi-sdk-views"  # Publish views

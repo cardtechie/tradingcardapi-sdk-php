@@ -5,12 +5,27 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use Mockery as m;
 
+class TestApiRequestClass
+{
+    use ApiRequest;
+    
+    public function __construct($client)
+    {
+        $this->client = $client;
+    }
+    
+    public function testMakeRequest($url, $method = 'GET', $request = [], $headers = [])
+    {
+        return $this->makeRequest($url, $method, $request, $headers);
+    }
+}
+
 beforeEach(function () {
-    config([
-        'tradingcardapi.url' => 'https://api.example.com',
-        'tradingcardapi.ssl_verify' => true,
-        'tradingcardapi.client_id' => 'test-client-id',
-        'tradingcardapi.client_secret' => 'test-client-secret',
+    $this->app['config']->set('tradingcardapi', [
+        'url' => 'https://api.example.com',
+        'ssl_verify' => true,
+        'client_id' => 'test-client-id',
+        'client_secret' => 'test-client-secret',
     ]);
     
     cache()->flush();
@@ -21,18 +36,6 @@ afterEach(function () {
 });
 
 it('can make a request with token retrieval', function () {
-    $testClass = new class {
-        use ApiRequest;
-        
-        public function __construct($client) {
-            $this->client = $client;
-        }
-        
-        public function testMakeRequest($url, $method = 'GET', $request = [], $headers = []) {
-            return $this->makeRequest($url, $method, $request, $headers);
-        }
-    };
-    
     $client = m::mock(Client::class);
     
     // Mock the OAuth token request
@@ -56,7 +59,7 @@ it('can make a request with token retrieval', function () {
         ->once()
         ->andReturn($apiResponse);
     
-    $instance = new $testClass($client);
+    $instance = new TestApiRequestClass($client);
     $result = $instance->testMakeRequest('/test');
     
     expect($result)->toBeObject();
@@ -64,18 +67,6 @@ it('can make a request with token retrieval', function () {
 });
 
 it('uses cached token when available', function () {
-    $testClass = new class {
-        use ApiRequest;
-        
-        public function __construct($client) {
-            $this->client = $client;
-        }
-        
-        public function testMakeRequest($url, $method = 'GET', $request = [], $headers = []) {
-            return $this->makeRequest($url, $method, $request, $headers);
-        }
-    };
-    
     // Set a cached token
     cache()->put('tcapi_token', 'cached-token', 60);
     
@@ -94,25 +85,13 @@ it('uses cached token when available', function () {
     // Should NOT receive a token request
     $client->shouldNotReceive('request')->with('POST', '/oauth/token', m::type('array'));
     
-    $instance = new $testClass($client);
+    $instance = new TestApiRequestClass($client);
     $result = $instance->testMakeRequest('/test');
     
     expect($result)->toBeObject();
 });
 
 it('handles empty response body', function () {
-    $testClass = new class {
-        use ApiRequest;
-        
-        public function __construct($client) {
-            $this->client = $client;
-        }
-        
-        public function testMakeRequest($url, $method = 'GET', $request = [], $headers = []) {
-            return $this->makeRequest($url, $method, $request, $headers);
-        }
-    };
-    
     $client = m::mock(Client::class);
     
     // Mock the OAuth token request
@@ -134,25 +113,13 @@ it('handles empty response body', function () {
         ->once()
         ->andReturn($apiResponse);
     
-    $instance = new $testClass($client);
+    $instance = new TestApiRequestClass($client);
     $result = $instance->testMakeRequest('/test', 'DELETE');
     
     expect($result)->toBeInstanceOf(stdClass::class);
 });
 
 it('includes custom headers in request', function () {
-    $testClass = new class {
-        use ApiRequest;
-        
-        public function __construct($client) {
-            $this->client = $client;
-        }
-        
-        public function testMakeRequest($url, $method = 'GET', $request = [], $headers = []) {
-            return $this->makeRequest($url, $method, $request, $headers);
-        }
-    };
-    
     $client = m::mock(Client::class);
     
     // Mock the OAuth token request
@@ -177,7 +144,7 @@ it('includes custom headers in request', function () {
         ->once()
         ->andReturn($apiResponse);
     
-    $instance = new $testClass($client);
+    $instance = new TestApiRequestClass($client);
     $result = $instance->testMakeRequest('/test', 'POST', [], ['Custom-Header' => 'custom-value']);
     
     expect($result->success)->toBeTrue();

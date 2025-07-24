@@ -8,11 +8,11 @@ use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use Mockery as m;
 
 beforeEach(function () {
-    config([
-        'tradingcardapi.url' => 'https://api.example.com',
-        'tradingcardapi.ssl_verify' => true,
-        'tradingcardapi.client_id' => 'test-client-id',
-        'tradingcardapi.client_secret' => 'test-client-secret',
+    $this->app['config']->set('tradingcardapi', [
+        'url' => 'https://api.example.com',
+        'ssl_verify' => true,
+        'client_id' => 'test-client-id',
+        'client_secret' => 'test-client-secret',
     ]);
     
     cache()->flush();

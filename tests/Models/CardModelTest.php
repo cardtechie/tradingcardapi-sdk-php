@@ -34,7 +34,19 @@ it('returns full number attribute', function () {
 
 it('returns oncard relationships', function () {
     $card = new Card(['id' => '123']);
-    $oncard = ['player1', 'player2'];
+    
+    // Create mock oncard objects that extend Model
+    $oncard1 = new class(['on_cardable_type' => 'players', 'on_cardable_id' => '1']) extends \CardTechie\TradingCardApiSdk\Models\Model {
+        public $on_cardable_type = 'players';
+        public $on_cardable_id = '1';
+    };
+    
+    $oncard2 = new class(['on_cardable_type' => 'players', 'on_cardable_id' => '2']) extends \CardTechie\TradingCardApiSdk\Models\Model {
+        public $on_cardable_type = 'players';
+        public $on_cardable_id = '2';
+    };
+    
+    $oncard = [$oncard1, $oncard2];
     
     $card->setRelationships(['oncard' => $oncard]);
     
