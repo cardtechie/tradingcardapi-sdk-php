@@ -23,18 +23,20 @@ This is a Laravel package providing a PHP SDK for the Trading Card API. The pack
 ## Common Commands
 
 ### Testing
+Tests should be run within the Docker container to ensure proper PHP environment:
 ```bash
-composer test                 # Run all tests using Pest
-composer test-coverage        # Run tests with coverage report
-vendor/bin/pest              # Direct Pest command
+docker-compose exec app composer test                 # Run all tests using Pest
+docker-compose exec app composer test-coverage        # Run tests with coverage report
+docker-compose exec app vendor/bin/pest              # Direct Pest command
 ```
 
 ### Code Quality
+Code quality tools should also be run within the Docker container:
 ```bash
-composer analyse             # Run PHPStan static analysis
-composer format              # Format code using Laravel Pint
-vendor/bin/phpstan analyse   # Direct PHPStan command
-vendor/bin/pint              # Direct Pint command
+docker-compose exec app composer analyse             # Run PHPStan static analysis
+docker-compose exec app composer format              # Format code using Laravel Pint
+docker-compose exec app vendor/bin/phpstan analyse   # Direct PHPStan command
+docker-compose exec app vendor/bin/pint              # Direct Pint command
 ```
 
 ### Package Development
