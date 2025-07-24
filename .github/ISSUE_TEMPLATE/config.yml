@@ -10,5 +10,5 @@ contact_links:
     url: https://github.com/cardtechie/tradingcardapi-sdk-php/security/policy
     about: Learn how to notify us for sensitive bugs
   - name: Report a bug
-    url: https://github.com/cardtechie/tradingcardapi-sdk-php/issues/new
+    url: https://github.com/cardtechie/tradingcardapi-sdk-php/issues/new/choose
     about: Report a reproducible bug
