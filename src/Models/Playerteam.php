@@ -4,7 +4,6 @@ namespace CardTechie\TradingCardApiSdk\Models;
 
 use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
 use CardTechie\TradingCardApiSdk\Models\Traits\OnCardable;
-use Exception;
 
 /**
  * Class Playerteam
@@ -87,7 +86,7 @@ class Playerteam extends Model implements Taxonomy
      */
     public static function prepare($data): ?object
     {
-        if (null === $data['player'] && null === $data['team']) {
+        if ($data['player'] === null && $data['team'] === null) {
             return null;
         }
 
@@ -113,7 +112,7 @@ class Playerteam extends Model implements Taxonomy
         }
 
         return self::lookup($playerUuid, $teamUuid);*/
-        
+
         // TODO: Implement prepare() method properly
         return null;
     }
@@ -121,8 +120,8 @@ class Playerteam extends Model implements Taxonomy
     /**
      * Look up a player/team by player and team uuids.
      *
-     * @param  string  $player The player uuid
-     * @param  string  $team   The team uuid
+     * @param  string  $player  The player uuid
+     * @param  string  $team  The team uuid
      */
     public static function lookup($player, $team): Playerteam
     {
@@ -143,10 +142,10 @@ class Playerteam extends Model implements Taxonomy
 
             return $playerteam;
         }
-        
+
         return $results->first();
         */
-        
+
         // For now, return a new instance
         return new self(['player_id' => $player, 'team_id' => $team]);
     }

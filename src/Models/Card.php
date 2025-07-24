@@ -4,7 +4,7 @@ namespace CardTechie\TradingCardApiSdk\Models;
 
 /**
  * Class Card
- * 
+ *
  * @property string $id
  */
 class Card extends Model
@@ -47,8 +47,6 @@ class Card extends Model
 
     /**
      * Retrieve array of extra attributes assigned to card
-     *
-     * @return array
      */
     public function extraAttributes(): ?array
     {
@@ -115,13 +113,13 @@ class Card extends Model
             }
         }
 
-        if (array_key_exists('team', $this->relationships) && 0 === count($this->relationships['team'])) {
+        if (array_key_exists('team', $this->relationships) && count($this->relationships['team']) === 0) {
             unset($this->relationships['team']);
         }
-        if (array_key_exists('player', $this->relationships) && 0 === count($this->relationships['player'])) {
+        if (array_key_exists('player', $this->relationships) && count($this->relationships['player']) === 0) {
             unset($this->relationships['player']);
         }
-        if (array_key_exists('playerteam', $this->relationships) && 0 === count($this->relationships['playerteam'])) {
+        if (array_key_exists('playerteam', $this->relationships) && count($this->relationships['playerteam']) === 0) {
             unset($this->relationships['playerteam']);
         }
     }

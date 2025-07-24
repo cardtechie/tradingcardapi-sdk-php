@@ -93,5 +93,4 @@ class TradingCardApi
     {
         return new Attribute($this->client);
     }
-
 }

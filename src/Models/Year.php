@@ -5,6 +5,4 @@ namespace CardTechie\TradingCardApiSdk\Models;
 /**
  * Class Year
  */
-class Year extends Model
-{
-}
+class Year extends Model {}
