@@ -1,8 +1,7 @@
 <?php
 
-use CardTechie\TradingCardApiSdk\Resources\Attribute;
 use CardTechie\TradingCardApiSdk\Models\Attribute as AttributeModel;
-use CardTechie\TradingCardApiSdk\Response;
+use CardTechie\TradingCardApiSdk\Resources\Attribute;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -16,11 +15,11 @@ beforeEach(function () {
         'client_id' => 'test-client-id',
         'client_secret' => 'test-client-secret',
     ]);
-    
+
     // Pre-populate cache with token to avoid OAuth requests
     cache()->put('tcapi_token', 'test-token', 60);
-    
-    $this->mockHandler = new MockHandler();
+
+    $this->mockHandler = new MockHandler;
     $handlerStack = HandlerStack::create($this->mockHandler);
     $this->client = new Client(['handler' => $handlerStack]);
     $this->attributeResource = new Attribute($this->client);
@@ -38,15 +37,15 @@ it('can create an attribute', function () {
                 'id' => '123',
                 'attributes' => [
                     'name' => 'Test Attribute',
-                    'value' => 'Test Value'
-                ]
-            ]
+                    'value' => 'Test Value',
+                ],
+            ],
         ]))
     );
 
     $attributes = [
         'name' => 'Test Attribute',
-        'value' => 'Test Value'
+        'value' => 'Test Value',
     ];
 
     $result = $this->attributeResource->create($attributes);
@@ -60,8 +59,8 @@ it('can create attribute without attributes', function () {
             'data' => [
                 'type' => 'attributes',
                 'id' => '123',
-                'attributes' => []
-            ]
+                'attributes' => [],
+            ],
         ]))
     );
 
@@ -78,17 +77,17 @@ it('can get a list of attributes', function () {
                     'type' => 'attributes',
                     'id' => '123',
                     'attributes' => [
-                        'name' => 'Attribute 1'
-                    ]
+                        'name' => 'Attribute 1',
+                    ],
                 ],
                 [
                     'type' => 'attributes',
                     'id' => '456',
                     'attributes' => [
-                        'name' => 'Attribute 2'
-                    ]
-                ]
-            ]
+                        'name' => 'Attribute 2',
+                    ],
+                ],
+            ],
         ]))
     );
 
@@ -106,9 +105,9 @@ it('can get an attribute by id', function () {
                 'id' => '123',
                 'attributes' => [
                     'name' => 'Test Attribute',
-                    'value' => 'Test Value'
-                ]
-            ]
+                    'value' => 'Test Value',
+                ],
+            ],
         ]))
     );
 
@@ -125,15 +124,15 @@ it('can update an attribute', function () {
                 'id' => '123',
                 'attributes' => [
                     'name' => 'Updated Attribute',
-                    'value' => 'Updated Value'
-                ]
-            ]
+                    'value' => 'Updated Value',
+                ],
+            ],
         ]))
     );
 
     $attributes = [
         'name' => 'Updated Attribute',
-        'value' => 'Updated Value'
+        'value' => 'Updated Value',
     ];
 
     $result = $this->attributeResource->update('123', $attributes);

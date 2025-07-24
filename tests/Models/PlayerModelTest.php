@@ -1,7 +1,6 @@
 <?php
 
 use CardTechie\TradingCardApiSdk\Models\Player;
-use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
 
 it('can be instantiated with attributes', function () {
     $player = new Player(['id' => '123', 'first_name' => 'John', 'last_name' => 'Doe']);
@@ -31,22 +30,22 @@ it('implements Taxonomy interface', function () {
 });
 
 it('build method returns stdClass object', function () {
-    $taxonomy = new \stdClass();
+    $taxonomy = new \stdClass;
     $data = ['test' => 'data'];
-    
+
     $result = Player::build($taxonomy, $data);
-    
+
     expect($result)->toBeInstanceOf(\stdClass::class);
 });
 
 it('getFromApi method exists and is properly defined', function () {
     // Test that the method exists and has proper structure
     expect(method_exists(Player::class, 'getFromApi'))->toBeTrue();
-    
+
     $reflection = new ReflectionMethod(Player::class, 'getFromApi');
     expect($reflection->isStatic())->toBeTrue();
     expect($reflection->isPublic())->toBeTrue();
-    
+
     // Check method parameters
     $parameters = $reflection->getParameters();
     expect($parameters)->toHaveCount(1);

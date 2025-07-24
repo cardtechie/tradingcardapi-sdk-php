@@ -1,7 +1,7 @@
 <?php
 
-use CardTechie\TradingCardApiSdk\Resources\Set;
 use CardTechie\TradingCardApiSdk\Models\Set as SetModel;
+use CardTechie\TradingCardApiSdk\Resources\Set;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -16,11 +16,11 @@ beforeEach(function () {
         'client_id' => 'test-client-id',
         'client_secret' => 'test-client-secret',
     ]);
-    
+
     // Pre-populate cache with token to avoid OAuth requests
     cache()->put('tcapi_token', 'test-token', 60);
-    
-    $this->mockHandler = new MockHandler();
+
+    $this->mockHandler = new MockHandler;
     $handlerStack = HandlerStack::create($this->mockHandler);
     $this->client = new Client(['handler' => $handlerStack]);
     $this->setResource = new Set($this->client);
@@ -38,15 +38,15 @@ it('can create a set', function () {
                 'id' => '123',
                 'attributes' => [
                     'name' => 'Test Set',
-                    'year' => '2023'
-                ]
-            ]
+                    'year' => '2023',
+                ],
+            ],
         ]))
     );
 
     $attributes = [
         'name' => 'Test Set',
-        'year' => '2023'
+        'year' => '2023',
     ];
 
     $result = $this->setResource->create($attributes);
@@ -62,9 +62,9 @@ it('can get a set by id with default includes', function () {
                 'id' => '123',
                 'attributes' => [
                     'name' => 'Test Set',
-                    'year' => '2023'
-                ]
-            ]
+                    'year' => '2023',
+                ],
+            ],
         ]))
     );
 
@@ -81,9 +81,9 @@ it('can get a set by id with custom params', function () {
                 'id' => '123',
                 'attributes' => [
                     'name' => 'Test Set',
-                    'year' => '2023'
-                ]
-            ]
+                    'year' => '2023',
+                ],
+            ],
         ]))
     );
 
@@ -101,17 +101,17 @@ it('can get a list of sets', function () {
                     'type' => 'sets',
                     'id' => '123',
                     'attributes' => [
-                        'name' => 'Set 1'
-                    ]
-                ]
+                        'name' => 'Set 1',
+                    ],
+                ],
             ],
             'meta' => [
                 'pagination' => [
                     'total' => 100,
                     'per_page' => 50,
-                    'current_page' => 1
-                ]
-            ]
+                    'current_page' => 1,
+                ],
+            ],
         ]))
     );
 
@@ -128,17 +128,17 @@ it('can get a list of sets with custom params', function () {
                     'type' => 'sets',
                     'id' => '123',
                     'attributes' => [
-                        'name' => 'Set 1'
-                    ]
-                ]
+                        'name' => 'Set 1',
+                    ],
+                ],
             ],
             'meta' => [
                 'pagination' => [
                     'total' => 100,
                     'per_page' => 25,
-                    'current_page' => 2
-                ]
-            ]
+                    'current_page' => 2,
+                ],
+            ],
         ]))
     );
 
@@ -156,15 +156,15 @@ it('can update a set', function () {
                 'id' => '123',
                 'attributes' => [
                     'name' => 'Updated Set',
-                    'year' => '2024'
-                ]
-            ]
+                    'year' => '2024',
+                ],
+            ],
         ]))
     );
 
     $attributes = [
         'name' => 'Updated Set',
-        'year' => '2024'
+        'year' => '2024',
     ];
 
     $result = $this->setResource->update('123', $attributes);
@@ -176,7 +176,7 @@ it('can add missing cards to a set', function () {
     $this->mockHandler->append(
         new GuzzleResponse(200, [], json_encode([
             'success' => true,
-            'message' => 'Missing cards added'
+            'message' => 'Missing cards added',
         ]))
     );
 
@@ -189,14 +189,14 @@ it('can add checklist to a set', function () {
     $this->mockHandler->append(
         new GuzzleResponse(200, [], json_encode([
             'success' => true,
-            'message' => 'Checklist added'
+            'message' => 'Checklist added',
         ]))
     );
 
     $request = [
         'json' => [
-            'checklist' => ['card1', 'card2']
-        ]
+            'checklist' => ['card1', 'card2'],
+        ],
     ];
 
     $result = $this->setResource->addChecklist($request, '123');
