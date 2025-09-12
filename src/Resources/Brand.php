@@ -26,9 +26,6 @@ class Brand
     /**
      * Create a brand with the passed in attributes
      *
-     * @param array $attributes
-     * @param array $relationships
-     * @return BrandModel
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function create(array $attributes = [], array $relationships = []): BrandModel
@@ -58,9 +55,6 @@ class Brand
     /**
      * Retrieve a brand by ID
      *
-     * @param string $id
-     * @param array $params
-     * @return BrandModel
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function get(string $id, array $params = []): BrandModel
@@ -80,8 +74,6 @@ class Brand
     /**
      * Retrieve a list of brands
      *
-     * @param array $params
-     * @return LengthAwarePaginator
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function list(array $params = []): LengthAwarePaginator
@@ -111,10 +103,6 @@ class Brand
     /**
      * Update a brand
      *
-     * @param string $id
-     * @param array $attributes
-     * @param array $relationships
-     * @return BrandModel
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function update(string $id, array $attributes = [], array $relationships = []): BrandModel
@@ -146,8 +134,6 @@ class Brand
     /**
      * Delete a brand
      *
-     * @param string $id
-     * @return void
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function delete(string $id): void

@@ -26,7 +26,7 @@ it('can be instantiated with attributes', function () {
 });
 
 it('can be instantiated without attributes', function () {
-    $brand = new Brand();
+    $brand = new Brand;
 
     expect($brand)->toBeInstanceOf(Brand::class);
 });
@@ -41,12 +41,12 @@ it('returns empty array when no sets', function () {
 
 it('returns sets array when sets relationship exists', function () {
     $brand = new Brand(['id' => '123', 'name' => 'Test Brand']);
-    
+
     $setData = [
         new Set(['id' => '1', 'name' => 'Set 1']),
         new Set(['id' => '2', 'name' => 'Set 2']),
     ];
-    
+
     $brand->setRelationships(['sets' => $setData]);
 
     $sets = $brand->sets();
@@ -91,11 +91,11 @@ it('converts to string correctly', function () {
 
 it('converts to string with relationships', function () {
     $brand = new Brand(['id' => '123', 'name' => 'Test Brand']);
-    
+
     $setData = [
         new Set(['id' => '1', 'name' => 'Set 1']),
     ];
-    
+
     $brand->setRelationships(['sets' => $setData]);
 
     $jsonString = (string) $brand;
