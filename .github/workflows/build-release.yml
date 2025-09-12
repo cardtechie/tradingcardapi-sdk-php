@@ -1,0 +1,288 @@
+name: "Build and Release"
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (optional, auto-generated if empty)'
+        required: false
+        type: string
+      claude_api_key:
+        description: 'Claude API key for AI-powered release notes'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  issues: read
+  pull-requests: read
+
+jobs:
+  version:
+    name: "Generate Version"
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      is_release: ${{ steps.version.outputs.is_release }}
+      should_release: ${{ steps.version.outputs.should_release }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Make build scripts executable
+        run: chmod +x build/*.sh
+
+      - name: Generate version
+        id: version
+        run: |
+          VERSION=$(bash build/version.sh)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+          # Determine if this is a release version (not dev/beta/rc)
+          IS_RELEASE=false
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            IS_RELEASE=true
+          fi
+          echo "is_release=$IS_RELEASE" >> $GITHUB_OUTPUT
+          
+          # Should we create a release?
+          SHOULD_RELEASE=false
+          if [[ "$GITHUB_REF" == "refs/heads/main" && "$IS_RELEASE" == "true" ]]; then
+            SHOULD_RELEASE=true
+          elif [[ "$GITHUB_REF" == "refs/heads/develop" && "$VERSION" =~ \.beta- ]]; then
+            SHOULD_RELEASE=true
+          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            SHOULD_RELEASE=true
+          fi
+          echo "should_release=$SHOULD_RELEASE" >> $GITHUB_OUTPUT
+          
+          echo "Generated version: $VERSION"
+          echo "Is release: $IS_RELEASE"  
+          echo "Should release: $SHOULD_RELEASE"
+
+  test:
+    name: "Run Tests"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [8.1, 8.2, 8.3]
+        laravel: [10.*, 11.*]
+        dependency-version: [prefer-stable]
+        include:
+          - laravel: 10.*
+            testbench: 8.*
+          - laravel: 11.*
+            testbench: 9.*
+        exclude:
+          - php: 8.1
+            laravel: 11.*
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
+          coverage: none
+
+      - name: Setup problem matchers
+        run: |
+          echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+          echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+      - name: Install dependencies
+        run: |
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+          composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
+
+      - name: List Installed Dependencies
+        run: composer show -D
+
+      - name: Execute tests
+        run: vendor/bin/pest
+
+      - name: Setup PHP with coverage for coverage job
+        if: matrix.php == '8.2' && matrix.laravel == '11.*'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
+          coverage: xdebug
+
+      - name: Execute tests with coverage (for PHP 8.2 only)
+        if: matrix.php == '8.2' && matrix.laravel == '11.*'
+        run: vendor/bin/pest --coverage-clover=coverage.xml
+
+      - name: Upload coverage to Codecov
+        if: matrix.php == '8.2' && matrix.laravel == '11.*'
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+
+  quality:
+    name: "Code Quality"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-interaction
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --error-format=github
+
+      - name: Check code style
+        run: vendor/bin/pint --test
+
+  changelog:
+    name: "Update Changelog"
+    runs-on: ubuntu-latest
+    needs: [version, test, quality]
+    if: needs.version.outputs.should_release == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Make build scripts executable
+        run: chmod +x build/*.sh
+
+      - name: Update changelog
+        run: |
+          VERSION="${{ needs.version.outputs.version }}"
+          echo "Updating changelog for version: $VERSION"
+          bash build/update-changelog.sh "$VERSION"
+
+      - name: Commit changelog
+        run: |
+          VERSION="${{ needs.version.outputs.version }}"
+          git add CHANGELOG.md
+          git commit -m "Update CHANGELOG.md for version $VERSION
+
+          🤖 Generated with [Claude Code](https://claude.ai/code)
+
+          Co-Authored-By: Claude <noreply@anthropic.com>" || exit 0
+
+      - name: Push changes
+        run: git push origin ${{ github.ref_name }}
+
+  release:
+    name: "Create Release"
+    runs-on: ubuntu-latest
+    needs: [version, test, quality, changelog]
+    if: needs.version.outputs.should_release == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Make build scripts executable
+        run: chmod +x build/*.sh
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          VERSION="${{ needs.version.outputs.version }}"
+          echo "Generating release notes for version: $VERSION"
+          
+          # Set Claude API key if provided
+          if [[ -n "${{ inputs.claude_api_key }}" ]]; then
+            export CLAUDE_API_KEY="${{ inputs.claude_api_key }}"
+          elif [[ -n "${{ secrets.CLAUDE_API_KEY }}" ]]; then
+            export CLAUDE_API_KEY="${{ secrets.CLAUDE_API_KEY }}"
+          fi
+          
+          # Generate release notes
+          RELEASE_NOTES=$(bash build/generate-release-notes.sh "$VERSION")
+          
+          # Save to file for GitHub release
+          echo "$RELEASE_NOTES" > release_notes.md
+          
+          # Set output for use in release creation
+          {
+            echo "notes<<EOF"
+            echo "$RELEASE_NOTES"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.version.outputs.version }}
+          release_name: ${{ needs.version.outputs.version }}
+          body: ${{ steps.release_notes.outputs.notes }}
+          draft: false
+          prerelease: ${{ needs.version.outputs.is_release != 'true' }}
+
+  packagist:
+    name: "Update Packagist"
+    runs-on: ubuntu-latest
+    needs: [version, release]
+    if: needs.version.outputs.is_release == 'true' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Update Packagist
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -d '{"repository":{"url":"https://github.com/cardtechie/tradingcardapi-sdk-php"}}' \
+            "https://packagist.org/api/update-package?username=${{ secrets.PACKAGIST_USERNAME }}&apiToken=${{ secrets.PACKAGIST_TOKEN }}" \
+            || echo "Packagist update failed or not configured"
+
+  notify:
+    name: "Notify Success" 
+    runs-on: ubuntu-latest
+    needs: [version, test, quality, release]
+    if: always() && needs.version.outputs.should_release == 'true'
+    steps:
+      - name: Release Summary
+        run: |
+          VERSION="${{ needs.version.outputs.version }}"
+          IS_RELEASE="${{ needs.version.outputs.is_release }}"
+          
+          echo "## 🚀 Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "- **Type**: $([ "$IS_RELEASE" = "true" ] && echo "Stable Release" || echo "Pre-release")" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tests**: ${{ needs.test.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Quality**: ${{ needs.quality.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release**: ${{ needs.release.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Installation" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "composer require cardtechie/tradingcardapi-sdk-php:^$VERSION" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **Links:**" >> $GITHUB_STEP_SUMMARY
+          echo "- [Release](https://github.com/cardtechie/tradingcardapi-sdk-php/releases/tag/$VERSION)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Packagist](https://packagist.org/packages/cardtechie/tradingcardapi-sdk-php)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Changelog](https://github.com/cardtechie/tradingcardapi-sdk-php/blob/main/CHANGELOG.md)" >> $GITHUB_STEP_SUMMARY
