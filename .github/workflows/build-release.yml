@@ -105,13 +105,18 @@ jobs:
         run: composer show -D
 
       - name: Execute tests
+        run: vendor/bin/pest
+
+      - name: Execute tests with coverage (for PHP 8.2 only)
+        if: matrix.php == '8.2' && matrix.laravel == '10.*' && matrix.dependency-version == 'prefer-stable'
         run: vendor/bin/pest --coverage-clover=coverage.xml
 
       - name: Upload coverage to Codecov
+        if: matrix.php == '8.2' && matrix.laravel == '10.*' && matrix.dependency-version == 'prefer-stable'
         uses: codecov/codecov-action@v3
         with:
           file: ./coverage.xml
-          fail_ci_if_error: true
+          fail_ci_if_error: false
 
   quality:
     name: "Code Quality"
