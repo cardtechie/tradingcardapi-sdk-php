@@ -200,7 +200,7 @@ The SDK uses intelligent, branch-aware semantic versioning:
 - **Production releases** (`1.2.3`) - Created from `main` branch
 - **Beta releases** (`1.3.0.beta-5`) - Created from `develop` branch  
 - **Release candidates** (`1.3.0.rc-2`) - Created from `release/*` branches
-- **Development versions** (`1.2.3-feature.name.4`) - Feature branches
+- **Development versions** (`1.2.3-alpha.4`) - Feature branches
 
 ### Development Commands
 

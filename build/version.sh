@@ -90,10 +90,8 @@ case "$branch" in
         version="$major.$minor.$((patch + 1))-hotfix.${clean_name}.${commits_since_tag}"
         ;;
     feature/*|bug/*|bugfix/*)
-        # Feature branches: development version with branch name
-        branch_name=${branch#*/}
-        clean_name=$(echo "$branch_name" | sed 's/[^a-zA-Z0-9]//g')
-        version="$major.$minor.$patch-${clean_name}.${commits_since_tag}"
+        # Feature branches: development version with alpha
+        version="$major.$minor.$patch-alpha.${commits_since_tag}"
         ;;
     *)
         # Unknown branch type

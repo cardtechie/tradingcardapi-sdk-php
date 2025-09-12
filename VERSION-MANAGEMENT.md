@@ -33,7 +33,7 @@ The SDK follows [Semantic Versioning 2.0.0](https://semver.org/):
 - **MAJOR.MINOR.PATCH** - Stable releases (e.g., `1.2.3`)
 - **MAJOR.MINOR.PATCH.beta-N** - Beta releases (e.g., `1.3.0.beta-5`)
 - **MAJOR.MINOR.PATCH.rc-N** - Release candidates (e.g., `1.3.0.rc-2`)
-- **MAJOR.MINOR.PATCH-feature.N** - Feature branches (e.g., `1.2.3-auth-improvements.4`)
+- **MAJOR.MINOR.PATCH-alpha.N** - Feature branches (e.g., `1.2.3-alpha.4`)
 
 ### Branch-Based Versioning
 
@@ -43,7 +43,7 @@ The SDK follows [Semantic Versioning 2.0.0](https://semver.org/):
 | `develop` | `X.Y+1.0.beta-N` | `1.3.0.beta-12` | Pre-release testing |
 | `release/X.Y.Z` | `X.Y.Z.rc-N` | `1.3.0.rc-2` | Release candidates |
 | `hotfix/*` | `X.Y.Z+1-hotfix.name.N` | `1.2.4-security-fix.3` | Critical fixes |
-| `feature/*` | `X.Y.Z-feature.name.N` | `1.2.3-new-endpoint.5` | Feature development |
+| `feature/*` | `X.Y.Z-alpha.N` | `1.2.3-alpha.5` | Feature development |
 
 ## Build Scripts
 
@@ -115,7 +115,7 @@ Creates comprehensive GitHub release notes with AI-powered summaries.
    ```bash
    git checkout -b feature/new-endpoint
    # Development work...
-   make version  # Shows: 1.2.3-new-endpoint.5
+   make version  # Shows: 1.2.3-alpha.5
    ```
 
 2. **Merge to Develop**
