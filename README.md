@@ -227,7 +227,7 @@ make release-notes-preview
 4. **Production Release**: Stable releases are merged to `main`
 5. **Automation**: GitHub Actions handles versioning, changelog updates, and Packagist publishing
 
-See [VERSION_MANAGEMENT.md](VERSION_MANAGEMENT.md) for complete release process documentation.
+See [VERSION-MANAGEMENT.md](VERSION-MANAGEMENT.md) for complete release process documentation.
 
 ## 📄 Changelog
 
