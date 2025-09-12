@@ -96,6 +96,7 @@ The SDK provides access to the following Trading Card API resources:
 | **Players** | Player information | `get()`, `getList()`, `create()` |
 | **Teams** | Team data | `get()`, `getList()`, `create()` |
 | **Genres** | Card categories/types | `get()`, `getList()` |
+| **Brands** | Trading card brands | `get()`, `list()`, `create()`, `update()`, `delete()` |
 | **Attributes** | Card attributes | `get()`, `getList()` |
 
 ## 🔧 Configuration

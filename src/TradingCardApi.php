@@ -3,6 +3,7 @@
 namespace CardTechie\TradingCardApiSdk;
 
 use CardTechie\TradingCardApiSdk\Resources\Attribute;
+use CardTechie\TradingCardApiSdk\Resources\Brand;
 use CardTechie\TradingCardApiSdk\Resources\Card;
 use CardTechie\TradingCardApiSdk\Resources\Genre;
 use CardTechie\TradingCardApiSdk\Resources\Player;
@@ -92,5 +93,13 @@ class TradingCardApi
     public function attribute(): Attribute
     {
         return new Attribute($this->client);
+    }
+
+    /**
+     * Retrieve the brand resource.
+     */
+    public function brand(): Brand
+    {
+        return new Brand($this->client);
     }
 }
