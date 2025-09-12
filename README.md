@@ -143,12 +143,17 @@ make check
 ### Available Commands
 
 ```bash
-make test           # Run test suite
-make analyse        # Run PHPStan static analysis
-make format         # Format code with Laravel Pint
-make check          # Run all quality checks
-make quality        # Run comprehensive quality checks with coverage
-make ci             # Run CI pipeline locally
+make test              # Run test suite
+make analyse           # Run PHPStan static analysis
+make format            # Format code with Laravel Pint
+make check             # Run all quality checks
+make quality           # Run comprehensive quality checks with coverage
+make ci                # Run CI pipeline locally
+
+# Release management commands
+make version           # Show current version
+make changelog-update  # Update changelog for current version
+make release-notes-preview  # Generate release notes preview
 ```
 
 ### Code Quality Standards
@@ -183,6 +188,46 @@ Please use the [GitHub Issues](https://github.com/cardtechie/tradingcardapi-sdk-
 ## 🔒 Security
 
 Please review our [Security Policy](../../security/policy) for reporting security vulnerabilities.
+
+## 🚀 Release Process
+
+This project uses a sophisticated, automated release management system adapted from the main Trading Card API repository.
+
+### Version Management
+
+The SDK uses intelligent, branch-aware semantic versioning:
+
+- **Production releases** (`1.2.3`) - Created from `main` branch
+- **Beta releases** (`1.3.0.beta-5`) - Created from `develop` branch  
+- **Release candidates** (`1.3.0.rc-2`) - Created from `release/*` branches
+- **Development versions** (`1.2.3-feature.name.4`) - Feature branches
+
+### Development Commands
+
+```bash
+# Check current version
+make version
+
+# Preview version for different branches
+make version-preview --branch=main
+make version-preview --branch=develop
+
+# Update changelog for current version
+make changelog-update
+
+# Generate release notes preview
+make release-notes-preview
+```
+
+### Automated Release Process
+
+1. **Development**: Features are developed on feature branches
+2. **Integration**: Changes are merged to `develop` for testing
+3. **Release Preparation**: Release branches are created for final testing
+4. **Production Release**: Stable releases are merged to `main`
+5. **Automation**: GitHub Actions handles versioning, changelog updates, and Packagist publishing
+
+See [VERSION_MANAGEMENT.md](VERSION_MANAGEMENT.md) for complete release process documentation.
 
 ## 📄 Changelog
 
