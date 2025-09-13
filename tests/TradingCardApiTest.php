@@ -9,6 +9,7 @@ use CardTechie\TradingCardApiSdk\Resources\Player;
 use CardTechie\TradingCardApiSdk\Resources\Playerteam;
 use CardTechie\TradingCardApiSdk\Resources\Set;
 use CardTechie\TradingCardApiSdk\Resources\Team;
+use CardTechie\TradingCardApiSdk\Resources\Year;
 use CardTechie\TradingCardApiSdk\TradingCardApi;
 use GuzzleHttp\Client;
 
@@ -79,6 +80,12 @@ it('returns manufacturer resource', function () {
     $api = new TradingCardApi;
     $manufacturer = $api->manufacturer();
     expect($manufacturer)->toBeInstanceOf(Manufacturer::class);
+});
+
+it('returns year resource', function () {
+    $api = new TradingCardApi;
+    $year = $api->year();
+    expect($year)->toBeInstanceOf(Year::class);
 });
 
 it('creates guzzle client with correct configuration', function () {
