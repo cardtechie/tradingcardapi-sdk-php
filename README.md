@@ -92,7 +92,7 @@ The SDK provides access to the following Trading Card API resources:
 | Resource | Description | Methods |
 |----------|-------------|---------|
 | **Cards** | Individual trading cards | `get()`, `create()`, `update()`, `delete()` |
-| **Sets** | Card sets and collections | `get()`, `getList()` |
+| **Sets** | Card sets and collections | `get()`, `list()`, `create()`, `update()`, `delete()`, `checklist($id)`, `addMissingCards($id)`, `addChecklist($request, $id)` |
 | **Players** | Player information | `get()`, `getList()`, `create()` |
 | **Teams** | Team data | `get()`, `getList()`, `create()` |
 | **Genres** | Card categories/types | `get()`, `list()`, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |

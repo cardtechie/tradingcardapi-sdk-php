@@ -120,6 +120,19 @@ class Set
     }
 
     /**
+     * Get the checklist for a set
+     *
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function checklist(string $id): object
+    {
+        $url = sprintf('/v1/sets/%s/checklist', $id);
+
+        return $this->makeRequest($url, 'GET');
+    }
+
+    /**
      * Add the missing cards (as empty cards) to the specified set
      *
      *
@@ -127,7 +140,7 @@ class Set
      */
     public function addMissingCards(string $id): object
     {
-        $url = sprintf('/sets/%s/checklist', $id);
+        $url = sprintf('/v1/sets/%s/checklist', $id);
 
         return $this->makeRequest($url, 'POST');
     }
@@ -140,7 +153,7 @@ class Set
      */
     public function addChecklist(array $request, string $id): object
     {
-        $url = sprintf('/sets/%s/checklist', $id);
+        $url = sprintf('/v1/sets/%s/checklist', $id);
 
         return $this->makeRequest($url, 'POST', $request);
     }
