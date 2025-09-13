@@ -172,6 +172,21 @@ it('can update a set', function () {
     expect($result)->toBeInstanceOf(SetModel::class);
 });
 
+it('can get checklist for a set', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'checklist' => ['card1', 'card2', 'card3'],
+                'missing' => ['card4', 'card5'],
+            ],
+        ]))
+    );
+
+    $result = $this->setResource->checklist('123');
+
+    expect($result)->toBeObject();
+});
+
 it('can add missing cards to a set', function () {
     $this->mockHandler->append(
         new GuzzleResponse(200, [], json_encode([
