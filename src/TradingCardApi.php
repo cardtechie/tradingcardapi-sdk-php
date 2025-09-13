@@ -7,6 +7,7 @@ use CardTechie\TradingCardApiSdk\Resources\Brand;
 use CardTechie\TradingCardApiSdk\Resources\Card;
 use CardTechie\TradingCardApiSdk\Resources\Genre;
 use CardTechie\TradingCardApiSdk\Resources\Manufacturer;
+use CardTechie\TradingCardApiSdk\Resources\ObjectAttribute;
 use CardTechie\TradingCardApiSdk\Resources\Player;
 use CardTechie\TradingCardApiSdk\Resources\Playerteam;
 use CardTechie\TradingCardApiSdk\Resources\Set;
@@ -119,5 +120,13 @@ class TradingCardApi
     public function year(): Year
     {
         return new Year($this->client);
+    }
+
+    /**
+     * Retrieve the object attribute resource.
+     */
+    public function objectAttribute(): ObjectAttribute
+    {
+        return new ObjectAttribute($this->client);
     }
 }
