@@ -11,6 +11,7 @@ use CardTechie\TradingCardApiSdk\Resources\ObjectAttribute;
 use CardTechie\TradingCardApiSdk\Resources\Player;
 use CardTechie\TradingCardApiSdk\Resources\Playerteam;
 use CardTechie\TradingCardApiSdk\Resources\Set;
+use CardTechie\TradingCardApiSdk\Resources\Stats;
 use CardTechie\TradingCardApiSdk\Resources\Team;
 use CardTechie\TradingCardApiSdk\Resources\Year;
 use GuzzleHttp\Client;
@@ -128,5 +129,13 @@ class TradingCardApi
     public function objectAttribute(): ObjectAttribute
     {
         return new ObjectAttribute($this->client);
+    }
+
+    /**
+     * Retrieve the stats resource.
+     */
+    public function stats(): Stats
+    {
+        return new Stats($this->client);
     }
 }
