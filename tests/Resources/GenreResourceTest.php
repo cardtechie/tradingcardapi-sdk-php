@@ -57,3 +57,78 @@ it('can get a list of genres', function () {
     expect($result)->toBeInstanceOf(\Illuminate\Support\Collection::class);
     expect($result->count())->toBe(2);
 });
+
+it('can get a list of deleted genres', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                [
+                    'type' => 'genres',
+                    'id' => '789',
+                    'attributes' => [
+                        'name' => 'Basketball',
+                        'slug' => 'basketball',
+                        'deleted_at' => '2024-01-15T10:30:00Z',
+                    ],
+                ],
+                [
+                    'type' => 'genres',
+                    'id' => '101112',
+                    'attributes' => [
+                        'name' => 'Soccer',
+                        'slug' => 'soccer',
+                        'deleted_at' => '2024-01-16T14:20:00Z',
+                    ],
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->genreResource->deletedIndex();
+
+    expect($result)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($result->count())->toBe(2);
+    expect($result[0]->name)->toBe('Basketball');
+    expect($result[0]->deleted_at)->toBe('2024-01-15T10:30:00Z');
+    expect($result[1]->name)->toBe('Soccer');
+    expect($result[1]->deleted_at)->toBe('2024-01-16T14:20:00Z');
+});
+
+it('can get a specific deleted genre by id', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'genres',
+                'id' => '789',
+                'attributes' => [
+                    'name' => 'Basketball',
+                    'slug' => 'basketball',
+                    'description' => 'A deleted basketball genre',
+                    'deleted_at' => '2024-01-15T10:30:00Z',
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->genreResource->deleted('789');
+
+    expect($result)->toBeInstanceOf(\CardTechie\TradingCardApiSdk\Models\Genre::class);
+    expect($result->id)->toBe('789');
+    expect($result->name)->toBe('Basketball');
+    expect($result->slug)->toBe('basketball');
+    expect($result->description)->toBe('A deleted basketball genre');
+    expect($result->deleted_at)->toBe('2024-01-15T10:30:00Z');
+});
+
+it('can handle empty deleted genres list', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [],
+        ]))
+    );
+
+    $result = $this->genreResource->deletedIndex();
+
+    expect($result)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($result->count())->toBe(0);
+});
