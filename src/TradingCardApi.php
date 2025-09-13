@@ -11,6 +11,7 @@ use CardTechie\TradingCardApiSdk\Resources\Player;
 use CardTechie\TradingCardApiSdk\Resources\Playerteam;
 use CardTechie\TradingCardApiSdk\Resources\Set;
 use CardTechie\TradingCardApiSdk\Resources\Team;
+use CardTechie\TradingCardApiSdk\Resources\Year;
 use GuzzleHttp\Client;
 
 /**
@@ -110,5 +111,13 @@ class TradingCardApi
     public function manufacturer(): Manufacturer
     {
         return new Manufacturer($this->client);
+    }
+
+    /**
+     * Retrieve the year resource.
+     */
+    public function year(): Year
+    {
+        return new Year($this->client);
     }
 }

@@ -98,6 +98,7 @@ The SDK provides access to the following Trading Card API resources:
 | **Genres** | Card categories/types | `get()`, `getList()` |
 | **Brands** | Trading card brands | `get()`, `list()`, `create()`, `update()`, `delete()` |
 | **Manufacturers** | Trading card manufacturers | `get()`, `list()`, `create()`, `update()`, `delete()` |
+| **Years** | Trading card years | `get()`, `list()`, `create()`, `update()`, `delete()` |
 | **Attributes** | Card attributes | `get()`, `getList()` |
 
 ## 🔧 Configuration
