@@ -66,7 +66,7 @@ it('can get list of players', function () {
         ->andReturn($tokenResponse);
 
     $client->shouldReceive('request')
-        ->with('GET', '/players?', m::type('array'))
+        ->with('GET', '/v1/players?', m::type('array'))
         ->once()
         ->andReturn($playersResponse);
 
@@ -104,7 +104,7 @@ it('can create a player', function () {
         ->andReturn($tokenResponse);
 
     $client->shouldReceive('request')
-        ->with('POST', '/players', m::type('array'))
+        ->with('POST', '/v1/players', m::type('array'))
         ->once()
         ->andReturn($playerResponse);
 
