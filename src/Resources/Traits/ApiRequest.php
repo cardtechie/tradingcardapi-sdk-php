@@ -2,6 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk\Resources\Traits;
 
+use CardTechie\TradingCardApiSdk\Services\ResponseValidator;
 use Psr\Http\Message\ResponseInterface;
 use stdClass;
 
@@ -23,6 +24,13 @@ trait ApiRequest
      * @var \GuzzleHttp\Client
      */
     private $client;
+
+    /**
+     * The response validator instance
+     *
+     * @var ResponseValidator|null
+     */
+    private $validator;
 
     /**
      * Makes a request to an API endpoint or webpage and returns its response
@@ -55,7 +63,14 @@ trait ApiRequest
             return new stdClass;
         }
 
-        return (object) json_decode($body);
+        $jsonData = json_decode($body, true);
+
+        // Validate response if validation is enabled
+        if ($this->shouldValidate()) {
+            $this->validateResponse($url, $jsonData);
+        }
+
+        return json_decode($body);
     }
 
     /**
@@ -110,5 +125,75 @@ trait ApiRequest
     private function doRequest(string $url, string $method = 'GET', array $request = []): ResponseInterface
     {
         return $this->client->request($method, $url, $request);
+    }
+
+    /**
+     * Check if response validation should be performed
+     */
+    private function shouldValidate(): bool
+    {
+        return config('tradingcardapi.validation.enabled', true);
+    }
+
+    /**
+     * Validate API response against expected schema
+     *
+     * @param  string  $url  The API endpoint URL
+     * @param  array  $data  The response data
+     */
+    private function validateResponse(string $url, array $data): void
+    {
+        $resourceType = $this->extractResourceType($url);
+
+        // Only validate if we can determine the resource type
+        if ($resourceType) {
+            if (! $this->validator) {
+                $this->validator = new ResponseValidator;
+            }
+
+            $this->validator->validate($resourceType, $data, $url);
+        }
+    }
+
+    /**
+     * Extract resource type from API URL
+     */
+    private function extractResourceType(string $url): ?string
+    {
+        // Remove query parameters
+        $path = parse_url($url, PHP_URL_PATH) ?? $url;
+
+        // Match common API patterns
+        if (preg_match('#/v\d+/([^/]+)#', $path, $matches)) {
+            $resource = $matches[1];
+
+            // Normalize resource names
+            $normalizedResources = [
+                'cards' => 'card',
+                'players' => 'player',
+                'teams' => 'team',
+                'sets' => 'set',
+                'genres' => 'genre',
+                'brands' => 'brand',
+                'manufacturers' => 'manufacturer',
+                'years' => 'year',
+                'attributes' => 'attribute',
+                'object-attributes' => 'objectattribute',
+                'playerteams' => 'playerteam',
+                'stats' => 'stats',
+            ];
+
+            return $normalizedResources[$resource] ?? $resource;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the response validator instance
+     */
+    public function getValidator(): ?ResponseValidator
+    {
+        return $this->validator;
     }
 }
