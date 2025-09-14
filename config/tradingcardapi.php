@@ -45,4 +45,38 @@ return [
     | code repo.
     */
     'client_secret' => env('TRADINGCARDAPI_CLIENT_SECRET', ''),
+
+    /*
+    |--------------------------------------------------------------------------
+    | API Response Validation
+    |--------------------------------------------------------------------------
+    |
+    | Configure how API responses are validated against expected schemas.
+    | This helps catch API changes early and provides better debugging.
+    */
+    'validation' => [
+        /*
+        | Enable or disable response validation entirely.
+        | Set to false in production if performance is critical.
+        */
+        'enabled' => (bool) env('TRADINGCARDAPI_VALIDATION', true),
+
+        /*
+        | Strict mode throws exceptions on validation failures.
+        | In lenient mode, validation errors are only logged.
+        */
+        'strict_mode' => (bool) env('TRADINGCARDAPI_STRICT_VALIDATION', false),
+
+        /*
+        | Log validation errors for debugging and monitoring.
+        | Useful for detecting API changes in production.
+        */
+        'log_validation_errors' => (bool) env('TRADINGCARDAPI_LOG_VALIDATION', true),
+
+        /*
+        | Cache parsed schemas for better performance.
+        | Disable in development if you're modifying schemas frequently.
+        */
+        'cache_schemas' => (bool) env('TRADINGCARDAPI_CACHE_SCHEMAS', true),
+    ],
 ];
