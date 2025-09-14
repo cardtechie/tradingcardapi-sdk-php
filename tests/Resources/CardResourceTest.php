@@ -55,7 +55,7 @@ it('can create a card with attributes', function () {
         ->andReturn($tokenResponse);
 
     $client->shouldReceive('request')
-        ->with('POST', '/cards', m::type('array'))
+        ->with('POST', '/v1/cards', m::type('array'))
         ->once()
         ->andReturn($cardResponse);
 
@@ -92,7 +92,7 @@ it('can get a card by id', function () {
         ->andReturn($tokenResponse);
 
     $client->shouldReceive('request')
-        ->with('GET', '/cards/123?include=', m::type('array'))
+        ->with('GET', '/v1/cards/123?include=', m::type('array'))
         ->once()
         ->andReturn($cardResponse);
 
@@ -129,7 +129,7 @@ it('can update a card', function () {
         ->andReturn($tokenResponse);
 
     $client->shouldReceive('request')
-        ->with('PUT', '/cards/123', m::type('array'))
+        ->with('PUT', '/v1/cards/123', m::type('array'))
         ->once()
         ->andReturn($cardResponse);
 
@@ -157,7 +157,7 @@ it('can delete a card', function () {
         ->andReturn($tokenResponse);
 
     $client->shouldReceive('request')
-        ->with('DELETE', '/cards/123', m::type('array'))
+        ->with('DELETE', '/v1/cards/123', m::type('array'))
         ->once()
         ->andReturn($deleteResponse);
 

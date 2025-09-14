@@ -46,7 +46,7 @@ class Card
             $request['json']['data']['relationships'] = $relationships;
         }
 
-        $response = $this->makeRequest('/cards', 'POST', $request);
+        $response = $this->makeRequest('/v1/cards', 'POST', $request);
         $formattedResponse = new Response(json_encode($response));
 
         return $formattedResponse->mainObject;
@@ -65,7 +65,7 @@ class Card
         ];
         $params = array_merge($defaultParams, $params);
 
-        $url = sprintf('/cards/%s?%s', $id, http_build_query($params));
+        $url = sprintf('/v1/cards/%s?%s', $id, http_build_query($params));
         $response = $this->makeRequest($url);
         $formattedResponse = new Response(json_encode($response));
 
@@ -80,7 +80,7 @@ class Card
      */
     public function update(string $id, array $attributes = [], array $relationships = []): CardModel
     {
-        $url = sprintf('/cards/%s', $id);
+        $url = sprintf('/v1/cards/%s', $id);
         $request = [
             'json' => [
                 'data' => [
@@ -112,7 +112,7 @@ class Card
      */
     public function delete(string $id): void
     {
-        $url = '/cards/'.$id;
+        $url = '/v1/cards/'.$id;
         $this->makeRequest($url, 'DELETE');
     }
 }
