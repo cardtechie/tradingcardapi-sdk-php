@@ -20,16 +20,37 @@ class Team extends Model implements Taxonomy
         return $this->location.' '.$this->mascot;
     }
 
-    // phpcs:disable
     /**
      * Build the taxonomy object
      */
     public static function build(object $taxonomy, array $data): object
     {
-        // TODO: Implement build() method.
-        return new \stdClass;
+        // Find the matching team in the data array
+        if (isset($data['team']) && is_array($data['team'])) {
+            foreach ($data['team'] as $teamData) {
+                if (isset($teamData->id) && $teamData->id === $taxonomy->id) {
+                    // Set the team data as a relationship on the taxonomy object
+                    if (! isset($taxonomy->relationships)) {
+                        $taxonomy->relationships = [];
+                    }
+                    $taxonomy->relationships['team'] = $teamData;
+                    break;
+                }
+            }
+        }
+
+        // If we have team data directly, use it
+        if (isset($data['team']) && is_object($data['team']) && isset($data['team']->id)) {
+            if ($data['team']->id === $taxonomy->id) {
+                if (! isset($taxonomy->relationships)) {
+                    $taxonomy->relationships = [];
+                }
+                $taxonomy->relationships['team'] = $data['team'];
+            }
+        }
+
+        return $taxonomy;
     }
-    // phpcs:enable
 
     /**
      * Get the object from the API

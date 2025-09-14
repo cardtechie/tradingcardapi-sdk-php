@@ -88,12 +88,28 @@ it('prepare method returns null when both player and team are null', function ()
     expect($result)->toBeNull();
 });
 
-it('prepare method returns null for other cases (TODO implementation)', function () {
-    $data = ['player' => 'Test Player', 'team' => 'Test Team'];
+it('prepare method returns null when both player and team are empty strings', function () {
+    $data = ['player' => '', 'team' => ''];
 
     $result = Playerteam::prepare($data);
 
     expect($result)->toBeNull();
+});
+
+it('prepare method throws exception for invalid player UUID', function () {
+    $data = ['player' => '550e8400-e29b-41d4-a716-446655440000', 'team' => 'Test Team'];
+
+    expect(function () use ($data) {
+        Playerteam::prepare($data);
+    })->toThrow(\InvalidArgumentException::class);
+});
+
+it('prepare method throws exception for invalid team UUID', function () {
+    $data = ['player' => 'Test Player', 'team' => '550e8400-e29b-41d4-a716-446655440000'];
+
+    expect(function () use ($data) {
+        Playerteam::prepare($data);
+    })->toThrow(\InvalidArgumentException::class);
 });
 
 it('lookup method returns new Playerteam instance', function () {
