@@ -1,5 +1,6 @@
 {
     "name": "cardtechie/tradingcardapi-sdk-php",
+    "version": "0.1.0",
     "description": "This is my package trading-card-api-sdk-php",
     "keywords": [
         "cardtechie",
