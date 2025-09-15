@@ -59,7 +59,7 @@ trait ApiRequest
         $defaultHeaders = [
             'Accept' => 'application/json',
             'Authorization' => 'Bearer '.$this->token,
-            'X-TCAPI-Ignore-Status' => (string) env('TRADINGCARDAPI_IGNORE_STATUS', 0),
+            'X-TCAPI-Ignore-Status' => (string) config('tradingcardapi.ignore_status', 0),
         ];
 
         $theRequest = array_merge($defaultRequest, $request);

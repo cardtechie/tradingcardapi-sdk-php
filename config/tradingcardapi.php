@@ -79,4 +79,15 @@ return [
         */
         'cache_schemas' => (bool) env('TRADINGCARDAPI_CACHE_SCHEMAS', true),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Debug Options
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for debugging and development features.
+    |
+    */
+
+    'ignore_status' => (bool) env('TRADINGCARDAPI_IGNORE_STATUS', 0),
 ];

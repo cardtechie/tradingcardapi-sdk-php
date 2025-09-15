@@ -2,20 +2,8 @@ name: "Build and Release"
 
 on:
   push:
-    branches: [ main, develop ]
-    tags: [ 'v*' ]
-  pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release (optional, auto-generated if empty)'
-        required: false
-        type: string
-      claude_api_key:
-        description: 'Claude API key for AI-powered release notes'
-        required: false
-        type: string
 
 permissions:
   contents: write
@@ -32,7 +20,7 @@ jobs:
       should_release: ${{ steps.version.outputs.should_release }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -69,100 +57,16 @@ jobs:
 
   test:
     name: "Run Tests"
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        php: [8.1, 8.2, 8.3]
-        laravel: [9.*, 10.*, 11.*]
-        dependency-version: [prefer-stable]
-        include:
-          - laravel: 9.*
-            testbench: 7.*
-          - laravel: 10.*
-            testbench: 8.*
-          - laravel: 11.*
-            testbench: 9.*
-        exclude:
-          - php: 8.1
-            laravel: 11.*
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
-          coverage: none
-
-      - name: Setup problem matchers
-        run: |
-          echo "::add-matcher::${{ runner.tool_cache }}/php.json"
-          echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
-
-      - name: Install dependencies
-        run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
-          composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
-
-      - name: List Installed Dependencies
-        run: composer show -D
-
-      - name: Execute tests
-        run: vendor/bin/pest
-
-      - name: Setup PHP with coverage for coverage job
-        if: matrix.php == '8.2' && matrix.laravel == '10.*'
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
-          coverage: xdebug
-
-      - name: Execute tests with coverage (for PHP 8.2 only)
-        if: matrix.php == '8.2' && matrix.laravel == '10.*'
-        run: vendor/bin/pest --coverage-clover=coverage.xml
-
-      - name: Upload coverage to Codecov
-        if: matrix.php == '8.2' && matrix.laravel == '10.*'
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.xml
-          fail_ci_if_error: false
-
-  quality:
-    name: "Code Quality"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv
-
-      - name: Install dependencies
-        run: composer update --prefer-dist --no-interaction
-
-      - name: Run PHPStan
-        run: vendor/bin/phpstan analyse --error-format=github
-
-      - name: Check code style
-        run: vendor/bin/pint --test
+    uses: ./.github/workflows/run-tests.yml
 
   changelog:
     name: "Update Changelog"
     runs-on: ubuntu-latest
-    needs: [version, test, quality]
-    if: needs.version.outputs.should_release == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    needs: [version, test]
+    if: needs.version.outputs.should_release == 'true' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -197,11 +101,11 @@ jobs:
   release:
     name: "Create Release"
     runs-on: ubuntu-latest
-    needs: [version, test, quality, changelog]
+    needs: [version, test, changelog]
     if: needs.version.outputs.should_release == 'true'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -262,7 +166,7 @@ jobs:
   notify:
     name: "Notify Success" 
     runs-on: ubuntu-latest
-    needs: [version, test, quality, release]
+    needs: [version, test, release]
     if: always() && needs.version.outputs.should_release == 'true'
     steps:
       - name: Release Summary
@@ -276,7 +180,6 @@ jobs:
           echo "- **Type**: $([ "$IS_RELEASE" = "true" ] && echo "Stable Release" || echo "Pre-release")" >> $GITHUB_STEP_SUMMARY
           echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Tests**: ${{ needs.test.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Quality**: ${{ needs.quality.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Release**: ${{ needs.release.result }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📦 Installation" >> $GITHUB_STEP_SUMMARY

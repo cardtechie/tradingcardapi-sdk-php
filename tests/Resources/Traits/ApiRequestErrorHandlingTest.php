@@ -74,13 +74,6 @@ beforeEach(function () {
         }
     }
 
-    // Mock env function for testing
-    if (! function_exists('env')) {
-        function env($key, $default = null)
-        {
-            return $default;
-        }
-    }
 });
 
 it('throws authentication exception on 401 response', function () {
