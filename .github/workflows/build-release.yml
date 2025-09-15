@@ -122,7 +122,7 @@ jobs:
         if: matrix.php == '8.2' && matrix.laravel == '10.*'
         uses: codecov/codecov-action@v5
         with:
-          file: ./coverage.xml
+          files: ./coverage.xml
           fail_ci_if_error: false
 
   quality:
