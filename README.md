@@ -14,13 +14,14 @@ A modern PHP SDK for integrating with the Trading Card API. This Laravel package
 - 🧪 **Well Tested** - Comprehensive test suite with 80%+ coverage
 - 📦 **Easy Installation** - Simple Composer installation and configuration
 - 🔄 **OAuth2 Authentication** - Automatic token management and renewal
+- 🚨 **Enhanced Error Handling** - Specific exception classes for different error types
 - 📖 **Rich Documentation** - Clear examples and comprehensive API coverage
 - ⚡ **High Performance** - Efficient HTTP client with connection pooling
 
 ## 📋 Requirements
 
 - PHP 8.1 or higher
-- Laravel 9.0 or higher
+- Laravel 10.0 or higher
 - GuzzleHTTP 7.5 or higher
 
 ## 🚀 Installation
@@ -74,6 +75,34 @@ $team = tradingcardapi()->team()->create([
     'name' => 'New Team',
     'location' => 'City Name'
 ]);
+```
+
+### Error Handling
+
+The SDK provides comprehensive error handling with specific exception classes:
+
+```php
+use CardTechie\TradingCardApiSdk\Exceptions\{
+    CardNotFoundException,
+    ValidationException,
+    RateLimitException,
+    AuthenticationException
+};
+
+try {
+    $card = TradingCardApiSdk::card()->get('invalid-id');
+} catch (CardNotFoundException $e) {
+    // Handle missing card
+    echo "Card not found: " . $e->getMessage();
+} catch (ValidationException $e) {
+    // Handle validation errors
+    foreach ($e->getValidationErrors() as $field => $errors) {
+        echo "Field $field: " . implode(', ', $errors);
+    }
+} catch (RateLimitException $e) {
+    // Handle rate limiting
+    echo "Rate limited. Retry after: " . $e->getRetryAfter() . " seconds";
+}
 ```
 
 ### Direct Class Usage
@@ -170,9 +199,12 @@ This project maintains high code quality standards:
 - ✅ **80%+ Test Coverage** - Comprehensive test suite using Pest
 - ✅ **Automated CI/CD** - Quality checks on all PRs
 
-## 📖 API Documentation
+## 📖 Documentation
 
-For complete API documentation, visit the [Trading Card API Documentation](https://docs.tradingcardapi.com).
+- **[Error Handling Guide](docs/ERROR-HANDLING.md)** - Comprehensive guide to exception handling
+- **[Response Validation](docs/VALIDATION.md)** - Response validation and schema handling  
+- **[Version Management](docs/VERSION-MANAGEMENT.md)** - Release process and versioning
+- **[Trading Card API Documentation](https://docs.tradingcardapi.com)** - Complete API reference
 
 ## 🤝 Contributing
 
@@ -232,7 +264,7 @@ make release-notes-preview
 4. **Production Release**: Stable releases are merged to `main`
 5. **Automation**: GitHub Actions handles versioning, changelog updates, and Packagist publishing
 
-See [VERSION-MANAGEMENT.md](VERSION-MANAGEMENT.md) for complete release process documentation.
+See [docs/VERSION-MANAGEMENT.md](docs/VERSION-MANAGEMENT.md) for complete release process documentation.
 
 ## 📄 Changelog
 
