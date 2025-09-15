@@ -3,7 +3,7 @@
 use CardTechie\TradingCardApiSdk\Exceptions\ResourceNotFoundException;
 
 it('creates resource not found exception with default values', function () {
-    $exception = new ResourceNotFoundException();
+    $exception = new ResourceNotFoundException;
 
     expect($exception->getMessage())->toBe('Resource not found');
     expect($exception->getCode())->toBe(404);
@@ -43,7 +43,7 @@ it('creates endpoint not found exception', function () {
 });
 
 it('has correct HTTP status code', function () {
-    $exception = new ResourceNotFoundException();
+    $exception = new ResourceNotFoundException;
     expect($exception->isClientError())->toBeTrue();
     expect($exception->isServerError())->toBeFalse();
 });

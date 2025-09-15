@@ -215,7 +215,7 @@ it('defaults to generic message when none provided', function () {
 it('handles error with error_description field', function () {
     $responseData = [
         'error' => 'invalid_grant',
-        'error_description' => 'The provided authorization grant is invalid'
+        'error_description' => 'The provided authorization grant is invalid',
     ];
 
     $response = new Response(400, [], json_encode($responseData));
@@ -239,7 +239,7 @@ it('handles simple error string', function () {
 it('parses headers correctly', function () {
     $headers = [
         'Content-Type' => ['application/json'],
-        'X-Custom-Header' => ['value1', 'value2']
+        'X-Custom-Header' => ['value1', 'value2'],
     ];
 
     $response = new Response(200, $headers, '{}');

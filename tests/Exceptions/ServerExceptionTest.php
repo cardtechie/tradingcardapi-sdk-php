@@ -3,7 +3,7 @@
 use CardTechie\TradingCardApiSdk\Exceptions\ServerException;
 
 it('creates server exception with default values', function () {
-    $exception = new ServerException();
+    $exception = new ServerException;
 
     expect($exception->getMessage())->toBe('Internal server error');
     expect($exception->getCode())->toBe(500);
@@ -69,7 +69,7 @@ it('creates gateway timeout exception', function () {
 });
 
 it('has correct HTTP status code classification', function () {
-    $exception = new ServerException();
+    $exception = new ServerException;
     expect($exception->isServerError())->toBeTrue();
     expect($exception->isClientError())->toBeFalse();
 

@@ -3,7 +3,7 @@
 use CardTechie\TradingCardApiSdk\Exceptions\AuthorizationException;
 
 it('creates authorization exception with default values', function () {
-    $exception = new AuthorizationException();
+    $exception = new AuthorizationException;
 
     expect($exception->getMessage())->toBe('Access forbidden');
     expect($exception->getCode())->toBe(403);
@@ -46,7 +46,7 @@ it('creates account suspended exception', function () {
 });
 
 it('has correct HTTP status code', function () {
-    $exception = new AuthorizationException();
+    $exception = new AuthorizationException;
     expect($exception->isClientError())->toBeTrue();
     expect($exception->isServerError())->toBeFalse();
 });
