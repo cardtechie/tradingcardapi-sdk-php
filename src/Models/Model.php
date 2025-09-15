@@ -114,9 +114,7 @@ class Model
     public function __toString(): string
     {
         $output = [];
-        if (property_exists($this, 'attributes')) {
-            $output = $this->attributes;
-        }
+        $output = $this->attributes;
 
         foreach ($this->relationships as $type => $relations) {
             foreach ($relations as $relation) {
