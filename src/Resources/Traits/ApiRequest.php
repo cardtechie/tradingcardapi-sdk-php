@@ -2,6 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk\Resources\Traits;
 
+use CardTechie\TradingCardApiSdk\Services\ErrorResponseParser;
 use CardTechie\TradingCardApiSdk\Services\ResponseValidator;
 use Psr\Http\Message\ResponseInterface;
 use stdClass;
@@ -33,6 +34,13 @@ trait ApiRequest
     private $validator;
 
     /**
+     * The error response parser instance
+     *
+     * @var ErrorResponseParser|null
+     */
+    private $errorParser;
+
+    /**
      * Makes a request to an API endpoint or webpage and returns its response
      *
      * @param  string  $url  Url of the api or webpage
@@ -41,6 +49,7 @@ trait ApiRequest
      * @param  array  $headers  HTTP headers
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \CardTechie\TradingCardApiSdk\Exceptions\TradingCardApiException
      */
     public function makeRequest(string $url, string $method = 'GET', array $request = [], array $headers = []): object
     {
@@ -56,7 +65,15 @@ trait ApiRequest
         $theRequest = array_merge($defaultRequest, $request);
         $theRequest['headers'] = array_merge($defaultHeaders, $headers);
 
-        $response = $this->doRequest($url, $method, $theRequest);
+        try {
+            $response = $this->doRequest($url, $method, $theRequest);
+        } catch (\Exception $exception) {
+            if (! $this->errorParser) {
+                $this->errorParser = new ErrorResponseParser;
+            }
+            throw $this->errorParser->parseGuzzleException($exception);
+        }
+
         $body = (string) $response->getBody();
 
         if (empty($body)) {
@@ -77,7 +94,7 @@ trait ApiRequest
      * Retrieve a token required for authentication
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \Exception
+     * @throws \CardTechie\TradingCardApiSdk\Exceptions\TradingCardApiException
      */
     private function retrieveToken(): void
     {
@@ -107,7 +124,15 @@ trait ApiRequest
         $request['headers'] = $headers;
         $request['form_params'] = $body;
 
-        $response = $this->doRequest($url, 'POST', $request);
+        try {
+            $response = $this->doRequest($url, 'POST', $request);
+        } catch (\Exception $exception) {
+            if (! $this->errorParser) {
+                $this->errorParser = new ErrorResponseParser;
+            }
+            throw $this->errorParser->parseGuzzleException($exception);
+        }
+
         $body = (string) $response->getBody();
         $json = json_decode($body);
 
@@ -195,5 +220,13 @@ trait ApiRequest
     public function getValidator(): ?ResponseValidator
     {
         return $this->validator;
+    }
+
+    /**
+     * Get the error response parser instance
+     */
+    public function getErrorParser(): ?ErrorResponseParser
+    {
+        return $this->errorParser;
     }
 }
