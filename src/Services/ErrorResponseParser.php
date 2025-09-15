@@ -225,7 +225,7 @@ class ErrorResponseParser
         // Single error format
         if (isset($responseData['error'])) {
             // Use error_description if available, otherwise use error field
-            $errorDetail = $responseData['error_description'] ?? $responseData['error'] ?? 'An error occurred';
+            $errorDetail = $responseData['error_description'] ?? $responseData['error'];
 
             return [['title' => 'Error', 'detail' => $errorDetail]];
         }
