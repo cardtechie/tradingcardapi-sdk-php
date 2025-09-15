@@ -14,13 +14,14 @@ A modern PHP SDK for integrating with the Trading Card API. This Laravel package
 - 🧪 **Well Tested** - Comprehensive test suite with 80%+ coverage
 - 📦 **Easy Installation** - Simple Composer installation and configuration
 - 🔄 **OAuth2 Authentication** - Automatic token management and renewal
+- 🚨 **Enhanced Error Handling** - Specific exception classes for different error types
 - 📖 **Rich Documentation** - Clear examples and comprehensive API coverage
 - ⚡ **High Performance** - Efficient HTTP client with connection pooling
 
 ## 📋 Requirements
 
 - PHP 8.1 or higher
-- Laravel 9.0 or higher
+- Laravel 10.0 or higher
 - GuzzleHTTP 7.5 or higher
 
 ## 🚀 Installation
@@ -76,6 +77,34 @@ $team = tradingcardapi()->team()->create([
 ]);
 ```
 
+### Error Handling
+
+The SDK provides comprehensive error handling with specific exception classes:
+
+```php
+use CardTechie\TradingCardApiSdk\Exceptions\{
+    CardNotFoundException,
+    ValidationException,
+    RateLimitException,
+    AuthenticationException
+};
+
+try {
+    $card = TradingCardApiSdk::card()->get('invalid-id');
+} catch (CardNotFoundException $e) {
+    // Handle missing card
+    echo "Card not found: " . $e->getMessage();
+} catch (ValidationException $e) {
+    // Handle validation errors
+    foreach ($e->getValidationErrors() as $field => $errors) {
+        echo "Field $field: " . implode(', ', $errors);
+    }
+} catch (RateLimitException $e) {
+    // Handle rate limiting
+    echo "Rate limited. Retry after: " . $e->getRetryAfter() . " seconds";
+}
+```
+
 ### Direct Class Usage
 
 ```php
@@ -92,10 +121,15 @@ The SDK provides access to the following Trading Card API resources:
 | Resource | Description | Methods |
 |----------|-------------|---------|
 | **Cards** | Individual trading cards | `get()`, `create()`, `update()`, `delete()` |
-| **Sets** | Card sets and collections | `get()`, `getList()` |
+| **Sets** | Card sets and collections | `get()`, `list()`, `create()`, `update()`, `delete()`, `checklist($id)`, `addMissingCards($id)`, `addChecklist($request, $id)` |
 | **Players** | Player information | `get()`, `getList()`, `create()` |
 | **Teams** | Team data | `get()`, `getList()`, `create()` |
-| **Genres** | Card categories/types | `get()`, `getList()` |
+| **Genres** | Card categories/types | `get()`, `list()`, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |
+| **Brands** | Trading card brands | `get()`, `list()`, `create()`, `update()`, `delete()` |
+| **Manufacturers** | Trading card manufacturers | `get()`, `list()`, `create()`, `update()`, `delete()` |
+| **Years** | Trading card years | `get()`, `list()`, `create()`, `update()`, `delete()` |
+| **ObjectAttributes** | Object attributes | `get()`, `list()`, `create()`, `update()`, `delete()` |
+| **Stats** | Model statistics | `get($type)` |
 | **Attributes** | Card attributes | `get()`, `getList()` |
 
 ## 🔧 Configuration
@@ -143,12 +177,17 @@ make check
 ### Available Commands
 
 ```bash
-make test           # Run test suite
-make analyse        # Run PHPStan static analysis
-make format         # Format code with Laravel Pint
-make check          # Run all quality checks
-make quality        # Run comprehensive quality checks with coverage
-make ci             # Run CI pipeline locally
+make test              # Run test suite
+make analyse           # Run PHPStan static analysis
+make format            # Format code with Laravel Pint
+make check             # Run all quality checks
+make quality           # Run comprehensive quality checks with coverage
+make ci                # Run CI pipeline locally
+
+# Release management commands
+make version           # Show current version
+make changelog-update  # Update changelog for current version
+make release-notes-preview  # Generate release notes preview
 ```
 
 ### Code Quality Standards
@@ -160,9 +199,12 @@ This project maintains high code quality standards:
 - ✅ **80%+ Test Coverage** - Comprehensive test suite using Pest
 - ✅ **Automated CI/CD** - Quality checks on all PRs
 
-## 📖 API Documentation
+## 📖 Documentation
 
-For complete API documentation, visit the [Trading Card API Documentation](https://docs.tradingcardapi.com).
+- **[Error Handling Guide](docs/ERROR-HANDLING.md)** - Comprehensive guide to exception handling
+- **[Response Validation](docs/VALIDATION.md)** - Response validation and schema handling  
+- **[Version Management](docs/VERSION-MANAGEMENT.md)** - Release process and versioning
+- **[Trading Card API Documentation](https://docs.tradingcardapi.com)** - Complete API reference
 
 ## 🤝 Contributing
 
@@ -183,6 +225,46 @@ Please use the [GitHub Issues](https://github.com/cardtechie/tradingcardapi-sdk-
 ## 🔒 Security
 
 Please review our [Security Policy](../../security/policy) for reporting security vulnerabilities.
+
+## 🚀 Release Process
+
+This project uses a sophisticated, automated release management system adapted from the main Trading Card API repository.
+
+### Version Management
+
+The SDK uses intelligent, branch-aware semantic versioning:
+
+- **Production releases** (`1.2.3`) - Created from `main` branch
+- **Beta releases** (`1.3.0.beta-5`) - Created from `develop` branch  
+- **Release candidates** (`1.3.0.rc-2`) - Created from `release/*` branches
+- **Development versions** (`1.2.3-alpha.4`) - Feature branches
+
+### Development Commands
+
+```bash
+# Check current version
+make version
+
+# Preview version for different branches
+make version-preview --branch=main
+make version-preview --branch=develop
+
+# Update changelog for current version
+make changelog-update
+
+# Generate release notes preview
+make release-notes-preview
+```
+
+### Automated Release Process
+
+1. **Development**: Features are developed on feature branches
+2. **Integration**: Changes are merged to `develop` for testing
+3. **Release Preparation**: Release branches are created for final testing
+4. **Production Release**: Stable releases are merged to `main`
+5. **Automation**: GitHub Actions handles versioning, changelog updates, and Packagist publishing
+
+See [docs/VERSION-MANAGEMENT.md](docs/VERSION-MANAGEMENT.md) for complete release process documentation.
 
 ## 📄 Changelog
 

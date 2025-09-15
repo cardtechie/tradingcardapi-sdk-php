@@ -39,7 +39,7 @@ class Set
                 ],
             ],
         ];
-        $response = $this->makeRequest('/sets', 'POST', $request);
+        $response = $this->makeRequest('/v1/sets', 'POST', $request);
         $formattedResponse = new Response(json_encode($response));
 
         return $formattedResponse->mainObject;
@@ -58,7 +58,7 @@ class Set
         ];
         $params = array_merge($defaultParams, $params);
 
-        $url = sprintf('/sets/%s?%s', $id, http_build_query($params));
+        $url = sprintf('/v1/sets/%s?%s', $id, http_build_query($params));
         $response = $this->makeRequest($url);
         $formattedResponse = new Response(json_encode($response));
 
@@ -80,7 +80,7 @@ class Set
         ];
         $params = array_merge($defaultParams, $params);
 
-        $url = sprintf('/sets?%s', http_build_query($params));
+        $url = sprintf('/v1/sets?%s', http_build_query($params));
         $response = $this->makeRequest($url);
 
         $totalPages = $response->meta->pagination->total;
@@ -103,7 +103,7 @@ class Set
      */
     public function update(string $id, array $attributes): SetModel
     {
-        $url = sprintf('/sets/%s', $id);
+        $url = sprintf('/v1/sets/%s', $id);
         $request = [
             'json' => [
                 'data' => [
@@ -120,6 +120,19 @@ class Set
     }
 
     /**
+     * Get the checklist for a set
+     *
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function checklist(string $id): object
+    {
+        $url = sprintf('/v1/sets/%s/checklist', $id);
+
+        return $this->makeRequest($url, 'GET');
+    }
+
+    /**
      * Add the missing cards (as empty cards) to the specified set
      *
      *
@@ -127,7 +140,7 @@ class Set
      */
     public function addMissingCards(string $id): object
     {
-        $url = sprintf('/sets/%s/checklist', $id);
+        $url = sprintf('/v1/sets/%s/checklist', $id);
 
         return $this->makeRequest($url, 'POST');
     }
@@ -140,7 +153,7 @@ class Set
      */
     public function addChecklist(array $request, string $id): object
     {
-        $url = sprintf('/sets/%s/checklist', $id);
+        $url = sprintf('/v1/sets/%s/checklist', $id);
 
         return $this->makeRequest($url, 'POST', $request);
     }
@@ -153,7 +166,7 @@ class Set
      */
     public function delete(string $id): void
     {
-        $url = '/sets/'.$id;
+        $url = '/v1/sets/'.$id;
         $this->makeRequest($url, 'DELETE');
     }
 }

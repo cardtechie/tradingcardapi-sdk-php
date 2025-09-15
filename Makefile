@@ -83,6 +83,49 @@ format-check: ## Check if code formatting is correct (dry-run)
 	@make ensure-running
 	docker compose exec dev vendor/bin/pint --test
 
+# Release management commands
+version: ## Generate version number for current branch
+	@bash build/version.sh
+
+version-preview: ## Preview version for specific branch (use --branch=<name>)
+	@bash build/version.sh $(filter-out $@,$(MAKECMDGOALS))
+
+changelog-update: ## Update changelog for next version
+	@echo "Updating changelog for version: $$(bash build/version.sh)"
+	@bash build/update-changelog.sh "$$(bash build/version.sh)"
+
+changelog-preview: ## Preview unreleased changes  
+	@echo "Current version would be: $$(bash build/version.sh)"
+	@echo ""
+	@echo "Recent commits that would be included:"
+	@git log --oneline -10
+
+release-notes-preview: ## Generate release notes preview
+	@echo "Generating release notes for version: $$(bash build/version.sh)"
+	@bash build/generate-release-notes.sh "$$(bash build/version.sh)"
+
+release-notes: ## Generate release notes (use VERSION=x.x.x)
+	@if [ -z "$(VERSION)" ]; then \
+		echo "ERROR: VERSION is required. Usage: make release-notes VERSION=1.0.0"; \
+		exit 1; \
+	fi
+	@bash build/generate-release-notes.sh "$(VERSION)"
+
+# Version bump helpers
+version-bump-develop: ## Update changelog and version for develop branch
+	@make ensure-running
+	@VERSION=$$(bash build/version.sh --branch=develop) && \
+	echo "Preparing version bump for develop branch: $$VERSION" && \
+	bash build/update-changelog.sh "$$VERSION" && \
+	echo "Updated changelog for version: $$VERSION"
+
+version-bump-main: ## Update changelog and version for main branch  
+	@make ensure-running
+	@VERSION=$$(bash build/version.sh --branch=main) && \
+	echo "Preparing version bump for main branch: $$VERSION" && \
+	bash build/update-changelog.sh "$$VERSION" && \
+	echo "Updated changelog for version: $$VERSION"
+
 # Combined tasks
 ci: test analyse format-check ## Run continuous integration tasks (tests + analysis + format check)
 

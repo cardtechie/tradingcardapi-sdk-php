@@ -30,13 +30,45 @@ it('implements Taxonomy interface', function () {
     expect($team)->toBeInstanceOf(Taxonomy::class);
 });
 
-it('build method returns stdClass object', function () {
+it('build method returns the taxonomy object', function () {
     $taxonomy = new \stdClass;
+    $taxonomy->id = '456';
     $data = ['test' => 'data'];
 
     $result = Team::build($taxonomy, $data);
 
-    expect($result)->toBeInstanceOf(\stdClass::class);
+    expect($result)->toBe($taxonomy);
+    expect($result->id)->toBe('456');
+});
+
+it('build method sets team relationship when matching data exists', function () {
+    $taxonomy = new \stdClass;
+    $taxonomy->id = '456';
+
+    $teamData = new \stdClass;
+    $teamData->id = '456';
+    $teamData->name = 'New York Yankees';
+
+    $data = ['team' => [$teamData]];
+
+    $result = Team::build($taxonomy, $data);
+
+    expect($result->relationships['team'])->toBe($teamData);
+});
+
+it('build method handles direct team object data', function () {
+    $taxonomy = new \stdClass;
+    $taxonomy->id = '456';
+
+    $teamData = new \stdClass;
+    $teamData->id = '456';
+    $teamData->name = 'New York Yankees';
+
+    $data = ['team' => $teamData];
+
+    $result = Team::build($taxonomy, $data);
+
+    expect($result->relationships['team'])->toBe($teamData);
 });
 
 it('getFromApi method exists and is properly defined', function () {

@@ -32,7 +32,7 @@ class Player
     public function getList(array $params = []): Collection
     {
         $query = http_build_query($params);
-        $url = sprintf('/players?%s', $query);
+        $url = sprintf('/v1/players?%s', $query);
         $response = $this->makeRequest($url);
 
         return Response::parse(json_encode($response));
@@ -58,7 +58,7 @@ class Player
             $request['json']['data']['attributes'] = $attributes;
         }
 
-        $response = $this->makeRequest('/players', 'POST', $request);
+        $response = $this->makeRequest('/v1/players', 'POST', $request);
         $formattedResponse = new Response(json_encode($response));
 
         return $formattedResponse->mainObject;

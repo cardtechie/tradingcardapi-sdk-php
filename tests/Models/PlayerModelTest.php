@@ -29,13 +29,45 @@ it('implements Taxonomy interface', function () {
     expect($player)->toBeInstanceOf(\CardTechie\TradingCardApiSdk\Models\Taxonomy::class);
 });
 
-it('build method returns stdClass object', function () {
+it('build method returns the taxonomy object', function () {
     $taxonomy = new \stdClass;
+    $taxonomy->id = '123';
     $data = ['test' => 'data'];
 
     $result = Player::build($taxonomy, $data);
 
-    expect($result)->toBeInstanceOf(\stdClass::class);
+    expect($result)->toBe($taxonomy);
+    expect($result->id)->toBe('123');
+});
+
+it('build method sets player relationship when matching data exists', function () {
+    $taxonomy = new \stdClass;
+    $taxonomy->id = '123';
+
+    $playerData = new \stdClass;
+    $playerData->id = '123';
+    $playerData->name = 'John Doe';
+
+    $data = ['player' => [$playerData]];
+
+    $result = Player::build($taxonomy, $data);
+
+    expect($result->relationships['player'])->toBe($playerData);
+});
+
+it('build method handles direct player object data', function () {
+    $taxonomy = new \stdClass;
+    $taxonomy->id = '123';
+
+    $playerData = new \stdClass;
+    $playerData->id = '123';
+    $playerData->name = 'John Doe';
+
+    $data = ['player' => $playerData];
+
+    $result = Player::build($taxonomy, $data);
+
+    expect($result->relationships['player'])->toBe($playerData);
 });
 
 it('getFromApi method exists and is properly defined', function () {

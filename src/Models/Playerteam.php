@@ -4,6 +4,7 @@ namespace CardTechie\TradingCardApiSdk\Models;
 
 use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
 use CardTechie\TradingCardApiSdk\Models\Traits\OnCardable;
+use CardTechie\TradingCardApiSdk\Utils\StringHelpers;
 
 /**
  * Class Playerteam
@@ -54,10 +55,20 @@ class Playerteam extends Model implements Taxonomy
      */
     public static function getFromApi(array $params): object
     {
-        // TODO Handle multiple players returned
         $player = Player::getFromApi([
             'player' => $params['player'],
         ]);
+
+        // Handle case where Player::getFromApi() might return a collection
+        if ($player instanceof \Illuminate\Support\Collection) {
+            if ($player->isEmpty()) {
+                throw new \InvalidArgumentException("No player found with name: {$params['player']}");
+            }
+            if ($player->count() > 1) {
+                throw new \InvalidArgumentException("Multiple players found with name: {$params['player']}. Please be more specific.");
+            }
+            $player = $player->first();
+        }
 
         $team = Team::getFromApi([
             'team' => $params['team'],
@@ -86,35 +97,93 @@ class Playerteam extends Model implements Taxonomy
      */
     public static function prepare($data): ?object
     {
-        if ($data['player'] === null && $data['team'] === null) {
+        if (($data['player'] === null || $data['player'] === '') &&
+            ($data['team'] === null || $data['team'] === '')) {
             return null;
         }
 
-        /*$playerService = resolve(PlayerService::class);
-        $teamService = resolve(TeamService::class);
+        $playerUuid = null;
+        $teamUuid = null;
 
-        if (StringHelpers::isValidUuid($data['player'])) {
-            $playerUuid = $data['player'];
-            // TODO Lookup the uuid to make sure it is a valid player
-        } else {
-            // We probably have a name of the player so we just need to look it up
-            $player = $playerService->getByName($data['player']);
-            $playerUuid = $player->id;
+        // Handle player lookup
+        if (! empty($data['player'])) {
+            if (StringHelpers::isValidUuid($data['player'])) {
+                $playerUuid = $data['player'];
+                // Validate that this player UUID exists in the API
+                if (! self::validatePlayerExists($playerUuid)) {
+                    throw new \InvalidArgumentException("Player with UUID {$playerUuid} not found in API");
+                }
+            } else {
+                // We have a name, look up the player
+                try {
+                    $player = Player::getFromApi(['player' => $data['player']]);
+                    if ($player instanceof \Illuminate\Support\Collection) {
+                        if ($player->isEmpty()) {
+                            throw new \InvalidArgumentException("No player found with name: {$data['player']}");
+                        }
+                        $player = $player->first();
+                    }
+                    $playerUuid = $player->id;
+                } catch (\Exception $e) {
+                    throw new \InvalidArgumentException("Failed to find player '{$data['player']}': ".$e->getMessage());
+                }
+            }
         }
 
-        if (StringHelpers::isValidUuid($data['team'])) {
-            $teamUuid = $data['team'];
-            // TODO Lookup the uuid to make sure it is a valid team
-        } else {
-            // We probably have a name of the player so we just need to look it up
-            $team = $teamService->getByName($data['team']);
-            $teamUuid = $team->id;
+        // Handle team lookup
+        if (! empty($data['team'])) {
+            if (StringHelpers::isValidUuid($data['team'])) {
+                $teamUuid = $data['team'];
+                // Validate that this team UUID exists in the API
+                if (! self::validateTeamExists($teamUuid)) {
+                    throw new \InvalidArgumentException("Team with UUID {$teamUuid} not found in API");
+                }
+            } else {
+                // We have a name, look up the team
+                try {
+                    $team = Team::getFromApi(['team' => $data['team']]);
+                    $teamUuid = $team->id;
+                } catch (\Exception $e) {
+                    throw new \InvalidArgumentException("Failed to find team '{$data['team']}': ".$e->getMessage());
+                }
+            }
         }
 
-        return self::lookup($playerUuid, $teamUuid);*/
+        return self::lookup($playerUuid, $teamUuid);
+    }
 
-        // TODO: Implement prepare() method properly
-        return null;
+    /**
+     * Validate that a player UUID exists in the API
+     *
+     * @param  string  $playerUuid  The player UUID to validate
+     * @return bool True if player exists, false otherwise
+     */
+    protected static function validatePlayerExists(string $playerUuid): bool
+    {
+        try {
+            $players = TradingCardApiSdk::player()->getList(['id' => $playerUuid]);
+
+            return ! $players->isEmpty();
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Validate that a team UUID exists in the API
+     *
+     * @param  string  $teamUuid  The team UUID to validate
+     * @return bool True if team exists, false otherwise
+     */
+    protected static function validateTeamExists(string $teamUuid): bool
+    {
+        try {
+            $teams = TradingCardApiSdk::team()->getList(['id' => $teamUuid]);
+
+            return ! $teams->isEmpty();
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     /**

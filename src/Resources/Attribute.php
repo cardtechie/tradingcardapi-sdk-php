@@ -43,7 +43,7 @@ class Attribute
             $request['json']['data']['attributes'] = $attributes;
         }
 
-        $response = $this->makeRequest('/attributes', 'POST', $request);
+        $response = $this->makeRequest('/v1/attributes', 'POST', $request);
         $formattedResponse = new Response(json_encode($response));
 
         return $formattedResponse->mainObject;
@@ -57,7 +57,7 @@ class Attribute
      */
     public function list(): Collection
     {
-        $response = $this->makeRequest('/attributes');
+        $response = $this->makeRequest('/v1/attributes');
 
         return Response::parse(json_encode($response));
     }
@@ -69,7 +69,7 @@ class Attribute
      */
     public function get(string $id): AttributeModel
     {
-        $url = sprintf('/attributes/%s', $id);
+        $url = sprintf('/v1/attributes/%s', $id);
         $response = $this->makeRequest($url);
         $formattedResponse = new Response(json_encode($response));
 
@@ -84,7 +84,7 @@ class Attribute
      */
     public function update(string $id, array $attributes): AttributeModel
     {
-        $url = sprintf('/attributes/%s', $id);
+        $url = sprintf('/v1/attributes/%s', $id);
         $request = [
             'json' => [
                 'data' => [

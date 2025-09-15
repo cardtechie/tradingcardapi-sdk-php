@@ -1,12 +1,17 @@
 <?php
 
 use CardTechie\TradingCardApiSdk\Resources\Attribute;
+use CardTechie\TradingCardApiSdk\Resources\Brand;
 use CardTechie\TradingCardApiSdk\Resources\Card;
 use CardTechie\TradingCardApiSdk\Resources\Genre;
+use CardTechie\TradingCardApiSdk\Resources\Manufacturer;
+use CardTechie\TradingCardApiSdk\Resources\ObjectAttribute;
 use CardTechie\TradingCardApiSdk\Resources\Player;
 use CardTechie\TradingCardApiSdk\Resources\Playerteam;
 use CardTechie\TradingCardApiSdk\Resources\Set;
+use CardTechie\TradingCardApiSdk\Resources\Stats;
 use CardTechie\TradingCardApiSdk\Resources\Team;
+use CardTechie\TradingCardApiSdk\Resources\Year;
 use CardTechie\TradingCardApiSdk\TradingCardApi;
 use GuzzleHttp\Client;
 
@@ -65,6 +70,36 @@ it('returns attribute resource', function () {
     $api = new TradingCardApi;
     $attribute = $api->attribute();
     expect($attribute)->toBeInstanceOf(Attribute::class);
+});
+
+it('returns brand resource', function () {
+    $api = new TradingCardApi;
+    $brand = $api->brand();
+    expect($brand)->toBeInstanceOf(Brand::class);
+});
+
+it('returns manufacturer resource', function () {
+    $api = new TradingCardApi;
+    $manufacturer = $api->manufacturer();
+    expect($manufacturer)->toBeInstanceOf(Manufacturer::class);
+});
+
+it('returns year resource', function () {
+    $api = new TradingCardApi;
+    $year = $api->year();
+    expect($year)->toBeInstanceOf(Year::class);
+});
+
+it('returns object attribute resource', function () {
+    $api = new TradingCardApi;
+    $objectAttribute = $api->objectAttribute();
+    expect($objectAttribute)->toBeInstanceOf(ObjectAttribute::class);
+});
+
+it('returns stats resource', function () {
+    $api = new TradingCardApi;
+    $stats = $api->stats();
+    expect($stats)->toBeInstanceOf(Stats::class);
 });
 
 it('creates guzzle client with correct configuration', function () {

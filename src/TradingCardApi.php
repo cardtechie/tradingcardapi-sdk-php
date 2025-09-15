@@ -3,12 +3,17 @@
 namespace CardTechie\TradingCardApiSdk;
 
 use CardTechie\TradingCardApiSdk\Resources\Attribute;
+use CardTechie\TradingCardApiSdk\Resources\Brand;
 use CardTechie\TradingCardApiSdk\Resources\Card;
 use CardTechie\TradingCardApiSdk\Resources\Genre;
+use CardTechie\TradingCardApiSdk\Resources\Manufacturer;
+use CardTechie\TradingCardApiSdk\Resources\ObjectAttribute;
 use CardTechie\TradingCardApiSdk\Resources\Player;
 use CardTechie\TradingCardApiSdk\Resources\Playerteam;
 use CardTechie\TradingCardApiSdk\Resources\Set;
+use CardTechie\TradingCardApiSdk\Resources\Stats;
 use CardTechie\TradingCardApiSdk\Resources\Team;
+use CardTechie\TradingCardApiSdk\Resources\Year;
 use GuzzleHttp\Client;
 
 /**
@@ -92,5 +97,45 @@ class TradingCardApi
     public function attribute(): Attribute
     {
         return new Attribute($this->client);
+    }
+
+    /**
+     * Retrieve the brand resource.
+     */
+    public function brand(): Brand
+    {
+        return new Brand($this->client);
+    }
+
+    /**
+     * Retrieve the manufacturer resource.
+     */
+    public function manufacturer(): Manufacturer
+    {
+        return new Manufacturer($this->client);
+    }
+
+    /**
+     * Retrieve the year resource.
+     */
+    public function year(): Year
+    {
+        return new Year($this->client);
+    }
+
+    /**
+     * Retrieve the object attribute resource.
+     */
+    public function objectAttribute(): ObjectAttribute
+    {
+        return new ObjectAttribute($this->client);
+    }
+
+    /**
+     * Retrieve the stats resource.
+     */
+    public function stats(): Stats
+    {
+        return new Stats($this->client);
     }
 }
