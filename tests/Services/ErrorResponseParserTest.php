@@ -211,3 +211,63 @@ it('defaults to generic message when none provided', function () {
     expect($exception->getMessage())->toBe('HTTP 418 error');
     expect($exception->getHttpStatusCode())->toBe(418);
 });
+
+it('handles error with error_description field', function () {
+    $responseData = [
+        'error' => 'invalid_grant',
+        'error_description' => 'The provided authorization grant is invalid'
+    ];
+
+    $response = new Response(400, [], json_encode($responseData));
+    $exception = $this->parser->parseHttpResponse($response);
+
+    expect($exception->getApiErrors())->toHaveCount(1);
+    expect($exception->getApiErrors()[0]['detail'])->toBe('The provided authorization grant is invalid');
+    expect($exception->getMessage())->toBe('The provided authorization grant is invalid');
+});
+
+it('handles simple error string', function () {
+    $responseData = ['error' => 'custom_error'];
+
+    $response = new Response(400, [], json_encode($responseData));
+    $exception = $this->parser->parseHttpResponse($response);
+
+    expect($exception->getApiErrors())->toHaveCount(1);
+    expect($exception->getApiErrors()[0]['detail'])->toBe('custom_error');
+});
+
+it('parses headers correctly', function () {
+    $headers = [
+        'Content-Type' => ['application/json'],
+        'X-Custom-Header' => ['value1', 'value2']
+    ];
+
+    $response = new Response(200, $headers, '{}');
+    $exception = $this->parser->parseHttpResponse($response);
+
+    $context = $exception->getContext();
+    expect($context['headers']['Content-Type'])->toBe('application/json');
+    expect($context['headers']['X-Custom-Header'])->toBe('value1, value2');
+});
+
+it('handles RequestException without response', function () {
+    $request = new Request('GET', 'https://api.example.com');
+    $guzzleException = new \GuzzleHttp\Exception\RequestException('Request failed', $request);
+
+    $exception = $this->parser->parseGuzzleException($guzzleException);
+
+    expect($exception)->toBeInstanceOf(NetworkException::class);
+    expect($exception->getMessage())->toBe('HTTP request failed: Request failed');
+    expect($exception->getApiErrorCode())->toBe('request_failed');
+});
+
+it('handles generic exceptions', function () {
+    $genericException = new \Exception('Something went wrong');
+
+    $exception = $this->parser->parseGuzzleException($genericException);
+
+    expect($exception)->toBeInstanceOf(TradingCardApiException::class);
+    expect($exception->getMessage())->toBe('Unexpected error: Something went wrong');
+    expect($exception->getApiErrorCode())->toBe('unexpected_error');
+    expect($exception->getPrevious())->toBe($genericException);
+});

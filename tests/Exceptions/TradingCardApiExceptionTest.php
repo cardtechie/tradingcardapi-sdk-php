@@ -87,3 +87,59 @@ it('converts to array for serialization', function () {
     expect($array)->toHaveKey('file');
     expect($array)->toHaveKey('line');
 });
+
+it('handles non-array first error in getApiErrorMessage', function () {
+    $exception = new TestTradingCardApiException(
+        'Test message',
+        0,
+        null,
+        null,
+        ['Simple error message']
+    );
+
+    expect($exception->getApiErrorMessage())->toBe('Simple error message');
+});
+
+it('correctly classifies error types based on HTTP status', function () {
+    // Test various 4xx client errors
+    $clientError = new TestTradingCardApiException('Test', 0, null, null, [], 422);
+    expect($clientError->isClientError())->toBeTrue();
+    expect($clientError->isServerError())->toBeFalse();
+
+    // Test various 5xx server errors
+    $serverError = new TestTradingCardApiException('Test', 0, null, null, [], 502);
+    expect($serverError->isServerError())->toBeTrue();
+    expect($serverError->isClientError())->toBeFalse();
+
+    // Test edge cases
+    $edgeError = new TestTradingCardApiException('Test', 0, null, null, [], 399);
+    expect($edgeError->isClientError())->toBeFalse();
+    expect($edgeError->isServerError())->toBeFalse();
+
+    $noStatusError = new TestTradingCardApiException('Test');
+    expect($noStatusError->isClientError())->toBeFalse();
+    expect($noStatusError->isServerError())->toBeFalse();
+});
+
+it('handles previous exception chaining', function () {
+    $previous = new \Exception('Previous error');
+    $exception = new TestTradingCardApiException(
+        'Current error',
+        0,
+        $previous
+    );
+
+    expect($exception->getPrevious())->toBe($previous);
+});
+
+it('handles error array with title but no detail', function () {
+    $exception = new TestTradingCardApiException(
+        'Test message',
+        0,
+        null,
+        null,
+        [['title' => 'Error Title']]
+    );
+
+    expect($exception->getApiErrorMessage())->toBe('Error Title');
+});
