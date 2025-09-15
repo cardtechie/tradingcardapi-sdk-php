@@ -13,5 +13,5 @@ parameters:
     ignoreErrors:
         - 
             message: '#larastan\.noEnvCallsOutsideOfConfig#'
-            path: 'config/*'
+            path: '*/config/*'
 
