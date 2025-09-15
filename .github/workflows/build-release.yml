@@ -2,20 +2,10 @@ name: "Build and Release"
 
 on:
   push:
-    branches: [ main, develop ]
-    tags: [ 'v*' ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release (optional, auto-generated if empty)'
-        required: false
-        type: string
-      claude_api_key:
-        description: 'Claude API key for AI-powered release notes'
-        required: false
-        type: string
 
 permissions:
   contents: write
@@ -161,7 +151,7 @@ jobs:
     name: "Update Changelog"
     runs-on: ubuntu-latest
     needs: [version, test, quality]
-    if: needs.version.outputs.should_release == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    if: needs.version.outputs.should_release == 'true' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
