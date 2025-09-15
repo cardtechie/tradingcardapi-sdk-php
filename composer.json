@@ -1,7 +1,7 @@
 {
     "name": "cardtechie/tradingcardapi-sdk-php",
     "version": "0.1.0",
-    "description": "This is my package trading-card-api-sdk-php",
+    "description": "Official PHP SDK for Trading Card API - comprehensive tools for accessing trading card data, players, sets, and market information with enhanced error handling and Laravel integration",
     "keywords": [
         "cardtechie",
         "laravel",
