@@ -166,3 +166,59 @@ it('can delete a card', function () {
 
     expect(true)->toBeTrue(); // If we get here without exception, the test passed
 });
+
+it('can list cards with pagination', function () {
+    $client = m::mock(Client::class);
+
+    // Mock the OAuth token request
+    $tokenResponse = new GuzzleResponse(200, [], json_encode([
+        'access_token' => 'test-token',
+        'token_type' => 'Bearer',
+    ]));
+
+    // Mock the card list request
+    $listResponse = new GuzzleResponse(200, [], json_encode([
+        'data' => [
+            [
+                'id' => '123',
+                'type' => 'cards',
+                'attributes' => [
+                    'name' => 'Test Card 1',
+                    'description' => 'First test card',
+                ],
+            ],
+            [
+                'id' => '456',
+                'type' => 'cards',
+                'attributes' => [
+                    'name' => 'Test Card 2',
+                    'description' => 'Second test card',
+                ],
+            ],
+        ],
+        'meta' => [
+            'pagination' => [
+                'total' => 2,
+                'per_page' => 50,
+                'current_page' => 1,
+                'last_page' => 1,
+            ],
+        ],
+    ]));
+
+    $client->shouldReceive('request')
+        ->with('POST', '/oauth/token', m::type('array'))
+        ->once()
+        ->andReturn($tokenResponse);
+
+    $client->shouldReceive('request')
+        ->with('GET', '/v1/cards?limit=50&page=1&pageName=page', m::type('array'))
+        ->once()
+        ->andReturn($listResponse);
+
+    $card = new Card($client);
+    $result = $card->list();
+
+    expect($result)->toBeInstanceOf(\Illuminate\Pagination\LengthAwarePaginator::class);
+    expect($result->count())->toBe(2);
+});
