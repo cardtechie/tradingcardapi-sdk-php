@@ -30,18 +30,18 @@ jobs:
           # Check 1: Version must be updated
           if [[ "$CURRENT_VERSION" != "$MAIN_VERSION" ]]; then
             echo "✅ Version updated: $MAIN_VERSION → $CURRENT_VERSION"
+            
+            # Check 2: Changelog must have section for the NEW version
+            if grep -q "^## \[$CURRENT_VERSION\]" CHANGELOG.md; then
+              echo "✅ Version section [$CURRENT_VERSION] found in CHANGELOG.md"
+            else
+              echo "❌ No version section [$CURRENT_VERSION] found in CHANGELOG.md"
+              echo "   Release PRs must have a changelog section for the new version"
+              VALIDATION_FAILED=true
+            fi
           else
             echo "❌ Version not updated in composer.json"
             echo "   Release PRs must bump the version"
-            VALIDATION_FAILED=true
-          fi
-          
-          # Check 2: Changelog must have section for current version
-          if grep -q "^## \[$CURRENT_VERSION\]" CHANGELOG.md; then
-            echo "✅ Version section [$CURRENT_VERSION] found in CHANGELOG.md"
-          else
-            echo "❌ No version section [$CURRENT_VERSION] found in CHANGELOG.md"
-            echo "   Release PRs must have a changelog section for the current version"
             VALIDATION_FAILED=true
           fi
           
