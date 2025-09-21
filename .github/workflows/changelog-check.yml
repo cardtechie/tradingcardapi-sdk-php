@@ -28,12 +28,18 @@ jobs:
           USER_FACING_CHANGES=true
           RELEASE_CHANGES=false
           
-          # Check if this looks like a release PR (version changes)
+          # Check if this looks like a release PR by examining current composer.json
           if echo "$CHANGED_FILES" | grep "composer.json" > /dev/null; then
-            # Check if version was changed in composer.json
-            if git diff origin/main...HEAD composer.json | grep -E '^\+.*"version"' > /dev/null; then
+            # Get current version from composer.json
+            CURRENT_VERSION=$(grep '"version"' composer.json | sed 's/.*"version": "\([^"]*\)".*/\1/')
+            # Get main branch version
+            MAIN_VERSION=$(git show origin/main:composer.json | grep '"version"' | sed 's/.*"version": "\([^"]*\)".*/\1/')
+            
+            if [[ "$CURRENT_VERSION" != "$MAIN_VERSION" ]]; then
               RELEASE_CHANGES=true
-              echo "🏷️  Version change detected in composer.json - this appears to be a release PR"
+              echo "🏷️  Version change detected: $MAIN_VERSION → $CURRENT_VERSION - this appears to be a release PR"
+            else
+              echo "ℹ️  composer.json changed but version unchanged ($CURRENT_VERSION)"
             fi
           fi
           
@@ -59,14 +65,14 @@ jobs:
               VALIDATION_FAILED=true
             fi
             
-            # Check if a new version section was added to changelog
-            if [ "$CHANGELOG_MODIFIED" = true ]; then
-              # Look for a new version section (not just Unreleased)
-              if git diff origin/main...HEAD CHANGELOG.md | grep -E '^\+## \[[0-9]+\.[0-9]+\.[0-9]+\]' > /dev/null; then
-                echo "✅ New version section added to CHANGELOG.md"
+            # Check if changelog has the current version section
+            if [ "$CHANGELOG_MODIFIED" = true ] && [ "$RELEASE_CHANGES" = true ]; then
+              # Check if current CHANGELOG.md contains a section for the current version
+              if grep -q "^## \[$CURRENT_VERSION\]" CHANGELOG.md; then
+                echo "✅ Version section [$CURRENT_VERSION] found in CHANGELOG.md"
               else
-                echo "❌ No new version section found in CHANGELOG.md"
-                echo "   Release PRs should add a new version section, not just update [Unreleased]"
+                echo "❌ No version section [$CURRENT_VERSION] found in CHANGELOG.md"
+                echo "   Release PRs must have a changelog section for the current version"
                 echo ""
                 echo "   To prepare a release:"
                 echo "   1. Run: bash build/version.sh to get the next version"
