@@ -66,6 +66,11 @@ jobs:
               else
                 echo "❌ No new version section found in CHANGELOG.md"
                 echo "   Release PRs should add a new version section, not just update [Unreleased]"
+                echo ""
+                echo "   To prepare a release:"
+                echo "   1. Run: bash build/version.sh to get the next version"
+                echo "   2. Update composer.json with the new version"
+                echo "   3. Run: bash build/update-changelog.sh VERSION to update CHANGELOG.md"
                 VALIDATION_FAILED=true
               fi
             fi
@@ -80,8 +85,7 @@ jobs:
             else
               echo "❌ CHANGELOG.md was not updated"
               echo ""
-              echo "All PRs to main require a changelog entry:"
-              echo "$CHANGED_FILES"
+              echo "All PRs to main require a changelog entry."
               echo ""
               echo "Please update CHANGELOG.md with:"
               echo "1. Add your changes under the [Unreleased] section"
