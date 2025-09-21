@@ -1,12 +1,12 @@
-name: "Changelog Check"
+name: "Release Validation"
 
 on:
   pull_request:
     branches: [ main ]
 
 jobs:
-  changelog:
-    name: "Check Changelog Updated"
+  validate-release:
+    name: "Validate Release Requirements"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -14,13 +14,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check if CHANGELOG.md was modified
+      - name: Check release requirements
         run: |
           # Get the list of changed files
           CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
           
+          echo "Changed files in this PR:"
+          echo "$CHANGED_FILES"
+          echo ""
+          
           # Check if this PR contains user-facing changes that would require changelog update
           USER_FACING_CHANGES=false
+          RELEASE_CHANGES=false
           
           # Check for changes in source code directories
           if echo "$CHANGED_FILES" | grep -E "(src/|tests/|database/)" > /dev/null; then
@@ -28,21 +33,65 @@ jobs:
           fi
           
           # Check for changes in important config files
-          if echo "$CHANGED_FILES" | grep -E "(composer.json|README.md)" > /dev/null; then
+          if echo "$CHANGED_FILES" | grep -E "(README.md)" > /dev/null; then
             USER_FACING_CHANGES=true
           fi
           
-          # If there are user-facing changes, ensure CHANGELOG.md was updated
-          if [ "$USER_FACING_CHANGES" = true ]; then
-            if echo "$CHANGED_FILES" | grep "CHANGELOG.md" > /dev/null; then
-              echo "✅ CHANGELOG.md was updated - great!"
-              echo "Changed files requiring changelog update:"
-              echo "$CHANGED_FILES" | grep -E "(src/|tests/|database/|composer.json|README.md)"
+          # Check if this looks like a release PR (version changes)
+          if echo "$CHANGED_FILES" | grep "composer.json" > /dev/null; then
+            # Check if version was changed in composer.json
+            if git diff origin/main...HEAD composer.json | grep -E '^\+.*"version"' > /dev/null; then
+              RELEASE_CHANGES=true
+              echo "🏷️  Version change detected in composer.json - this appears to be a release PR"
+            fi
+          fi
+          
+          # Check for changelog modifications
+          CHANGELOG_MODIFIED=false
+          if echo "$CHANGED_FILES" | grep "CHANGELOG.md" > /dev/null; then
+            CHANGELOG_MODIFIED=true
+          fi
+          
+          # Validation logic
+          VALIDATION_FAILED=false
+          
+          # If this is a release PR, both changelog and version must be updated
+          if [ "$RELEASE_CHANGES" = true ]; then
+            echo ""
+            echo "🔍 Release PR validation:"
+            
+            if [ "$CHANGELOG_MODIFIED" = true ]; then
+              echo "✅ CHANGELOG.md was updated"
+            else
+              echo "❌ CHANGELOG.md was NOT updated"
+              echo "   Release PRs must include changelog updates"
+              VALIDATION_FAILED=true
+            fi
+            
+            # Check if a new version section was added to changelog
+            if [ "$CHANGELOG_MODIFIED" = true ]; then
+              # Look for a new version section (not just Unreleased)
+              if git diff origin/main...HEAD CHANGELOG.md | grep -E '^\+## \[[0-9]+\.[0-9]+\.[0-9]+\]' > /dev/null; then
+                echo "✅ New version section added to CHANGELOG.md"
+              else
+                echo "❌ No new version section found in CHANGELOG.md"
+                echo "   Release PRs should add a new version section, not just update [Unreleased]"
+                VALIDATION_FAILED=true
+              fi
+            fi
+            
+          # If user-facing changes but no version bump, require changelog update
+          elif [ "$USER_FACING_CHANGES" = true ]; then
+            echo ""
+            echo "🔍 User-facing changes validation:"
+            
+            if [ "$CHANGELOG_MODIFIED" = true ]; then
+              echo "✅ CHANGELOG.md was updated for user-facing changes"
             else
               echo "❌ CHANGELOG.md was not updated"
               echo ""
               echo "This PR contains user-facing changes that require a changelog entry:"
-              echo "$CHANGED_FILES" | grep -E "(src/|tests/|database/|composer.json|README.md)"
+              echo "$CHANGED_FILES" | grep -E "(src/|tests/|database/|README.md)"
               echo ""
               echo "Please update CHANGELOG.md with:"
               echo "1. Add your changes under the [Unreleased] section"
@@ -55,11 +104,17 @@ jobs:
               echo "### Added"
               echo ""
               echo "- Your new feature description"
-              echo ""
-              exit 1
+              VALIDATION_FAILED=true
             fi
+            
           else
             echo "ℹ️  No user-facing changes detected - changelog update not required"
-            echo "Changed files:"
-            echo "$CHANGED_FILES"
+          fi
+          
+          echo ""
+          if [ "$VALIDATION_FAILED" = true ]; then
+            echo "❌ Validation failed - please address the issues above"
+            exit 1
+          else
+            echo "✅ All validation checks passed!"
           fi
