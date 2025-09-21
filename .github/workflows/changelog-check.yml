@@ -1,0 +1,65 @@
+name: "Changelog Check"
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  changelog:
+    name: "Check Changelog Updated"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Check if CHANGELOG.md was modified
+        run: |
+          # Get the list of changed files
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+          
+          # Check if this PR contains user-facing changes that would require changelog update
+          USER_FACING_CHANGES=false
+          
+          # Check for changes in source code directories
+          if echo "$CHANGED_FILES" | grep -E "(src/|tests/|database/)" > /dev/null; then
+            USER_FACING_CHANGES=true
+          fi
+          
+          # Check for changes in important config files
+          if echo "$CHANGED_FILES" | grep -E "(composer.json|README.md)" > /dev/null; then
+            USER_FACING_CHANGES=true
+          fi
+          
+          # If there are user-facing changes, ensure CHANGELOG.md was updated
+          if [ "$USER_FACING_CHANGES" = true ]; then
+            if echo "$CHANGED_FILES" | grep "CHANGELOG.md" > /dev/null; then
+              echo "✅ CHANGELOG.md was updated - great!"
+              echo "Changed files requiring changelog update:"
+              echo "$CHANGED_FILES" | grep -E "(src/|tests/|database/|composer.json|README.md)"
+            else
+              echo "❌ CHANGELOG.md was not updated"
+              echo ""
+              echo "This PR contains user-facing changes that require a changelog entry:"
+              echo "$CHANGED_FILES" | grep -E "(src/|tests/|database/|composer.json|README.md)"
+              echo ""
+              echo "Please update CHANGELOG.md with:"
+              echo "1. Add your changes under the [Unreleased] section"
+              echo "2. Follow the Keep a Changelog format"
+              echo "3. Use appropriate categories: Added, Changed, Deprecated, Removed, Fixed, Security"
+              echo ""
+              echo "Example:"
+              echo "## [Unreleased]"
+              echo ""
+              echo "### Added"
+              echo ""
+              echo "- Your new feature description"
+              echo ""
+              exit 1
+            fi
+          else
+            echo "ℹ️  No user-facing changes detected - changelog update not required"
+            echo "Changed files:"
+            echo "$CHANGED_FILES"
+          fi
