@@ -7,31 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.2] - 2025-09-21
-
-### Added
-
-- Enhanced Card resource list method with proper LengthAwarePaginator integration
-- Improved pagination handling to match Laravel conventions
-- Better parameter handling for card listing with sorting and filtering
-
-### Fixed
-
-- Card resource list method now properly returns paginated results
-- Fixed pagination metadata parsing in Card list responses
-- Improved consistency with other resource list implementations
-
-## [0.1.1] - 2025-09-20
+## [0.1.1] - 2025-09-21
 
 ### Added
 
 - Added missing `list()` method to Card resource for paginated card listings
-- Enhanced Card resource to match functionality of other SDK resources (Set, Player, etc.)
-- Improved consistency across all SDK resource implementations
-
-### Fixed
-
-- Fixed missing Card list method that was preventing proper card pagination in client applications
 
 ## [0.1.0] - 2025-09-15
 
@@ -75,7 +55,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.2...HEAD
-[0.1.2]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.1...v0.1.2
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.1...HEAD
 [0.1.1]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/cardtechie/tradingcardapi-sdk-php/releases/tag/v0.1.0
