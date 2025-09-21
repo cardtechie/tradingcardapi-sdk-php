@@ -16,6 +16,7 @@ jobs:
 
       - name: Check release requirements
         run: |
+          # Test comment to trigger validation
           # Get the list of changed files
           CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
           
