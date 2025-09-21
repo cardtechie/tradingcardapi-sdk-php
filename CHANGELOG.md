@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Replaced automated changelog updates with manual PR validation requirement
+- All PRs to main now require CHANGELOG.md updates
+- Simplified release workflow by removing problematic changelog automation
+- Enhanced release validation to require both version and changelog updates for release PRs
+
 ## [0.1.1] - 2025-09-21
 
 ### Added
