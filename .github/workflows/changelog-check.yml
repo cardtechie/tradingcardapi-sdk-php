@@ -23,19 +23,9 @@ jobs:
           echo "$CHANGED_FILES"
           echo ""
           
-          # Check if this PR contains user-facing changes that would require changelog update
-          USER_FACING_CHANGES=false
+          # ALL changes to main require changelog updates
+          USER_FACING_CHANGES=true
           RELEASE_CHANGES=false
-          
-          # Check for changes in source code directories
-          if echo "$CHANGED_FILES" | grep -E "(src/|tests/|database/)" > /dev/null; then
-            USER_FACING_CHANGES=true
-          fi
-          
-          # Check for changes in important config files
-          if echo "$CHANGED_FILES" | grep -E "(README.md)" > /dev/null; then
-            USER_FACING_CHANGES=true
-          fi
           
           # Check if this looks like a release PR (version changes)
           if echo "$CHANGED_FILES" | grep "composer.json" > /dev/null; then
@@ -80,18 +70,18 @@ jobs:
               fi
             fi
             
-          # If user-facing changes but no version bump, require changelog update
+          # All non-release PRs require changelog update
           elif [ "$USER_FACING_CHANGES" = true ]; then
             echo ""
-            echo "🔍 User-facing changes validation:"
+            echo "🔍 Changelog validation:"
             
             if [ "$CHANGELOG_MODIFIED" = true ]; then
-              echo "✅ CHANGELOG.md was updated for user-facing changes"
+              echo "✅ CHANGELOG.md was updated"
             else
               echo "❌ CHANGELOG.md was not updated"
               echo ""
-              echo "This PR contains user-facing changes that require a changelog entry:"
-              echo "$CHANGED_FILES" | grep -E "(src/|tests/|database/|README.md)"
+              echo "All PRs to main require a changelog entry:"
+              echo "$CHANGED_FILES"
               echo ""
               echo "Please update CHANGELOG.md with:"
               echo "1. Add your changes under the [Unreleased] section"
@@ -106,9 +96,6 @@ jobs:
               echo "- Your new feature description"
               VALIDATION_FAILED=true
             fi
-            
-          else
-            echo "ℹ️  No user-facing changes detected - changelog update not required"
           fi
           
           echo ""
