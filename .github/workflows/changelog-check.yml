@@ -29,7 +29,7 @@ jobs:
           
           # Check 1: Version must be updated
           if [[ "$CURRENT_VERSION" != "$MAIN_VERSION" ]]; then
-            echo "✅ Version updated: $MAIN_VERSION → $CURRENT_VERSION"
+            echo "✅ Version updated in composer.json: $MAIN_VERSION → $CURRENT_VERSION"
             
             # Check 2: Changelog must have section for the NEW version
             if grep -q "^## \[$CURRENT_VERSION\]" CHANGELOG.md; then
