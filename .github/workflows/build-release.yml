@@ -59,49 +59,10 @@ jobs:
     name: "Run Tests"
     uses: ./.github/workflows/run-tests.yml
 
-  changelog:
-    name: "Update Changelog"
-    runs-on: ubuntu-latest
-    needs: [version, test]
-    if: needs.version.outputs.should_release == 'true' && github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Configure Git
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-      - name: Make build scripts executable
-        run: chmod +x build/*.sh
-
-      - name: Update changelog
-        run: |
-          VERSION="${{ needs.version.outputs.version }}"
-          echo "Updating changelog for version: $VERSION"
-          bash build/update-changelog.sh "$VERSION"
-
-      - name: Commit changelog
-        run: |
-          VERSION="${{ needs.version.outputs.version }}"
-          git add CHANGELOG.md
-          git commit -m "Update CHANGELOG.md for version $VERSION
-
-          🤖 Generated with [Claude Code](https://claude.ai/code)
-
-          Co-Authored-By: Claude <noreply@anthropic.com>" || exit 0
-
-      - name: Push changes
-        run: git push origin ${{ github.ref_name }}
-
   release:
     name: "Create Release"
     runs-on: ubuntu-latest
-    needs: [version, test, changelog]
+    needs: [version, test]
     if: needs.version.outputs.should_release == 'true'
     steps:
       - name: Checkout code

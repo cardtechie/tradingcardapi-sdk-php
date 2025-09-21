@@ -1,0 +1,62 @@
+name: "Release Validation"
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-release:
+    name: "Validate Release Requirements"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Check release requirements
+        run: |
+          # Test comment to trigger validation
+          # Check both version and changelog requirements
+          CURRENT_VERSION=$(grep '"version"' composer.json | sed 's/.*"version": "\([^"]*\)".*/\1/')
+          MAIN_VERSION=$(git show origin/main:composer.json | grep '"version"' | sed 's/.*"version": "\([^"]*\)".*/\1/')
+          
+          echo "Current version: $CURRENT_VERSION"
+          echo "Main branch version: $MAIN_VERSION"
+          echo ""
+          
+          VALIDATION_FAILED=false
+          
+          # Check 1: Version must be updated
+          if [[ "$CURRENT_VERSION" != "$MAIN_VERSION" ]]; then
+            echo "✅ Version updated in composer.json: $MAIN_VERSION → $CURRENT_VERSION"
+            
+            # Check 2: Changelog must have section for the NEW version
+            if grep -q "^## \[$CURRENT_VERSION\]" CHANGELOG.md; then
+              echo "✅ Version section [$CURRENT_VERSION] found in CHANGELOG.md"
+            else
+              echo "❌ No version section [$CURRENT_VERSION] found in CHANGELOG.md"
+              echo "   Release PRs must have a changelog section for the new version"
+              VALIDATION_FAILED=true
+            fi
+          else
+            echo "❌ Version not updated in composer.json"
+            echo "   Release PRs must bump the version"
+            VALIDATION_FAILED=true
+          fi
+          
+          if [ "$VALIDATION_FAILED" = true ]; then
+            echo ""
+            echo "To prepare a release:"
+            echo "1. Run: bash build/version.sh to get the next version"
+            echo "2. Update composer.json with the new version"  
+            echo "3. Run: bash build/update-changelog.sh VERSION to update CHANGELOG.md"
+          fi
+          
+          echo ""
+          if [ "$VALIDATION_FAILED" = true ]; then
+            echo "❌ Validation failed - please address the issues above"
+            exit 1
+          else
+            echo "✅ All validation checks passed!"
+          fi
