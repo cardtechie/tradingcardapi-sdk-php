@@ -7,15 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.2] - 2025-09-21
-
-### Changed
-
-- Replaced automated changelog updates with manual PR validation requirement
-- All PRs to main now require CHANGELOG.md updates
-- Simplified release workflow by removing problematic changelog automation
-- Enhanced release validation to require both version and changelog updates for release PRs
-
 ## [0.1.1] - 2025-09-21
 
 ### Added
@@ -64,7 +55,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.2...HEAD
-[0.1.2]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.1...v0.1.2
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.1...HEAD
 [0.1.1]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/cardtechie/tradingcardapi-sdk-php/releases/tag/v0.1.0
