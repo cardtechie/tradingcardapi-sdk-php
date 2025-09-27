@@ -196,15 +196,25 @@ class Player extends Model implements Taxonomy
 
     /**
      * Get all cards featuring this player
-     * Note: This method will need to be implemented once Card relationships are available
      *
      * @return Collection Collection of Card models
      */
     public function getCards(): Collection
     {
-        // TODO: Implement when Card-Player relationship endpoints are available
-        // This would likely involve querying cards with player_id or through OnCard relationships
-        return collect();
+        try {
+            // Query cards that feature this player through OnCard relationships
+            $cards = TradingCardApiSdk::card()->list([
+                'player_id' => $this->id,
+                'limit' => 1000, // Get all cards for this player
+            ]);
+            
+            return $cards->getCollection();
+        } catch (\Exception $e) {
+            \Log::error('Failed to get cards for player: ' . $e->getMessage(), [
+                'player_id' => $this->id
+            ]);
+            return collect();
+        }
     }
 
     /**
