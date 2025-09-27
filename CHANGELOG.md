@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2025-09-27
+
+### Fixed
+
+- **Packagist Publishing Issues** - Removed hardcoded version from composer.json to prevent webhook failures
+  - Eliminates 403 errors when publishing to Packagist
+  - Follows industry standard practice used by Laravel, Guzzle, and Spatie packages
+  - Ensures automatic version detection through git tags
+
+### Added
+
+- **Release Management Documentation** - Comprehensive guide for future releases
+  - Documents proper release process to prevent Packagist issues
+  - Explains why hardcoded versions cause publishing problems
+  - Provides step-by-step release workflow
+
 ## [0.1.3] - 2025-09-27
 
 ### Added
