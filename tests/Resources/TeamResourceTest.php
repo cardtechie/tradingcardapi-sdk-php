@@ -142,10 +142,10 @@ it('can create a team with relationships', function () {
                     'genre' => [
                         'data' => [
                             'type' => 'genres',
-                            'id' => '456'
-                        ]
-                    ]
-                ]
+                            'id' => '456',
+                        ],
+                    ],
+                ],
             ],
         ]))
     );
@@ -160,9 +160,9 @@ it('can create a team with relationships', function () {
         'genre' => [
             'data' => [
                 'type' => 'genres',
-                'id' => '456'
-            ]
-        ]
+                'id' => '456',
+            ],
+        ],
     ];
 
     $result = $this->teamResource->create($attributes, $relationships);
@@ -285,10 +285,10 @@ it('can update a team with relationships', function () {
                     'genre' => [
                         'data' => [
                             'type' => 'genres',
-                            'id' => '789'
-                        ]
-                    ]
-                ]
+                            'id' => '789',
+                        ],
+                    ],
+                ],
             ],
         ]))
     );
@@ -303,9 +303,9 @@ it('can update a team with relationships', function () {
         'genre' => [
             'data' => [
                 'type' => 'genres',
-                'id' => '789'
-            ]
-        ]
+                'id' => '789',
+            ],
+        ],
     ];
 
     $result = $this->teamResource->update('123', $attributes, $relationships);
