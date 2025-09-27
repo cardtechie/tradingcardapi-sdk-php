@@ -56,7 +56,7 @@ it('can check if player is an alias', function () {
 });
 
 it('has relationship methods defined', function () {
-    $player = new Player();
+    $player = new Player;
 
     expect(method_exists($player, 'getParent'))->toBeTrue();
     expect(method_exists($player, 'getAliases'))->toBeTrue();
@@ -130,13 +130,13 @@ it('getFromApi method exists and is properly defined', function () {
 it('returns null when player has no parent_id', function () {
     $player = new Player(['id' => '123']);
     $result = $player->getParent();
-    
+
     expect($result)->toBeNull();
 });
 
 it('returns null when parent_id is empty', function () {
     $player = new Player(['id' => '123', 'parent_id' => '']);
     $result = $player->getParent();
-    
+
     expect($result)->toBeNull();
 });
