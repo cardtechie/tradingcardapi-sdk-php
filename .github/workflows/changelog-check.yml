@@ -14,24 +14,27 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Make build scripts executable
+        run: chmod +x build/*.sh
+
       - name: Check release requirements
         run: |
-          # Test comment to trigger validation
-          # Check both version and changelog requirements
-          CURRENT_VERSION=$(grep '"version"' composer.json | sed 's/.*"version": "\([^"]*\)".*/\1/')
-          MAIN_VERSION=$(git show origin/main:composer.json | grep '"version"' | sed 's/.*"version": "\([^"]*\)".*/\1/')
-          
-          echo "Current version: $CURRENT_VERSION"
-          echo "Main branch version: $MAIN_VERSION"
+          echo "🔍 Validating release requirements..."
           echo ""
           
           VALIDATION_FAILED=false
           
-          # Check 1: Version must be updated
-          if [[ "$CURRENT_VERSION" != "$MAIN_VERSION" ]]; then
-            echo "✅ Version updated in composer.json: $MAIN_VERSION → $CURRENT_VERSION"
+          # Get version that would be generated for this branch
+          CURRENT_VERSION=$(bash build/version.sh)
+          
+          echo "Generated version for this branch: $CURRENT_VERSION"
+          echo ""
+          
+          # Check if this looks like a release version (not dev/alpha/beta)
+          if [[ "$CURRENT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "✅ Release version format detected: $CURRENT_VERSION"
             
-            # Check 2: Changelog must have section for the NEW version
+            # Check that CHANGELOG.md has section for this version
             if grep -q "^## \[$CURRENT_VERSION\]" CHANGELOG.md; then
               echo "✅ Version section [$CURRENT_VERSION] found in CHANGELOG.md"
             else
@@ -40,17 +43,27 @@ jobs:
               VALIDATION_FAILED=true
             fi
           else
-            echo "❌ Version not updated in composer.json"
-            echo "   Release PRs must bump the version"
+            echo "ℹ️  Development version detected - no release validation needed"
+          fi
+          
+          # Verify composer.json does NOT have hardcoded version (to prevent Packagist issues)
+          if grep -q '"version"' composer.json; then
+            echo "❌ Hardcoded version found in composer.json"
+            echo "   Remove the 'version' field to prevent Packagist publishing issues"
+            echo "   Versions are managed through git tags, not composer.json"
             VALIDATION_FAILED=true
+          else
+            echo "✅ No hardcoded version in composer.json (managed by git tags)"
           fi
           
           if [ "$VALIDATION_FAILED" = true ]; then
             echo ""
-            echo "To prepare a release:"
-            echo "1. Run: bash build/version.sh to get the next version"
-            echo "2. Update composer.json with the new version"  
-            echo "3. Run: bash build/update-changelog.sh VERSION to update CHANGELOG.md"
+            echo "📝 To prepare a release:"
+            echo "1. Ensure no 'version' field exists in composer.json"
+            echo "2. Add version section to CHANGELOG.md for: $CURRENT_VERSION"
+            echo "3. Git tags will define the actual release version"
+            echo ""
+            echo "📚 See .claude/CLAUDE.md for complete release process documentation"
           fi
           
           echo ""

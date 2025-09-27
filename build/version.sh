@@ -111,11 +111,8 @@ if [[ -n "${CI}" ]] || [[ -n "${GITHUB_ACTIONS}" ]]; then
         echo "BUILD_COMMIT=$(git rev-parse HEAD)"
     } >> "$GITHUB_ENV" 2>/dev/null || true
     
-    # Update composer.json version if available and in CI
-    if [[ -f "composer.json" ]] && command -v jq >/dev/null 2>&1; then
-        echo "Updating composer.json version to $version" >&2
-        jq --arg version "$version" '.version = $version' composer.json > composer.json.tmp && mv composer.json.tmp composer.json
-    fi
+    # Note: We no longer update composer.json version to prevent Packagist publishing issues
+    # Git tags are used for version management instead of hardcoded values
 fi
 
 exit 0
