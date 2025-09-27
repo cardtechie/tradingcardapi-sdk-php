@@ -282,7 +282,7 @@ it('resets validation state between calls', function () {
 
 it('can detect collection responses correctly', function () {
     $validator = new ResponseValidator;
-    
+
     // Test collection response with data array
     $collectionData = [
         'data' => [
@@ -311,9 +311,9 @@ it('can detect collection responses correctly', function () {
             ],
         ],
     ];
-    
+
     $result = $validator->validate('player', $collectionData, '/v1/players');
-    
+
     expect($result)->toBeTrue();
     expect($validator->isValid())->toBeTrue();
     expect($validator->getErrors())->toBeEmpty();
@@ -321,7 +321,7 @@ it('can detect collection responses correctly', function () {
 
 it('can detect single resource responses correctly', function () {
     $validator = new ResponseValidator;
-    
+
     // Test single resource response with data object
     $singleData = [
         'data' => [
@@ -333,9 +333,9 @@ it('can detect single resource responses correctly', function () {
             ],
         ],
     ];
-    
+
     $result = $validator->validate('player', $singleData, '/v1/players/123');
-    
+
     expect($result)->toBeTrue();
     expect($validator->isValid())->toBeTrue();
     expect($validator->getErrors())->toBeEmpty();
@@ -343,7 +343,7 @@ it('can detect single resource responses correctly', function () {
 
 it('validates collection response with pagination meta', function () {
     $validator = new ResponseValidator;
-    
+
     $collectionWithPagination = [
         'data' => [
             [
@@ -364,16 +364,16 @@ it('validates collection response with pagination meta', function () {
             ],
         ],
     ];
-    
+
     $result = $validator->validate('player', $collectionWithPagination, '/v1/players');
-    
+
     expect($result)->toBeTrue();
     expect($validator->isValid())->toBeTrue();
 });
 
 it('handles empty collection responses', function () {
     $validator = new ResponseValidator;
-    
+
     $emptyCollection = [
         'data' => [],
         'meta' => [
@@ -385,16 +385,16 @@ it('handles empty collection responses', function () {
             ],
         ],
     ];
-    
+
     $result = $validator->validate('player', $emptyCollection, '/v1/players');
-    
+
     expect($result)->toBeTrue();
     expect($validator->isValid())->toBeTrue();
 });
 
 it('validates playerteam collection responses', function () {
     $validator = new ResponseValidator;
-    
+
     $playerteamCollection = [
         'data' => [
             [
@@ -417,9 +417,9 @@ it('validates playerteam collection responses', function () {
             ],
         ],
     ];
-    
+
     $result = $validator->validate('playerteam', $playerteamCollection, '/v1/playerteams');
-    
+
     expect($result)->toBeTrue();
     expect($validator->isValid())->toBeTrue();
 });

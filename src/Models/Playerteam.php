@@ -225,21 +225,21 @@ class Playerteam extends Model implements Taxonomy
     public function player(): ?Player
     {
         $relationshipData = $this->getRelationshipAsArray('player');
-        
+
         if ($relationshipData === null) {
             return null;
         }
-        
+
         // If it's already a Player model object, return it
         if ($relationshipData instanceof Player) {
             return $relationshipData;
         }
-        
+
         // If it's an array/object, create a new Player model from it
         if (is_object($relationshipData) || is_array($relationshipData)) {
             return new Player((array) $relationshipData);
         }
-        
+
         return null;
     }
 
@@ -249,21 +249,21 @@ class Playerteam extends Model implements Taxonomy
     public function team(): ?Team
     {
         $relationshipData = $this->getRelationshipAsArray('team');
-        
+
         if ($relationshipData === null) {
             return null;
         }
-        
+
         // If it's already a Team model object, return it
         if ($relationshipData instanceof Team) {
             return $relationshipData;
         }
-        
+
         // If it's an array/object, create a new Team model from it
         if (is_object($relationshipData) || is_array($relationshipData)) {
             return new Team((array) $relationshipData);
         }
-        
+
         return null;
     }
 }

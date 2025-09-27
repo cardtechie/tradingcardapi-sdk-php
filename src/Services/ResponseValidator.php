@@ -49,7 +49,7 @@ class ResponseValidator
         try {
             // Detect if this is a collection response
             $isCollection = $this->isCollectionResponse($data);
-            
+
             // Get schema for resource type
             $schema = $this->getSchema($resourceType, $isCollection);
 
@@ -121,8 +121,8 @@ class ResponseValidator
     private function getSchema(string $resourceType, bool $isCollection = false): array
     {
         // Create cache key that includes collection flag
-        $cacheKey = $resourceType . ($isCollection ? '_collection' : '_single');
-        
+        $cacheKey = $resourceType.($isCollection ? '_collection' : '_single');
+
         // Check cache first
         if (isset(self::$schemaCache[$cacheKey])) {
             return self::$schemaCache[$cacheKey];
@@ -135,14 +135,14 @@ class ResponseValidator
         }
 
         $schemaInstance = new $schemaClass;
-        
+
         // Get appropriate schema based on response type
         if ($isCollection && method_exists($schemaInstance, 'getCollectionRules')) {
             $schema = $schemaInstance->getCollectionRules();
         } else {
             $schema = $schemaInstance->getRules();
         }
-        
+
         self::$schemaCache[$cacheKey] = $schema;
 
         return $schema;
@@ -193,24 +193,24 @@ class ResponseValidator
     private function isCollectionResponse(array $data): bool
     {
         // Check if the 'data' field exists and is an array of objects
-        if (!isset($data['data'])) {
+        if (! isset($data['data'])) {
             return false;
         }
-        
+
         // If data is an array and has multiple items, or first item is an object with id/type
         if (is_array($data['data'])) {
             // Empty array is still a collection
             if (empty($data['data'])) {
                 return true;
             }
-            
+
             // Check if first item looks like a resource object
             $firstItem = $data['data'][0] ?? null;
             if (is_array($firstItem) && isset($firstItem['type']) && isset($firstItem['id'])) {
                 return true;
             }
         }
-        
+
         return false;
     }
 

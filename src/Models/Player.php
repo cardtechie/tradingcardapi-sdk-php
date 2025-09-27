@@ -8,8 +8,10 @@ use Illuminate\Support\Collection;
 /**
  * Class Player
  *
+ * @property string|null $id
  * @property string|null $first_name
  * @property string|null $last_name
+ * @property string|null $parent_id
  */
 class Player extends Model implements Taxonomy
 {
@@ -18,7 +20,7 @@ class Player extends Model implements Taxonomy
      */
     public function getFullNameAttribute(): ?string
     {
-        return trim(($this->first_name ?? '') . ' ' . ($this->last_name ?? ''));
+        return trim(($this->first_name ?? '').' '.($this->last_name ?? ''));
     }
 
     /**
@@ -28,11 +30,11 @@ class Player extends Model implements Taxonomy
     {
         $name = [];
 
-        if (!empty($this->last_name)) {
+        if (! empty($this->last_name)) {
             $name[] = $this->last_name;
         }
 
-        if (!empty($this->first_name)) {
+        if (! empty($this->first_name)) {
             $name[] = $this->first_name;
         }
 
@@ -96,7 +98,7 @@ class Player extends Model implements Taxonomy
      */
     public function getParent(): ?Player
     {
-        if (!isset($this->parent_id) || empty($this->parent_id)) {
+        if (! isset($this->parent_id) || empty($this->parent_id)) {
             return null;
         }
 
@@ -122,37 +124,38 @@ class Player extends Model implements Taxonomy
                 ['where[parent_id]' => $this->id],
                 ['parent' => $this->id],
             ];
-            
+
             foreach ($filterAttempts as $filter) {
                 $aliases = TradingCardApiSdk::player()->getList($filter);
-                
+
                 // Manually filter to ensure we only get actual aliases
                 $validAliases = $aliases->filter(function ($player) {
-                    return isset($player->parent_id) && 
-                           !empty($player->parent_id) && 
+                    return isset($player->parent_id) &&
+                           ! empty($player->parent_id) &&
                            $player->parent_id === $this->id;
                 });
-                
+
                 // If we found valid aliases, return them
                 if ($validAliases->isNotEmpty()) {
                     return $validAliases;
                 }
-                
-                // If we got few results (< 10) and they're all invalid, 
+
+                // If we got few results (< 10) and they're all invalid,
                 // this filter attempt probably worked but there are no aliases
                 if ($aliases->count() < 10) {
                     return collect(); // No aliases found
                 }
             }
-            
+
             // If no filter worked, return empty collection
             // TODO: Consider implementing a more efficient search if needed
             return collect();
-            
+
         } catch (\Exception $e) {
-            \Log::error('Failed to get aliases: ' . $e->getMessage(), [
-                'player_id' => $this->id
+            \Log::error('Failed to get aliases: '.$e->getMessage(), [
+                'player_id' => $this->id,
             ]);
+
             return collect();
         }
     }
@@ -207,12 +210,13 @@ class Player extends Model implements Taxonomy
                 'player_id' => $this->id,
                 'limit' => 1000, // Get all cards for this player
             ]);
-            
+
             return $cards->getCollection();
         } catch (\Exception $e) {
-            \Log::error('Failed to get cards for player: ' . $e->getMessage(), [
-                'player_id' => $this->id
+            \Log::error('Failed to get cards for player: '.$e->getMessage(), [
+                'player_id' => $this->id,
             ]);
+
             return collect();
         }
     }
@@ -224,7 +228,7 @@ class Player extends Model implements Taxonomy
      */
     public function isAlias(): bool
     {
-        return isset($this->parent_id) && !empty($this->parent_id);
+        return isset($this->parent_id) && ! empty($this->parent_id);
     }
 
     /**

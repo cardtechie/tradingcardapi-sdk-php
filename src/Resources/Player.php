@@ -42,9 +42,8 @@ class Player
     /**
      * Create a player
      *
-     * @param array $attributes Player attributes
-     * @param array $relationships Player relationships
-     *
+     * @param  array  $attributes  Player attributes
+     * @param  array  $relationships  Player relationships
      * @return PlayerModel The created player
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
@@ -76,9 +75,8 @@ class Player
     /**
      * Retrieve a player by ID
      *
-     * @param string $id Player ID
-     * @param array $params Additional parameters (e.g., include relationships)
-     *
+     * @param  string  $id  Player ID
+     * @param  array  $params  Additional parameters (e.g., include relationships)
      * @return PlayerModel The player
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
@@ -95,8 +93,7 @@ class Player
     /**
      * List players with pagination
      *
-     * @param array $params Query parameters (limit, page, sort, filters, etc.)
-     *
+     * @param  array  $params  Query parameters (limit, page, sort, filters, etc.)
      * @return LengthAwarePaginator Paginated player results
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
@@ -128,10 +125,9 @@ class Player
     /**
      * Update a player
      *
-     * @param string $id Player ID
-     * @param array $attributes Player attributes to update
-     * @param array $relationships Player relationships to update
-     *
+     * @param  string  $id  Player ID
+     * @param  array  $attributes  Player attributes to update
+     * @param  array  $relationships  Player relationships to update
      * @return PlayerModel The updated player
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
@@ -165,7 +161,7 @@ class Player
     /**
      * Delete a player
      *
-     * @param string $id Player ID
+     * @param  string  $id  Player ID
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -201,8 +197,7 @@ class Player
     /**
      * Get a deleted player by ID
      *
-     * @param string $id Player ID
-     *
+     * @param  string  $id  Player ID
      * @return PlayerModel The deleted player
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
