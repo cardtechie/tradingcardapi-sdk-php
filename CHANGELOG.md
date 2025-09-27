@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2025-09-27
+
+### Added
+
+- **Complete Player Resource Support** - Full CRUD operations for Player entities
+  - `TradingCardApiSdk::player()->get($id)` - Get player by ID
+  - `TradingCardApiSdk::player()->list($params)` - List players with pagination
+  - `TradingCardApiSdk::player()->create($data)` - Create new players
+  - `TradingCardApiSdk::player()->update($id, $data)` - Update existing players  
+  - `TradingCardApiSdk::player()->delete($id)` - Delete players
+  - `TradingCardApiSdk::player()->listDeleted()` - List deleted players
+  - `TradingCardApiSdk::player()->deleted($id)` - Get deleted player by ID
+
+- **Player Model Relationships** - Access related data through Player models
+  - `$player->getParent()` - Get parent player (for aliases)
+  - `$player->getAliases()` - Get all alias players
+  - `$player->getTeams()` - Get associated teams
+  - `$player->getPlayerteams()` - Get playerteam relationships
+  - `$player->getCards()` - Get all cards featuring this player
+  - `$player->isAlias()` - Check if player is an alias
+  - `$player->hasAliases()` - Check if player has aliases
+
+- **Enhanced Player Model Attributes**
+  - `$player->full_name` - Automatically formatted full name
+  - `$player->last_name_first` - Last name first format for display
+
+### Enhanced
+
+- **Improved Response Validation** - Better handling of API responses and error detection
+- **Enhanced Error Handling** - Graceful fallbacks when API calls fail
+
 ## [0.1.2] - 2025-09-21
 
 ### Changed
