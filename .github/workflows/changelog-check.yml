@@ -24,8 +24,16 @@ jobs:
           
           VALIDATION_FAILED=false
           
-          # Get version that would be generated for this branch
-          CURRENT_VERSION=$(bash build/version.sh)
+          # Get version that would be generated for this PR's branch
+          # Use the PR head ref to get the actual branch name
+          PR_HEAD_REF="${{ github.head_ref }}"
+          if [[ -n "$PR_HEAD_REF" ]]; then
+            # Use the actual branch name from the PR
+            CURRENT_VERSION=$(bash build/version.sh --branch="$PR_HEAD_REF")
+          else
+            # Fallback to current branch detection
+            CURRENT_VERSION=$(bash build/version.sh)
+          fi
           
           echo "Generated version for this branch: $CURRENT_VERSION"
           echo ""
