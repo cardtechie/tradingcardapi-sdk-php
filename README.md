@@ -62,6 +62,12 @@ $cards = TradingCardApiSdk::card()->getList(['name' => 'Pikachu']);
 
 // Get player information
 $player = TradingCardApiSdk::player()->get('player-id');
+
+// Get paginated list of players
+$players = TradingCardApiSdk::player()->list(['limit' => 25, 'page' => 1]);
+
+// Search for players
+$players = TradingCardApiSdk::player()->getList(['full_name' => 'Michael Jordan']);
 ```
 
 ### Using the Helper Function
@@ -114,6 +120,126 @@ $api = new TradingCardApi();
 $genres = $api->genre()->getList();
 ```
 
+## 👥 Working with Players
+
+The Player resource provides comprehensive CRUD operations and relationship management:
+
+### Basic Operations
+
+```php
+use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
+
+// Get a specific player
+$player = TradingCardApiSdk::player()->get('player-id');
+
+// Create a new player
+$player = TradingCardApiSdk::player()->create([
+    'first_name' => 'Michael',
+    'last_name' => 'Jordan'
+]);
+
+// Update player information
+$player = TradingCardApiSdk::player()->update('player-id', [
+    'first_name' => 'Michael Jeffrey',
+    'last_name' => 'Jordan'
+]);
+
+// Delete a player
+TradingCardApiSdk::player()->delete('player-id');
+```
+
+### Listing and Searching
+
+```php
+// Get paginated list of players
+$players = TradingCardApiSdk::player()->list([
+    'limit' => 50,
+    'page' => 1,
+    'sort' => 'last_name'
+]);
+
+// Search for players (returns Collection)
+$players = TradingCardApiSdk::player()->getList([
+    'full_name' => 'Michael Jordan',
+    'parent_id' => null  // Only parent players, not aliases
+]);
+
+// Find players by partial name
+$players = TradingCardApiSdk::player()->getList([
+    'first_name' => 'Michael'
+]);
+```
+
+### Player Relationships
+
+```php
+// Working with player relationships
+$player = TradingCardApiSdk::player()->get('player-id');
+
+// Get parent player (if this is an alias)
+$parent = $player->getParent();
+
+// Get all aliases of this player
+$aliases = $player->getAliases();
+
+// Get teams this player has been associated with
+$teams = $player->getTeams();
+
+// Get all player-team relationships
+$playerteams = $player->getPlayerteams();
+
+// Check if player is an alias
+if ($player->isAlias()) {
+    echo "This is an alias of: " . $player->getParent()->full_name;
+}
+
+// Check if player has aliases
+if ($player->hasAliases()) {
+    echo "This player has " . $player->getAliases()->count() . " aliases";
+}
+```
+
+### Creating Player Hierarchies
+
+```php
+// Create a parent player
+$parent = TradingCardApiSdk::player()->create([
+    'first_name' => 'Michael',
+    'last_name' => 'Jordan'
+]);
+
+// Create an alias player with parent relationship
+$alias = TradingCardApiSdk::player()->create(
+    ['first_name' => 'Mike', 'last_name' => 'Jordan'],
+    ['parent' => ['data' => ['type' => 'players', 'id' => $parent->id]]]
+);
+```
+
+### Working with Deleted Players
+
+```php
+// List deleted players
+$deletedPlayers = TradingCardApiSdk::player()->listDeleted();
+
+// Get a specific deleted player
+$deletedPlayer = TradingCardApiSdk::player()->deleted('player-id');
+```
+
+### Player Model Attributes
+
+```php
+$player = TradingCardApiSdk::player()->get('player-id');
+
+// Access player data
+echo $player->first_name;        // "Michael"
+echo $player->last_name;         // "Jordan"
+echo $player->full_name;         // "Michael Jordan" (computed attribute)
+echo $player->last_name_first;   // "Jordan, Michael" (computed attribute)
+
+// Check relationships
+echo $player->parent_id;         // UUID of parent player (if alias)
+```
+
 ## 📚 Available Resources
 
 The SDK provides access to the following Trading Card API resources:
@@ -122,7 +248,7 @@ The SDK provides access to the following Trading Card API resources:
 |----------|-------------|---------|
 | **Cards** | Individual trading cards | `get()`, `create()`, `update()`, `delete()` |
 | **Sets** | Card sets and collections | `get()`, `list()`, `create()`, `update()`, `delete()`, `checklist($id)`, `addMissingCards($id)`, `addChecklist($request, $id)` |
-| **Players** | Player information | `get()`, `getList()`, `create()` |
+| **Players** | Player information | `get()`, `list()`, `getList()`, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |
 | **Teams** | Team data | `get()`, `getList()`, `create()` |
 | **Genres** | Card categories/types | `get()`, `list()`, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |
 | **Brands** | Trading card brands | `get()`, `list()`, `create()`, `update()`, `delete()` |
