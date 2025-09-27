@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Complete Team resource CRUD operations (get, update, delete, list, listDeleted, deleted)
+
+### Fixed
+- API pagination handling when meta property is missing
+
 ## [0.1.4] - 2025-09-27
 
 ### Fixed
