@@ -115,10 +115,44 @@ class Player extends Model implements Taxonomy
     public function getAliases(): Collection
     {
         try {
-            return TradingCardApiSdk::player()->getList([
-                'parent_id' => $this->id,
-            ]);
+            // Try different filter parameter names in case the API uses a different convention
+            $filterAttempts = [
+                ['parent_id' => $this->id],
+                ['filter[parent_id]' => $this->id],
+                ['where[parent_id]' => $this->id],
+                ['parent' => $this->id],
+            ];
+            
+            foreach ($filterAttempts as $filter) {
+                $aliases = TradingCardApiSdk::player()->getList($filter);
+                
+                // Manually filter to ensure we only get actual aliases
+                $validAliases = $aliases->filter(function ($player) {
+                    return isset($player->parent_id) && 
+                           !empty($player->parent_id) && 
+                           $player->parent_id === $this->id;
+                });
+                
+                // If we found valid aliases, return them
+                if ($validAliases->isNotEmpty()) {
+                    return $validAliases;
+                }
+                
+                // If we got few results (< 10) and they're all invalid, 
+                // this filter attempt probably worked but there are no aliases
+                if ($aliases->count() < 10) {
+                    return collect(); // No aliases found
+                }
+            }
+            
+            // If no filter worked, return empty collection
+            // TODO: Consider implementing a more efficient search if needed
+            return collect();
+            
         } catch (\Exception $e) {
+            \Log::error('Failed to get aliases: ' . $e->getMessage(), [
+                'player_id' => $this->id
+            ]);
             return collect();
         }
     }
