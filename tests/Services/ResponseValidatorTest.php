@@ -279,3 +279,147 @@ it('resets validation state between calls', function () {
     expect($validator->isValid())->toBeTrue();
     expect($validator->getErrors())->toBeEmpty();
 });
+
+it('can detect collection responses correctly', function () {
+    $validator = new ResponseValidator;
+    
+    // Test collection response with data array
+    $collectionData = [
+        'data' => [
+            [
+                'id' => '1',
+                'type' => 'players',
+                'attributes' => [
+                    'first_name' => 'John',
+                    'last_name' => 'Doe',
+                ],
+            ],
+            [
+                'id' => '2',
+                'type' => 'players',
+                'attributes' => [
+                    'first_name' => 'Jane',
+                    'last_name' => 'Smith',
+                ],
+            ],
+        ],
+        'meta' => [
+            'pagination' => [
+                'total' => 2,
+                'per_page' => 50,
+                'current_page' => 1,
+            ],
+        ],
+    ];
+    
+    $result = $validator->validate('player', $collectionData, '/v1/players');
+    
+    expect($result)->toBeTrue();
+    expect($validator->isValid())->toBeTrue();
+    expect($validator->getErrors())->toBeEmpty();
+});
+
+it('can detect single resource responses correctly', function () {
+    $validator = new ResponseValidator;
+    
+    // Test single resource response with data object
+    $singleData = [
+        'data' => [
+            'id' => '123',
+            'type' => 'players',
+            'attributes' => [
+                'first_name' => 'John',
+                'last_name' => 'Doe',
+            ],
+        ],
+    ];
+    
+    $result = $validator->validate('player', $singleData, '/v1/players/123');
+    
+    expect($result)->toBeTrue();
+    expect($validator->isValid())->toBeTrue();
+    expect($validator->getErrors())->toBeEmpty();
+});
+
+it('validates collection response with pagination meta', function () {
+    $validator = new ResponseValidator;
+    
+    $collectionWithPagination = [
+        'data' => [
+            [
+                'id' => '1',
+                'type' => 'players',
+                'attributes' => [
+                    'first_name' => 'John',
+                    'last_name' => 'Doe',
+                ],
+            ],
+        ],
+        'meta' => [
+            'pagination' => [
+                'total' => 100,
+                'per_page' => 50,
+                'current_page' => 1,
+                'last_page' => 2,
+            ],
+        ],
+    ];
+    
+    $result = $validator->validate('player', $collectionWithPagination, '/v1/players');
+    
+    expect($result)->toBeTrue();
+    expect($validator->isValid())->toBeTrue();
+});
+
+it('handles empty collection responses', function () {
+    $validator = new ResponseValidator;
+    
+    $emptyCollection = [
+        'data' => [],
+        'meta' => [
+            'pagination' => [
+                'total' => 0,
+                'per_page' => 50,
+                'current_page' => 1,
+                'last_page' => 1,
+            ],
+        ],
+    ];
+    
+    $result = $validator->validate('player', $emptyCollection, '/v1/players');
+    
+    expect($result)->toBeTrue();
+    expect($validator->isValid())->toBeTrue();
+});
+
+it('validates playerteam collection responses', function () {
+    $validator = new ResponseValidator;
+    
+    $playerteamCollection = [
+        'data' => [
+            [
+                'id' => '1',
+                'type' => 'playerteams',
+                'attributes' => [
+                    'player_id' => '123',
+                    'team_id' => '456',
+                    'start_date' => '2020-01-01',
+                ],
+            ],
+            [
+                'id' => '2',
+                'type' => 'playerteams',
+                'attributes' => [
+                    'player_id' => '123',
+                    'team_id' => '789',
+                    'start_date' => '2021-01-01',
+                ],
+            ],
+        ],
+    ];
+    
+    $result = $validator->validate('playerteam', $playerteamCollection, '/v1/playerteams');
+    
+    expect($result)->toBeTrue();
+    expect($validator->isValid())->toBeTrue();
+});
