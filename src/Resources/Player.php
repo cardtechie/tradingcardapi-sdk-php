@@ -110,9 +110,10 @@ class Player
         $url = sprintf('/v1/players?%s', http_build_query($params));
         $response = $this->makeRequest($url);
 
-        $totalPages = $response->meta->pagination->total;
-        $perPage = $response->meta->pagination->per_page;
-        $page = $response->meta->pagination->current_page;
+        // Handle missing meta information gracefully
+        $totalPages = isset($response->meta->pagination->total) ? $response->meta->pagination->total : count($response->data);
+        $perPage = isset($response->meta->pagination->per_page) ? $response->meta->pagination->per_page : ($params['limit'] ?? 50);
+        $page = isset($response->meta->pagination->current_page) ? $response->meta->pagination->current_page : ($params['page'] ?? 1);
         $options = [
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'pageName' => $params['pageName'],

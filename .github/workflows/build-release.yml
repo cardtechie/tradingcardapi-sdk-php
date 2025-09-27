@@ -30,7 +30,13 @@ jobs:
       - name: Generate version
         id: version
         run: |
-          VERSION=$(bash build/version.sh)
+          # For push events, explicitly use the branch name from context
+          BRANCH_NAME="${{ github.ref_name }}"
+          if [[ -n "$BRANCH_NAME" ]]; then
+            VERSION=$(bash build/version.sh --branch="$BRANCH_NAME")
+          else
+            VERSION=$(bash build/version.sh)
+          fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           
           # Determine if this is a release version (not dev/beta/rc)
