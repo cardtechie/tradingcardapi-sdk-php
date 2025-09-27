@@ -30,31 +30,26 @@ jobs:
           echo "Generated version for this branch: $CURRENT_VERSION"
           echo ""
           
-          # Check if this PR targets main branch - all PRs to main should have changelog entries
+          # For PRs to main, we expect a proper release version in changelog
           PR_BASE_BRANCH="${{ github.base_ref }}"
           if [ "$PR_BASE_BRANCH" = "main" ]; then
-            echo "🎯 PR targets main branch - changelog validation required"
+            echo "🎯 PR targets main branch - release changelog validation required"
             
-            # Check if CHANGELOG.md has been modified in this PR
-            if git diff --name-only origin/main...HEAD | grep -q "CHANGELOG.md"; then
-              echo "✅ CHANGELOG.md has been updated in this PR"
-              
-              # Also check if there are entries in the Unreleased section
-              if grep -A 20 "^## \[Unreleased\]" CHANGELOG.md | grep -q "^### "; then
-                echo "✅ Unreleased section contains changelog entries"
-              else
-                echo "❌ Unreleased section is empty - please add changelog entries"
-                echo "   PRs to main branch must document changes in CHANGELOG.md"
-                VALIDATION_FAILED=true
-              fi
+            # Extract the base semantic version (remove any suffixes like -hotfix.xxx)
+            RELEASE_VERSION=$(echo "$CURRENT_VERSION" | sed 's/-.*$//')
+            echo "Expected release version: $RELEASE_VERSION"
+            
+            # Check that CHANGELOG.md has section for this release version
+            if grep -q "^## \[$RELEASE_VERSION\]" CHANGELOG.md; then
+              echo "✅ Version section [$RELEASE_VERSION] found in CHANGELOG.md"
             else
-              echo "❌ CHANGELOG.md has not been updated in this PR"
-              echo "   All PRs to main branch must include changelog updates"
-              echo "   Add entries to the [Unreleased] section describing your changes"
+              echo "❌ No version section [$RELEASE_VERSION] found in CHANGELOG.md"
+              echo "   PRs to main must have a changelog section for the release version"
+              echo "   Add a section like: ## [$RELEASE_VERSION] - $(date +%Y-%m-%d)"
               VALIDATION_FAILED=true
             fi
           else
-            echo "ℹ️  PR targets $PR_BASE_BRANCH branch - no changelog validation needed"
+            echo "ℹ️  PR targets $PR_BASE_BRANCH branch - no release validation needed"
           fi
           
           # Verify composer.json does NOT have hardcoded version (to prevent Packagist issues)
@@ -71,8 +66,8 @@ jobs:
             echo ""
             echo "📝 To fix validation issues:"
             echo "1. Ensure no 'version' field exists in composer.json"
-            echo "2. Update CHANGELOG.md with your changes in the [Unreleased] section"
-            echo "3. All PRs to main branch must document their changes"
+            echo "2. Add version section to CHANGELOG.md for: $RELEASE_VERSION"
+            echo "3. All PRs to main branch must have a release version section"
             echo ""
             echo "📚 See .claude/CLAUDE.md for complete release process documentation"
           fi
