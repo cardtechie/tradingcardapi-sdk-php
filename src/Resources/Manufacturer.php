@@ -89,9 +89,9 @@ class Manufacturer
         $response = $this->makeRequest($url);
 
         // Handle missing meta information gracefully
-        $totalPages = isset($response->meta->pagination->total) ? $response->meta->pagination->total : count($response->data);
-        $perPage = isset($response->meta->pagination->per_page) ? $response->meta->pagination->per_page : ($params['limit'] ?? 50);
-        $page = isset($response->meta->pagination->current_page) ? $response->meta->pagination->current_page : ($params['page'] ?? 1);
+        $totalPages = isset($response->meta, $response->meta->pagination, $response->meta->pagination->total) ? $response->meta->pagination->total : count($response->data);
+        $perPage = isset($response->meta, $response->meta->pagination, $response->meta->pagination->per_page) ? $response->meta->pagination->per_page : ($params['limit'] ?? 50);
+        $page = isset($response->meta, $response->meta->pagination, $response->meta->pagination->current_page) ? $response->meta->pagination->current_page : ($params['page'] ?? 1);
         $options = [
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'pageName' => $params['pageName'],
