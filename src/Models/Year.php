@@ -24,7 +24,7 @@ class Year extends Model
      */
     public function parent(): ?Year
     {
-        if (array_key_exists('parent', $this->relationships) && !empty($this->relationships['parent'])) {
+        if (array_key_exists('parent', $this->relationships) && ! empty($this->relationships['parent'])) {
             return $this->relationships['parent'][0] ?? null;
         }
 
@@ -48,7 +48,7 @@ class Year extends Model
      */
     public function hasParent(): bool
     {
-        return !empty($this->parent_year);
+        return ! empty($this->parent_year);
     }
 
     /**
@@ -65,9 +65,9 @@ class Year extends Model
      */
     public function getDisplayName(): string
     {
-        return $this->name 
-            ?? $this->year 
-            ?? $this->description 
+        return $this->name
+            ?? $this->year
+            ?? $this->description
             ?? 'Unknown Year';
     }
 }
