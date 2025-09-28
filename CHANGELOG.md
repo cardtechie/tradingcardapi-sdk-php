@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.8] - 2025-09-28
+
+### Fixed
+- Manufacturer resource pagination crash when API response missing meta property
+- Added defensive handling for missing pagination metadata in Manufacturer::list() method
+- Added collection validation rules for Manufacturer schema to support array responses
+- Fixed ManufacturerSchema validation failing on collection endpoints
+
+### Added
+- ManufacturerSchema::getCollectionRules() method for proper collection response validation
+- Enhanced defensive pagination handling with multi-level isset() checks
+
 ## [0.1.7] - 2025-09-28
 
 ### Fixed
