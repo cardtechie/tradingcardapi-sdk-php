@@ -107,3 +107,100 @@ it('converts to string with relationships', function () {
     expect($decodedJson['sets'])->toBeArray();
     expect($decodedJson['sets'])->toHaveCount(1);
 });
+
+// Test parent year functionality
+it('returns null parent when no parent relationship exists', function () {
+    $year = new Year(['id' => '123', 'year' => '2023']);
+
+    $parent = $year->parent();
+
+    expect($parent)->toBeNull();
+});
+
+it('returns parent year when parent relationship exists', function () {
+    $year = new Year(['id' => '123', 'year' => '2023', 'parent_year' => 'parent-id']);
+
+    $parentData = [
+        new Year(['id' => 'parent-id', 'year' => '2022']),
+    ];
+
+    $year->setRelationships(['parent' => $parentData]);
+
+    $parent = $year->parent();
+
+    expect($parent)->toBeInstanceOf(Year::class);
+    expect($parent->id)->toBe('parent-id');
+    expect($parent->year)->toBe('2022');
+});
+
+it('returns empty array when no children', function () {
+    $year = new Year(['id' => '123', 'year' => '2023']);
+
+    $children = $year->children();
+
+    expect($children)->toBe([]);
+});
+
+it('returns children array when children relationship exists', function () {
+    $year = new Year(['id' => '123', 'year' => '2023']);
+
+    $childrenData = [
+        new Year(['id' => '1', 'year' => '2023', 'parent_year' => '123']),
+        new Year(['id' => '2', 'year' => '2023', 'parent_year' => '123']),
+    ];
+
+    $year->setRelationships(['children' => $childrenData]);
+
+    $children = $year->children();
+
+    expect($children)->toHaveCount(2);
+    expect($children[0])->toBeInstanceOf(Year::class);
+    expect($children[0]->parent_year)->toBe('123');
+    expect($children[1])->toBeInstanceOf(Year::class);
+    expect($children[1]->parent_year)->toBe('123');
+});
+
+it('correctly detects if year has parent', function () {
+    $yearWithParent = new Year(['id' => '123', 'year' => '2023', 'parent_year' => 'parent-id']);
+    $yearWithoutParent = new Year(['id' => '456', 'year' => '2024']);
+
+    expect($yearWithParent->hasParent())->toBeTrue();
+    expect($yearWithoutParent->hasParent())->toBeFalse();
+});
+
+it('correctly detects if year has children', function () {
+    $yearWithChildren = new Year(['id' => '123', 'year' => '2023']);
+    $childrenData = [
+        new Year(['id' => '1', 'year' => '2023', 'parent_year' => '123']),
+    ];
+    $yearWithChildren->setRelationships(['children' => $childrenData]);
+
+    $yearWithoutChildren = new Year(['id' => '456', 'year' => '2024']);
+
+    expect($yearWithChildren->hasChildren())->toBeTrue();
+    expect($yearWithoutChildren->hasChildren())->toBeFalse();
+});
+
+it('generates correct display name with name field', function () {
+    $year = new Year(['id' => '123', 'name' => 'The Year 2023', 'year' => '2023']);
+
+    expect($year->getDisplayName())->toBe('The Year 2023');
+});
+
+it('generates correct display name with year field fallback', function () {
+    $year = new Year(['id' => '123', 'year' => '2023']);
+
+    expect($year->getDisplayName())->toBe('2023');
+});
+
+it('generates correct display name with description fallback', function () {
+    $year = new Year(['id' => '123', 'description' => 'Test Year']);
+
+    expect($year->getDisplayName())->toBe('Test Year');
+});
+
+it('generates default display name when no name fields exist', function () {
+    $year = new Year(['id' => '123']);
+
+    expect($year->getDisplayName())->toBe('Unknown Year');
+});

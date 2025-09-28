@@ -264,3 +264,137 @@ it('can delete a year', function () {
 
     expect(true)->toBeTrue(); // If no exception is thrown, the test passes
 });
+
+// Test parent year functionality
+it('can list parent years', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                [
+                    'type' => 'years',
+                    'id' => '123',
+                    'attributes' => [
+                        'year' => '2023',
+                        'parent_year' => null,
+                    ],
+                ],
+                [
+                    'type' => 'years',
+                    'id' => '124',
+                    'attributes' => [
+                        'year' => '2024',
+                        'parent_year' => null,
+                    ],
+                ],
+            ],
+            'meta' => [
+                'pagination' => [
+                    'total' => 50,
+                    'per_page' => 50,
+                    'current_page' => 1,
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->yearResource->listParents();
+
+    expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
+});
+
+it('can list parent years with custom params', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                [
+                    'type' => 'years',
+                    'id' => '123',
+                    'attributes' => [
+                        'year' => '2023',
+                        'parent_year' => null,
+                    ],
+                ],
+            ],
+            'meta' => [
+                'pagination' => [
+                    'total' => 25,
+                    'per_page' => 25,
+                    'current_page' => 1,
+                ],
+            ],
+        ]))
+    );
+
+    $params = ['limit' => 25];
+    $result = $this->yearResource->listParents($params);
+
+    expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
+});
+
+it('can list children for a specific parent year', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                [
+                    'type' => 'years',
+                    'id' => '125',
+                    'attributes' => [
+                        'year' => '2023',
+                        'parent_year' => '123',
+                        'description' => 'First variation',
+                    ],
+                ],
+                [
+                    'type' => 'years',
+                    'id' => '126',
+                    'attributes' => [
+                        'year' => '2023',
+                        'parent_year' => '123',
+                        'description' => 'Second variation',
+                    ],
+                ],
+            ],
+            'meta' => [
+                'pagination' => [
+                    'total' => 2,
+                    'per_page' => 50,
+                    'current_page' => 1,
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->yearResource->listChildren('123');
+
+    expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
+});
+
+it('can list children with custom params', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                [
+                    'type' => 'years',
+                    'id' => '125',
+                    'attributes' => [
+                        'year' => '2023',
+                        'parent_year' => '123',
+                        'description' => 'First variation',
+                    ],
+                ],
+            ],
+            'meta' => [
+                'pagination' => [
+                    'total' => 10,
+                    'per_page' => 10,
+                    'current_page' => 1,
+                ],
+            ],
+        ]))
+    );
+
+    $params = ['limit' => 10];
+    $result = $this->yearResource->listChildren('123', $params);
+
+    expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
+});

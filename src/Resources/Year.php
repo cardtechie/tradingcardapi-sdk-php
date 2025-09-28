@@ -141,4 +141,36 @@ class Year
         $url = '/v1/years/'.$id;
         $this->makeRequest($url, 'DELETE');
     }
+
+    /**
+     * Retrieve parent years (years without a parent_year)
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function listParents(array $params = []): LengthAwarePaginator
+    {
+        $defaultParams = [
+            'filter[parent_year]' => 'null',
+            'sort' => 'year',
+        ];
+        $params = array_merge($defaultParams, $params);
+
+        return $this->list($params);
+    }
+
+    /**
+     * Retrieve child years for a specific parent year
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function listChildren(string $parentYearId, array $params = []): LengthAwarePaginator
+    {
+        $defaultParams = [
+            'filter[parent_year]' => $parentYearId,
+            'sort' => 'year',
+        ];
+        $params = array_merge($defaultParams, $params);
+
+        return $this->list($params);
+    }
 }
