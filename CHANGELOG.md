@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Maintained backward compatibility with existing `year` and `description` fields
 
 ### Fixed
+- **Year Resource Pagination Crash** - Added defensive handling for missing meta property
+  - Fixed division by zero error when API response lacks pagination metadata  
+  - Added fallback pagination values using request params and response data
+  - Applied consistent pagination handling matching other SDK resources
 - Year resource integration gaps preventing admin interface migration
 - Field mapping inconsistencies between API database and SDK schema
 - Missing validation rules for Year parent relationships
