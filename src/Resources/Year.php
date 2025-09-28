@@ -92,7 +92,7 @@ class Year
         $totalPages = isset($response->meta->pagination->total) ? $response->meta->pagination->total : count($response->data ?? []);
         $perPage = isset($response->meta->pagination->per_page) ? $response->meta->pagination->per_page : $params['limit'];
         $page = isset($response->meta->pagination->current_page) ? $response->meta->pagination->current_page : $params['page'];
-        
+
         $options = [
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'pageName' => $params['pageName'],
