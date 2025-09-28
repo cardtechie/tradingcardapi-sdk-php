@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.9] - 2025-09-28
+
+### Added
+- **Complete Year Parent/Child Relationship Support** - Full hierarchical year functionality
+  - `Year::parent()` method for retrieving parent year relationship
+  - `Year::children()` method for retrieving child year relationships
+  - `Year::hasParent()` helper method for checking parent existence
+  - `Year::hasChildren()` helper method for checking child existence
+  - `Year::getDisplayName()` method for consistent display across applications
+  - `Year::listParents()` resource method for filtering parent years
+  - `Year::listChildren($parentId)` resource method for filtering child years
+
+### Enhanced
+- **YearSchema Field Mapping** - Resolved field mapping inconsistencies for admin integration
+  - Added `name` field validation to support database schema requirements
+  - Added `parent_year` field validation for relationship functionality
+  - Added `YearSchema::getCollectionRules()` method for bulk operation validation
+  - Maintained backward compatibility with existing `year` and `description` fields
+
+### Fixed
+- **Year Resource Pagination Crash** - Added defensive handling for missing meta property
+  - Fixed division by zero error when API response lacks pagination metadata  
+  - Added fallback pagination values using request params and response data
+  - Applied consistent pagination handling matching other SDK resources
+- Year resource integration gaps preventing admin interface migration
+- Field mapping inconsistencies between API database and SDK schema
+- Missing validation rules for Year parent relationships
+
 ## [0.1.8] - 2025-09-28
 
 ### Fixed
