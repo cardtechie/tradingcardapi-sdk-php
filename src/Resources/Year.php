@@ -88,9 +88,11 @@ class Year
         $url = sprintf('/v1/years?%s', http_build_query($params));
         $response = $this->makeRequest($url);
 
-        $totalPages = $response->meta->pagination->total;
-        $perPage = $response->meta->pagination->per_page;
-        $page = $response->meta->pagination->current_page;
+        // Defensive handling for missing pagination metadata
+        $totalPages = isset($response->meta->pagination->total) ? $response->meta->pagination->total : count($response->data ?? []);
+        $perPage = isset($response->meta->pagination->per_page) ? $response->meta->pagination->per_page : $params['limit'];
+        $page = isset($response->meta->pagination->current_page) ? $response->meta->pagination->current_page : $params['page'];
+        
         $options = [
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'pageName' => $params['pageName'],
@@ -151,7 +153,10 @@ class Year
     {
         $defaultParams = [
             'filter[parent_year]' => 'null',
-            'sort' => 'year',
+            'sort' => 'name', // Use name for sorting since that's what API has
+            'limit' => 50,
+            'page' => 1,
+            'pageName' => 'page',
         ];
         $params = array_merge($defaultParams, $params);
 
@@ -167,7 +172,10 @@ class Year
     {
         $defaultParams = [
             'filter[parent_year]' => $parentYearId,
-            'sort' => 'year',
+            'sort' => 'name', // Use name for sorting since that's what API has
+            'limit' => 50,
+            'page' => 1,
+            'pageName' => 'page',
         ];
         $params = array_merge($defaultParams, $params);
 
