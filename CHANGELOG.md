@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.7] - 2025-09-28
+
+### Fixed
+- Brand resource pagination crash when API response missing meta property
+- Added defensive handling for missing pagination metadata in Brand::list() method
+
 ## [0.1.6] - 2025-09-27
 
 ### Added
