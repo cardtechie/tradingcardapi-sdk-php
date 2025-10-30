@@ -268,8 +268,38 @@ return [
     'ssl_verify' => (bool) env('TRADINGCARDAPI_SSL_VERIFY', true),
     'client_id' => env('TRADINGCARDAPI_CLIENT_ID', ''),
     'client_secret' => env('TRADINGCARDAPI_CLIENT_SECRET', ''),
+    'scope' => env('TRADINGCARDAPI_SCOPE', 'read:published'),
 ];
 ```
+
+### OAuth Scopes
+
+Configure the OAuth scopes to request when authenticating. Available scopes:
+
+- **`read:published`** (default) - Access published content only
+- **`read:draft`** - Access published and draft content
+- **`read:all-status`** - Access all content regardless of status
+- **`write`** - Create and update resources
+- **`delete`** - Delete resources
+
+#### Examples
+
+**Read-only access to published content:**
+```env
+TRADINGCARDAPI_SCOPE="read:published"
+```
+
+**Admin access with full permissions:**
+```env
+TRADINGCARDAPI_SCOPE="read:all-status write delete"
+```
+
+**Content management (no delete):**
+```env
+TRADINGCARDAPI_SCOPE="read:draft write"
+```
+
+Multiple scopes should be separated by spaces. If not specified, the default scope (`read:published`) is used.
 
 ## 🧪 Development & Testing
 

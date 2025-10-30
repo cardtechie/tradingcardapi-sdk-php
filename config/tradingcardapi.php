@@ -48,6 +48,31 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | OAuth Scopes
+    |--------------------------------------------------------------------------
+    |
+    | The OAuth scopes to request when authenticating with the API. This
+    | controls what permissions the access token will have.
+    |
+    | Available scopes:
+    | - read:published (default): Access published content only
+    | - read:draft: Access published and draft content
+    | - read:all-status: Access all content regardless of status
+    | - write: Create and update resources
+    | - delete: Delete resources
+    |
+    | You can specify a single scope as a string or multiple scopes as a
+    | space-separated string:
+    |   'read:published'
+    |   'read:all-status write delete'
+    |
+    | For backwards compatibility, if not set, requests will be made without
+    | explicit scopes and receive the API's default scope (read:published).
+    */
+    'scope' => env('TRADINGCARDAPI_SCOPE', 'read:published'),
+
+    /*
+    |--------------------------------------------------------------------------
     | API Response Validation
     |--------------------------------------------------------------------------
     |
