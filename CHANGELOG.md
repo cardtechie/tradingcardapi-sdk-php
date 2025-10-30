@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.10] - 2025-10-30
+
+### Added
+- **OAuth Scope Configuration Support** - Configurable OAuth scopes for fine-grained API access control
+  - Added `scope` configuration option to `config/tradingcardapi.php`
+  - Default scope: `read:published` for backwards compatibility
+  - Supports space-separated multiple scopes (e.g., `read:all-status write delete`)
+  - Environment variable: `TRADINGCARDAPI_SCOPE`
+  - Updated `ApiRequest::retrieveToken()` to request configured scopes instead of empty string
+
+### Enhanced
+- **OAuth Token Authentication** - Modified OAuth token request to use configured scopes
+  - Changed `src/Resources/Traits/ApiRequest.php:120` from hardcoded empty scope to configurable scope
+  - Enables write operations, delete operations, and access to draft/archived content
+  - Unblocks admin applications requiring elevated permissions
+
+### Documentation
+- Added OAuth Scopes section to README.md with comprehensive examples
+- Documented all available scopes and their purposes
+- Provided configuration examples for different use cases (read-only, admin, content management)
+
 ## [0.1.9] - 2025-09-28
 
 ### Added
