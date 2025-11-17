@@ -30,23 +30,17 @@ class ApiRequestTestClass
 }
 
 beforeEach(function () {
-    // Mock config function for testing
-    if (! function_exists('config')) {
-        function config($key = null, $default = null)
-        {
-            $config = [
-                'tradingcardapi.client_id' => 'test_client_id',
-                'tradingcardapi.client_secret' => 'test_client_secret',
-                'tradingcardapi.validation.enabled' => false, // Disable validation for error handling tests
-            ];
+    // Set up Laravel config for tests
+    $this->app['config']->set('tradingcardapi', [
+        'client_id' => 'test-client-id',
+        'client_secret' => 'test-client-secret',
+        'validation' => [
+            'enabled' => false, // Disable validation for error handling tests
+        ],
+    ]);
 
-            if ($key === null) {
-                return $config;
-            }
-
-            return $config[$key] ?? $default;
-        }
-    }
+    // Pre-populate cache with token to avoid OAuth requests
+    cache()->put('tcapi_token_'.md5('test-client-idtest-client-secret'), 'test-token', 60);
 
     // Mock cache function for testing
     if (! function_exists('cache')) {
@@ -211,7 +205,8 @@ it('provides access to error parser instance', function () {
     $client = new Client(['handler' => $handlerStack]);
 
     // Clear cached token
-    cache()->put('tcapi_token', null, 0);
+    $tokenKey = 'tcapi_token_'.md5('test-client-idtest-client-secret');
+    cache()->put($tokenKey, null, 0);
 
     $apiRequest = new ApiRequestTestClass($client);
 
@@ -242,9 +237,8 @@ it('handles authentication errors during token retrieval', function () {
     $client = new Client(['handler' => $handlerStack]);
 
     // Create fresh instance without cached token
-    if (function_exists('cache')) {
-        cache()->put('tcapi_token', null, 0); // Clear token
-    }
+    $tokenKey = 'tcapi_token_'.md5('test-client-idtest-client-secret');
+    cache()->put($tokenKey, null, 0); // Clear token
 
     $apiRequest = new ApiRequestTestClass($client);
 
@@ -272,7 +266,8 @@ it('successfully makes request when no errors occur', function () {
     $client = new Client(['handler' => $handlerStack]);
 
     // Clear cached token to force token retrieval
-    cache()->put('tcapi_token', null, 0);
+    $tokenKey = 'tcapi_token_'.md5('test-client-idtest-client-secret');
+    cache()->put($tokenKey, null, 0);
 
     $apiRequest = new ApiRequestTestClass($client);
     $result = $apiRequest->testMakeRequest('/api/cards/123');

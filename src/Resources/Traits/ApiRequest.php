@@ -164,7 +164,7 @@ trait ApiRequest
 
             // Fallback to config if PAT not set via setAuthInfo
             $config = config('tradingcardapi');
-            if (isset($config['personal_access_token'])) {
+            if (! empty($config['personal_access_token'])) {
                 $this->token = $config['personal_access_token'];
 
                 return;
@@ -182,6 +182,11 @@ trait ApiRequest
             $config = config('tradingcardapi');
             $clientId = $config['client_id'] ?? '';
             $clientSecret = $config['client_secret'] ?? '';
+        }
+
+        // Validate that we have non-empty credentials
+        if (empty($clientId) || empty($clientSecret)) {
+            throw new \RuntimeException('OAuth2 client credentials not configured. Please set TRADINGCARDAPI_CLIENT_ID and TRADINGCARDAPI_CLIENT_SECRET.');
         }
 
         // Generate unique cache key based on credentials to prevent token sharing
