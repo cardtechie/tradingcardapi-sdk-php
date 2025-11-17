@@ -77,6 +77,80 @@ $team = tradingcardapi()->team()->create([
 ]);
 ```
 
+## 🔐 Authentication
+
+The SDK supports two authentication methods:
+
+### Personal Access Token (PAT) - Recommended for Simple Use Cases
+
+Personal Access Tokens provide a simpler authentication flow ideal for:
+- Testing and development
+- Single-user applications
+- AI/GPT integrations
+- Simple scripts and tools
+
+```php
+use CardTechie\TradingCardApiSdk\TradingCardApi;
+
+// Method 1: Direct instantiation with token
+$api = TradingCardApi::withPersonalAccessToken('your-pat-token-here');
+
+// Method 2: From configuration
+$api = TradingCardApi::withPersonalAccessToken(
+    config('tradingcardapi.personal_access_token')
+);
+
+// Use normally
+$card = $api->card()->get('card-id');
+```
+
+**Environment Configuration:**
+
+```env
+# .env
+TRADINGCARDAPI_URL=https://api.tradingcardapi.com
+TRADINGCARDAPI_PAT=your-personal-access-token
+```
+
+**Security Considerations:**
+- ⚠️ PAT tokens are long-lived and should be kept secret
+- Never commit tokens to version control
+- Always use environment variables
+- Rotate tokens periodically
+- Consider OAuth2 for production multi-user applications
+
+### OAuth2 Client Credentials - Recommended for Production
+
+OAuth2 Client Credentials flow is ideal for:
+- Production applications
+- Multi-user systems
+- Applications requiring token refresh
+
+```php
+use CardTechie\TradingCardApiSdk\TradingCardApi;
+
+// Method 1: Using static method
+$api = TradingCardApi::withClientCredentials(
+    clientId: config('tradingcardapi.client_id'),
+    clientSecret: config('tradingcardapi.client_secret')
+);
+
+// Method 2: Using default constructor (uses config)
+$api = new TradingCardApi();
+
+// Use normally
+$card = $api->card()->get('card-id');
+```
+
+**Environment Configuration:**
+
+```env
+# .env
+TRADINGCARDAPI_URL=https://api.tradingcardapi.com
+TRADINGCARDAPI_CLIENT_ID=your-client-id
+TRADINGCARDAPI_CLIENT_SECRET=your-client-secret
+```
+
 ### Error Handling
 
 The SDK provides comprehensive error handling with specific exception classes:

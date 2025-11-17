@@ -112,3 +112,96 @@ it('creates guzzle client with correct configuration', function () {
 
     expect($client)->toBeInstanceOf(Client::class);
 });
+
+// Personal Access Token Authentication Tests
+
+it('can be instantiated with personal access token', function () {
+    $api = TradingCardApi::withPersonalAccessToken('test-pat-token');
+
+    expect($api)->toBeInstanceOf(TradingCardApi::class);
+    expect($api->getAuthType())->toBe('pat');
+    expect($api->getPersonalAccessToken())->toBe('test-pat-token');
+});
+
+it('can be instantiated with client credentials', function () {
+    $api = TradingCardApi::withClientCredentials('test-client-id', 'test-client-secret');
+
+    expect($api)->toBeInstanceOf(TradingCardApi::class);
+    expect($api->getAuthType())->toBe('oauth2');
+});
+
+it('defaults to oauth2 authentication type', function () {
+    $api = new TradingCardApi;
+
+    expect($api->getAuthType())->toBe('oauth2');
+    expect($api->getPersonalAccessToken())->toBeNull();
+});
+
+it('passes auth info to resources when using PAT', function () {
+    $api = TradingCardApi::withPersonalAccessToken('test-pat-token');
+    $card = $api->card();
+
+    expect($card)->toBeInstanceOf(Card::class);
+
+    // Use reflection to verify auth info was set on the resource
+    $reflection = new ReflectionClass($card);
+    $authTypeProperty = $reflection->getProperty('authType');
+    $authTypeProperty->setAccessible(true);
+
+    expect($authTypeProperty->getValue($card))->toBe('pat');
+});
+
+it('passes auth info to resources when using OAuth2', function () {
+    $api = TradingCardApi::withClientCredentials('client-id', 'client-secret');
+    $card = $api->card();
+
+    expect($card)->toBeInstanceOf(Card::class);
+
+    // Use reflection to verify auth info was set on the resource
+    $reflection = new ReflectionClass($card);
+    $authTypeProperty = $reflection->getProperty('authType');
+    $authTypeProperty->setAccessible(true);
+
+    expect($authTypeProperty->getValue($card))->toBe('oauth2');
+
+    // Verify OAuth2 credentials were passed to the resource
+    $clientIdProperty = $reflection->getProperty('oauthClientId');
+    $clientIdProperty->setAccessible(true);
+    $clientSecretProperty = $reflection->getProperty('oauthClientSecret');
+    $clientSecretProperty->setAccessible(true);
+
+    expect($clientIdProperty->getValue($card))->toBe('client-id');
+    expect($clientSecretProperty->getValue($card))->toBe('client-secret');
+});
+
+it('auto-detects PAT mode when PAT is set and OAuth2 credentials are empty', function () {
+    config(['tradingcardapi.personal_access_token' => 'test-pat-token']);
+    config(['tradingcardapi.client_id' => '']);
+    config(['tradingcardapi.client_secret' => '']);
+
+    $api = new TradingCardApi;
+
+    expect($api->getAuthType())->toBe('pat');
+    expect($api->getPersonalAccessToken())->toBe('test-pat-token');
+});
+
+it('defaults to OAuth2 when both PAT and OAuth2 credentials are set', function () {
+    config(['tradingcardapi.personal_access_token' => 'test-pat-token']);
+    config(['tradingcardapi.client_id' => 'test-client-id']);
+    config(['tradingcardapi.client_secret' => 'test-client-secret']);
+
+    $api = new TradingCardApi;
+
+    expect($api->getAuthType())->toBe('oauth2');
+});
+
+it('uses explicit auth_type option over auto-detection', function () {
+    config(['tradingcardapi.personal_access_token' => 'test-pat-token']);
+    config(['tradingcardapi.client_id' => '']);
+    config(['tradingcardapi.client_secret' => '']);
+
+    // Explicitly set to oauth2 even though PAT is available
+    $api = new TradingCardApi(['auth_type' => 'oauth2']);
+
+    expect($api->getAuthType())->toBe('oauth2');
+});

@@ -38,6 +38,8 @@ class ResourceNotFoundException extends TradingCardApiException
 
     /**
      * Create exception for specific resource type and ID
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function resource(string $resourceType, string $resourceId, array $context = []): self
     {
@@ -62,6 +64,8 @@ class ResourceNotFoundException extends TradingCardApiException
 
     /**
      * Create exception for endpoint not found
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function endpoint(string $endpoint, array $context = []): self
     {

@@ -41,6 +41,54 @@ trait ApiRequest
     private $errorParser;
 
     /**
+     * Authentication type ('oauth2' or 'pat')
+     *
+     * @var string
+     */
+    private $authType = 'oauth2';
+
+    /**
+     * Personal Access Token (for PAT auth mode)
+     *
+     * @var string|null
+     */
+    private $personalAccessToken;
+
+    /**
+     * OAuth2 Client ID (for OAuth2 auth mode)
+     *
+     * @var string|null
+     */
+    private $oauthClientId;
+
+    /**
+     * OAuth2 Client Secret (for OAuth2 auth mode)
+     *
+     * @var string|null
+     */
+    private $oauthClientSecret;
+
+    /**
+     * Set authentication information
+     *
+     * @param  string  $authType  The authentication type ('oauth2' or 'pat')
+     * @param  string|null  $personalAccessToken  The personal access token (for PAT mode)
+     * @param  string|null  $clientId  The OAuth2 client ID (for OAuth2 mode)
+     * @param  string|null  $clientSecret  The OAuth2 client secret (for OAuth2 mode)
+     */
+    public function setAuthInfo(
+        string $authType,
+        ?string $personalAccessToken = null,
+        ?string $clientId = null,
+        ?string $clientSecret = null
+    ): void {
+        $this->authType = $authType;
+        $this->personalAccessToken = $personalAccessToken;
+        $this->oauthClientId = $clientId;
+        $this->oauthClientSecret = $clientSecret;
+    }
+
+    /**
      * Makes a request to an API endpoint or webpage and returns its response
      *
      * @param  string  $url  Url of the api or webpage
@@ -106,14 +154,52 @@ trait ApiRequest
      */
     private function retrieveToken(): void
     {
-        $tokenKey = 'tcapi_token';
+        // If using PAT authentication, use the personal access token directly
+        if ($this->authType === 'pat') {
+            if ($this->personalAccessToken) {
+                $this->token = $this->personalAccessToken;
+
+                return;
+            }
+
+            // Fallback to config if PAT not set via setAuthInfo
+            $config = config('tradingcardapi');
+            if (! empty($config['personal_access_token'])) {
+                $this->token = $config['personal_access_token'];
+
+                return;
+            }
+
+            throw new \RuntimeException('Personal Access Token not configured');
+        }
+
+        // OAuth2 Client Credentials flow
+        // First, check if credentials were set via setAuthInfo() (e.g., from withClientCredentials())
+        // This allows using TradingCardApi::withClientCredentials() without needing config values
+        $clientId = $this->oauthClientId;
+        $clientSecret = $this->oauthClientSecret;
+
+        // If instance credentials are not set, fall back to config values
+        if (! $clientId || ! $clientSecret) {
+            $config = config('tradingcardapi');
+            $clientId = $config['client_id'] ?? '';
+            $clientSecret = $config['client_secret'] ?? '';
+        }
+
+        // Validate that we have non-empty credentials
+        if (empty($clientId) || empty($clientSecret)) {
+            throw new \RuntimeException('OAuth2 client credentials not configured. Please set TRADINGCARDAPI_CLIENT_ID and TRADINGCARDAPI_CLIENT_SECRET.');
+        }
+
+        // Generate unique cache key based on credentials to prevent token sharing
+        // between different OAuth2 client instances
+        $tokenKey = 'tcapi_token_'.md5($clientId.$clientSecret);
+
         if (cache()->has($tokenKey)) {
             $this->token = cache()->get($tokenKey);
 
             return;
         }
-
-        $config = config('tradingcardapi');
 
         $url = '/oauth/token';
         $headers = [
@@ -123,8 +209,8 @@ trait ApiRequest
 
         $body = [
             'grant_type' => 'client_credentials',
-            'client_id' => $config['client_id'],
-            'client_secret' => $config['client_secret'],
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
             'scope' => '',
         ];
 

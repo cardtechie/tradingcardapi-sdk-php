@@ -67,8 +67,9 @@ it('can make a request with token retrieval', function () {
 });
 
 it('uses cached token when available', function () {
-    // Set a cached token
-    cache()->put('tcapi_token', 'cached-token', 60);
+    // Set a cached token with the new cache key format (includes credentials hash)
+    $cacheKey = 'tcapi_token_'.md5('test-client-idtest-client-secret');
+    cache()->put($cacheKey, 'cached-token', 60);
 
     $client = m::mock(Client::class);
 
