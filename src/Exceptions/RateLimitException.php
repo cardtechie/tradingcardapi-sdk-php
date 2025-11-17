@@ -135,6 +135,9 @@ class RateLimitException extends TradingCardApiException
 
     /**
      * Create exception from response headers
+     *
+     * @param  array<string, mixed>  $headers
+     * @param  array<string, mixed>  $context
      */
     public static function fromHeaders(
         array $headers,

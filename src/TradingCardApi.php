@@ -107,7 +107,6 @@ class TradingCardApi
      * Create a new instance using Personal Access Token authentication
      *
      * @param  string  $token  The personal access token
-     * @return self
      */
     public static function withPersonalAccessToken(string $token): self
     {
@@ -122,7 +121,6 @@ class TradingCardApi
      *
      * @param  string  $clientId  The OAuth2 client ID
      * @param  string  $clientSecret  The OAuth2 client secret
-     * @return self
      */
     public static function withClientCredentials(string $clientId, string $clientSecret): self
     {

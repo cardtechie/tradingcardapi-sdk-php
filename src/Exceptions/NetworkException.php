@@ -38,6 +38,8 @@ class NetworkException extends TradingCardApiException
 
     /**
      * Create exception for connection timeout
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function connectionTimeout(float $timeout, array $context = []): self
     {
@@ -56,6 +58,8 @@ class NetworkException extends TradingCardApiException
 
     /**
      * Create exception for request timeout
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function requestTimeout(float $timeout, array $context = []): self
     {
@@ -74,6 +78,8 @@ class NetworkException extends TradingCardApiException
 
     /**
      * Create exception for DNS resolution failure
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function dnsResolutionFailed(string $hostname, array $context = []): self
     {
@@ -92,6 +98,8 @@ class NetworkException extends TradingCardApiException
 
     /**
      * Create exception for connection refused
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function connectionRefused(string $host, int $port, array $context = []): self
     {
@@ -110,6 +118,8 @@ class NetworkException extends TradingCardApiException
 
     /**
      * Create exception for SSL/TLS certificate errors
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function sslError(string $message, array $context = []): self
     {
@@ -128,6 +138,8 @@ class NetworkException extends TradingCardApiException
 
     /**
      * Create exception from Guzzle ConnectException
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function fromGuzzleConnectException(\Exception $exception, array $context = []): self
     {

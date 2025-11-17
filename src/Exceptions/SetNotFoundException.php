@@ -9,6 +9,8 @@ class SetNotFoundException extends ResourceNotFoundException
 {
     /**
      * Create exception for set not found by ID
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function byId(string $setId, array $context = []): self
     {
@@ -24,6 +26,8 @@ class SetNotFoundException extends ResourceNotFoundException
 
     /**
      * Create exception for set not found by name
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function byName(string $setName, array $context = []): self
     {

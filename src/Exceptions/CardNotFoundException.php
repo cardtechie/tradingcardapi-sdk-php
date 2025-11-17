@@ -9,6 +9,8 @@ class CardNotFoundException extends ResourceNotFoundException
 {
     /**
      * Create exception for card not found by ID
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function byId(string $cardId, array $context = []): self
     {
@@ -24,6 +26,9 @@ class CardNotFoundException extends ResourceNotFoundException
 
     /**
      * Create exception for card not found by criteria
+     *
+     * @param  array<string, mixed>  $criteria
+     * @param  array<string, mixed>  $context
      */
     public static function byCriteria(array $criteria, array $context = []): self
     {

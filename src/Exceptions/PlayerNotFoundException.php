@@ -9,6 +9,8 @@ class PlayerNotFoundException extends ResourceNotFoundException
 {
     /**
      * Create exception for player not found by ID
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function byId(string $playerId, array $context = []): self
     {
@@ -24,6 +26,8 @@ class PlayerNotFoundException extends ResourceNotFoundException
 
     /**
      * Create exception for player not found by name
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function byName(string $playerName, array $context = []): self
     {

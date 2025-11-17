@@ -40,6 +40,8 @@ class ServerException extends TradingCardApiException
 
     /**
      * Create exception for internal server error (500)
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function internalServerError(array $context = []): self
     {
@@ -59,6 +61,8 @@ class ServerException extends TradingCardApiException
 
     /**
      * Create exception for service unavailable (503)
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function serviceUnavailable(array $context = []): self
     {
@@ -78,6 +82,8 @@ class ServerException extends TradingCardApiException
 
     /**
      * Create exception for bad gateway (502)
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function badGateway(array $context = []): self
     {
@@ -97,6 +103,8 @@ class ServerException extends TradingCardApiException
 
     /**
      * Create exception for gateway timeout (504)
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function gatewayTimeout(array $context = []): self
     {
