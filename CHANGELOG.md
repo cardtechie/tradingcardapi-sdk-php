@@ -73,6 +73,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Comprehensive test coverage for all relationship methods
   - Updated documentation with Collection-based examples
 
+### Changed
+
+- **⚠️ BREAKING CHANGE: Migrated Array-Based Relationship Methods to Collections** - Consistent Collection API across all model relationships
+  - **Set Model Changes:**
+    - `Set::subsets()` - Now returns `Collection<Set>` instead of `array`
+    - `Set::checklist()` - Now returns `Collection<Card>` instead of `array`
+    - Added `Set::hasSubsets()` helper method
+    - Added `Set::hasChecklist()` helper method
+    - Refactored navigation methods to use Collection search (no longer stateful)
+    - Removed private `$checklistIndex` property (cleaner functional approach)
+  - **Card Model Changes:**
+    - `Card::oncard()` - Now returns `Collection<mixed>` instead of `?array`
+    - `Card::extraAttributes()` - Now returns `Collection<mixed>` instead of `?array`
+    - Added `Card::hasOncard()` helper method
+    - Added `Card::hasExtraAttributes()` helper method
+  - **ObjectAttribute Model Changes:**
+    - `ObjectAttribute::cards()` - Now returns `Collection<Card>` instead of `array`
+    - Added `ObjectAttribute::hasCards()` helper method
+  - **Migration Guide:**
+    - Most iteration code continues to work (Collections are iterable)
+    - Array functions need updating:
+      - `count($model->relationship())` → `$model->relationship()->count()`
+      - `array_filter($array, ...)` → `$collection->filter(...)`
+      - `array_map($callback, $array)` → `$collection->map($callback)`
+    - Null checks need updating:
+      - `if ($card->oncard() === null)` → `if ($card->hasOncard())`
+      - `if (empty($set->checklist()))` → `if ($set->hasChecklist())`
+  - **Benefits:**
+    - Consistent API across all relationships
+    - Access to 80+ Laravel Collection methods
+    - Better IDE support with type hints
+    - Cleaner, more maintainable code
+  - Full test coverage with Collection method examples
+  - See issue #133 for implementation details
+
 ## [0.1.0] - 2025-09-15
 
 ### Added

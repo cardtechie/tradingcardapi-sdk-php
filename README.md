@@ -535,6 +535,151 @@ $source = TradingCardApiSdk::setSource()->update('source-uuid', [
 echo $source->verified_at->format('Y-m-d'); // Carbon instance
 ```
 
+## 🔗 Working with Model Relationships & Collections
+
+The SDK uses Laravel Collections for all relationship methods, providing a powerful and fluent API for working with related data. All relationship methods return `Collection` instances, giving you access to 80+ collection methods for filtering, mapping, and transforming data.
+
+### Set Relationships
+
+#### Subsets Collection
+
+```php
+// Load a set with subsets included
+$set = TradingCardApiSdk::set()->get('set-uuid', [
+    'include' => 'subsets',
+]);
+
+// Get all subsets as a Collection
+$subsets = $set->subsets(); // Returns Collection<Set>
+
+// Use Collection methods
+$activeSubsets = $subsets->filter(fn($subset) => $subset->status === 'active');
+$subsetNames = $subsets->pluck('name');
+$firstSubset = $subsets->first();
+
+// Check if set has subsets
+if ($set->hasSubsets()) {
+    echo "This set has {$subsets->count()} subset(s)";
+}
+```
+
+#### Checklist Collection
+
+```php
+// Load a set with checklist included
+$set = TradingCardApiSdk::set()->get('set-uuid', [
+    'include' => 'checklist',
+]);
+
+// Get all checklist cards as a Collection
+$checklist = $set->checklist(); // Returns Collection<Card>
+
+// Use Collection methods
+$rookieCards = $checklist->filter(fn($card) => $card->is_rookie === true);
+$cardNumbers = $checklist->pluck('number');
+$cardCount = $checklist->count();
+
+// Check if set has checklist
+if ($set->hasChecklist()) {
+    echo "This set has {$checklist->count()} card(s)";
+}
+
+// Navigate through checklist
+$currentCard = $checklist->first();
+$nextCard = $set->nextCard($currentCard);
+$previousCard = $set->previousCard($currentCard);
+```
+
+### Card Relationships
+
+#### OnCard Collection
+
+```php
+// Load a card with oncard relationships included
+$card = TradingCardApiSdk::card()->get('card-uuid', [
+    'include' => 'oncard',
+]);
+
+// Get all oncard items as a Collection
+$oncard = $card->oncard(); // Returns Collection<mixed>
+
+// Use Collection methods
+$players = $oncard->filter(fn($item) => $item->on_cardable_type === 'players');
+$teams = $oncard->filter(fn($item) => $item->on_cardable_type === 'teams');
+
+// Check if card has oncard items
+if ($card->hasOncard()) {
+    echo "This card features {$oncard->count()} item(s)";
+}
+```
+
+#### Extra Attributes Collection
+
+```php
+// Load a card with extra attributes included
+$card = TradingCardApiSdk::card()->get('card-uuid', [
+    'include' => 'attributes',
+]);
+
+// Get all extra attributes as a Collection
+$attributes = $card->extraAttributes(); // Returns Collection<mixed>
+
+// Use Collection methods
+$specialAttributes = $attributes->filter(fn($attr, $key) => str_starts_with($key, 'special_'));
+
+// Check if card has extra attributes
+if ($card->hasExtraAttributes()) {
+    echo "This card has {$attributes->count()} extra attribute(s)";
+}
+```
+
+### ObjectAttribute Relationships
+
+#### Cards Collection
+
+```php
+// Load an object attribute with cards included
+$attribute = TradingCardApiSdk::objectAttribute()->get('attribute-uuid', [
+    'include' => 'cards',
+]);
+
+// Get all cards with this attribute as a Collection
+$cards = $attribute->cards(); // Returns Collection<Card>
+
+// Use Collection methods
+$recentCards = $cards->sortByDesc('created_at')->take(10);
+$cardNames = $cards->pluck('name');
+
+// Check if attribute has cards
+if ($attribute->hasCards()) {
+    echo "This attribute is used on {$cards->count()} card(s)";
+}
+```
+
+### Collection Methods Available
+
+All relationship methods return Laravel Collections, giving you access to powerful methods:
+
+**Filtering & Searching:**
+- `filter()`, `reject()`, `first()`, `last()`, `firstWhere()`, `where()`
+
+**Transformation:**
+- `map()`, `pluck()`, `flatMap()`, `groupBy()`, `keyBy()`
+
+**Aggregation:**
+- `count()`, `sum()`, `avg()`, `min()`, `max()`
+
+**Sorting:**
+- `sort()`, `sortBy()`, `sortByDesc()`, `reverse()`
+
+**Chunking & Pagination:**
+- `take()`, `skip()`, `chunk()`, `forPage()`
+
+**Boolean Checks:**
+- `isEmpty()`, `isNotEmpty()`, `contains()`, `doesntContain()`
+
+See the full [Laravel Collections Documentation](https://laravel.com/docs/11.x/collections) for all available methods.
+
 ## 📚 Available Resources
 
 The SDK provides access to the following Trading Card API resources:

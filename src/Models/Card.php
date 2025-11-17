@@ -35,29 +35,47 @@ class Card extends Model
     }
 
     /**
-     * Retrieve array of objects on the card.
+     * Retrieve collection of objects on the card.
+     *
+     * @return Collection<int, mixed>
      */
-    public function oncard(): ?array
+    public function oncard(): Collection
     {
-        $key = 'oncard';
-        if (array_key_exists($key, $this->relationships)) {
-            return $this->relationships[$key];
+        if (array_key_exists('oncard', $this->relationships)) {
+            return collect($this->relationships['oncard']);
         }
 
-        return [];
+        return collect([]);
     }
 
     /**
-     * Retrieve array of extra attributes assigned to card
+     * Check if card has any oncard items.
      */
-    public function extraAttributes(): ?array
+    public function hasOncard(): bool
     {
-        $key = 'attributes';
-        if (array_key_exists($key, $this->relationships)) {
-            return $this->relationships[$key];
+        return $this->oncard()->isNotEmpty();
+    }
+
+    /**
+     * Retrieve collection of extra attributes assigned to card.
+     *
+     * @return Collection<int, mixed>
+     */
+    public function extraAttributes(): Collection
+    {
+        if (array_key_exists('attributes', $this->relationships)) {
+            return collect($this->relationships['attributes']);
         }
 
-        return [];
+        return collect([]);
+    }
+
+    /**
+     * Check if card has any extra attributes.
+     */
+    public function hasExtraAttributes(): bool
+    {
+        return $this->extraAttributes()->isNotEmpty();
     }
 
     /**

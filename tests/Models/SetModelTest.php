@@ -62,7 +62,7 @@ it('returns year relationship', function () {
     expect($set->year())->toBe($year);
 });
 
-it('returns subsets array', function () {
+it('returns subsets collection', function () {
     $subset1 = new Set(['id' => '1', 'name' => 'Subset 1']);
     $subset2 = new Set(['id' => '2', 'name' => 'Subset 2']);
     $subsets = [$subset1, $subset2];
@@ -70,16 +70,62 @@ it('returns subsets array', function () {
     $set = new Set(['id' => '123']);
     $set->setRelationships(['subsets' => $subsets]);
 
-    expect($set->subsets())->toBe($subsets);
+    $subsetsCollection = $set->subsets();
+
+    expect($subsetsCollection)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($subsetsCollection)->toHaveCount(2);
+    expect($subsetsCollection->get(0))->toBe($subset1);
+    expect($subsetsCollection->get(1))->toBe($subset2);
 });
 
-it('returns empty array when no subsets', function () {
+it('returns empty collection when no subsets', function () {
     $set = new Set(['id' => '123']);
 
-    expect($set->subsets())->toBe([]);
+    $subsets = $set->subsets();
+
+    expect($subsets)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($subsets)->toBeEmpty();
 });
 
-it('returns checklist array', function () {
+it('hasSubsets returns false when no subsets', function () {
+    $set = new Set(['id' => '123']);
+
+    expect($set->hasSubsets())->toBeFalse();
+});
+
+it('hasSubsets returns true when subsets exist', function () {
+    $subset1 = new Set(['id' => '1', 'name' => 'Subset 1']);
+
+    $set = new Set(['id' => '123']);
+    $set->setRelationships(['subsets' => [$subset1]]);
+
+    expect($set->hasSubsets())->toBeTrue();
+});
+
+it('subsets collection supports collection methods', function () {
+    $subset1 = new Set(['id' => '1', 'name' => 'Subset 1']);
+    $subset2 = new Set(['id' => '2', 'name' => 'Subset 2']);
+    $subset3 = new Set(['id' => '3', 'name' => 'Subset 3']);
+
+    $set = new Set(['id' => '123']);
+    $set->setRelationships(['subsets' => [$subset1, $subset2, $subset3]]);
+
+    $subsets = $set->subsets();
+
+    // Test pluck
+    $names = $subsets->pluck('name');
+    expect($names->toArray())->toBe(['Subset 1', 'Subset 2', 'Subset 3']);
+
+    // Test filter
+    $filteredSubsets = $subsets->filter(fn ($subset) => $subset->id === '2');
+    expect($filteredSubsets)->toHaveCount(1);
+    expect($filteredSubsets->first()->name)->toBe('Subset 2');
+
+    // Test first
+    expect($subsets->first()->name)->toBe('Subset 1');
+});
+
+it('returns checklist collection', function () {
     $card1 = new Card(['id' => '1', 'name' => 'Card 1']);
     $card2 = new Card(['id' => '2', 'name' => 'Card 2']);
     $checklist = [$card1, $card2];
@@ -87,13 +133,59 @@ it('returns checklist array', function () {
     $set = new Set(['id' => '123']);
     $set->setRelationships(['checklist' => $checklist]);
 
-    expect($set->checklist())->toBe($checklist);
+    $checklistCollection = $set->checklist();
+
+    expect($checklistCollection)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($checklistCollection)->toHaveCount(2);
+    expect($checklistCollection->get(0))->toBe($card1);
+    expect($checklistCollection->get(1))->toBe($card2);
 });
 
-it('returns empty array when no checklist', function () {
+it('returns empty collection when no checklist', function () {
     $set = new Set(['id' => '123']);
 
-    expect($set->checklist())->toBe([]);
+    $checklist = $set->checklist();
+
+    expect($checklist)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($checklist)->toBeEmpty();
+});
+
+it('hasChecklist returns false when no checklist', function () {
+    $set = new Set(['id' => '123']);
+
+    expect($set->hasChecklist())->toBeFalse();
+});
+
+it('hasChecklist returns true when checklist exists', function () {
+    $card1 = new Card(['id' => '1', 'name' => 'Card 1']);
+
+    $set = new Set(['id' => '123']);
+    $set->setRelationships(['checklist' => [$card1]]);
+
+    expect($set->hasChecklist())->toBeTrue();
+});
+
+it('checklist collection supports collection methods', function () {
+    $card1 = new Card(['id' => '1', 'name' => 'Card 1']);
+    $card2 = new Card(['id' => '2', 'name' => 'Card 2']);
+    $card3 = new Card(['id' => '3', 'name' => 'Card 3']);
+
+    $set = new Set(['id' => '123']);
+    $set->setRelationships(['checklist' => [$card1, $card2, $card3]]);
+
+    $checklist = $set->checklist();
+
+    // Test pluck
+    $names = $checklist->pluck('name');
+    expect($names->toArray())->toBe(['Card 1', 'Card 2', 'Card 3']);
+
+    // Test filter
+    $filteredCards = $checklist->filter(fn ($card) => $card->id === '2');
+    expect($filteredCards)->toHaveCount(1);
+    expect($filteredCards->first()->name)->toBe('Card 2');
+
+    // Test first
+    expect($checklist->first()->name)->toBe('Card 1');
 });
 
 it('returns current card count from checklist', function () {
@@ -127,12 +219,9 @@ it('returns previous card in checklist', function () {
     $previousCard = $set->previousCard($card2);
     expect($previousCard)->toBe($card1);
 
-    // Create new set instance to reset internal index
-    $set2 = new Set(['id' => '123']);
-    $set2->setRelationships(['checklist' => $checklist]);
-
     // Test previous card for card3 (should return card2)
-    $previousCard2 = $set2->previousCard($card3);
+    // No need to create new set instance since we're no longer using stateful index
+    $previousCard2 = $set->previousCard($card3);
     expect($previousCard2)->toBe($card2);
 });
 
@@ -145,6 +234,17 @@ it('returns null for previous card at beginning of checklist', function () {
     $set->setRelationships(['checklist' => $checklist]);
 
     expect($set->previousCard($card1))->toBeNull();
+});
+
+it('returns null for previous card not in checklist', function () {
+    $card1 = new Card(['id' => '1', 'name' => 'Card 1']);
+    $card2 = new Card(['id' => '2', 'name' => 'Card 2']);
+    $cardNotInList = new Card(['id' => '999', 'name' => 'Not in list']);
+
+    $set = new Set(['id' => '123']);
+    $set->setRelationships(['checklist' => [$card1, $card2]]);
+
+    expect($set->previousCard($cardNotInList))->toBeNull();
 });
 
 it('returns next card in checklist', function () {
@@ -160,12 +260,9 @@ it('returns next card in checklist', function () {
     $nextCard = $set->nextCard($card1);
     expect($nextCard)->toBe($card2);
 
-    // Create new set instance to reset internal index
-    $set2 = new Set(['id' => '123']);
-    $set2->setRelationships(['checklist' => $checklist]);
-
     // Test next card for card2 (should return card3)
-    $nextCard2 = $set2->nextCard($card2);
+    // No need to create new set instance since we're no longer using stateful index
+    $nextCard2 = $set->nextCard($card2);
     expect($nextCard2)->toBe($card3);
 });
 
@@ -178,6 +275,17 @@ it('returns null for next card at end of checklist', function () {
     $set->setRelationships(['checklist' => $checklist]);
 
     expect($set->nextCard($card2))->toBeNull();
+});
+
+it('returns null for next card not in checklist', function () {
+    $card1 = new Card(['id' => '1', 'name' => 'Card 1']);
+    $card2 = new Card(['id' => '2', 'name' => 'Card 2']);
+    $cardNotInList = new Card(['id' => '999', 'name' => 'Not in list']);
+
+    $set = new Set(['id' => '123']);
+    $set->setRelationships(['checklist' => [$card1, $card2]]);
+
+    expect($set->nextCard($cardNotInList))->toBeNull();
 });
 
 it('sets genre relationship when genres provided', function () {
