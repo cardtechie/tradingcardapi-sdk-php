@@ -261,6 +261,42 @@ $url = TradingCardApiSdk::cardImage()->getDownloadUrl('image-uuid');          //
 $url = TradingCardApiSdk::cardImage()->getDownloadUrl('image-uuid', 'small'); // Small variant
 ```
 
+### Access Card Images from a Card
+
+You can load a card with its images and access them using convenient Collection-based methods:
+
+```php
+use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
+
+// Load card with images included
+$card = TradingCardApiSdk::card()->get('card-uuid', [
+    'include' => 'images',
+]);
+
+// Get all images as a Collection
+$images = $card->images(); // Returns Collection<CardImage>
+
+// Use Collection methods for filtering and manipulation
+$frontImages = $images->filter(fn($img) => $img->image_type === 'front');
+$downloadUrls = $images->pluck('download_url');
+
+// Check if card has any images
+if ($card->hasImages()) {
+    echo "This card has {$images->count()} image(s)";
+}
+
+// Get specific images using convenience methods
+$frontImage = $card->getFrontImage();
+if ($frontImage) {
+    echo "Front image: {$frontImage->download_url}";
+}
+
+$backImage = $card->getBackImage();
+if ($backImage) {
+    echo "Back image: {$backImage->download_url}";
+}
+```
+
 ## 📊 Working with Set Sources (Data Provenance)
 
 The SDK provides support for tracking data provenance for trading card sets through the Set Sources API. Track where checklist, metadata, and image data came from.
@@ -303,12 +339,37 @@ $set = TradingCardApiSdk::set()->get('set-uuid', [
     'include' => 'set-sources',
 ]);
 
-// Access sources for the set
+// Get all sources as a Collection
+$sources = $set->sources(); // Returns Collection<SetSource>
+
+// Use Collection methods for filtering and manipulation
+$verifiedSources = $sources->filter(fn($s) => $s->verified_at !== null);
+$sourceNames = $sources->pluck('source_name');
+
+// Check if set has any sources
+if ($set->hasSources()) {
+    echo "This set has {$sources->count()} source(s)";
+}
+
+// Get specific source types using convenience methods
+$checklistSource = $set->getChecklistSource();
+if ($checklistSource) {
+    echo "Checklist source: {$checklistSource->source_name}";
+}
+
+$metadataSource = $set->getMetadataSource();
+if ($metadataSource) {
+    echo "Metadata source: {$metadataSource->source_name}";
+}
+
+$imagesSource = $set->getImagesSource();
+if ($imagesSource) {
+    echo "Images source: {$imagesSource->source_name}";
+}
+
+// Or iterate directly (Collections are iterable)
 foreach ($set->sources() as $source) {
     echo "{$source->source_type}: {$source->source_name}\n";
-    // Output: "checklist: Beckett"
-    //         "metadata: CardboardConnection"
-    //         "images: eBay"
 }
 ```
 

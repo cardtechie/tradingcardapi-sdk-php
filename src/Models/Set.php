@@ -2,6 +2,8 @@
 
 namespace CardTechie\TradingCardApiSdk\Models;
 
+use Illuminate\Support\Collection;
+
 /**
  * Class Set
  *
@@ -53,15 +55,52 @@ class Set extends Model
     }
 
     /**
-     * Retrieve the sources of the set.
+     * Retrieve collection of set sources.
+     *
+     * @return Collection<int, SetSource>
      */
-    public function sources(): array
+    public function sources(): Collection
     {
         if (array_key_exists('set-sources', $this->relationships)) {
-            return $this->relationships['set-sources'];
+            return collect($this->relationships['set-sources']);
         }
 
-        return [];
+        return collect([]);
+    }
+
+    /**
+     * Check if set has any sources.
+     */
+    public function hasSources(): bool
+    {
+        return $this->sources()->isNotEmpty();
+    }
+
+    /**
+     * Get the checklist source for the set.
+     */
+    public function getChecklistSource(): ?SetSource
+    {
+        return $this->sources()
+            ->firstWhere('source_type', 'checklist');
+    }
+
+    /**
+     * Get the metadata source for the set.
+     */
+    public function getMetadataSource(): ?SetSource
+    {
+        return $this->sources()
+            ->firstWhere('source_type', 'metadata');
+    }
+
+    /**
+     * Get the images source for the set.
+     */
+    public function getImagesSource(): ?SetSource
+    {
+        return $this->sources()
+            ->firstWhere('source_type', 'images');
     }
 
     /**
