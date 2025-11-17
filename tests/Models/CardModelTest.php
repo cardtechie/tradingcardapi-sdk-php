@@ -134,7 +134,7 @@ it('returns collection of images', function () {
 
     $card->setRelationships(['card-images' => [$frontImage, $backImage]]);
 
-    $images = $card->getImages();
+    $images = $card->images();
 
     expect($images)->toBeInstanceOf(\Illuminate\Support\Collection::class);
     expect($images->count())->toBe(2);
@@ -144,7 +144,7 @@ it('returns collection of images', function () {
 it('returns empty collection when no images', function () {
     $card = new Card(['id' => '123']);
 
-    $images = $card->getImages();
+    $images = $card->images();
 
     expect($images)->toBeInstanceOf(\Illuminate\Support\Collection::class);
     expect($images->isEmpty())->toBeTrue();

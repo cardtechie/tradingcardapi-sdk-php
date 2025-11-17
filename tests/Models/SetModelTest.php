@@ -192,23 +192,6 @@ it('sets genre relationship when genres provided', function () {
     expect($set->getRelationship('genres'))->toBeNull();
 });
 
-it('returns sources array', function () {
-    $source1 = new \CardTechie\TradingCardApiSdk\Models\SetSource(['id' => '1', 'source_type' => 'checklist']);
-    $source2 = new \CardTechie\TradingCardApiSdk\Models\SetSource(['id' => '2', 'source_type' => 'metadata']);
-    $sources = [$source1, $source2];
-
-    $set = new Set(['id' => '123']);
-    $set->setRelationships(['set-sources' => $sources]);
-
-    expect($set->sources())->toBe($sources);
-});
-
-it('returns empty array when no sources', function () {
-    $set = new Set(['id' => '123']);
-
-    expect($set->sources())->toBe([]);
-});
-
 it('returns collection of sources', function () {
     $checklistSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
         'id' => '1',
@@ -227,17 +210,17 @@ it('returns collection of sources', function () {
     $set = new Set(['id' => '123']);
     $set->setRelationships(['set-sources' => $sources]);
 
-    $sourcesCollection = $set->getSources();
+    $sourcesCollection = $set->sources();
 
     expect($sourcesCollection)->toBeInstanceOf(\Illuminate\Support\Collection::class);
     expect($sourcesCollection->count())->toBe(2);
     expect($sourcesCollection->first())->toBe($checklistSource);
 });
 
-it('returns empty collection when no sources for getSources', function () {
+it('returns empty collection when no sources', function () {
     $set = new Set(['id' => '123']);
 
-    $sources = $set->getSources();
+    $sources = $set->sources();
 
     expect($sources)->toBeInstanceOf(\Illuminate\Support\Collection::class);
     expect($sources->isEmpty())->toBeTrue();

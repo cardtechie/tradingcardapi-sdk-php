@@ -73,7 +73,7 @@ class Card extends Model
      *
      * @return Collection<int, CardImage>
      */
-    public function getImages(): Collection
+    public function images(): Collection
     {
         if (array_key_exists('card-images', $this->relationships)) {
             return collect($this->relationships['card-images']);
@@ -87,7 +87,7 @@ class Card extends Model
      */
     public function hasImages(): bool
     {
-        return $this->getImages()->isNotEmpty();
+        return $this->images()->isNotEmpty();
     }
 
     /**
@@ -95,7 +95,7 @@ class Card extends Model
      */
     public function getFrontImage(): ?CardImage
     {
-        return $this->getImages()
+        return $this->images()
             ->firstWhere('image_type', 'front');
     }
 
@@ -104,7 +104,7 @@ class Card extends Model
      */
     public function getBackImage(): ?CardImage
     {
-        return $this->getImages()
+        return $this->images()
             ->firstWhere('image_type', 'back');
     }
 

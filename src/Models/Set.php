@@ -55,23 +55,11 @@ class Set extends Model
     }
 
     /**
-     * Retrieve the sources of the set.
-     */
-    public function sources(): array
-    {
-        if (array_key_exists('set-sources', $this->relationships)) {
-            return $this->relationships['set-sources'];
-        }
-
-        return [];
-    }
-
-    /**
      * Retrieve collection of set sources.
      *
      * @return Collection<int, SetSource>
      */
-    public function getSources(): Collection
+    public function sources(): Collection
     {
         if (array_key_exists('set-sources', $this->relationships)) {
             return collect($this->relationships['set-sources']);
@@ -85,7 +73,7 @@ class Set extends Model
      */
     public function hasSources(): bool
     {
-        return $this->getSources()->isNotEmpty();
+        return $this->sources()->isNotEmpty();
     }
 
     /**
@@ -93,7 +81,7 @@ class Set extends Model
      */
     public function getChecklistSource(): ?SetSource
     {
-        return $this->getSources()
+        return $this->sources()
             ->firstWhere('source_type', 'checklist');
     }
 
@@ -102,7 +90,7 @@ class Set extends Model
      */
     public function getMetadataSource(): ?SetSource
     {
-        return $this->getSources()
+        return $this->sources()
             ->firstWhere('source_type', 'metadata');
     }
 
@@ -111,7 +99,7 @@ class Set extends Model
      */
     public function getImagesSource(): ?SetSource
     {
-        return $this->getSources()
+        return $this->sources()
             ->firstWhere('source_type', 'images');
     }
 

@@ -274,7 +274,7 @@ $card = TradingCardApiSdk::card()->get('card-uuid', [
 ]);
 
 // Get all images as a Collection
-$images = $card->getImages(); // Returns Collection<CardImage>
+$images = $card->images(); // Returns Collection<CardImage>
 
 // Use Collection methods for filtering and manipulation
 $frontImages = $images->filter(fn($img) => $img->image_type === 'front');
@@ -339,8 +339,8 @@ $set = TradingCardApiSdk::set()->get('set-uuid', [
     'include' => 'set-sources',
 ]);
 
-// Access sources using Collection-based methods
-$sources = $set->getSources(); // Returns Collection<SetSource>
+// Get all sources as a Collection
+$sources = $set->sources(); // Returns Collection<SetSource>
 
 // Use Collection methods for filtering and manipulation
 $verifiedSources = $sources->filter(fn($s) => $s->verified_at !== null);
@@ -367,7 +367,7 @@ if ($imagesSource) {
     echo "Images source: {$imagesSource->source_name}";
 }
 
-// Or use array-based method (legacy)
+// Or iterate directly (Collections are iterable)
 foreach ($set->sources() as $source) {
     echo "{$source->source_type}: {$source->source_name}\n";
 }

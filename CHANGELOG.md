@@ -37,13 +37,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Collection-Based Relationship Methods** - Modern Laravel-style relationship access
   - **Card-to-Images Relationship Support**
-    - `Card::getImages()` - Returns `Collection<CardImage>` for fluent data manipulation
+    - `Card::images()` - Returns `Collection<CardImage>` for fluent data manipulation
     - `Card::hasImages()` - Check if card has any images
     - `Card::getFrontImage()` - Convenience method to get front image
     - `Card::getBackImage()` - Convenience method to get back image
     - Full Collection API support (filter, map, pluck, etc.)
-  - **Set-to-Sources Relationship Helpers**
-    - `Set::getSources()` - Returns `Collection<SetSource>` for fluent data manipulation
+  - **Set-to-Sources Relationship Support**
+    - `Set::sources()` - Returns `Collection<SetSource>` for fluent data manipulation (breaking change: now returns Collection instead of array)
     - `Set::hasSources()` - Check if set has any sources
     - `Set::getChecklistSource()` - Convenience method to get checklist source
     - `Set::getMetadataSource()` - Convenience method to get metadata source
@@ -51,7 +51,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Full Collection API support for source filtering and manipulation
   - Comprehensive test coverage for all relationship methods
   - Updated documentation with Collection-based examples
-  - Legacy array-based methods (`sources()`) remain available for backward compatibility
+
+### Changed
+
+- **BREAKING**: `Set::sources()` now returns `Collection<SetSource>` instead of `array`
+  - Most code will continue to work as Collections are iterable
+  - Replace `count($set->sources())` with `$set->sources()->count()`
+  - Replace array functions with Collection methods
 
 ## [0.1.0] - 2025-09-15
 
