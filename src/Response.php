@@ -45,6 +45,12 @@ class Response
         $attributes['id'] = $this->response->data->id;
 
         $type = ucfirst(Str::singular($this->response->data->type));
+
+        // Handle special case type mappings
+        if ($type === 'Card-image') {
+            $type = 'CardImage';
+        }
+
         $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$type;
         $this->mainObject = new $class($attributes);
     }
@@ -85,6 +91,8 @@ class Response
                     $theType = 'Set';
                 } elseif ($theType === 'Checklist') {
                     $theType = 'Card';
+                } elseif ($theType === 'Card-image') {
+                    $theType = 'CardImage';
                 }
                 $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$theType;
                 $object = new $class($attributes);
@@ -148,6 +156,12 @@ class Response
         $attributes['id'] = $data->id;
 
         $type = ucfirst(Str::singular($data->type));
+
+        // Handle special case type mappings
+        if ($type === 'Card-image') {
+            $type = 'CardImage';
+        }
+
         $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$type;
 
         return new $class($attributes);
@@ -176,6 +190,9 @@ class Response
                 $type = 'Card';
             } else {
                 $type = ucfirst(Str::singular($included->type));
+                if ($type === 'Card-image') {
+                    $type = 'CardImage';
+                }
             }
             $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$type;
             $object = new $class($attributes);
