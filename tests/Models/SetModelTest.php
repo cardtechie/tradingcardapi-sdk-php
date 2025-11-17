@@ -208,3 +208,126 @@ it('returns empty array when no sources', function () {
 
     expect($set->sources())->toBe([]);
 });
+
+it('returns collection of sources', function () {
+    $checklistSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
+        'id' => '1',
+        'source_type' => 'checklist',
+        'source_name' => 'Beckett',
+    ]);
+
+    $metadataSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
+        'id' => '2',
+        'source_type' => 'metadata',
+        'source_name' => 'COMC',
+    ]);
+
+    $sources = [$checklistSource, $metadataSource];
+
+    $set = new Set(['id' => '123']);
+    $set->setRelationships(['set-sources' => $sources]);
+
+    $sourcesCollection = $set->getSources();
+
+    expect($sourcesCollection)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($sourcesCollection->count())->toBe(2);
+    expect($sourcesCollection->first())->toBe($checklistSource);
+});
+
+it('returns empty collection when no sources for getSources', function () {
+    $set = new Set(['id' => '123']);
+
+    $sources = $set->getSources();
+
+    expect($sources)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($sources->isEmpty())->toBeTrue();
+});
+
+it('hasSources returns true when set has sources', function () {
+    $source = new \CardTechie\TradingCardApiSdk\Models\SetSource([
+        'id' => '1',
+        'source_type' => 'checklist',
+    ]);
+
+    $set = new Set(['id' => '123']);
+    $set->setRelationships(['set-sources' => [$source]]);
+
+    expect($set->hasSources())->toBeTrue();
+});
+
+it('hasSources returns false when set has no sources', function () {
+    $set = new Set(['id' => '123']);
+
+    expect($set->hasSources())->toBeFalse();
+});
+
+it('getChecklistSource returns checklist source', function () {
+    $checklistSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
+        'id' => '1',
+        'source_type' => 'checklist',
+        'source_name' => 'Beckett',
+    ]);
+
+    $metadataSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
+        'id' => '2',
+        'source_type' => 'metadata',
+        'source_name' => 'COMC',
+    ]);
+
+    $set = new Set(['id' => '123']);
+    $set->setRelationships(['set-sources' => [$checklistSource, $metadataSource]]);
+
+    expect($set->getChecklistSource())->toBe($checklistSource);
+});
+
+it('getMetadataSource returns metadata source', function () {
+    $checklistSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
+        'id' => '1',
+        'source_type' => 'checklist',
+        'source_name' => 'Beckett',
+    ]);
+
+    $metadataSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
+        'id' => '2',
+        'source_type' => 'metadata',
+        'source_name' => 'COMC',
+    ]);
+
+    $set = new Set(['id' => '123']);
+    $set->setRelationships(['set-sources' => [$metadataSource, $checklistSource]]);
+
+    expect($set->getMetadataSource())->toBe($metadataSource);
+});
+
+it('getImagesSource returns images source', function () {
+    $imagesSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
+        'id' => '1',
+        'source_type' => 'images',
+        'source_name' => 'eBay',
+    ]);
+
+    $metadataSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
+        'id' => '2',
+        'source_type' => 'metadata',
+        'source_name' => 'COMC',
+    ]);
+
+    $set = new Set(['id' => '123']);
+    $set->setRelationships(['set-sources' => [$imagesSource, $metadataSource]]);
+
+    expect($set->getImagesSource())->toBe($imagesSource);
+});
+
+it('source type helpers return null when source type does not exist', function () {
+    $checklistSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
+        'id' => '1',
+        'source_type' => 'checklist',
+        'source_name' => 'Beckett',
+    ]);
+
+    $set = new Set(['id' => '123']);
+    $set->setRelationships(['set-sources' => [$checklistSource]]);
+
+    expect($set->getMetadataSource())->toBeNull();
+    expect($set->getImagesSource())->toBeNull();
+});

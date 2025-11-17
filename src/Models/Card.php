@@ -2,6 +2,8 @@
 
 namespace CardTechie\TradingCardApiSdk\Models;
 
+use Illuminate\Support\Collection;
+
 /**
  * Class Card
  *
@@ -64,6 +66,46 @@ class Card extends Model
     public function set(): ?Set
     {
         return $this->getRelationship('set');
+    }
+
+    /**
+     * Retrieve collection of card images.
+     *
+     * @return Collection<int, CardImage>
+     */
+    public function getImages(): Collection
+    {
+        if (array_key_exists('card-images', $this->relationships)) {
+            return collect($this->relationships['card-images']);
+        }
+
+        return collect([]);
+    }
+
+    /**
+     * Check if card has any images.
+     */
+    public function hasImages(): bool
+    {
+        return $this->getImages()->isNotEmpty();
+    }
+
+    /**
+     * Get the front image of the card.
+     */
+    public function getFrontImage(): ?CardImage
+    {
+        return $this->getImages()
+            ->firstWhere('image_type', 'front');
+    }
+
+    /**
+     * Get the back image of the card.
+     */
+    public function getBackImage(): ?CardImage
+    {
+        return $this->getImages()
+            ->firstWhere('image_type', 'back');
     }
 
     /**
