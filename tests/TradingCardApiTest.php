@@ -170,7 +170,7 @@ it('auto-detects PAT mode when PAT is set and OAuth2 credentials are empty', fun
     config(['tradingcardapi.client_id' => '']);
     config(['tradingcardapi.client_secret' => '']);
 
-    $api = new TradingCardApi();
+    $api = new TradingCardApi;
 
     expect($api->getAuthType())->toBe('pat');
     expect($api->getPersonalAccessToken())->toBe('test-pat-token');
@@ -181,7 +181,7 @@ it('defaults to OAuth2 when both PAT and OAuth2 credentials are set', function (
     config(['tradingcardapi.client_id' => 'test-client-id']);
     config(['tradingcardapi.client_secret' => 'test-client-secret']);
 
-    $api = new TradingCardApi();
+    $api = new TradingCardApi;
 
     expect($api->getAuthType())->toBe('oauth2');
 });
