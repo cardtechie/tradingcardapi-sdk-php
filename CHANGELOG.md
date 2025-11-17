@@ -23,6 +23,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Comprehensive test coverage for model, resource, and schema
   - Full documentation with usage examples in README.md
 
+- **Set Sources API Support** - Data provenance tracking for trading card sets (Trading Card API v0.6.0)
+  - New `SetSource` model for tracking data sources (checklist, metadata, images)
+  - New `SetSource` resource class with full CRUD operations
+  - Support for three source types: `checklist`, `metadata`, `images`
+  - Unique constraint handling (one source per type per set)
+  - Verification timestamp tracking with `verified_at` field
+  - `SetSourceSchema` for API response validation
+  - `setSource()` method added to main `TradingCardApi` class
+  - Response type mapping for `set-sources` resource
+  - Comprehensive test coverage for model, resource, and schema
+  - Full documentation with usage examples in README.md
+
 ## [0.1.0] - 2025-09-15
 
 ### Added

@@ -207,6 +207,7 @@ trait ApiRequest
                 'players' => 'player',
                 'teams' => 'team',
                 'sets' => 'set',
+                'set-sources' => 'setsource',
                 'genres' => 'genre',
                 'brands' => 'brand',
                 'manufacturers' => 'manufacturer',

@@ -49,6 +49,8 @@ class Response
         // Handle special case type mappings
         if ($type === 'Card-image') {
             $type = 'CardImage';
+        } elseif ($type === 'Set-source') {
+            $type = 'SetSource';
         }
 
         $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$type;
@@ -93,6 +95,8 @@ class Response
                     $theType = 'Card';
                 } elseif ($theType === 'Card-image') {
                     $theType = 'CardImage';
+                } elseif ($theType === 'Set-source') {
+                    $theType = 'SetSource';
                 }
                 $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$theType;
                 $object = new $class($attributes);
@@ -160,6 +164,8 @@ class Response
         // Handle special case type mappings
         if ($type === 'Card-image') {
             $type = 'CardImage';
+        } elseif ($type === 'Set-source') {
+            $type = 'SetSource';
         }
 
         $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$type;
@@ -192,6 +198,8 @@ class Response
                 $type = ucfirst(Str::singular($included->type));
                 if ($type === 'Card-image') {
                     $type = 'CardImage';
+                } elseif ($type === 'Set-source') {
+                    $type = 'SetSource';
                 }
             }
             $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$type;
