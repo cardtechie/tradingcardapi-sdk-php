@@ -53,6 +53,18 @@ class Set extends Model
     }
 
     /**
+     * Retrieve the sources of the set.
+     */
+    public function sources(): array
+    {
+        if (array_key_exists('set-sources', $this->relationships)) {
+            return $this->relationships['set-sources'];
+        }
+
+        return [];
+    }
+
+    /**
      * Retrieve the subsets of the set.
      */
     public function subsets(): array

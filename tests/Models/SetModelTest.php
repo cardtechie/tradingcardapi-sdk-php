@@ -191,3 +191,20 @@ it('sets genre relationship when genres provided', function () {
     expect($set->genre())->toBe($genre1);
     expect($set->getRelationship('genres'))->toBeNull();
 });
+
+it('returns sources array', function () {
+    $source1 = new \CardTechie\TradingCardApiSdk\Models\SetSource(['id' => '1', 'source_type' => 'checklist']);
+    $source2 = new \CardTechie\TradingCardApiSdk\Models\SetSource(['id' => '2', 'source_type' => 'metadata']);
+    $sources = [$source1, $source2];
+
+    $set = new Set(['id' => '123']);
+    $set->setRelationships(['set-sources' => $sources]);
+
+    expect($set->sources())->toBe($sources);
+});
+
+it('returns empty array when no sources', function () {
+    $set = new Set(['id' => '123']);
+
+    expect($set->sources())->toBe([]);
+});

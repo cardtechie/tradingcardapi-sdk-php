@@ -295,6 +295,23 @@ echo $source->source_type;  // e.g., "checklist"
 echo $source->set->name;    // e.g., "1989 Topps Baseball" (if included)
 ```
 
+### Get Set Sources from a Set
+
+```php
+// Fetch a set with its sources included
+$set = TradingCardApiSdk::set()->get('set-uuid', [
+    'include' => 'set-sources',
+]);
+
+// Access sources for the set
+foreach ($set->sources() as $source) {
+    echo "{$source->source_type}: {$source->source_name}\n";
+    // Output: "checklist: Beckett"
+    //         "metadata: CardboardConnection"
+    //         "images: eBay"
+}
+```
+
 ### List Set Sources
 
 ```php
