@@ -163,6 +163,15 @@ it('passes auth info to resources when using OAuth2', function () {
     $authTypeProperty->setAccessible(true);
 
     expect($authTypeProperty->getValue($card))->toBe('oauth2');
+
+    // Verify OAuth2 credentials were passed to the resource
+    $clientIdProperty = $reflection->getProperty('oauthClientId');
+    $clientIdProperty->setAccessible(true);
+    $clientSecretProperty = $reflection->getProperty('oauthClientSecret');
+    $clientSecretProperty->setAccessible(true);
+
+    expect($clientIdProperty->getValue($card))->toBe('client-id');
+    expect($clientSecretProperty->getValue($card))->toBe('client-secret');
 });
 
 it('auto-detects PAT mode when PAT is set and OAuth2 credentials are empty', function () {
