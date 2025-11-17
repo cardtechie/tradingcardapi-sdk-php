@@ -12,6 +12,7 @@ use CardTechie\TradingCardApiSdk\Resources\ObjectAttribute;
 use CardTechie\TradingCardApiSdk\Resources\Player;
 use CardTechie\TradingCardApiSdk\Resources\Playerteam;
 use CardTechie\TradingCardApiSdk\Resources\Set;
+use CardTechie\TradingCardApiSdk\Resources\SetSource;
 use CardTechie\TradingCardApiSdk\Resources\Stats;
 use CardTechie\TradingCardApiSdk\Resources\Team;
 use CardTechie\TradingCardApiSdk\Resources\Year;
@@ -58,6 +59,14 @@ class TradingCardApi
     public function set(): Set
     {
         return new Set($this->client);
+    }
+
+    /**
+     * Retrieve the set source resource.
+     */
+    public function setSource(): SetSource
+    {
+        return new SetSource($this->client);
     }
 
     /**

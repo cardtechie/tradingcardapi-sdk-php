@@ -261,6 +261,145 @@ $url = TradingCardApiSdk::cardImage()->getDownloadUrl('image-uuid');          //
 $url = TradingCardApiSdk::cardImage()->getDownloadUrl('image-uuid', 'small'); // Small variant
 ```
 
+## 📊 Working with Set Sources (Data Provenance)
+
+The SDK provides support for tracking data provenance for trading card sets through the Set Sources API. Track where checklist, metadata, and image data came from.
+
+### Create Set Source
+
+```php
+use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
+
+// Create checklist source
+$source = TradingCardApiSdk::setSource()->create([
+    'set_id' => 'set-uuid-here',
+    'source_type' => 'checklist',
+    'source_name' => 'Beckett',
+    'source_url' => 'https://www.beckett.com/...',
+    'verified_at' => now(),
+]);
+
+echo $source->id;          // UUID of created source
+echo $source->source_type; // "checklist"
+```
+
+### Get Set Source
+
+```php
+$source = TradingCardApiSdk::setSource()->get('source-uuid', [
+    'include' => 'set',
+]);
+
+echo $source->source_name;  // e.g., "Beckett"
+echo $source->source_type;  // e.g., "checklist"
+echo $source->set->name;    // e.g., "1989 Topps Baseball" (if included)
+```
+
+### Get Set Sources from a Set
+
+```php
+// Fetch a set with its sources included
+$set = TradingCardApiSdk::set()->get('set-uuid', [
+    'include' => 'set-sources',
+]);
+
+// Access sources for the set
+foreach ($set->sources() as $source) {
+    echo "{$source->source_type}: {$source->source_name}\n";
+    // Output: "checklist: Beckett"
+    //         "metadata: CardboardConnection"
+    //         "images: eBay"
+}
+```
+
+### List Set Sources
+
+```php
+// List all set sources with pagination
+$sources = TradingCardApiSdk::setSource()->list([
+    'page' => 1,
+    'limit' => 50,
+]);
+
+// Filter by set
+$sources = TradingCardApiSdk::setSource()->list([
+    'filter' => ['set_id' => 'set-uuid'],
+    'include' => 'set',
+]);
+
+// Iterate through paginated results
+foreach ($sources as $source) {
+    echo "{$source->source_type}: {$source->source_name}\n";
+}
+```
+
+### Update Set Source
+
+```php
+// Update source URL and verification timestamp
+$source = TradingCardApiSdk::setSource()->update('source-uuid', [
+    'source_url' => 'https://updated-url.com',
+    'verified_at' => now(),
+]);
+```
+
+### Delete Set Source
+
+```php
+// Delete a set source
+TradingCardApiSdk::setSource()->delete('source-uuid');
+```
+
+### Source Types
+
+Valid values for `source_type`:
+
+- **`checklist`** - Source of card checklist data
+- **`metadata`** - Source of set metadata (year, manufacturer, etc.)
+- **`images`** - Source of card images
+
+**Note:** Each set can have only one source per type. The API enforces unique constraints.
+
+### Usage Examples
+
+**Track multiple sources for a set:**
+
+```php
+// Checklist from Beckett
+$checklistSource = TradingCardApiSdk::setSource()->create([
+    'set_id' => 'set-123',
+    'source_type' => 'checklist',
+    'source_name' => 'Beckett',
+    'source_url' => 'https://www.beckett.com/...',
+]);
+
+// Metadata from CardboardConnection
+$metadataSource = TradingCardApiSdk::setSource()->create([
+    'set_id' => 'set-123',
+    'source_type' => 'metadata',
+    'source_name' => 'CardboardConnection',
+    'source_url' => 'https://www.cardboardconnection.com/...',
+]);
+
+// Images from eBay
+$imagesSource = TradingCardApiSdk::setSource()->create([
+    'set_id' => 'set-123',
+    'source_type' => 'images',
+    'source_name' => 'eBay',
+    'source_url' => 'https://www.ebay.com/...',
+]);
+```
+
+**Update verification timestamp:**
+
+```php
+$source = TradingCardApiSdk::setSource()->update('source-uuid', [
+    'verified_at' => now(), // Mark as verified today
+]);
+
+echo $source->verified_at->format('Y-m-d'); // Carbon instance
+```
+
 ## 📚 Available Resources
 
 The SDK provides access to the following Trading Card API resources:
@@ -270,6 +409,7 @@ The SDK provides access to the following Trading Card API resources:
 | **Cards** | Individual trading cards | `get()`, `create()`, `update()`, `delete()` |
 | **CardImages** | Card image uploads and management | `get()`, `list()`, `upload()`, `update()`, `delete()`, `getDownloadUrl()` |
 | **Sets** | Card sets and collections | `get()`, `list()`, `create()`, `update()`, `delete()`, `checklist($id)`, `addMissingCards($id)`, `addChecklist($request, $id)` |
+| **SetSources** | Data provenance tracking for sets | `get()`, `list()`, `create()`, `update()`, `delete()` |
 | **Players** | Player information | `get()`, `getList()`, `create()` |
 | **Teams** | Team data | `get()`, `getList()`, `create()` |
 | **Genres** | Card categories/types | `get()`, `list()`, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |
