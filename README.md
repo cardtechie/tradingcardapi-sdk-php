@@ -656,6 +656,45 @@ if ($attribute->hasCards()) {
 }
 ```
 
+### Year, Brand, Manufacturer Relationships
+
+#### Sets Collection
+
+```php
+// These models all have sets() relationships that return Collections
+
+// Load a year with its sets
+$year = TradingCardApiSdk::year()->get('year-uuid', [
+    'include' => 'sets',
+]);
+
+$sets = $year->sets(); // Returns Collection<Set>
+
+// Same pattern for Brand and Manufacturer
+$brand = TradingCardApiSdk::brand()->get('brand-uuid', ['include' => 'sets']);
+$brandSets = $brand->sets();
+
+$manufacturer = TradingCardApiSdk::manufacturer()->get('manufacturer-uuid', ['include' => 'sets']);
+$manufacturerSets = $manufacturer->sets();
+
+// Use Collection methods
+$recentSets = $sets->sortByDesc('release_date')->take(5);
+$setNames = $sets->pluck('name');
+
+// Check if entity has sets
+if ($year->hasSets()) {
+    echo "This year has {$sets->count()} set(s)";
+}
+
+if ($brand->hasSets()) {
+    echo "This brand has {$brandSets->count()} set(s)";
+}
+
+if ($manufacturer->hasSets()) {
+    echo "This manufacturer has {$manufacturerSets->count()} set(s)";
+}
+```
+
 ### Collection Methods Available
 
 All relationship methods return Laravel Collections, giving you access to powerful methods:

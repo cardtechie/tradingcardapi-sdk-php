@@ -31,15 +31,16 @@ it('can be instantiated without attributes', function () {
     expect($year)->toBeInstanceOf(Year::class);
 });
 
-it('returns empty array when no sets', function () {
+it('returns empty collection when no sets', function () {
     $year = new Year(['id' => '123', 'year' => '2023']);
 
     $sets = $year->sets();
 
-    expect($sets)->toBe([]);
+    expect($sets)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($sets)->toBeEmpty();
 });
 
-it('returns sets array when sets relationship exists', function () {
+it('returns sets collection when sets relationship exists', function () {
     $year = new Year(['id' => '123', 'year' => '2023']);
 
     $setData = [
@@ -51,11 +52,56 @@ it('returns sets array when sets relationship exists', function () {
 
     $sets = $year->sets();
 
+    expect($sets)->toBeInstanceOf(\Illuminate\Support\Collection::class);
     expect($sets)->toHaveCount(2);
-    expect($sets[0])->toBeInstanceOf(Set::class);
-    expect($sets[0]->name)->toBe('Set 1');
-    expect($sets[1])->toBeInstanceOf(Set::class);
-    expect($sets[1]->name)->toBe('Set 2');
+    expect($sets->get(0))->toBeInstanceOf(Set::class);
+    expect($sets->get(0)->name)->toBe('Set 1');
+    expect($sets->get(1))->toBeInstanceOf(Set::class);
+    expect($sets->get(1)->name)->toBe('Set 2');
+});
+
+it('hasSets returns false when no sets', function () {
+    $year = new Year(['id' => '123', 'year' => '2023']);
+
+    expect($year->hasSets())->toBeFalse();
+});
+
+it('hasSets returns true when sets exist', function () {
+    $year = new Year(['id' => '123', 'year' => '2023']);
+
+    $setData = [
+        new Set(['id' => '1', 'name' => 'Set 1']),
+    ];
+
+    $year->setRelationships(['sets' => $setData]);
+
+    expect($year->hasSets())->toBeTrue();
+});
+
+it('sets collection supports collection methods', function () {
+    $year = new Year(['id' => '123', 'year' => '2023']);
+
+    $setData = [
+        new Set(['id' => '1', 'name' => 'Set 1']),
+        new Set(['id' => '2', 'name' => 'Set 2']),
+        new Set(['id' => '3', 'name' => 'Set 3']),
+    ];
+
+    $year->setRelationships(['sets' => $setData]);
+
+    $sets = $year->sets();
+
+    // Test pluck
+    $names = $sets->pluck('name');
+    expect($names->toArray())->toBe(['Set 1', 'Set 2', 'Set 3']);
+
+    // Test filter
+    $filteredSets = $sets->filter(fn ($set) => $set->id === '2');
+    expect($filteredSets)->toHaveCount(1);
+    expect($filteredSets->first()->name)->toBe('Set 2');
+
+    // Test first
+    expect($sets->first()->name)->toBe('Set 1');
 });
 
 it('handles null attributes gracefully', function () {

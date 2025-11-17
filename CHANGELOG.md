@@ -91,6 +91,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **ObjectAttribute Model Changes:**
     - `ObjectAttribute::cards()` - Now returns `Collection<Card>` instead of `array`
     - Added `ObjectAttribute::hasCards()` helper method
+  - **Year Model Changes:**
+    - `Year::sets()` - Now returns `Collection<Set>` instead of `array`
+    - Added `Year::hasSets()` helper method
+  - **Brand Model Changes:**
+    - `Brand::sets()` - Now returns `Collection<Set>` instead of `array`
+    - Added `Brand::hasSets()` helper method
+  - **Manufacturer Model Changes:**
+    - `Manufacturer::sets()` - Now returns `Collection<Set>` instead of `array`
+    - Added `Manufacturer::hasSets()` helper method
   - **Migration Guide:**
     - Most iteration code continues to work (Collections are iterable)
     - Array functions need updating:
