@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **API Versions Documentation** - Added comprehensive documentation explaining v1 and v2 endpoint differences
+  - New "API Versions" section in README.md
+  - Explains v1 endpoints (relationship-focused, SDK default)
+  - Explains v2 endpoints (stricter JSON:API compliance)
+  - Includes JSON response examples for both versions
+  - Notes SDK's current v1-only support with future v2 consideration
+
 - **Card Images API Support** - Complete implementation of Card Images functionality (Trading Card API v0.7.0)
   - New `CardImage` model with properties for image metadata and relationships
   - New `CardImage` resource class with full CRUD operations
