@@ -164,3 +164,35 @@ it('passes auth info to resources when using OAuth2', function () {
 
     expect($authTypeProperty->getValue($card))->toBe('oauth2');
 });
+
+it('auto-detects PAT mode when PAT is set and OAuth2 credentials are empty', function () {
+    config(['tradingcardapi.personal_access_token' => 'test-pat-token']);
+    config(['tradingcardapi.client_id' => '']);
+    config(['tradingcardapi.client_secret' => '']);
+
+    $api = new TradingCardApi();
+
+    expect($api->getAuthType())->toBe('pat');
+    expect($api->getPersonalAccessToken())->toBe('test-pat-token');
+});
+
+it('defaults to OAuth2 when both PAT and OAuth2 credentials are set', function () {
+    config(['tradingcardapi.personal_access_token' => 'test-pat-token']);
+    config(['tradingcardapi.client_id' => 'test-client-id']);
+    config(['tradingcardapi.client_secret' => 'test-client-secret']);
+
+    $api = new TradingCardApi();
+
+    expect($api->getAuthType())->toBe('oauth2');
+});
+
+it('uses explicit auth_type option over auto-detection', function () {
+    config(['tradingcardapi.personal_access_token' => 'test-pat-token']);
+    config(['tradingcardapi.client_id' => '']);
+    config(['tradingcardapi.client_secret' => '']);
+
+    // Explicitly set to oauth2 even though PAT is available
+    $api = new TradingCardApi(['auth_type' => 'oauth2']);
+
+    expect($api->getAuthType())->toBe('oauth2');
+});

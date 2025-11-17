@@ -63,11 +63,18 @@ return [
     |   - AI/GPT integrations
     |   - Simple scripts and tools
     |
-    | To use PAT authentication:
-    |   $client = TradingCardApi::withPersonalAccessToken($token);
+    | Usage Option 1 - Explicit factory method:
+    |   $api = TradingCardApi::withPersonalAccessToken($token);
     |
-    | Or set in your .env file and the SDK will use it automatically:
+    | Usage Option 2 - Auto-detection via environment variable:
+    |   Set TRADINGCARDAPI_PAT in your .env file and leave OAuth2 credentials
+    |   empty. The SDK will automatically detect and use PAT authentication:
+    |
     |   TRADINGCARDAPI_PAT=your-personal-access-token
+    |   TRADINGCARDAPI_CLIENT_ID=
+    |   TRADINGCARDAPI_CLIENT_SECRET=
+    |
+    | Note: If both PAT and OAuth2 credentials are set, OAuth2 takes precedence.
     |
     | WARNING: Personal Access Tokens are long-lived and should be kept secret.
     | Never commit tokens to version control. Use environment variables.

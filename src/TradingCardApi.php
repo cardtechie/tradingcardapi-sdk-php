@@ -74,6 +74,17 @@ class TradingCardApi
             'base_uri' => $mergedConfig['url'] ?? '',
         ]);
 
+        // Auto-detect auth type if not explicitly set
+        if (! isset($mergedConfig['auth_type'])) {
+            // If PAT is set and OAuth2 credentials are empty, default to PAT mode
+            $hasPat = ! empty($mergedConfig['personal_access_token']);
+            $hasOAuth = ! empty($mergedConfig['client_id']) && ! empty($mergedConfig['client_secret']);
+
+            if ($hasPat && ! $hasOAuth) {
+                $mergedConfig['auth_type'] = 'pat';
+            }
+        }
+
         // Set auth type and credentials if provided
         if (isset($mergedConfig['auth_type'])) {
             $this->authType = $mergedConfig['auth_type'];
