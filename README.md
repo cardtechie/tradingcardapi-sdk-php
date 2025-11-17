@@ -95,8 +95,10 @@ use CardTechie\TradingCardApiSdk\TradingCardApi;
 // Method 1: Direct instantiation with token
 $api = TradingCardApi::withPersonalAccessToken('your-pat-token-here');
 
-// Method 2: From environment variable
-$api = TradingCardApi::withPersonalAccessToken(env('TRADINGCARDAPI_PAT'));
+// Method 2: From configuration
+$api = TradingCardApi::withPersonalAccessToken(
+    config('tradingcardapi.personal_access_token')
+);
 
 // Use normally
 $cards = $api->card()->list();
@@ -129,8 +131,8 @@ use CardTechie\TradingCardApiSdk\TradingCardApi;
 
 // Method 1: Using static method
 $api = TradingCardApi::withClientCredentials(
-    clientId: env('TRADINGCARDAPI_CLIENT_ID'),
-    clientSecret: env('TRADINGCARDAPI_CLIENT_SECRET')
+    clientId: config('tradingcardapi.client_id'),
+    clientSecret: config('tradingcardapi.client_secret')
 );
 
 // Method 2: Using default constructor (uses config)
