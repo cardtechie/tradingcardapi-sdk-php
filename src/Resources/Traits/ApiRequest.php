@@ -174,10 +174,12 @@ trait ApiRequest
         }
 
         // OAuth2 Client Credentials flow
-        // Use instance-specific credentials if set, otherwise fall back to config
+        // First, check if credentials were set via setAuthInfo() (e.g., from withClientCredentials())
+        // This allows using TradingCardApi::withClientCredentials() without needing config values
         $clientId = $this->oauthClientId;
         $clientSecret = $this->oauthClientSecret;
 
+        // If instance credentials are not set, fall back to config values
         if (! $clientId || ! $clientSecret) {
             $config = config('tradingcardapi');
             $clientId = $config['client_id'] ?? '';
