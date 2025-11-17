@@ -41,6 +41,32 @@ trait ApiRequest
     private $errorParser;
 
     /**
+     * Authentication type ('oauth2' or 'pat')
+     *
+     * @var string
+     */
+    private $authType = 'oauth2';
+
+    /**
+     * Personal Access Token (for PAT auth mode)
+     *
+     * @var string|null
+     */
+    private $personalAccessToken;
+
+    /**
+     * Set authentication information
+     *
+     * @param  string  $authType  The authentication type ('oauth2' or 'pat')
+     * @param  string|null  $personalAccessToken  The personal access token (for PAT mode)
+     */
+    public function setAuthInfo(string $authType, ?string $personalAccessToken = null): void
+    {
+        $this->authType = $authType;
+        $this->personalAccessToken = $personalAccessToken;
+    }
+
+    /**
      * Makes a request to an API endpoint or webpage and returns its response
      *
      * @param  string  $url  Url of the api or webpage
@@ -106,6 +132,26 @@ trait ApiRequest
      */
     private function retrieveToken(): void
     {
+        // If using PAT authentication, use the personal access token directly
+        if ($this->authType === 'pat') {
+            if ($this->personalAccessToken) {
+                $this->token = $this->personalAccessToken;
+
+                return;
+            }
+
+            // Fallback to config if PAT not set via setAuthInfo
+            $config = config('tradingcardapi');
+            if (isset($config['personal_access_token'])) {
+                $this->token = $config['personal_access_token'];
+
+                return;
+            }
+
+            throw new \RuntimeException('Personal Access Token not configured');
+        }
+
+        // OAuth2 Client Credentials flow
         $tokenKey = 'tcapi_token';
         if (cache()->has($tokenKey)) {
             $this->token = cache()->get($tokenKey);

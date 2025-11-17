@@ -24,8 +24,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Trading Card API Client ID
+    | OAuth2 Client Credentials Authentication
     |--------------------------------------------------------------------------
+    |
+    | These credentials are used for OAuth2 Client Credentials authentication.
+    | This is the recommended approach for production applications.
+    */
+
+    /*
+    | Trading Card API Client ID
     |
     | The ID of the client used to connect to the API. It is recommended
     | that you do not add your client ID to the line below. Instead, add
@@ -35,16 +42,37 @@ return [
     'client_id' => env('TRADINGCARDAPI_CLIENT_ID', ''),
 
     /*
-    |--------------------------------------------------------------------------
     | Trading Card API Secret
-    |--------------------------------------------------------------------------
     |
-    | The secret of the client used to connect to the API .It is recommended
+    | The secret of the client used to connect to the API. It is recommended
     | that you do not add your client secret to the line below. Instead, add
     | it to your environment file, so it doesn't get checked into your
     | code repo.
     */
     'client_secret' => env('TRADINGCARDAPI_CLIENT_SECRET', ''),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Personal Access Token Authentication
+    |--------------------------------------------------------------------------
+    |
+    | Alternative authentication method using a Personal Access Token (PAT).
+    | This is simpler than OAuth2 and ideal for:
+    |   - Testing and development
+    |   - Single-user applications
+    |   - AI/GPT integrations
+    |   - Simple scripts and tools
+    |
+    | To use PAT authentication:
+    |   $client = TradingCardApi::withPersonalAccessToken($token);
+    |
+    | Or set in your .env file and the SDK will use it automatically:
+    |   TRADINGCARDAPI_PAT=your-personal-access-token
+    |
+    | WARNING: Personal Access Tokens are long-lived and should be kept secret.
+    | Never commit tokens to version control. Use environment variables.
+    */
+    'personal_access_token' => env('TRADINGCARDAPI_PAT', ''),
 
     /*
     |--------------------------------------------------------------------------

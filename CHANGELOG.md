@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Personal Access Token (PAT) Authentication Support** - Alternative authentication method for simpler use cases (Trading Card API v0.6.0+)
+  - New `TradingCardApi::withPersonalAccessToken($token)` static factory method
+  - New `TradingCardApi::withClientCredentials($clientId, $clientSecret)` static factory method
+  - Dual authentication support: PAT for simple apps, OAuth2 for production
+  - Updated `ApiRequest` trait to handle both auth types
+  - PAT tokens bypass OAuth2 token exchange (direct Bearer token usage)
+  - Configuration support via `TRADINGCARDAPI_PAT` environment variable
+  - Backward compatible - existing OAuth2 usage continues to work
+  - Comprehensive security documentation and warnings
+  - Full test coverage for both authentication methods
+  - Ideal for testing, development, AI integrations, and single-user apps
+
 - **API Versions Documentation** - Added comprehensive documentation explaining v1 and v2 endpoint differences
   - New "API Versions" section in README.md
   - Explains v1 endpoints (relationship-focused, SDK default)

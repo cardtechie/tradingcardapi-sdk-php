@@ -112,3 +112,55 @@ it('creates guzzle client with correct configuration', function () {
 
     expect($client)->toBeInstanceOf(Client::class);
 });
+
+// Personal Access Token Authentication Tests
+
+it('can be instantiated with personal access token', function () {
+    $api = TradingCardApi::withPersonalAccessToken('test-pat-token');
+
+    expect($api)->toBeInstanceOf(TradingCardApi::class);
+    expect($api->getAuthType())->toBe('pat');
+    expect($api->getPersonalAccessToken())->toBe('test-pat-token');
+});
+
+it('can be instantiated with client credentials', function () {
+    $api = TradingCardApi::withClientCredentials('test-client-id', 'test-client-secret');
+
+    expect($api)->toBeInstanceOf(TradingCardApi::class);
+    expect($api->getAuthType())->toBe('oauth2');
+});
+
+it('defaults to oauth2 authentication type', function () {
+    $api = new TradingCardApi;
+
+    expect($api->getAuthType())->toBe('oauth2');
+    expect($api->getPersonalAccessToken())->toBeNull();
+});
+
+it('passes auth info to resources when using PAT', function () {
+    $api = TradingCardApi::withPersonalAccessToken('test-pat-token');
+    $card = $api->card();
+
+    expect($card)->toBeInstanceOf(Card::class);
+
+    // Use reflection to verify auth info was set on the resource
+    $reflection = new ReflectionClass($card);
+    $authTypeProperty = $reflection->getProperty('authType');
+    $authTypeProperty->setAccessible(true);
+
+    expect($authTypeProperty->getValue($card))->toBe('pat');
+});
+
+it('passes auth info to resources when using OAuth2', function () {
+    $api = TradingCardApi::withClientCredentials('client-id', 'client-secret');
+    $card = $api->card();
+
+    expect($card)->toBeInstanceOf(Card::class);
+
+    // Use reflection to verify auth info was set on the resource
+    $reflection = new ReflectionClass($card);
+    $authTypeProperty = $reflection->getProperty('authType');
+    $authTypeProperty->setAccessible(true);
+
+    expect($authTypeProperty->getValue($card))->toBe('oauth2');
+});

@@ -31,18 +31,107 @@ class TradingCardApi
     private $client;
 
     /**
+     * Authentication type ('oauth2' or 'pat')
+     *
+     * @var string
+     */
+    private $authType = 'oauth2';
+
+    /**
+     * Personal Access Token (for PAT auth mode)
+     *
+     * @var string|null
+     */
+    private $personalAccessToken;
+
+    /**
      * Constructor
      *
+     * @param  array<string, mixed>  $options  Optional configuration overrides
      * @return void
      */
-    public function __construct()
+    public function __construct(array $options = [])
     {
         $config = config('tradingcardapi') ?: [];
+        $mergedConfig = array_merge($config, $options);
 
         $this->client = new Client([
-            'verify' => $config['ssl_verify'] ?? true,
-            'base_uri' => $config['url'] ?? '',
+            'verify' => $mergedConfig['ssl_verify'] ?? true,
+            'base_uri' => $mergedConfig['url'] ?? '',
         ]);
+
+        // Set auth type and token if provided
+        if (isset($mergedConfig['auth_type'])) {
+            $this->authType = $mergedConfig['auth_type'];
+        }
+
+        if (isset($mergedConfig['personal_access_token'])) {
+            $this->personalAccessToken = $mergedConfig['personal_access_token'];
+        }
+    }
+
+    /**
+     * Create a new instance using Personal Access Token authentication
+     *
+     * @param  string  $token  The personal access token
+     */
+    public static function withPersonalAccessToken(string $token): self
+    {
+        return new self([
+            'auth_type' => 'pat',
+            'personal_access_token' => $token,
+        ]);
+    }
+
+    /**
+     * Create a new instance using OAuth2 Client Credentials authentication
+     *
+     * @param  string  $clientId  The OAuth2 client ID
+     * @param  string  $clientSecret  The OAuth2 client secret
+     */
+    public static function withClientCredentials(string $clientId, string $clientSecret): self
+    {
+        return new self([
+            'auth_type' => 'oauth2',
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
+        ]);
+    }
+
+    /**
+     * Get the authentication type
+     */
+    public function getAuthType(): string
+    {
+        return $this->authType;
+    }
+
+    /**
+     * Get the personal access token
+     */
+    public function getPersonalAccessToken(): ?string
+    {
+        return $this->personalAccessToken;
+    }
+
+    /**
+     * Create a resource instance with auth information
+     *
+     * @template T of object
+     *
+     * @param  class-string<T>  $resourceClass
+     * @return T
+     */
+    private function createResource(string $resourceClass): object
+    {
+        $resource = new $resourceClass($this->client);
+
+        // Set auth information on the resource if it uses ApiRequest trait
+        if (method_exists($resource, 'setAuthInfo')) {
+            $resource->setAuthInfo($this->authType, $this->personalAccessToken);
+        }
+
+        return $resource;
     }
 
     /**
@@ -50,7 +139,7 @@ class TradingCardApi
      */
     public function genre(): Genre
     {
-        return new Genre($this->client);
+        return $this->createResource(Genre::class);
     }
 
     /**
@@ -58,7 +147,7 @@ class TradingCardApi
      */
     public function set(): Set
     {
-        return new Set($this->client);
+        return $this->createResource(Set::class);
     }
 
     /**
@@ -66,7 +155,7 @@ class TradingCardApi
      */
     public function setSource(): SetSource
     {
-        return new SetSource($this->client);
+        return $this->createResource(SetSource::class);
     }
 
     /**
@@ -74,7 +163,7 @@ class TradingCardApi
      */
     public function card(): Card
     {
-        return new Card($this->client);
+        return $this->createResource(Card::class);
     }
 
     /**
@@ -82,7 +171,7 @@ class TradingCardApi
      */
     public function cardImage(): CardImage
     {
-        return new CardImage($this->client);
+        return $this->createResource(CardImage::class);
     }
 
     /**
@@ -90,7 +179,7 @@ class TradingCardApi
      */
     public function player(): Player
     {
-        return new Player($this->client);
+        return $this->createResource(Player::class);
     }
 
     /**
@@ -98,7 +187,7 @@ class TradingCardApi
      */
     public function team(): Team
     {
-        return new Team($this->client);
+        return $this->createResource(Team::class);
     }
 
     /**
@@ -106,7 +195,7 @@ class TradingCardApi
      */
     public function playerteam(): Playerteam
     {
-        return new Playerteam($this->client);
+        return $this->createResource(Playerteam::class);
     }
 
     /**
@@ -114,7 +203,7 @@ class TradingCardApi
      */
     public function attribute(): Attribute
     {
-        return new Attribute($this->client);
+        return $this->createResource(Attribute::class);
     }
 
     /**
@@ -122,7 +211,7 @@ class TradingCardApi
      */
     public function brand(): Brand
     {
-        return new Brand($this->client);
+        return $this->createResource(Brand::class);
     }
 
     /**
@@ -130,7 +219,7 @@ class TradingCardApi
      */
     public function manufacturer(): Manufacturer
     {
-        return new Manufacturer($this->client);
+        return $this->createResource(Manufacturer::class);
     }
 
     /**
@@ -138,7 +227,7 @@ class TradingCardApi
      */
     public function year(): Year
     {
-        return new Year($this->client);
+        return $this->createResource(Year::class);
     }
 
     /**
@@ -146,7 +235,7 @@ class TradingCardApi
      */
     public function objectAttribute(): ObjectAttribute
     {
-        return new ObjectAttribute($this->client);
+        return $this->createResource(ObjectAttribute::class);
     }
 
     /**
@@ -154,6 +243,6 @@ class TradingCardApi
      */
     public function stats(): Stats
     {
-        return new Stats($this->client);
+        return $this->createResource(Stats::class);
     }
 }
