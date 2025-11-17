@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Card Images API Support** - Complete implementation of Card Images functionality (Trading Card API v0.7.0)
+  - New `CardImage` model with properties for image metadata and relationships
+  - New `CardImage` resource class with full CRUD operations
+  - Multipart file upload support in `ApiRequest` trait for handling binary file uploads
+  - Support for both file path strings and Laravel `UploadedFile` instances
+  - Image variant handling (small, medium, large thumbnails)
+  - CDN URL helpers: `getCdnUrl()`, `getVersionedUrl()`, `getVariantUrl()`
+  - Responsive image support with `srcset` and `sizes` attributes
+  - Variant detection methods: `hasVariant()`, `getVariantSizes()`
+  - `CardImageSchema` for API response validation
+  - `cardImage()` method added to main `TradingCardApi` class
+  - Comprehensive test coverage for model, resource, and schema
+  - Full documentation with usage examples in README.md
+
 ## [0.1.0] - 2025-09-15
 
 ### Added

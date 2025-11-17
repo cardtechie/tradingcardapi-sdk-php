@@ -55,12 +55,20 @@ trait ApiRequest
     {
         $this->retrieveToken();
 
+        $isMultipart = isset($request['multipart']);
+
         $defaultRequest = [];
         $defaultHeaders = [
             'Accept' => 'application/json',
             'Authorization' => 'Bearer '.$this->token,
             'X-TCAPI-Ignore-Status' => (string) config('tradingcardapi.ignore_status', 0),
         ];
+
+        // For multipart requests, Guzzle will set Content-Type automatically
+        // For JSON requests, we need to explicitly set it
+        if (! $isMultipart) {
+            $defaultHeaders['Content-Type'] = 'application/json';
+        }
 
         $theRequest = array_merge($defaultRequest, $request);
         $theRequest['headers'] = array_merge($defaultHeaders, $headers);
@@ -195,6 +203,7 @@ trait ApiRequest
             // Normalize resource names
             $normalizedResources = [
                 'cards' => 'card',
+                'card-images' => 'cardimage',
                 'players' => 'player',
                 'teams' => 'team',
                 'sets' => 'set',

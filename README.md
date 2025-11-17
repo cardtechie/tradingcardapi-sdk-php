@@ -114,6 +114,153 @@ $api = new TradingCardApi();
 $genres = $api->genre()->getList();
 ```
 
+## 📸 Working with Card Images
+
+The SDK provides comprehensive support for uploading, managing, and retrieving card images with automatic thumbnail generation and CDN delivery.
+
+### Upload Card Images
+
+```php
+use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
+
+// Upload from file path
+$image = TradingCardApiSdk::cardImage()->upload(
+    file: '/path/to/card-front.jpg',
+    cardId: 'card-uuid-here',
+    imageType: 'front'
+);
+
+// Upload from Laravel UploadedFile (e.g., from request)
+$image = TradingCardApiSdk::cardImage()->upload(
+    file: $request->file('image'),
+    cardId: 'card-uuid-here',
+    imageType: 'back'
+);
+
+// Upload with additional attributes
+$image = TradingCardApiSdk::cardImage()->upload(
+    file: '/path/to/image.jpg',
+    cardId: 'card-uuid',
+    imageType: 'front',
+    attributes: ['storage_disk' => 's3']
+);
+
+echo $image->id;           // UUID of uploaded image
+echo $image->download_url; // CDN URL for the image
+```
+
+### Retrieve Card Images
+
+```php
+// Get a specific card image with metadata
+$image = TradingCardApiSdk::cardImage()->get('image-uuid');
+
+// Access image properties
+echo $image->file_size;    // File size in bytes
+echo $image->mime_type;    // e.g., "image/jpeg"
+echo $image->width;        // Image width in pixels
+echo $image->height;       // Image height in pixels
+
+// Get related card
+$card = $image->card();
+```
+
+### Image Variants & CDN URLs
+
+The API automatically generates thumbnail variants (small, medium, large) for uploaded images:
+
+```php
+$image = TradingCardApiSdk::cardImage()->get('image-uuid');
+
+// Get original image URL
+echo $image->getCdnUrl();           // Original size
+echo $image->getCdnUrl('original'); // Explicit original
+
+// Get thumbnail URLs
+echo $image->getCdnUrl('small');    // Small thumbnail (150px)
+echo $image->getCdnUrl('medium');   // Medium thumbnail (300px)
+echo $image->getCdnUrl('large');    // Large thumbnail (600px)
+
+// Get cache-busted versioned URLs
+echo $image->getVersionedUrl();         // Original with version parameter
+echo $image->getVersionedUrl('small');  // Small variant with version
+
+// Check if variant exists
+if ($image->hasVariant('small')) {
+    echo $image->getVariantUrl('small');
+}
+
+// Get all available variant sizes
+$sizes = $image->getVariantSizes(); // ['small', 'medium', 'large']
+```
+
+### Responsive Images
+
+Generate responsive image markup for optimal loading:
+
+```php
+$image = TradingCardApiSdk::cardImage()->get('image-uuid');
+
+// Get srcset for responsive images
+echo "<img src='{$image->download_url}'
+           srcset='{$image->srcset}'
+           sizes='{$image->sizes}'
+           alt='Card Image' />";
+
+// Output example:
+// <img src="https://cdn.example.com/image.jpg"
+//      srcset="https://cdn.example.com/small.jpg 150w,
+//              https://cdn.example.com/medium.jpg 300w,
+//              https://cdn.example.com/image.jpg 600w"
+//      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+//      alt="Card Image" />
+```
+
+### List and Filter Card Images
+
+```php
+// List all card images with pagination
+$images = TradingCardApiSdk::cardImage()->list([
+    'page' => 1,
+    'limit' => 50,
+]);
+
+// Filter by card
+$images = TradingCardApiSdk::cardImage()->list([
+    'filter' => ['card_id' => 'card-uuid'],
+    'include' => 'card',
+]);
+
+// Iterate through paginated results
+foreach ($images as $image) {
+    echo "{$image->image_type}: {$image->download_url}\n";
+}
+```
+
+### Update Image Metadata
+
+```php
+// Update image type or other metadata
+$image = TradingCardApiSdk::cardImage()->update('image-uuid', [
+    'image_type' => 'back',  // Change from front to back
+]);
+```
+
+### Delete Card Images
+
+```php
+// Soft delete a card image
+TradingCardApiSdk::cardImage()->delete('image-uuid');
+```
+
+### Get Download URLs
+
+```php
+// Get download URL for specific size
+$url = TradingCardApiSdk::cardImage()->getDownloadUrl('image-uuid');          // Original
+$url = TradingCardApiSdk::cardImage()->getDownloadUrl('image-uuid', 'small'); // Small variant
+```
+
 ## 📚 Available Resources
 
 The SDK provides access to the following Trading Card API resources:
@@ -121,6 +268,7 @@ The SDK provides access to the following Trading Card API resources:
 | Resource | Description | Methods |
 |----------|-------------|---------|
 | **Cards** | Individual trading cards | `get()`, `create()`, `update()`, `delete()` |
+| **CardImages** | Card image uploads and management | `get()`, `list()`, `upload()`, `update()`, `delete()`, `getDownloadUrl()` |
 | **Sets** | Card sets and collections | `get()`, `list()`, `create()`, `update()`, `delete()`, `checklist($id)`, `addMissingCards($id)`, `addChecklist($request, $id)` |
 | **Players** | Player information | `get()`, `getList()`, `create()` |
 | **Teams** | Team data | `get()`, `getList()`, `create()` |

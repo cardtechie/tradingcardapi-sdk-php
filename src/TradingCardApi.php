@@ -5,6 +5,7 @@ namespace CardTechie\TradingCardApiSdk;
 use CardTechie\TradingCardApiSdk\Resources\Attribute;
 use CardTechie\TradingCardApiSdk\Resources\Brand;
 use CardTechie\TradingCardApiSdk\Resources\Card;
+use CardTechie\TradingCardApiSdk\Resources\CardImage;
 use CardTechie\TradingCardApiSdk\Resources\Genre;
 use CardTechie\TradingCardApiSdk\Resources\Manufacturer;
 use CardTechie\TradingCardApiSdk\Resources\ObjectAttribute;
@@ -65,6 +66,14 @@ class TradingCardApi
     public function card(): Card
     {
         return new Card($this->client);
+    }
+
+    /**
+     * Retrieve the card image resource.
+     */
+    public function cardImage(): CardImage
+    {
+        return new CardImage($this->client);
     }
 
     /**
