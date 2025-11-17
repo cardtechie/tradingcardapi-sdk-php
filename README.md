@@ -101,7 +101,7 @@ $api = TradingCardApi::withPersonalAccessToken(
 );
 
 // Use normally
-$cards = $api->card()->list();
+$card = $api->card()->get('card-id');
 ```
 
 **Environment Configuration:**
@@ -139,7 +139,7 @@ $api = TradingCardApi::withClientCredentials(
 $api = new TradingCardApi();
 
 // Use normally
-$cards = $api->card()->list();
+$card = $api->card()->get('card-id');
 ```
 
 **Environment Configuration:**
