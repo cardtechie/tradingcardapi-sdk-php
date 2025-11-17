@@ -494,6 +494,83 @@ return [
 ];
 ```
 
+## 🔄 API Versions
+
+The Trading Card API provides both v1 and v2 endpoints with different response structures to support various JSON:API compliance levels.
+
+### v1 Endpoints (Default)
+
+**The SDK uses v1 endpoints by default.** These endpoints follow a relationship-focused JSON:API pattern where related resources are returned in the `included` array alongside the primary resource.
+
+**Example:** `GET /v1/sets/{id}/checklist`
+
+```json
+{
+  "data": {
+    "type": "sets",
+    "id": "set-uuid",
+    "attributes": {
+      "name": "1989 Topps Baseball"
+    }
+  },
+  "included": [
+    {
+      "type": "cards",
+      "id": "card-1",
+      "attributes": { "number": "1", "name": "Player 1" }
+    },
+    {
+      "type": "cards",
+      "id": "card-2",
+      "attributes": { "number": "2", "name": "Player 2" }
+    }
+  ]
+}
+```
+
+**Characteristics:**
+- Primary resource in `data` object
+- Related resources in `included` array
+- Follows JSON:API relationship pattern
+- Optimal for accessing both the parent resource and related data
+
+### v2 Endpoints (Stricter JSON:API Compliance)
+
+The API also provides v2 endpoints with stricter JSON:API compliance. These endpoints return collections as the primary `data` array when accessing relationship endpoints.
+
+**Example:** `GET /v2/sets/{id}/checklist`
+
+```json
+{
+  "data": [
+    {
+      "type": "cards",
+      "id": "card-1",
+      "attributes": { "number": "1", "name": "Player 1" }
+    },
+    {
+      "type": "cards",
+      "id": "card-2",
+      "attributes": { "number": "2", "name": "Player 2" }
+    }
+  ]
+}
+```
+
+**Characteristics:**
+- Collection resources in `data` array
+- More JSON:API compliant for collection endpoints
+- Focuses on the requested collection rather than parent resource
+- Cleaner structure when you only need the related resources
+
+### Version Support
+
+**Current SDK Support:** v1 endpoints only
+
+**Future Plans:** v2 endpoint support may be added in a future SDK version based on user feedback and demand. Both versions return the same data, just structured differently according to JSON:API specifications.
+
+**Need v2 Support?** If you require v2 endpoint support, please [open an issue](https://github.com/cardtechie/tradingcardapi-sdk-php/issues) describing your use case.
+
 ## 🧪 Development & Testing
 
 This project uses modern PHP development tools and practices:
