@@ -45,6 +45,20 @@ class TradingCardApi
     private $personalAccessToken;
 
     /**
+     * OAuth2 Client ID (for OAuth2 auth mode)
+     *
+     * @var string|null
+     */
+    private $clientId;
+
+    /**
+     * OAuth2 Client Secret (for OAuth2 auth mode)
+     *
+     * @var string|null
+     */
+    private $clientSecret;
+
+    /**
      * Constructor
      *
      * @param  array<string, mixed>  $options  Optional configuration overrides
@@ -60,13 +74,21 @@ class TradingCardApi
             'base_uri' => $mergedConfig['url'] ?? '',
         ]);
 
-        // Set auth type and token if provided
+        // Set auth type and credentials if provided
         if (isset($mergedConfig['auth_type'])) {
             $this->authType = $mergedConfig['auth_type'];
         }
 
         if (isset($mergedConfig['personal_access_token'])) {
             $this->personalAccessToken = $mergedConfig['personal_access_token'];
+        }
+
+        if (isset($mergedConfig['client_id'])) {
+            $this->clientId = $mergedConfig['client_id'];
+        }
+
+        if (isset($mergedConfig['client_secret'])) {
+            $this->clientSecret = $mergedConfig['client_secret'];
         }
     }
 
@@ -128,7 +150,12 @@ class TradingCardApi
 
         // Set auth information on the resource if it uses ApiRequest trait
         if (method_exists($resource, 'setAuthInfo')) {
-            $resource->setAuthInfo($this->authType, $this->personalAccessToken);
+            $resource->setAuthInfo(
+                $this->authType,
+                $this->personalAccessToken,
+                $this->clientId,
+                $this->clientSecret
+            );
         }
 
         return $resource;

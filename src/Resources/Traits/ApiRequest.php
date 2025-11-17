@@ -55,15 +55,37 @@ trait ApiRequest
     private $personalAccessToken;
 
     /**
+     * OAuth2 Client ID (for OAuth2 auth mode)
+     *
+     * @var string|null
+     */
+    private $oauthClientId;
+
+    /**
+     * OAuth2 Client Secret (for OAuth2 auth mode)
+     *
+     * @var string|null
+     */
+    private $oauthClientSecret;
+
+    /**
      * Set authentication information
      *
      * @param  string  $authType  The authentication type ('oauth2' or 'pat')
      * @param  string|null  $personalAccessToken  The personal access token (for PAT mode)
+     * @param  string|null  $clientId  The OAuth2 client ID (for OAuth2 mode)
+     * @param  string|null  $clientSecret  The OAuth2 client secret (for OAuth2 mode)
      */
-    public function setAuthInfo(string $authType, ?string $personalAccessToken = null): void
-    {
+    public function setAuthInfo(
+        string $authType,
+        ?string $personalAccessToken = null,
+        ?string $clientId = null,
+        ?string $clientSecret = null
+    ): void {
         $this->authType = $authType;
         $this->personalAccessToken = $personalAccessToken;
+        $this->oauthClientId = $clientId;
+        $this->oauthClientSecret = $clientSecret;
     }
 
     /**
@@ -152,14 +174,25 @@ trait ApiRequest
         }
 
         // OAuth2 Client Credentials flow
-        $tokenKey = 'tcapi_token';
+        // Use instance-specific credentials if set, otherwise fall back to config
+        $clientId = $this->oauthClientId;
+        $clientSecret = $this->oauthClientSecret;
+
+        if (! $clientId || ! $clientSecret) {
+            $config = config('tradingcardapi');
+            $clientId = $config['client_id'] ?? '';
+            $clientSecret = $config['client_secret'] ?? '';
+        }
+
+        // Generate unique cache key based on credentials to prevent token sharing
+        // between different OAuth2 client instances
+        $tokenKey = 'tcapi_token_'.md5($clientId.$clientSecret);
+
         if (cache()->has($tokenKey)) {
             $this->token = cache()->get($tokenKey);
 
             return;
         }
-
-        $config = config('tradingcardapi');
 
         $url = '/oauth/token';
         $headers = [
@@ -169,8 +202,8 @@ trait ApiRequest
 
         $body = [
             'grant_type' => 'client_credentials',
-            'client_id' => $config['client_id'],
-            'client_secret' => $config['client_secret'],
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
             'scope' => '',
         ];
 

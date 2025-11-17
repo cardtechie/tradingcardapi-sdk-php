@@ -17,7 +17,7 @@ beforeEach(function () {
     ]);
 
     // Pre-populate cache with token to avoid OAuth requests
-    cache()->put('tcapi_token', 'test-token', 60);
+    cache()->put('tcapi_token_'.md5('test-client-idtest-client-secret'), 'test-token', 60);
 
     $this->mockHandler = new MockHandler;
     $handlerStack = HandlerStack::create($this->mockHandler);
