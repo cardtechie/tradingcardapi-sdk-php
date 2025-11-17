@@ -43,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `Card::getBackImage()` - Convenience method to get back image
     - Full Collection API support (filter, map, pluck, etc.)
   - **Set-to-Sources Relationship Support**
-    - `Set::sources()` - Returns `Collection<SetSource>` for fluent data manipulation (breaking change: now returns Collection instead of array)
+    - `Set::sources()` - Returns `Collection<SetSource>` for fluent data manipulation
     - `Set::hasSources()` - Check if set has any sources
     - `Set::getChecklistSource()` - Convenience method to get checklist source
     - `Set::getMetadataSource()` - Convenience method to get metadata source
@@ -51,13 +51,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Full Collection API support for source filtering and manipulation
   - Comprehensive test coverage for all relationship methods
   - Updated documentation with Collection-based examples
-
-### Changed
-
-- **BREAKING**: `Set::sources()` now returns `Collection<SetSource>` instead of `array`
-  - Most code will continue to work as Collections are iterable
-  - Replace `count($set->sources())` with `$set->sources()->count()`
-  - Replace array functions with Collection methods
 
 ## [0.1.0] - 2025-09-15
 
