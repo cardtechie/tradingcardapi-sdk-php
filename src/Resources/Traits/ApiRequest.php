@@ -113,9 +113,9 @@ trait ApiRequest
         ];
 
         // For multipart requests, Guzzle will set Content-Type automatically
-        // For JSON requests, we need to explicitly set it
-        if (! $isMultipart) {
-            $defaultHeaders['Content-Type'] = 'application/json';
+        // For JSON:API requests (POST/PUT/PATCH), we need to set the JSON:API Content-Type
+        if (! $isMultipart && in_array(strtoupper($method), ['POST', 'PUT', 'PATCH'])) {
+            $defaultHeaders['Content-Type'] = 'application/vnd.api+json';
         }
 
         $theRequest = array_merge($defaultRequest, $request);
@@ -211,7 +211,7 @@ trait ApiRequest
             'grant_type' => 'client_credentials',
             'client_id' => $clientId,
             'client_secret' => $clientSecret,
-            'scope' => '',
+            'scope' => config('tradingcardapi.scope', ''),
         ];
 
         $request = [];
