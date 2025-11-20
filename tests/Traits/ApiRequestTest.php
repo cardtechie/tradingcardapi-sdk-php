@@ -244,3 +244,187 @@ it('handles empty scope configuration', function () {
 
     expect($result)->toBeObject();
 });
+
+it('sets Content-Type header to application/vnd.api+json for POST requests', function () {
+    $client = m::mock(Client::class);
+
+    // Mock the OAuth token request
+    $tokenResponse = new GuzzleResponse(200, [], json_encode([
+        'access_token' => 'test-token',
+        'token_type' => 'Bearer',
+    ]));
+
+    // Mock the API request and verify Content-Type header
+    $apiResponse = new GuzzleResponse(201, [], json_encode(['data' => ['id' => '123']]));
+
+    $client->shouldReceive('request')
+        ->with('POST', '/oauth/token', m::type('array'))
+        ->once()
+        ->andReturn($tokenResponse);
+
+    $client->shouldReceive('request')
+        ->with('POST', '/v1/cards', m::on(function ($request) {
+            return isset($request['headers']['Content-Type']) &&
+                   $request['headers']['Content-Type'] === 'application/vnd.api+json';
+        }))
+        ->once()
+        ->andReturn($apiResponse);
+
+    $instance = new TestApiRequestClass($client);
+    $result = $instance->testMakeRequest('/v1/cards', 'POST');
+
+    expect($result)->toBeObject();
+});
+
+it('sets Content-Type header to application/vnd.api+json for PUT requests', function () {
+    $client = m::mock(Client::class);
+
+    // Mock the OAuth token request
+    $tokenResponse = new GuzzleResponse(200, [], json_encode([
+        'access_token' => 'test-token',
+        'token_type' => 'Bearer',
+    ]));
+
+    // Mock the API request and verify Content-Type header
+    $apiResponse = new GuzzleResponse(200, [], json_encode(['data' => ['id' => '123']]));
+
+    $client->shouldReceive('request')
+        ->with('POST', '/oauth/token', m::type('array'))
+        ->once()
+        ->andReturn($tokenResponse);
+
+    $client->shouldReceive('request')
+        ->with('PUT', '/v1/cards/123', m::on(function ($request) {
+            return isset($request['headers']['Content-Type']) &&
+                   $request['headers']['Content-Type'] === 'application/vnd.api+json';
+        }))
+        ->once()
+        ->andReturn($apiResponse);
+
+    $instance = new TestApiRequestClass($client);
+    $result = $instance->testMakeRequest('/v1/cards/123', 'PUT');
+
+    expect($result)->toBeObject();
+});
+
+it('sets Content-Type header to application/vnd.api+json for PATCH requests', function () {
+    $client = m::mock(Client::class);
+
+    // Mock the OAuth token request
+    $tokenResponse = new GuzzleResponse(200, [], json_encode([
+        'access_token' => 'test-token',
+        'token_type' => 'Bearer',
+    ]));
+
+    // Mock the API request and verify Content-Type header
+    $apiResponse = new GuzzleResponse(200, [], json_encode(['data' => ['id' => '123']]));
+
+    $client->shouldReceive('request')
+        ->with('POST', '/oauth/token', m::type('array'))
+        ->once()
+        ->andReturn($tokenResponse);
+
+    $client->shouldReceive('request')
+        ->with('PATCH', '/v1/cards/123', m::on(function ($request) {
+            return isset($request['headers']['Content-Type']) &&
+                   $request['headers']['Content-Type'] === 'application/vnd.api+json';
+        }))
+        ->once()
+        ->andReturn($apiResponse);
+
+    $instance = new TestApiRequestClass($client);
+    $result = $instance->testMakeRequest('/v1/cards/123', 'PATCH');
+
+    expect($result)->toBeObject();
+});
+
+it('does not set Content-Type header for GET requests', function () {
+    $client = m::mock(Client::class);
+
+    // Mock the OAuth token request
+    $tokenResponse = new GuzzleResponse(200, [], json_encode([
+        'access_token' => 'test-token',
+        'token_type' => 'Bearer',
+    ]));
+
+    // Mock the API request and verify no Content-Type header
+    $apiResponse = new GuzzleResponse(200, [], json_encode(['data' => ['id' => '123']]));
+
+    $client->shouldReceive('request')
+        ->with('POST', '/oauth/token', m::type('array'))
+        ->once()
+        ->andReturn($tokenResponse);
+
+    $client->shouldReceive('request')
+        ->with('GET', '/v1/cards/123', m::on(function ($request) {
+            return ! isset($request['headers']['Content-Type']);
+        }))
+        ->once()
+        ->andReturn($apiResponse);
+
+    $instance = new TestApiRequestClass($client);
+    $result = $instance->testMakeRequest('/v1/cards/123', 'GET');
+
+    expect($result)->toBeObject();
+});
+
+it('does not set Content-Type header for DELETE requests', function () {
+    $client = m::mock(Client::class);
+
+    // Mock the OAuth token request
+    $tokenResponse = new GuzzleResponse(200, [], json_encode([
+        'access_token' => 'test-token',
+        'token_type' => 'Bearer',
+    ]));
+
+    // Mock the API request and verify no Content-Type header
+    $apiResponse = new GuzzleResponse(204, [], '');
+
+    $client->shouldReceive('request')
+        ->with('POST', '/oauth/token', m::type('array'))
+        ->once()
+        ->andReturn($tokenResponse);
+
+    $client->shouldReceive('request')
+        ->with('DELETE', '/v1/cards/123', m::on(function ($request) {
+            return ! isset($request['headers']['Content-Type']);
+        }))
+        ->once()
+        ->andReturn($apiResponse);
+
+    $instance = new TestApiRequestClass($client);
+    $result = $instance->testMakeRequest('/v1/cards/123', 'DELETE');
+
+    expect($result)->toBeInstanceOf(stdClass::class);
+});
+
+it('allows custom Content-Type header to override default for POST requests', function () {
+    $client = m::mock(Client::class);
+
+    // Mock the OAuth token request
+    $tokenResponse = new GuzzleResponse(200, [], json_encode([
+        'access_token' => 'test-token',
+        'token_type' => 'Bearer',
+    ]));
+
+    // Mock the API request with custom Content-Type
+    $apiResponse = new GuzzleResponse(200, [], json_encode(['success' => true]));
+
+    $client->shouldReceive('request')
+        ->with('POST', '/oauth/token', m::type('array'))
+        ->once()
+        ->andReturn($tokenResponse);
+
+    $client->shouldReceive('request')
+        ->with('POST', '/test', m::on(function ($request) {
+            return isset($request['headers']['Content-Type']) &&
+                   $request['headers']['Content-Type'] === 'application/custom';
+        }))
+        ->once()
+        ->andReturn($apiResponse);
+
+    $instance = new TestApiRequestClass($client);
+    $result = $instance->testMakeRequest('/test', 'POST', [], ['Content-Type' => 'application/custom']);
+
+    expect($result->success)->toBeTrue();
+});
