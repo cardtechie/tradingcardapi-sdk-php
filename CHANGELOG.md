@@ -117,6 +117,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Full test coverage with Collection method examples
   - See issue #133 for implementation details
 
+### Fixed
+
+- **Content-Type Header for Mutating Requests** - Fixed JSON:API Content-Type header for POST/PUT/PATCH requests
+  - Changed `ApiRequest` trait to send `Content-Type: application/vnd.api+json` for mutating requests (POST, PUT, PATCH)
+  - Previously sent `application/json` causing 415 Unsupported Media Type errors
+  - GET and DELETE requests no longer send Content-Type header (not needed for requests without body)
+  - Custom Content-Type headers can still override the default if needed
+  - Fixes issue #139 - Resolves admin application Dusk test failures
+
 ## [0.1.10] - 2025-10-30
 
 ### Added
