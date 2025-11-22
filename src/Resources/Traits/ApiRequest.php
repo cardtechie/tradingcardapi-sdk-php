@@ -221,8 +221,12 @@ trait ApiRequest
             'grant_type' => 'client_credentials',
             'client_id' => $clientId,
             'client_secret' => $clientSecret,
-            'scope' => $this->oauthScope ?? '',
         ];
+
+        // Only include scope if it's set and not '*' (which means all scopes)
+        if (!empty($this->oauthScope) && $this->oauthScope !== '*') {
+            $body['scope'] = $this->oauthScope;
+        }
 
         $request = [];
         $request['headers'] = $headers;
