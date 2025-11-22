@@ -69,23 +69,33 @@ trait ApiRequest
     private $oauthClientSecret;
 
     /**
+     * OAuth2 Scope (for OAuth2 auth mode)
+     *
+     * @var string|null
+     */
+    private $oauthScope;
+
+    /**
      * Set authentication information
      *
      * @param  string  $authType  The authentication type ('oauth2' or 'pat')
      * @param  string|null  $personalAccessToken  The personal access token (for PAT mode)
      * @param  string|null  $clientId  The OAuth2 client ID (for OAuth2 mode)
      * @param  string|null  $clientSecret  The OAuth2 client secret (for OAuth2 mode)
+     * @param  string|null  $scope  The OAuth2 scope (for OAuth2 mode)
      */
     public function setAuthInfo(
         string $authType,
         ?string $personalAccessToken = null,
         ?string $clientId = null,
-        ?string $clientSecret = null
+        ?string $clientSecret = null,
+        ?string $scope = null
     ): void {
         $this->authType = $authType;
         $this->personalAccessToken = $personalAccessToken;
         $this->oauthClientId = $clientId;
         $this->oauthClientSecret = $clientSecret;
+        $this->oauthScope = $scope;
     }
 
     /**
@@ -211,7 +221,7 @@ trait ApiRequest
             'grant_type' => 'client_credentials',
             'client_id' => $clientId,
             'client_secret' => $clientSecret,
-            'scope' => config('tradingcardapi.scope', ''),
+            'scope' => $this->oauthScope ?? '',
         ];
 
         $request = [];

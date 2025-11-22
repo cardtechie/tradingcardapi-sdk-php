@@ -59,6 +59,13 @@ class TradingCardApi
     private $clientSecret;
 
     /**
+     * OAuth2 Scope (for OAuth2 auth mode)
+     *
+     * @var string|null
+     */
+    private $scope;
+
+    /**
      * Constructor
      *
      * @param  array<string, mixed>  $options  Optional configuration overrides
@@ -100,6 +107,10 @@ class TradingCardApi
 
         if (isset($mergedConfig['client_secret'])) {
             $this->clientSecret = $mergedConfig['client_secret'];
+        }
+
+        if (isset($mergedConfig['scope'])) {
+            $this->scope = $mergedConfig['scope'];
         }
     }
 
@@ -148,6 +159,14 @@ class TradingCardApi
     }
 
     /**
+     * Get the OAuth2 scope
+     */
+    public function getScope(): ?string
+    {
+        return $this->scope;
+    }
+
+    /**
      * Create a resource instance with auth information
      *
      * @template T of object
@@ -165,7 +184,8 @@ class TradingCardApi
                 $this->authType,
                 $this->personalAccessToken,
                 $this->clientId,
-                $this->clientSecret
+                $this->clientSecret,
+                $this->scope
             );
         }
 
