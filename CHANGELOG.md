@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Content-Type Header for Mutating Requests** - Fixed JSON:API Content-Type header for POST/PUT/PATCH requests
+  - Changed `ApiRequest` trait to send `Content-Type: application/vnd.api+json` for mutating requests (POST, PUT, PATCH)
+  - Previously sent `application/json` causing 415 Unsupported Media Type errors
+  - GET and DELETE requests no longer send Content-Type header (not needed for requests without body)
+  - Custom Content-Type headers can still override the default if needed
+  - Fixes issue #139 - Resolves admin application Dusk test failures
+
 ## [0.1.10] - 2025-10-30
 
 ### Added
@@ -49,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Year Resource Pagination Crash** - Added defensive handling for missing meta property
-  - Fixed division by zero error when API response lacks pagination metadata  
+  - Fixed division by zero error when API response lacks pagination metadata
   - Added fallback pagination values using request params and response data
   - Applied consistent pagination handling matching other SDK resources
 - Year resource integration gaps preventing admin interface migration
@@ -111,7 +120,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `TradingCardApiSdk::player()->get($id)` - Get player by ID
   - `TradingCardApiSdk::player()->list($params)` - List players with pagination
   - `TradingCardApiSdk::player()->create($data)` - Create new players
-  - `TradingCardApiSdk::player()->update($id, $data)` - Update existing players  
+  - `TradingCardApiSdk::player()->update($id, $data)` - Update existing players
   - `TradingCardApiSdk::player()->delete($id)` - Delete players
   - `TradingCardApiSdk::player()->listDeleted()` - List deleted players
   - `TradingCardApiSdk::player()->deleted($id)` - Get deleted player by ID
@@ -188,7 +197,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.10...HEAD
+[0.1.10]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.9...v0.1.10
+[0.1.9]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.8...v0.1.9
+[0.1.8]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.7...v0.1.8
+[0.1.7]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.6...v0.1.7
+[0.1.6]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.5...v0.1.6
+[0.1.5]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.3...v0.1.4
+[0.1.3]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/cardtechie/tradingcardapi-sdk-php/releases/tag/v0.1.0
