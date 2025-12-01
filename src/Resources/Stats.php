@@ -60,7 +60,7 @@ class Stats
      */
     public function getGrowth(string $period = '7d'): GrowthResponse
     {
-        $url = sprintf('/v1/stats/growth?period=%s', $period);
+        $url = sprintf('/v1/stats/growth?%s', http_build_query(['period' => $period]));
         $response = $this->makeRequest($url);
 
         return GrowthResponse::fromResponse($response);
