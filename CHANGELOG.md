@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Stats Endpoint Support** - New methods for entity count tracking and analytics (Issue #144)
+  - `Stats::getCounts()` - Get current counts for all entity types (total, published, draft, archived)
+  - `Stats::getSnapshots(array $filters = [])` - Get historical snapshots with date range filtering
+  - `Stats::getGrowth(string $period = '7d')` - Get growth metrics (daily/weekly/monthly changes)
+  - New DTOs for type-safe responses:
+    - `CountsResponse` with `EntityCount` objects
+    - `SnapshotsResponse` with `Snapshot` objects
+    - `GrowthResponse` with `GrowthMetric` objects
+  - Helper methods `getByEntityType()` for easy access to specific entity metrics
+
 ## [0.1.11] - 2025-11-30
 
 ### Fixed

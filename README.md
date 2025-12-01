@@ -255,8 +255,51 @@ The SDK provides access to the following Trading Card API resources:
 | **Manufacturers** | Trading card manufacturers | `get()`, `list()`, `create()`, `update()`, `delete()` |
 | **Years** | Trading card years | `get()`, `list()`, `create()`, `update()`, `delete()` |
 | **ObjectAttributes** | Object attributes | `get()`, `list()`, `create()`, `update()`, `delete()` |
-| **Stats** | Model statistics | `get($type)` |
+| **Stats** | Entity statistics and analytics | `get($type)`, `getCounts()`, `getSnapshots()`, `getGrowth()` |
 | **Attributes** | Card attributes | `get()`, `getList()` |
+
+### Stats Resource
+
+The Stats resource provides analytics and tracking capabilities for entity counts:
+
+```php
+// Get current counts for all entity types
+$counts = $api->stats()->getCounts();
+
+// Access counts for a specific entity type
+$setsCount = $counts->getByEntityType('sets');
+echo $setsCount->total;      // Total count
+echo $setsCount->published;  // Published count
+echo $setsCount->draft;      // Draft count
+echo $setsCount->archived;   // Archived count
+
+// Get growth metrics (default: 7 days)
+$growth = $api->stats()->getGrowth();
+// Or specify a period: '7d', '30d', '90d', 'week', 'month'
+$growth = $api->stats()->getGrowth('30d');
+
+$setsGrowth = $growth->getByEntityType('sets');
+echo $setsGrowth->current;          // Current count
+echo $setsGrowth->previous;         // Previous period count
+echo $setsGrowth->change;           // Absolute change
+echo $setsGrowth->percentageChange; // Percentage change
+
+// Get historical snapshots
+$snapshots = $api->stats()->getSnapshots();
+
+// With filters
+$snapshots = $api->stats()->getSnapshots([
+    'entity_type' => 'sets',
+    'from' => '2024-11-01',
+    'to' => '2024-11-30',
+]);
+
+foreach ($snapshots->snapshots as $snapshot) {
+    echo $snapshot->date;        // Snapshot date
+    echo $snapshot->entityType;  // Entity type
+    echo $snapshot->total;       // Total at that point
+}
+```
 
 ## 🔧 Configuration
 
