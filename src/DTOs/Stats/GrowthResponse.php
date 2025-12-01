@@ -12,6 +12,13 @@ class GrowthResponse
         public readonly string $period,
     ) {}
 
+    /**
+     * Lazy-loaded index for O(1) lookups by entity type.
+     *
+     * @var array<string, GrowthMetric>|null
+     */
+    private ?array $entityTypeIndex = null;
+
     public static function fromResponse(object $response): self
     {
         $metrics = [];
@@ -28,14 +35,19 @@ class GrowthResponse
         );
     }
 
+    /**
+     * Get growth metric by entity type with O(1) indexed lookup.
+     */
     public function getByEntityType(string $entityType): ?GrowthMetric
     {
-        foreach ($this->metrics as $metric) {
-            if ($metric->entityType === $entityType) {
-                return $metric;
+        // Build index on first access for lazy loading
+        if ($this->entityTypeIndex === null) {
+            $this->entityTypeIndex = [];
+            foreach ($this->metrics as $metric) {
+                $this->entityTypeIndex[$metric->entityType] = $metric;
             }
         }
 
-        return null;
+        return $this->entityTypeIndex[$entityType] ?? null;
     }
 }
