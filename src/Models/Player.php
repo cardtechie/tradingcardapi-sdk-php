@@ -44,7 +44,7 @@ class Player extends Model implements Taxonomy
         /** @var string $playerValue */
         $playerValue = $data['player'];
 
-        // If it's a UUID, validate and return a player instance
+        // If it's a UUID, attempt to fetch and return the player instance; throw an exception if not found
         if (StringHelpers::isValidUuid($playerValue)) {
             try {
                 return TradingCardApiSdk::player()->get($playerValue);

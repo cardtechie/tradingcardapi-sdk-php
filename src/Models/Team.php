@@ -41,7 +41,7 @@ class Team extends Model implements Taxonomy
         /** @var string $teamValue */
         $teamValue = $data['team'];
 
-        // If it's a UUID, validate and return a team instance
+        // If it's a UUID, attempt to fetch and return the team instance; throw an exception if not found
         if (StringHelpers::isValidUuid($teamValue)) {
             try {
                 return TradingCardApiSdk::team()->get($teamValue);
