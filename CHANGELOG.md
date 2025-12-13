@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.13] - 2025-12-13
+
+### Added
+
+- **OnCardable Trait for Player and Team Models** - Enables independent oncard relationships (Issue #148)
+  - Added `OnCardable` trait to `Player` model with `onCardable()` and `prepare()` methods
+  - Added `OnCardable` trait to `Team` model with `onCardable()` and `prepare()` methods
+  - Allows cards to have direct player-only or team-only associations without requiring a Playerteam relationship
+  - Supports both UUID and name-based lookups in `prepare()` method
+
 ## [0.1.12] - 2025-12-01
 
 ### Added

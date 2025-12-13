@@ -140,3 +140,60 @@ it('returns null when parent_id is empty', function () {
 
     expect($result)->toBeNull();
 });
+
+it('returns onCardable configuration', function () {
+    $player = new Player;
+
+    expect($player->onCardable())->toBe(['name' => 'Player']);
+});
+
+it('prepare method returns null when player is empty', function () {
+    $data = ['player' => ''];
+
+    $result = Player::prepare($data);
+
+    expect($result)->toBeNull();
+});
+
+it('prepare method returns null when player is null', function () {
+    $data = ['player' => null];
+
+    $result = Player::prepare($data);
+
+    expect($result)->toBeNull();
+});
+
+it('prepare method returns null when player key is missing', function () {
+    $data = [];
+
+    $result = Player::prepare($data);
+
+    expect($result)->toBeNull();
+});
+
+it('prepare method throws exception for invalid player UUID', function () {
+    $data = ['player' => '550e8400-e29b-41d4-a716-446655440000'];
+
+    expect(function () use ($data) {
+        Player::prepare($data);
+    })->toThrow(\InvalidArgumentException::class, 'Player with UUID 550e8400-e29b-41d4-a716-446655440000 not found');
+});
+
+it('prepare method preserves exception chain for invalid UUID', function () {
+    $data = ['player' => '550e8400-e29b-41d4-a716-446655440000'];
+
+    try {
+        Player::prepare($data);
+        $this->fail('Expected InvalidArgumentException');
+    } catch (\InvalidArgumentException $e) {
+        expect($e->getPrevious())->not->toBeNull();
+    }
+});
+
+it('prepare method exists and has proper structure', function () {
+    expect(method_exists(Player::class, 'prepare'))->toBeTrue();
+
+    $reflection = new ReflectionMethod(Player::class, 'prepare');
+    expect($reflection->isStatic())->toBeTrue();
+    expect($reflection->isPublic())->toBeTrue();
+});
