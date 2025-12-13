@@ -3,6 +3,8 @@
 namespace CardTechie\TradingCardApiSdk\Models;
 
 use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
+use CardTechie\TradingCardApiSdk\Models\Traits\OnCardable;
+use CardTechie\TradingCardApiSdk\Utils\StringHelpers;
 use Illuminate\Support\Collection;
 
 /**
@@ -15,6 +17,46 @@ use Illuminate\Support\Collection;
  */
 class Player extends Model implements Taxonomy
 {
+    use OnCardable;
+
+    /**
+     * Return the onCardable configuration array for this model.
+     */
+    public function onCardable(): array
+    {
+        return [
+            'name' => 'Player',
+        ];
+    }
+
+    /**
+     * Prepare the on card relationships and return the object that matches the passed in data.
+     *
+     * @param  array<string, mixed>  $data  Array containing 'player' key with UUID or name
+     * @return Player|null
+     */
+    public static function prepare($data): ?object
+    {
+        if (empty($data['player'])) {
+            return null;
+        }
+
+        /** @var string $playerValue */
+        $playerValue = $data['player'];
+
+        // If it's a UUID, validate and return a player instance
+        if (StringHelpers::isValidUuid($playerValue)) {
+            try {
+                return TradingCardApiSdk::player()->get($playerValue);
+            } catch (\Exception $e) {
+                throw new \InvalidArgumentException("Player with UUID {$playerValue} not found");
+            }
+        }
+
+        // It's a name, look up or create the player
+        return self::getFromApi(['player' => $playerValue]);
+    }
+
     /**
      * Return the full name of the player
      */

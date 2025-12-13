@@ -3,6 +3,8 @@
 namespace CardTechie\TradingCardApiSdk\Models;
 
 use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
+use CardTechie\TradingCardApiSdk\Models\Traits\OnCardable;
+use CardTechie\TradingCardApiSdk\Utils\StringHelpers;
 
 /**
  * Class Team
@@ -12,6 +14,46 @@ use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
  */
 class Team extends Model implements Taxonomy
 {
+    use OnCardable;
+
+    /**
+     * Return the onCardable configuration array for this model.
+     */
+    public function onCardable(): array
+    {
+        return [
+            'name' => 'Team',
+        ];
+    }
+
+    /**
+     * Prepare the on card relationships and return the object that matches the passed in data.
+     *
+     * @param  array<string, mixed>  $data  Array containing 'team' key with UUID or name
+     * @return Team|null
+     */
+    public static function prepare($data): ?object
+    {
+        if (empty($data['team'])) {
+            return null;
+        }
+
+        /** @var string $teamValue */
+        $teamValue = $data['team'];
+
+        // If it's a UUID, validate and return a team instance
+        if (StringHelpers::isValidUuid($teamValue)) {
+            try {
+                return TradingCardApiSdk::team()->get($teamValue);
+            } catch (\Exception $e) {
+                throw new \InvalidArgumentException("Team with UUID {$teamValue} not found");
+            }
+        }
+
+        // It's a name, look up or create the team
+        return self::getFromApi(['team' => $teamValue]);
+    }
+
     /**
      * Get the full name of the team
      */
