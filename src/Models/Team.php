@@ -46,7 +46,7 @@ class Team extends Model implements Taxonomy
             try {
                 return TradingCardApiSdk::team()->get($teamValue);
             } catch (\Exception $e) {
-                throw new \InvalidArgumentException("Team with UUID {$teamValue} not found");
+                throw new \InvalidArgumentException("Team with UUID {$teamValue} not found", 0, $e);
             }
         }
 

@@ -49,7 +49,7 @@ class Player extends Model implements Taxonomy
             try {
                 return TradingCardApiSdk::player()->get($playerValue);
             } catch (\Exception $e) {
-                throw new \InvalidArgumentException("Player with UUID {$playerValue} not found");
+                throw new \InvalidArgumentException("Player with UUID {$playerValue} not found", 0, $e);
             }
         }
 
