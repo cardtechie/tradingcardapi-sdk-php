@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.14] - 2025-12-20
+
+### Added
+
+- **is_variation Support for Set Model** - New boolean field to distinguish variations from parallels (Issue #151)
+  - Added `is_variation` property to Set model for API response handling
+  - Added validation rules in SetSchema for single and collection responses
+  - Variations are sets that share card numbers with base sets but have different visual treatments (e.g., Tin Type, Chrome)
+
 ## [0.1.13] - 2025-12-13
 
 ### Added

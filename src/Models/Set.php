@@ -7,6 +7,7 @@ namespace CardTechie\TradingCardApiSdk\Models;
  *
  * @property string $number_prefix
  * @property string $genre_id
+ * @property bool|null $is_variation
  */
 class Set extends Model
 {
