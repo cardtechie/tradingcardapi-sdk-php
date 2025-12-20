@@ -180,6 +180,25 @@ it('returns null for next card at end of checklist', function () {
     expect($set->nextCard($card2))->toBeNull();
 });
 
+it('can be instantiated with is_variation attribute', function () {
+    $set = new Set(['id' => '123', 'name' => 'Test Set', 'is_variation' => true]);
+
+    expect($set)->toBeInstanceOf(Set::class);
+    expect($set->is_variation)->toBeTrue();
+});
+
+it('handles null is_variation attribute', function () {
+    $set = new Set(['id' => '123', 'name' => 'Test Set', 'is_variation' => null]);
+
+    expect($set->is_variation)->toBeNull();
+});
+
+it('handles false is_variation attribute', function () {
+    $set = new Set(['id' => '123', 'name' => 'Test Set', 'is_variation' => false]);
+
+    expect($set->is_variation)->toBeFalse();
+});
+
 it('sets genre relationship when genres provided', function () {
     $genre1 = new Genre(['id' => '1', 'name' => 'Genre 1']);
     $genre2 = new Genre(['id' => '2', 'name' => 'Genre 2']);
