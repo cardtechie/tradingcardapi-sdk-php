@@ -12,6 +12,29 @@ use stdClass;
  */
 class Response
 {
+    /**
+     * Whitelist of allowed model types for dynamic instantiation.
+     * This prevents arbitrary class instantiation from API responses.
+     *
+     * @var array<string>
+     */
+    private const ALLOWED_MODEL_TYPES = [
+        'Attribute',
+        'Brand',
+        'Card',
+        'Genre',
+        'Manufacturer',
+        'ObjectAttribute',
+        'Oncard',
+        'Player',
+        'Playerteam',
+        'Set',
+        'SetSource',
+        'Taxonomy',
+        'Team',
+        'Year',
+    ];
+
     private object $response;
 
     public $mainObject;
@@ -52,6 +75,8 @@ class Response
     /**
      * Normalize the type string to a class name.
      * Handles hyphenated types like "set-sources" -> "SetSource"
+     *
+     * @throws \InvalidArgumentException If the type is not in the allowed whitelist
      */
     private static function normalizeType(string $type): string
     {
@@ -65,8 +90,19 @@ class Response
 
         // Convert hyphenated types (e.g., "set-sources" -> "SetSource")
         $singular = Str::singular($type);
+        $normalizedType = Str::studly($singular);
 
-        return Str::studly($singular);
+        // Validate against whitelist to prevent arbitrary class instantiation
+        if (! in_array($normalizedType, self::ALLOWED_MODEL_TYPES, true)) {
+            throw new \InvalidArgumentException(
+                sprintf('Unknown model type "%s" in API response. Expected one of: %s',
+                    $type,
+                    implode(', ', self::ALLOWED_MODEL_TYPES)
+                )
+            );
+        }
+
+        return $normalizedType;
     }
 
     /**

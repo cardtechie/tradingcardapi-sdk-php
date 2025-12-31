@@ -5,6 +5,7 @@ use CardTechie\TradingCardApiSdk\Models\Card;
 use CardTechie\TradingCardApiSdk\Models\Genre;
 use CardTechie\TradingCardApiSdk\Models\Manufacturer;
 use CardTechie\TradingCardApiSdk\Models\Set;
+use CardTechie\TradingCardApiSdk\Models\SetSource;
 use CardTechie\TradingCardApiSdk\Models\Year;
 
 it('can be instantiated with attributes', function () {
@@ -209,4 +210,22 @@ it('sets genre relationship when genres provided', function () {
 
     expect($set->genre())->toBe($genre1);
     expect($set->getRelationship('genres'))->toBeNull();
+});
+
+it('returns sources array', function () {
+    $source1 = new SetSource(['id' => '1', 'source_url' => 'https://example.com/source1', 'source_type' => 'checklist']);
+    $source2 = new SetSource(['id' => '2', 'source_url' => 'https://example.com/source2', 'source_type' => 'metadata']);
+    $sources = [$source1, $source2];
+
+    $set = new Set(['id' => '123']);
+    $set->setRelationships(['sources' => $sources]);
+
+    expect($set->sources())->toBe($sources);
+    expect($set->sources())->toHaveCount(2);
+});
+
+it('returns empty array when no sources', function () {
+    $set = new Set(['id' => '123']);
+
+    expect($set->sources())->toBe([]);
 });

@@ -318,3 +318,74 @@ it('can get set sources for a specific set', function () {
     expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
     expect($result->count())->toBe(2);
 });
+
+it('can handle list response without meta information', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                [
+                    'type' => 'set-sources',
+                    'id' => '123',
+                    'attributes' => [
+                        'source_url' => 'https://example.com/source1',
+                        'source_type' => 'checklist',
+                    ],
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->setSourceResource->list();
+
+    expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
+    expect($result->count())->toBe(1);
+});
+
+it('can update set source without attributes', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'set-sources',
+                'id' => '123',
+                'attributes' => [
+                    'source_url' => 'https://example.com/existing-source',
+                    'source_type' => 'checklist',
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->setSourceResource->update('123');
+
+    expect($result)->toBeInstanceOf(SetSourceModel::class);
+});
+
+it('can get set sources for a specific set with additional params', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                [
+                    'type' => 'set-sources',
+                    'id' => '123',
+                    'attributes' => [
+                        'set_id' => 'set-456',
+                        'source_url' => 'https://example.com/source1',
+                        'source_type' => 'checklist',
+                    ],
+                ],
+            ],
+            'meta' => [
+                'pagination' => [
+                    'total' => 1,
+                    'per_page' => 10,
+                    'current_page' => 1,
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->setSourceResource->forSet('set-456', ['limit' => 10]);
+
+    expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
+    expect($result->count())->toBe(1);
+});
