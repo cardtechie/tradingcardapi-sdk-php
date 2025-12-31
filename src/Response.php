@@ -44,9 +44,29 @@ class Response
         $attributes = (array) $this->response->data->attributes;
         $attributes['id'] = $this->response->data->id;
 
-        $type = ucfirst(Str::singular($this->response->data->type));
+        $type = self::normalizeType($this->response->data->type);
         $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$type;
         $this->mainObject = new $class($attributes);
+    }
+
+    /**
+     * Normalize the type string to a class name.
+     * Handles hyphenated types like "set-sources" -> "SetSource"
+     */
+    private static function normalizeType(string $type): string
+    {
+        // Handle special cases
+        if ($type === 'parentset' || $type === 'subset') {
+            return 'Set';
+        }
+        if ($type === 'checklist') {
+            return 'Card';
+        }
+
+        // Convert hyphenated types (e.g., "set-sources" -> "SetSource")
+        $singular = Str::singular($type);
+
+        return Str::studly($singular);
     }
 
     /**
@@ -80,12 +100,7 @@ class Response
     {
         foreach ($this->relationships as $type => $theObjects) {
             foreach ($theObjects as $index => $attributes) {
-                $theType = ucfirst(Str::singular($type));
-                if ($theType === 'Parentset' || $theType === 'Subset') {
-                    $theType = 'Set';
-                } elseif ($theType === 'Checklist') {
-                    $theType = 'Card';
-                }
+                $theType = self::normalizeType($type);
                 $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$theType;
                 $object = new $class($attributes);
 
@@ -147,7 +162,7 @@ class Response
         $attributes = (array) $data->attributes;
         $attributes['id'] = $data->id;
 
-        $type = ucfirst(Str::singular($data->type));
+        $type = self::normalizeType($data->type);
         $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$type;
 
         return new $class($attributes);
@@ -170,13 +185,7 @@ class Response
                 $attributes[$key] = $value;
             }
 
-            if ($included->type == 'parentset') {
-                $type = 'Set';
-            } elseif ($included->type === 'checklist') {
-                $type = 'Card';
-            } else {
-                $type = ucfirst(Str::singular($included->type));
-            }
+            $type = self::normalizeType($included->type);
             $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$type;
             $object = new $class($attributes);
 

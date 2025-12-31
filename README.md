@@ -255,6 +255,7 @@ The SDK provides access to the following Trading Card API resources:
 | **Manufacturers** | Trading card manufacturers | `get()`, `list()`, `create()`, `update()`, `delete()` |
 | **Years** | Trading card years | `get()`, `list()`, `create()`, `update()`, `delete()` |
 | **ObjectAttributes** | Object attributes | `get()`, `list()`, `create()`, `update()`, `delete()` |
+| **SetSources** | Set data sources | `get()`, `list()`, `create()`, `update()`, `delete()`, `forSet($setId)` |
 | **Stats** | Entity statistics and analytics | `get($type)`, `getCounts()`, `getSnapshots()`, `getGrowth()` |
 | **Attributes** | Card attributes | `get()`, `getList()` |
 
@@ -299,6 +300,39 @@ foreach ($snapshots->snapshots as $snapshot) {
     echo $snapshot->entityType;  // Entity type
     echo $snapshot->total;       // Total at that point
 }
+```
+
+### SetSource Resource
+
+The SetSource resource manages data sources for trading card sets (checklists, metadata, images):
+
+```php
+// Get all sources for a specific set
+$sources = $api->setSource()->forSet('set-id');
+
+// Get a specific source
+$source = $api->setSource()->get('source-id');
+
+// Create a new set source
+$source = $api->setSource()->create([
+    'set_id' => 'set-uuid',
+    'source_url' => 'https://example.com/checklist',
+    'source_name' => 'Example Source',
+    'source_type' => 'checklist',  // checklist, metadata, or images
+]);
+
+// Update a source
+$source = $api->setSource()->update('source-id', [
+    'source_url' => 'https://example.com/updated-checklist',
+    'verified_at' => '2024-01-15T10:30:00Z',
+]);
+
+// Delete a source
+$api->setSource()->delete('source-id');
+
+// Include sources when fetching a set
+$set = $api->set()->get('set-id', ['include' => 'sources']);
+$sources = $set->sources();  // Returns array of SetSource models
 ```
 
 ## 🔧 Configuration

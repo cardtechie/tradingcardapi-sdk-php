@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **SetSource Resource Support** - New resource for managing set data sources (Issue #156)
+  - Added `SetSource` model with `set()` relationship method
+  - Added `SetSource` resource with full CRUD operations: `get()`, `list()`, `create()`, `update()`, `delete()`
+  - Added `forSet($setId)` method to retrieve all sources for a specific set
+  - Added `SetSourceSchema` for API response validation
+  - Added `sources()` relationship method to `Set` model
+  - Added `setSource()` accessor method to `TradingCardApi` class
+  - Set sources track where checklist data, metadata, and images come from (e.g., Beckett, TCDB, CardboardConnection)
+
+### Changed
+
+- **Response Type Normalization** - Improved handling of hyphenated API types
+  - Added `normalizeType()` method to `Response` class for consistent type-to-class mapping
+  - Supports hyphenated types like `set-sources` converting to `SetSource` model class
+  - Consolidated special type handling (parentset, subset, checklist) into single method
+
 ## [0.1.14] - 2025-12-20
 
 ### Added
