@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.15] - 2025-12-31
+
+### Added
+
+- **SetSource Resource Support** - New resource for managing set data sources (Issue #156)
+  - Added `SetSource` model with `set()` relationship method
+  - Added `SetSource` resource with full CRUD operations: `get()`, `list()`, `create()`, `update()`, `delete()`
+  - Added `forSet($setId)` method to retrieve all sources for a specific set
+  - Added `SetSourceSchema` for API response validation
+  - Added `sources()` relationship method to `Set` model
+  - Added `setSource()` accessor method to `TradingCardApi` class
+  - Set sources track where checklist data, metadata, and images come from (e.g., Beckett, TCDB, CardboardConnection)
+
+### Changed
+
+- **Response Type Normalization** - Improved handling of hyphenated API types
+  - Added `normalizeType()` method to `Response` class for consistent type-to-class mapping
+  - Supports hyphenated types like `set-sources` converting to `SetSource` model class
+  - Consolidated special type handling (parentset, subset, checklist) into single method
+  - Added `ALLOWED_MODEL_TYPES` whitelist for security validation
+
 ## [0.1.14] - 2025-12-20
 
 ### Added
@@ -232,7 +253,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.11...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.15...HEAD
+[0.1.15]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.14...0.1.15
+[0.1.14]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.13...0.1.14
+[0.1.13]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.12...0.1.13
+[0.1.12]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.11...0.1.12
 [0.1.11]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.10...0.1.11
 [0.1.10]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.9...0.1.10
 [0.1.9]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.8...0.1.9

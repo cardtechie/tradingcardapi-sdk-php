@@ -78,6 +78,18 @@ class Set extends Model
     }
 
     /**
+     * Retrieve the sources of the set.
+     */
+    public function sources(): array
+    {
+        if (array_key_exists('sources', $this->relationships)) {
+            return $this->relationships['sources'];
+        }
+
+        return [];
+    }
+
+    /**
      * Return how many cards are in the set currently.
      */
     public function getCurrentCardCountAttribute(): int
