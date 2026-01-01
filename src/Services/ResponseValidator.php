@@ -47,8 +47,11 @@ class ResponseValidator
         $this->resetValidation();
 
         try {
+            // Detect if this is a collection response
+            $isCollection = $this->isCollectionResponse($data);
+
             // Get schema for resource type
-            $schema = $this->getSchema($resourceType);
+            $schema = $this->getSchema($resourceType, $isCollection);
 
             if (empty($schema)) {
                 $this->logWarning("No schema defined for resource type: {$resourceType}");
@@ -74,6 +77,7 @@ class ResponseValidator
                         'endpoint' => $endpoint,
                         'errors' => $this->errors,
                         'data' => $data,
+                        'is_collection' => $isCollection,
                     ]);
                 }
 
@@ -114,11 +118,14 @@ class ResponseValidator
     /**
      * Get schema for a resource type
      */
-    private function getSchema(string $resourceType): array
+    private function getSchema(string $resourceType, bool $isCollection = false): array
     {
+        // Create cache key that includes collection flag
+        $cacheKey = $resourceType.($isCollection ? '_collection' : '_single');
+
         // Check cache first
-        if (isset(self::$schemaCache[$resourceType])) {
-            return self::$schemaCache[$resourceType];
+        if (isset(self::$schemaCache[$cacheKey])) {
+            return self::$schemaCache[$cacheKey];
         }
 
         $schemaClass = $this->getSchemaClass($resourceType);
@@ -127,8 +134,16 @@ class ResponseValidator
             return [];
         }
 
-        $schema = (new $schemaClass)->getRules();
-        self::$schemaCache[$resourceType] = $schema;
+        $schemaInstance = new $schemaClass;
+
+        // Get appropriate schema based on response type
+        if ($isCollection && method_exists($schemaInstance, 'getCollectionRules')) {
+            $schema = $schemaInstance->getCollectionRules();
+        } else {
+            $schema = $schemaInstance->getRules();
+        }
+
+        self::$schemaCache[$cacheKey] = $schema;
 
         return $schema;
     }
@@ -170,6 +185,33 @@ class ResponseValidator
         if ($this->config['log_validation_errors']) {
             Log::error("[TradingCardAPI SDK] {$message}");
         }
+    }
+
+    /**
+     * Detect if the response is a collection (array) or single object
+     */
+    private function isCollectionResponse(array $data): bool
+    {
+        // Check if the 'data' field exists and is an array of objects
+        if (! isset($data['data'])) {
+            return false;
+        }
+
+        // If data is an array and has multiple items, or first item is an object with id/type
+        if (is_array($data['data'])) {
+            // Empty array is still a collection
+            if (empty($data['data'])) {
+                return true;
+            }
+
+            // Check if first item looks like a resource object
+            $firstItem = $data['data'][0] ?? null;
+            if (is_array($firstItem) && isset($firstItem['type']) && isset($firstItem['id'])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

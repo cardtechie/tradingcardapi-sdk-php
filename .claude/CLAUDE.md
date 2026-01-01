@@ -124,3 +124,31 @@ make check          # Verify all quality standards
 - New development commands or workflows
 
 The README.md is the public face of this repository and should always accurately represent the current state of the project.
+
+## Release Management
+
+**CRITICAL: Packagist Version Management**
+
+When creating releases, follow these rules to prevent Packagist publishing issues:
+
+1. **Never include hardcoded version in composer.json**:
+   - ❌ `"version": "0.1.3"` - causes Packagist validation failures and webhook 403 errors
+   - ✅ Let git tags define versions automatically
+
+2. **Release Process**:
+   ```bash
+   # 1. Update CHANGELOG.md with new version details
+   # 2. Commit changes (without version in composer.json)
+   # 3. Create and push git tag
+   git tag -a 0.1.4 -m "v0.1.4 - Feature description"
+   git push origin 0.1.4
+   # 4. Create GitHub release from the tag
+   gh release create 0.1.4 --title "v0.1.4 - Feature description" --generate-notes
+   ```
+
+3. **Why this matters**:
+   - Hardcoded versions that don't match git tags cause Packagist to reject updates
+   - Results in webhook failures (403 errors) and versions not appearing on Packagist
+   - Standard practice by major packages (Laravel, Guzzle, Spatie) is to omit version field
+
+**Reference**: [Packagist troubleshooting guide](https://blog.packagist.com/tagged-a-new-release-for-composer-and-it-wont-show-up-on-packagist/)

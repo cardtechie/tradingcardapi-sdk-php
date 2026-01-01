@@ -303,4 +303,12 @@ class TradingCardApi
     {
         return $this->createResource(Stats::class);
     }
+
+    /**
+     * Retrieve the set source resource.
+     */
+    public function setSource(): SetSource
+    {
+        return new SetSource($this->client);
+    }
 }

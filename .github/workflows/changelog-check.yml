@@ -1,0 +1,89 @@
+name: "Release Validation"
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-release:
+    name: "Validate Release Requirements"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Make build scripts executable
+        run: chmod +x build/*.sh
+
+      - name: Check release requirements
+        run: |
+          echo "🔍 Validating release requirements..."
+          echo ""
+          
+          VALIDATION_FAILED=false
+          
+          # Get version that would be generated for this PR's branch
+          # Use the PR head ref to get the actual branch name
+          PR_HEAD_REF="${{ github.head_ref }}"
+          if [[ -n "$PR_HEAD_REF" ]]; then
+            # Use the actual branch name from the PR
+            CURRENT_VERSION=$(bash build/version.sh --branch="$PR_HEAD_REF")
+          else
+            # Fallback to current branch detection
+            CURRENT_VERSION=$(bash build/version.sh)
+          fi
+          
+          echo "Generated version for this branch: $CURRENT_VERSION"
+          echo ""
+          
+          # For PRs to main, we expect a proper release version in changelog
+          PR_BASE_BRANCH="${{ github.base_ref }}"
+          if [ "$PR_BASE_BRANCH" = "main" ]; then
+            echo "🎯 PR targets main branch - release changelog validation required"
+            
+            # Extract the base semantic version (remove any suffixes like -hotfix.xxx)
+            RELEASE_VERSION=$(echo "$CURRENT_VERSION" | sed 's/-.*$//')
+            echo "Expected release version: $RELEASE_VERSION"
+            
+            # Check that CHANGELOG.md has section for this release version
+            if grep -q "^## \[$RELEASE_VERSION\]" CHANGELOG.md; then
+              echo "✅ Version section [$RELEASE_VERSION] found in CHANGELOG.md"
+            else
+              echo "❌ No version section [$RELEASE_VERSION] found in CHANGELOG.md"
+              echo "   PRs to main must have a changelog section for the release version"
+              echo "   Add a section like: ## [$RELEASE_VERSION] - $(date +%Y-%m-%d)"
+              VALIDATION_FAILED=true
+            fi
+          else
+            echo "ℹ️  PR targets $PR_BASE_BRANCH branch - no release validation needed"
+          fi
+          
+          # Verify composer.json does NOT have hardcoded version (to prevent Packagist issues)
+          if grep -q '"version"' composer.json; then
+            echo "❌ Hardcoded version found in composer.json"
+            echo "   Remove the 'version' field to prevent Packagist publishing issues"
+            echo "   Versions are managed through git tags, not composer.json"
+            VALIDATION_FAILED=true
+          else
+            echo "✅ No hardcoded version in composer.json (managed by git tags)"
+          fi
+          
+          if [ "$VALIDATION_FAILED" = true ]; then
+            echo ""
+            echo "📝 To fix validation issues:"
+            echo "1. Ensure no 'version' field exists in composer.json"
+            echo "2. Add version section to CHANGELOG.md for: $RELEASE_VERSION"
+            echo "3. All PRs to main branch must have a release version section"
+            echo ""
+            echo "📚 See .claude/CLAUDE.md for complete release process documentation"
+          fi
+          
+          echo ""
+          if [ "$VALIDATION_FAILED" = true ]; then
+            echo "❌ Validation failed - please address the issues above"
+            exit 1
+          else
+            echo "✅ All validation checks passed!"
+          fi

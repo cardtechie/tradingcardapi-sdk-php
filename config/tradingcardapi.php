@@ -24,15 +24,8 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | OAuth2 Client Credentials Authentication
-    |--------------------------------------------------------------------------
-    |
-    | These credentials are used for OAuth2 Client Credentials authentication.
-    | This is the recommended approach for production applications.
-    */
-
-    /*
     | Trading Card API Client ID
+    |--------------------------------------------------------------------------
     |
     | The ID of the client used to connect to the API. It is recommended
     | that you do not add your client ID to the line below. Instead, add
@@ -42,9 +35,11 @@ return [
     'client_id' => env('TRADINGCARDAPI_CLIENT_ID', ''),
 
     /*
+    |--------------------------------------------------------------------------
     | Trading Card API Secret
+    |--------------------------------------------------------------------------
     |
-    | The secret of the client used to connect to the API. It is recommended
+    | The secret of the client used to connect to the API .It is recommended
     | that you do not add your client secret to the line below. Instead, add
     | it to your environment file, so it doesn't get checked into your
     | code repo.
@@ -53,33 +48,28 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Personal Access Token Authentication
+    | OAuth Scopes
     |--------------------------------------------------------------------------
     |
-    | Alternative authentication method using a Personal Access Token (PAT).
-    | This is simpler than OAuth2 and ideal for:
-    |   - Testing and development
-    |   - Single-user applications
-    |   - AI/GPT integrations
-    |   - Simple scripts and tools
+    | The OAuth scopes to request when authenticating with the API. This
+    | controls what permissions the access token will have.
     |
-    | Usage Option 1 - Explicit factory method:
-    |   $api = TradingCardApi::withPersonalAccessToken($token);
+    | Available scopes:
+    | - read:published (default): Access published content only
+    | - read:draft: Access published and draft content
+    | - read:all-status: Access all content regardless of status
+    | - write: Create and update resources
+    | - delete: Delete resources
     |
-    | Usage Option 2 - Auto-detection via environment variable:
-    |   Set TRADINGCARDAPI_PAT in your .env file and leave OAuth2 credentials
-    |   empty. The SDK will automatically detect and use PAT authentication:
+    | You can specify a single scope as a string or multiple scopes as a
+    | space-separated string:
+    |   'read:published'
+    |   'read:all-status write delete'
     |
-    |   TRADINGCARDAPI_PAT=your-personal-access-token
-    |   TRADINGCARDAPI_CLIENT_ID=
-    |   TRADINGCARDAPI_CLIENT_SECRET=
-    |
-    | Note: If both PAT and OAuth2 credentials are set, OAuth2 takes precedence.
-    |
-    | WARNING: Personal Access Tokens are long-lived and should be kept secret.
-    | Never commit tokens to version control. Use environment variables.
+    | For backwards compatibility, if not set, requests will be made without
+    | explicit scopes and receive the API's default scope (read:published).
     */
-    'personal_access_token' => env('TRADINGCARDAPI_PAT', ''),
+    'scope' => env('TRADINGCARDAPI_SCOPE', 'read:published'),
 
     /*
     |--------------------------------------------------------------------------

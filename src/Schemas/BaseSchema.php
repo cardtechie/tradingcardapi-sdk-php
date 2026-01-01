@@ -32,9 +32,9 @@ abstract class BaseSchema
     {
         return [
             'data' => 'required|array',
-            'data.*.id' => 'required|string',
-            'data.*.type' => 'required|string',
-            'data.*.attributes' => 'required|array',
+            'data.*.id' => 'sometimes|required|string',
+            'data.*.type' => 'sometimes|required|string',
+            'data.*.attributes' => 'sometimes|required|array',
         ];
     }
 

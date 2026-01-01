@@ -20,7 +20,50 @@ it('returns full name attribute', function () {
 it('handles null full name gracefully', function () {
     $player = new Player(['first_name' => null, 'last_name' => 'Doe']);
 
-    expect($player->full_name)->toBe(' Doe');
+    expect($player->full_name)->toBe('Doe');
+});
+
+it('handles empty names in full name', function () {
+    $player = new Player(['first_name' => '', 'last_name' => '']);
+
+    expect($player->full_name)->toBe('');
+});
+
+it('returns last name first attribute', function () {
+    $player = new Player(['first_name' => 'John', 'last_name' => 'Doe']);
+
+    expect($player->last_name_first)->toBe('Doe, John');
+});
+
+it('handles last name first with only first name', function () {
+    $player = new Player(['first_name' => 'John', 'last_name' => '']);
+
+    expect($player->last_name_first)->toBe('John');
+});
+
+it('handles last name first with only last name', function () {
+    $player = new Player(['first_name' => '', 'last_name' => 'Doe']);
+
+    expect($player->last_name_first)->toBe('Doe');
+});
+
+it('can check if player is an alias', function () {
+    $aliasPlayer = new Player(['id' => '123', 'parent_id' => '456']);
+    $parentPlayer = new Player(['id' => '456', 'parent_id' => null]);
+
+    expect($aliasPlayer->isAlias())->toBeTrue();
+    expect($parentPlayer->isAlias())->toBeFalse();
+});
+
+it('has relationship methods defined', function () {
+    $player = new Player;
+
+    expect(method_exists($player, 'getParent'))->toBeTrue();
+    expect(method_exists($player, 'getAliases'))->toBeTrue();
+    expect(method_exists($player, 'getTeams'))->toBeTrue();
+    expect(method_exists($player, 'getPlayerteams'))->toBeTrue();
+    expect(method_exists($player, 'getCards'))->toBeTrue();
+    expect(method_exists($player, 'hasAliases'))->toBeTrue();
 });
 
 it('implements Taxonomy interface', function () {
@@ -82,4 +125,75 @@ it('getFromApi method exists and is properly defined', function () {
     $parameters = $reflection->getParameters();
     expect($parameters)->toHaveCount(1);
     expect($parameters[0]->getName())->toBe('params');
+});
+
+it('returns null when player has no parent_id', function () {
+    $player = new Player(['id' => '123']);
+    $result = $player->getParent();
+
+    expect($result)->toBeNull();
+});
+
+it('returns null when parent_id is empty', function () {
+    $player = new Player(['id' => '123', 'parent_id' => '']);
+    $result = $player->getParent();
+
+    expect($result)->toBeNull();
+});
+
+it('returns onCardable configuration', function () {
+    $player = new Player;
+
+    expect($player->onCardable())->toBe(['name' => 'Player']);
+});
+
+it('prepare method returns null when player is empty', function () {
+    $data = ['player' => ''];
+
+    $result = Player::prepare($data);
+
+    expect($result)->toBeNull();
+});
+
+it('prepare method returns null when player is null', function () {
+    $data = ['player' => null];
+
+    $result = Player::prepare($data);
+
+    expect($result)->toBeNull();
+});
+
+it('prepare method returns null when player key is missing', function () {
+    $data = [];
+
+    $result = Player::prepare($data);
+
+    expect($result)->toBeNull();
+});
+
+it('prepare method throws exception for invalid player UUID', function () {
+    $data = ['player' => '550e8400-e29b-41d4-a716-446655440000'];
+
+    expect(function () use ($data) {
+        Player::prepare($data);
+    })->toThrow(\InvalidArgumentException::class, 'Player with UUID 550e8400-e29b-41d4-a716-446655440000 not found');
+});
+
+it('prepare method preserves exception chain for invalid UUID', function () {
+    $data = ['player' => '550e8400-e29b-41d4-a716-446655440000'];
+
+    try {
+        Player::prepare($data);
+        $this->fail('Expected InvalidArgumentException');
+    } catch (\InvalidArgumentException $e) {
+        expect($e->getPrevious())->not->toBeNull();
+    }
+});
+
+it('prepare method exists and has proper structure', function () {
+    expect(method_exists(Player::class, 'prepare'))->toBeTrue();
+
+    $reflection = new ReflectionMethod(Player::class, 'prepare');
+    expect($reflection->isStatic())->toBeTrue();
+    expect($reflection->isPublic())->toBeTrue();
 });

@@ -12,6 +12,29 @@ use stdClass;
  */
 class Response
 {
+    /**
+     * Whitelist of allowed model types for dynamic instantiation.
+     * This prevents arbitrary class instantiation from API responses.
+     *
+     * @var array<string>
+     */
+    private const ALLOWED_MODEL_TYPES = [
+        'Attribute',
+        'Brand',
+        'Card',
+        'Genre',
+        'Manufacturer',
+        'ObjectAttribute',
+        'Oncard',
+        'Player',
+        'Playerteam',
+        'Set',
+        'SetSource',
+        'Taxonomy',
+        'Team',
+        'Year',
+    ];
+
     private object $response;
 
     public $mainObject;
@@ -44,17 +67,42 @@ class Response
         $attributes = (array) $this->response->data->attributes;
         $attributes['id'] = $this->response->data->id;
 
-        $type = ucfirst(Str::singular($this->response->data->type));
-
-        // Handle special case type mappings
-        if ($type === 'Card-image') {
-            $type = 'CardImage';
-        } elseif ($type === 'Set-source') {
-            $type = 'SetSource';
-        }
-
+        $type = self::normalizeType($this->response->data->type);
         $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$type;
         $this->mainObject = new $class($attributes);
+    }
+
+    /**
+     * Normalize the type string to a class name.
+     * Handles hyphenated types like "set-sources" -> "SetSource"
+     *
+     * @throws \InvalidArgumentException If the type is not in the allowed whitelist
+     */
+    private static function normalizeType(string $type): string
+    {
+        // Handle special cases
+        if ($type === 'parentset' || $type === 'subset') {
+            return 'Set';
+        }
+        if ($type === 'checklist') {
+            return 'Card';
+        }
+
+        // Convert hyphenated types (e.g., "set-sources" -> "SetSource")
+        $singular = Str::singular($type);
+        $normalizedType = Str::studly($singular);
+
+        // Validate against whitelist to prevent arbitrary class instantiation
+        if (! in_array($normalizedType, self::ALLOWED_MODEL_TYPES, true)) {
+            throw new \InvalidArgumentException(
+                sprintf('Unknown model type "%s" in API response. Expected one of: %s',
+                    $type,
+                    implode(', ', self::ALLOWED_MODEL_TYPES)
+                )
+            );
+        }
+
+        return $normalizedType;
     }
 
     /**
@@ -88,16 +136,7 @@ class Response
     {
         foreach ($this->relationships as $type => $theObjects) {
             foreach ($theObjects as $index => $attributes) {
-                $theType = ucfirst(Str::singular($type));
-                if ($theType === 'Parentset' || $theType === 'Subset') {
-                    $theType = 'Set';
-                } elseif ($theType === 'Checklist') {
-                    $theType = 'Card';
-                } elseif ($theType === 'Card-image') {
-                    $theType = 'CardImage';
-                } elseif ($theType === 'Set-source') {
-                    $theType = 'SetSource';
-                }
+                $theType = self::normalizeType($type);
                 $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$theType;
                 $object = new $class($attributes);
 
@@ -159,15 +198,7 @@ class Response
         $attributes = (array) $data->attributes;
         $attributes['id'] = $data->id;
 
-        $type = ucfirst(Str::singular($data->type));
-
-        // Handle special case type mappings
-        if ($type === 'Card-image') {
-            $type = 'CardImage';
-        } elseif ($type === 'Set-source') {
-            $type = 'SetSource';
-        }
-
+        $type = self::normalizeType($data->type);
         $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$type;
 
         return new $class($attributes);
@@ -190,18 +221,7 @@ class Response
                 $attributes[$key] = $value;
             }
 
-            if ($included->type == 'parentset') {
-                $type = 'Set';
-            } elseif ($included->type === 'checklist') {
-                $type = 'Card';
-            } else {
-                $type = ucfirst(Str::singular($included->type));
-                if ($type === 'Card-image') {
-                    $type = 'CardImage';
-                } elseif ($type === 'Set-source') {
-                    $type = 'SetSource';
-                }
-            }
+            $type = self::normalizeType($included->type);
             $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$type;
             $object = new $class($attributes);
 

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace CardTechie\TradingCardApiSdk\Schemas;
 
 /**
@@ -27,11 +25,11 @@ class SetSourceSchema extends BaseSchema
     private function getSetSourceSpecificRules(): array
     {
         return [
-            'data.type' => 'required|string|in:set-sources,set_sources,setSources',
-            'data.attributes.set_id' => 'required|string',
-            'data.attributes.source_type' => 'required|string|in:checklist,metadata,images',
-            'data.attributes.source_name' => 'required|string',
+            'data.type' => 'required|string|in:set-sources,set-source',
+            'data.attributes.set_id' => 'sometimes|string|nullable',
             'data.attributes.source_url' => 'sometimes|string|nullable',
+            'data.attributes.source_name' => 'sometimes|string|nullable',
+            'data.attributes.source_type' => 'sometimes|string|nullable',
             'data.attributes.verified_at' => 'sometimes|string|nullable',
             'data.attributes.created_at' => 'sometimes|string|nullable',
             'data.attributes.updated_at' => 'sometimes|string|nullable',
@@ -56,11 +54,11 @@ class SetSourceSchema extends BaseSchema
     private function getSetSourceCollectionSpecificRules(): array
     {
         return [
-            'data.*.type' => 'required|string|in:set-sources,set_sources,setSources',
-            'data.*.attributes.set_id' => 'required|string',
-            'data.*.attributes.source_type' => 'required|string|in:checklist,metadata,images',
-            'data.*.attributes.source_name' => 'required|string',
+            'data.*.type' => 'required|string|in:set-sources,set-source',
+            'data.*.attributes.set_id' => 'sometimes|string|nullable',
             'data.*.attributes.source_url' => 'sometimes|string|nullable',
+            'data.*.attributes.source_name' => 'sometimes|string|nullable',
+            'data.*.attributes.source_type' => 'sometimes|string|nullable',
             'data.*.attributes.verified_at' => 'sometimes|string|nullable',
             'data.*.attributes.created_at' => 'sometimes|string|nullable',
             'data.*.attributes.updated_at' => 'sometimes|string|nullable',

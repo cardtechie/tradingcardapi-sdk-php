@@ -9,6 +9,7 @@ use CardTechie\TradingCardApiSdk\Resources\ObjectAttribute;
 use CardTechie\TradingCardApiSdk\Resources\Player;
 use CardTechie\TradingCardApiSdk\Resources\Playerteam;
 use CardTechie\TradingCardApiSdk\Resources\Set;
+use CardTechie\TradingCardApiSdk\Resources\SetSource;
 use CardTechie\TradingCardApiSdk\Resources\Stats;
 use CardTechie\TradingCardApiSdk\Resources\Team;
 use CardTechie\TradingCardApiSdk\Resources\Year;
@@ -100,6 +101,12 @@ it('returns stats resource', function () {
     $api = new TradingCardApi;
     $stats = $api->stats();
     expect($stats)->toBeInstanceOf(Stats::class);
+});
+
+it('returns set source resource', function () {
+    $api = new TradingCardApi;
+    $setSource = $api->setSource();
+    expect($setSource)->toBeInstanceOf(SetSource::class);
 });
 
 it('creates guzzle client with correct configuration', function () {

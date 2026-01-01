@@ -71,9 +71,9 @@ it('provides JSON API collection structure rules', function () {
     expect($rules)->toHaveKey('data.*.attributes');
 
     expect($rules['data'])->toBe('required|array');
-    expect($rules['data.*.id'])->toBe('required|string');
-    expect($rules['data.*.type'])->toBe('required|string');
-    expect($rules['data.*.attributes'])->toBe('required|array');
+    expect($rules['data.*.id'])->toBe('sometimes|required|string');
+    expect($rules['data.*.type'])->toBe('sometimes|required|string');
+    expect($rules['data.*.attributes'])->toBe('sometimes|required|array');
 });
 
 it('provides meta and links rules', function () {

@@ -7,115 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.15] - 2025-12-31
+
 ### Added
 
-- **Personal Access Token (PAT) Authentication Support** - Alternative authentication method for simpler use cases (Trading Card API v0.6.0+)
-  - New `TradingCardApi::withPersonalAccessToken($token)` static factory method
-  - New `TradingCardApi::withClientCredentials($clientId, $clientSecret)` static factory method
-  - Dual authentication support: PAT for simple apps, OAuth2 for production
-  - **Auto-detection**: SDK automatically uses PAT mode when `TRADINGCARDAPI_PAT` is set and OAuth2 credentials are empty
-  - Updated `ApiRequest` trait to handle both auth types
-  - PAT tokens bypass OAuth2 token exchange (direct Bearer token usage)
-  - OAuth2 token caching now uses unique keys per credentials (prevents token sharing between instances)
-  - Configuration support via `TRADINGCARDAPI_PAT` environment variable
-  - Backward compatible - existing OAuth2 usage continues to work
-  - Comprehensive security documentation and warnings
-  - Full test coverage for both authentication methods and auto-detection
-  - Ideal for testing, development, AI integrations, and single-user apps
-
-- **API Versions Documentation** - Added comprehensive documentation explaining v1 and v2 endpoint differences
-  - New "API Versions" section in README.md
-  - Explains v1 endpoints (relationship-focused, SDK default)
-  - Explains v2 endpoints (stricter JSON:API compliance)
-  - Includes JSON response examples for both versions
-  - Notes SDK's current v1-only support with future v2 consideration
-
-- **Card Images API Support** - Complete implementation of Card Images functionality (Trading Card API v0.7.0)
-  - New `CardImage` model with properties for image metadata and relationships
-  - New `CardImage` resource class with full CRUD operations
-  - Multipart file upload support in `ApiRequest` trait for handling binary file uploads
-  - Support for both file path strings and Laravel `UploadedFile` instances
-  - Image variant handling (small, medium, large thumbnails)
-  - CDN URL helpers: `getCdnUrl()`, `getVersionedUrl()`, `getVariantUrl()`
-  - Responsive image support with `srcset` and `sizes` attributes
-  - Variant detection methods: `hasVariant()`, `getVariantSizes()`
-  - `CardImageSchema` for API response validation
-  - `cardImage()` method added to main `TradingCardApi` class
-  - Comprehensive test coverage for model, resource, and schema
-  - Full documentation with usage examples in README.md
-
-- **Set Sources API Support** - Data provenance tracking for trading card sets (Trading Card API v0.6.0)
-  - New `SetSource` model for tracking data sources (checklist, metadata, images)
-  - New `SetSource` resource class with full CRUD operations
-  - Support for three source types: `checklist`, `metadata`, `images`
-  - Unique constraint handling (one source per type per set)
-  - Verification timestamp tracking with `verified_at` field
-  - `SetSourceSchema` for API response validation
-  - `setSource()` method added to main `TradingCardApi` class
-  - Response type mapping for `set-sources` resource
-  - Comprehensive test coverage for model, resource, and schema
-  - Full documentation with usage examples in README.md
-
-- **Collection-Based Relationship Methods** - Modern Laravel-style relationship access
-  - **Card-to-Images Relationship Support**
-    - `Card::images()` - Returns `Collection<CardImage>` for fluent data manipulation
-    - `Card::hasImages()` - Check if card has any images
-    - `Card::getFrontImage()` - Convenience method to get front image
-    - `Card::getBackImage()` - Convenience method to get back image
-    - Full Collection API support (filter, map, pluck, etc.)
-  - **Set-to-Sources Relationship Support**
-    - `Set::sources()` - Returns `Collection<SetSource>` for fluent data manipulation
-    - `Set::hasSources()` - Check if set has any sources
-    - `Set::getChecklistSource()` - Convenience method to get checklist source
-    - `Set::getMetadataSource()` - Convenience method to get metadata source
-    - `Set::getImagesSource()` - Convenience method to get images source
-    - Full Collection API support for source filtering and manipulation
-  - Comprehensive test coverage for all relationship methods
-  - Updated documentation with Collection-based examples
+- **SetSource Resource Support** - New resource for managing set data sources (Issue #156)
+  - Added `SetSource` model with `set()` relationship method
+  - Added `SetSource` resource with full CRUD operations: `get()`, `list()`, `create()`, `update()`, `delete()`
+  - Added `forSet($setId)` method to retrieve all sources for a specific set
+  - Added `SetSourceSchema` for API response validation
+  - Added `sources()` relationship method to `Set` model
+  - Added `setSource()` accessor method to `TradingCardApi` class
+  - Set sources track where checklist data, metadata, and images come from (e.g., Beckett, TCDB, CardboardConnection)
 
 ### Changed
 
-- **⚠️ BREAKING CHANGE: Migrated Array-Based Relationship Methods to Collections** - Consistent Collection API across all model relationships
-  - **Set Model Changes:**
-    - `Set::subsets()` - Now returns `Collection<Set>` instead of `array`
-    - `Set::checklist()` - Now returns `Collection<Card>` instead of `array`
-    - Added `Set::hasSubsets()` helper method
-    - Added `Set::hasChecklist()` helper method
-    - Refactored navigation methods to use Collection search (no longer stateful)
-    - Removed private `$checklistIndex` property (cleaner functional approach)
-  - **Card Model Changes:**
-    - `Card::oncard()` - Now returns `Collection<mixed>` instead of `?array`
-    - `Card::extraAttributes()` - Now returns `Collection<mixed>` instead of `?array`
-    - Added `Card::hasOncard()` helper method
-    - Added `Card::hasExtraAttributes()` helper method
-  - **ObjectAttribute Model Changes:**
-    - `ObjectAttribute::cards()` - Now returns `Collection<Card>` instead of `array`
-    - Added `ObjectAttribute::hasCards()` helper method
-  - **Year Model Changes:**
-    - `Year::sets()` - Now returns `Collection<Set>` instead of `array`
-    - Added `Year::hasSets()` helper method
-  - **Brand Model Changes:**
-    - `Brand::sets()` - Now returns `Collection<Set>` instead of `array`
-    - Added `Brand::hasSets()` helper method
-  - **Manufacturer Model Changes:**
-    - `Manufacturer::sets()` - Now returns `Collection<Set>` instead of `array`
-    - Added `Manufacturer::hasSets()` helper method
-  - **Migration Guide:**
-    - Most iteration code continues to work (Collections are iterable)
-    - Array functions need updating:
-      - `count($model->relationship())` → `$model->relationship()->count()`
-      - `array_filter($array, ...)` → `$collection->filter(...)`
-      - `array_map($callback, $array)` → `$collection->map($callback)`
-    - Null checks need updating:
-      - `if ($card->oncard() === null)` → `if ($card->hasOncard())`
-      - `if (empty($set->checklist()))` → `if ($set->hasChecklist())`
-  - **Benefits:**
-    - Consistent API across all relationships
-    - Access to 80+ Laravel Collection methods
-    - Better IDE support with type hints
-    - Cleaner, more maintainable code
-  - Full test coverage with Collection method examples
-  - See issue #133 for implementation details
+- **Response Type Normalization** - Improved handling of hyphenated API types
+  - Added `normalizeType()` method to `Response` class for consistent type-to-class mapping
+  - Supports hyphenated types like `set-sources` converting to `SetSource` model class
+  - Consolidated special type handling (parentset, subset, checklist) into single method
+  - Added `ALLOWED_MODEL_TYPES` whitelist for security validation
+
+## [0.1.14] - 2025-12-20
+
+### Added
+
+- **is_variation Support for Set Model** - New boolean field to distinguish variations from parallels (Issue #151)
+  - Added `is_variation` property to Set model for API response handling
+  - Added validation rules in SetSchema for single and collection responses
+  - Variations are sets that share card numbers with base sets but have different visual treatments (e.g., Tin Type, Chrome)
+
+## [0.1.13] - 2025-12-13
+
+### Added
+
+- **OnCardable Trait for Player and Team Models** - Enables independent oncard relationships (Issue #148)
+  - Added `OnCardable` trait to `Player` model with `onCardable()` and `prepare()` methods
+  - Added `OnCardable` trait to `Team` model with `onCardable()` and `prepare()` methods
+  - Allows cards to have direct player-only or team-only associations without requiring a Playerteam relationship
+  - Supports both UUID and name-based lookups in `prepare()` method
+
+## [0.1.12] - 2025-12-01
+
+### Added
+
+- **Stats Endpoint Support** - New methods for entity count tracking and analytics (Issue #144)
+  - `Stats::getCounts()` - Get current counts for all entity types (total, published, draft, archived)
+  - `Stats::getSnapshots(array $filters = [])` - Get historical snapshots with date range filtering
+  - `Stats::getGrowth(string $period = '7d')` - Get growth metrics (daily/weekly/monthly changes)
+  - New DTOs for type-safe responses:
+    - `CountsResponse` with `EntityCount` objects
+    - `SnapshotsResponse` with `Snapshot` objects
+    - `GrowthResponse` with `GrowthMetric` objects
+  - Helper methods `getByEntityType()` for easy access to specific entity metrics
+
+## [0.1.11] - 2025-11-30
 
 ### Fixed
 
@@ -129,26 +75,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.10] - 2025-10-30
 
 ### Added
-
 - **OAuth Scope Configuration Support** - Configurable OAuth scopes for fine-grained API access control
   - Added `scope` configuration option to `config/tradingcardapi.php`
   - Default scope: `read:published` for backwards compatibility
   - Supports space-separated multiple scopes (e.g., `read:all-status write delete`)
   - Environment variable: `TRADINGCARDAPI_SCOPE`
   - Updated `ApiRequest::retrieveToken()` to request configured scopes instead of empty string
-  - Documented all available scopes and their purposes in README.md
 
 ### Enhanced
-
 - **OAuth Token Authentication** - Modified OAuth token request to use configured scopes
   - Changed `src/Resources/Traits/ApiRequest.php:120` from hardcoded empty scope to configurable scope
   - Enables write operations, delete operations, and access to draft/archived content
   - Unblocks admin applications requiring elevated permissions
 
+### Documentation
+- Added OAuth Scopes section to README.md with comprehensive examples
+- Documented all available scopes and their purposes
+- Provided configuration examples for different use cases (read-only, admin, content management)
+
 ## [0.1.9] - 2025-09-28
 
 ### Added
-
 - **Complete Year Parent/Child Relationship Support** - Full hierarchical year functionality
   - `Year::parent()` method for retrieving parent year relationship
   - `Year::children()` method for retrieving child year relationships
@@ -159,7 +106,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Year::listChildren($parentId)` resource method for filtering child years
 
 ### Enhanced
-
 - **YearSchema Field Mapping** - Resolved field mapping inconsistencies for admin integration
   - Added `name` field validation to support database schema requirements
   - Added `parent_year` field validation for relationship functionality
@@ -167,64 +113,91 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Maintained backward compatibility with existing `year` and `description` fields
 
 ### Fixed
-
 - **Year Resource Pagination Crash** - Added defensive handling for missing meta property
   - Fixed division by zero error when API response lacks pagination metadata
   - Added fallback pagination values using request params and response data
   - Applied consistent pagination handling matching other SDK resources
+- Year resource integration gaps preventing admin interface migration
+- Field mapping inconsistencies between API database and SDK schema
+- Missing validation rules for Year parent relationships
 
 ## [0.1.8] - 2025-09-28
 
-### Added
-
-- ManufacturerSchema::getCollectionRules() method for proper collection response validation
-- Enhanced defensive pagination handling with multi-level isset() checks
-
 ### Fixed
-
 - Manufacturer resource pagination crash when API response missing meta property
 - Added defensive handling for missing pagination metadata in Manufacturer::list() method
+- Added collection validation rules for Manufacturer schema to support array responses
 - Fixed ManufacturerSchema validation failing on collection endpoints
+
+### Added
+- ManufacturerSchema::getCollectionRules() method for proper collection response validation
+- Enhanced defensive pagination handling with multi-level isset() checks
 
 ## [0.1.7] - 2025-09-28
 
 ### Fixed
-
 - Brand resource pagination crash when API response missing meta property
 - Added defensive handling for missing pagination metadata in Brand::list() method
 
 ## [0.1.6] - 2025-09-27
 
 ### Added
-
 - Complete Team resource CRUD operations (get, update, delete, list, listDeleted, deleted)
 
 ### Fixed
-
 - API pagination handling when meta property is missing
 
 ## [0.1.5] - 2025-09-27
 
-### Fixed
-
-- Removed hardcoded version from package to improve release automation
-- Enhanced release documentation generation
+### Added
+- Enhanced create() method for Team resource with relationship support
 
 ## [0.1.4] - 2025-09-27
 
-### Changed
+### Fixed
 
-- Trigger Packagist update for v0.1.3 release
+- **Packagist Publishing Issues** - Removed hardcoded version from composer.json to prevent webhook failures
+  - Eliminates 403 errors when publishing to Packagist
+  - Follows industry standard practice used by Laravel, Guzzle, and Spatie packages
+  - Ensures automatic version detection through git tags
+
+### Added
+
+- **Release Management Documentation** - Comprehensive guide for future releases
+  - Documents proper release process to prevent Packagist issues
+  - Explains why hardcoded versions cause publishing problems
+  - Provides step-by-step release workflow
 
 ## [0.1.3] - 2025-09-27
 
 ### Added
 
-- Comprehensive Player SDK functionality to match Card/Genre resource patterns
-  - Complete CRUD operations for Player resource
-  - Player model with full attribute support
-  - Player schema validation
-  - Comprehensive test coverage
+- **Complete Player Resource Support** - Full CRUD operations for Player entities
+  - `TradingCardApiSdk::player()->get($id)` - Get player by ID
+  - `TradingCardApiSdk::player()->list($params)` - List players with pagination
+  - `TradingCardApiSdk::player()->create($data)` - Create new players
+  - `TradingCardApiSdk::player()->update($id, $data)` - Update existing players
+  - `TradingCardApiSdk::player()->delete($id)` - Delete players
+  - `TradingCardApiSdk::player()->listDeleted()` - List deleted players
+  - `TradingCardApiSdk::player()->deleted($id)` - Get deleted player by ID
+
+- **Player Model Relationships** - Access related data through Player models
+  - `$player->getParent()` - Get parent player (for aliases)
+  - `$player->getAliases()` - Get all alias players
+  - `$player->getTeams()` - Get associated teams
+  - `$player->getPlayerteams()` - Get playerteam relationships
+  - `$player->getCards()` - Get all cards featuring this player
+  - `$player->isAlias()` - Check if player is an alias
+  - `$player->hasAliases()` - Check if player has aliases
+
+- **Enhanced Player Model Attributes**
+  - `$player->full_name` - Automatically formatted full name
+  - `$player->last_name_first` - Last name first format for display
+
+### Enhanced
+
+- **Improved Response Validation** - Better handling of API responses and error detection
+- **Enhanced Error Handling** - Graceful fallbacks when API calls fail
 
 ## [0.1.2] - 2025-09-21
 
@@ -280,7 +253,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.10...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.15...HEAD
+[0.1.15]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.14...0.1.15
+[0.1.14]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.13...0.1.14
+[0.1.13]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.12...0.1.13
+[0.1.12]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.11...0.1.12
+[0.1.11]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.10...0.1.11
 [0.1.10]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.9...0.1.10
 [0.1.9]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.8...0.1.9
 [0.1.8]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.7...0.1.8
@@ -290,5 +268,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.1.4]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.3...0.1.4
 [0.1.3]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.2...0.1.3
 [0.1.2]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.1...0.1.2
-[0.1.1]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/v0.1.0...0.1.1
-[0.1.0]: https://github.com/cardtechie/tradingcardapi-sdk-php/releases/tag/v0.1.0
+[0.1.1]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.0...0.1.1
+[0.1.0]: https://github.com/cardtechie/tradingcardapi-sdk-php/releases/tag/0.1.0

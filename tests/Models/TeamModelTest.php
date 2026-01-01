@@ -97,3 +97,60 @@ it('getFromApi method handles team matching logic', function () {
         expect($returnType->getName())->toBe('object');
     }
 });
+
+it('returns onCardable configuration', function () {
+    $team = new Team;
+
+    expect($team->onCardable())->toBe(['name' => 'Team']);
+});
+
+it('prepare method returns null when team is empty', function () {
+    $data = ['team' => ''];
+
+    $result = Team::prepare($data);
+
+    expect($result)->toBeNull();
+});
+
+it('prepare method returns null when team is null', function () {
+    $data = ['team' => null];
+
+    $result = Team::prepare($data);
+
+    expect($result)->toBeNull();
+});
+
+it('prepare method returns null when team key is missing', function () {
+    $data = [];
+
+    $result = Team::prepare($data);
+
+    expect($result)->toBeNull();
+});
+
+it('prepare method throws exception for invalid team UUID', function () {
+    $data = ['team' => '550e8400-e29b-41d4-a716-446655440000'];
+
+    expect(function () use ($data) {
+        Team::prepare($data);
+    })->toThrow(\InvalidArgumentException::class, 'Team with UUID 550e8400-e29b-41d4-a716-446655440000 not found');
+});
+
+it('prepare method preserves exception chain for invalid UUID', function () {
+    $data = ['team' => '550e8400-e29b-41d4-a716-446655440000'];
+
+    try {
+        Team::prepare($data);
+        $this->fail('Expected InvalidArgumentException');
+    } catch (\InvalidArgumentException $e) {
+        expect($e->getPrevious())->not->toBeNull();
+    }
+});
+
+it('prepare method exists and has proper structure', function () {
+    expect(method_exists(Team::class, 'prepare'))->toBeTrue();
+
+    $reflection = new ReflectionMethod(Team::class, 'prepare');
+    expect($reflection->isStatic())->toBeTrue();
+    expect($reflection->isPublic())->toBeTrue();
+});

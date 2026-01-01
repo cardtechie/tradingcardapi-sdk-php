@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
  *
  * @property string $number_prefix
  * @property string $genre_id
+ * @property bool|null $is_variation
  */
 class Set extends Model
 {
@@ -143,6 +144,18 @@ class Set extends Model
     public function hasChecklist(): bool
     {
         return $this->checklist()->isNotEmpty();
+    }
+
+    /**
+     * Retrieve the sources of the set.
+     */
+    public function sources(): array
+    {
+        if (array_key_exists('sources', $this->relationships)) {
+            return $this->relationships['sources'];
+        }
+
+        return [];
     }
 
     /**

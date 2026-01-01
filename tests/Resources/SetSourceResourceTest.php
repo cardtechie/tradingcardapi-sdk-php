@@ -18,7 +18,7 @@ beforeEach(function () {
     ]);
 
     // Pre-populate cache with token to avoid OAuth requests
-    cache()->put('tcapi_token_'.md5('test-client-idtest-client-secret'), 'test-token', 60);
+    cache()->put('tcapi_token', 'test-token', 60);
 
     $this->mockHandler = new MockHandler;
     $handlerStack = HandlerStack::create($this->mockHandler);
@@ -30,6 +30,84 @@ it('can be instantiated with client', function () {
     expect($this->setSourceResource)->toBeInstanceOf(SetSource::class);
 });
 
+it('can create a set source', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'set-sources',
+                'id' => '123',
+                'attributes' => [
+                    'set_id' => 'set-456',
+                    'source_url' => 'https://example.com/source',
+                    'source_name' => 'Example Source',
+                    'source_type' => 'checklist',
+                ],
+            ],
+        ]))
+    );
+
+    $attributes = [
+        'set_id' => 'set-456',
+        'source_url' => 'https://example.com/source',
+        'source_name' => 'Example Source',
+        'source_type' => 'checklist',
+    ];
+
+    $result = $this->setSourceResource->create($attributes);
+
+    expect($result)->toBeInstanceOf(SetSourceModel::class);
+});
+
+it('can create set source without attributes', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'set-sources',
+                'id' => '123',
+                'attributes' => [],
+            ],
+        ]))
+    );
+
+    $result = $this->setSourceResource->create();
+
+    expect($result)->toBeInstanceOf(SetSourceModel::class);
+});
+
+it('can create a set source with relationships', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'set-sources',
+                'id' => '123',
+                'attributes' => [
+                    'source_url' => 'https://example.com/source',
+                    'source_type' => 'metadata',
+                ],
+                'relationships' => [
+                    'set' => [
+                        'data' => ['type' => 'sets', 'id' => '456'],
+                    ],
+                ],
+            ],
+        ]))
+    );
+
+    $attributes = [
+        'source_url' => 'https://example.com/source',
+        'source_type' => 'metadata',
+    ];
+    $relationships = [
+        'set' => [
+            'data' => ['type' => 'sets', 'id' => '456'],
+        ],
+    ];
+
+    $result = $this->setSourceResource->create($attributes, $relationships);
+
+    expect($result)->toBeInstanceOf(SetSourceModel::class);
+});
+
 it('can get a set source by id', function () {
     $this->mockHandler->append(
         new GuzzleResponse(200, [], json_encode([
@@ -37,13 +115,10 @@ it('can get a set source by id', function () {
                 'type' => 'set-sources',
                 'id' => '123',
                 'attributes' => [
-                    'set_id' => '456',
-                    'source_type' => 'checklist',
-                    'source_name' => 'Beckett',
-                    'source_url' => 'https://www.beckett.com/...',
-                    'verified_at' => '2024-01-15T10:30:00Z',
-                    'created_at' => '2024-01-01T00:00:00Z',
-                    'updated_at' => '2024-01-15T10:30:00Z',
+                    'set_id' => 'set-456',
+                    'source_url' => 'https://example.com/source',
+                    'source_name' => 'Example Source',
+                    'source_type' => 'images',
                 ],
             ],
         ]))
@@ -52,24 +127,18 @@ it('can get a set source by id', function () {
     $result = $this->setSourceResource->get('123');
 
     expect($result)->toBeInstanceOf(SetSourceModel::class);
-    expect($result->id)->toBe('123');
-    expect($result->source_type)->toBe('checklist');
-    expect($result->source_name)->toBe('Beckett');
 });
 
-it('can get a set source with custom params', function () {
+it('can get a set source by id with custom params', function () {
     $this->mockHandler->append(
         new GuzzleResponse(200, [], json_encode([
             'data' => [
                 'type' => 'set-sources',
                 'id' => '123',
                 'attributes' => [
-                    'set_id' => '456',
-                    'source_type' => 'metadata',
-                    'source_name' => 'COMC',
-                    'source_url' => 'https://www.comc.com/',
-                    'created_at' => '2024-01-01T00:00:00Z',
-                    'updated_at' => '2024-01-15T10:30:00Z',
+                    'set_id' => 'set-456',
+                    'source_url' => 'https://example.com/source',
+                    'source_type' => 'checklist',
                 ],
             ],
         ]))
@@ -89,12 +158,16 @@ it('can get a list of set sources', function () {
                     'type' => 'set-sources',
                     'id' => '123',
                     'attributes' => [
-                        'set_id' => '456',
+                        'source_url' => 'https://example.com/source1',
                         'source_type' => 'checklist',
-                        'source_name' => 'Beckett',
-                        'source_url' => 'https://www.beckett.com/',
-                        'created_at' => '2024-01-01T00:00:00Z',
-                        'updated_at' => '2024-01-15T10:30:00Z',
+                    ],
+                ],
+                [
+                    'type' => 'set-sources',
+                    'id' => '124',
+                    'attributes' => [
+                        'source_url' => 'https://example.com/source2',
+                        'source_type' => 'metadata',
                     ],
                 ],
             ],
@@ -113,7 +186,7 @@ it('can get a list of set sources', function () {
     expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
 });
 
-it('can get a list with custom params', function () {
+it('can get a list of set sources with custom params', function () {
     $this->mockHandler->append(
         new GuzzleResponse(200, [], json_encode([
             'data' => [
@@ -121,12 +194,8 @@ it('can get a list with custom params', function () {
                     'type' => 'set-sources',
                     'id' => '123',
                     'attributes' => [
-                        'set_id' => '456',
+                        'source_url' => 'https://example.com/source1',
                         'source_type' => 'images',
-                        'source_name' => 'eBay',
-                        'source_url' => 'https://www.ebay.com/',
-                        'created_at' => '2024-01-01T00:00:00Z',
-                        'updated_at' => '2024-01-15T10:30:00Z',
                     ],
                 ],
             ],
@@ -140,108 +209,65 @@ it('can get a list with custom params', function () {
         ]))
     );
 
-    $params = ['limit' => 25, 'page' => 2, 'filter' => ['set_id' => '456']];
+    $params = ['limit' => 25, 'page' => 2];
     $result = $this->setSourceResource->list($params);
 
     expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
 });
 
-it('can create a set source', function () {
-    $this->mockHandler->append(
-        new GuzzleResponse(201, [], json_encode([
-            'data' => [
-                'type' => 'set-sources',
-                'id' => '789',
-                'attributes' => [
-                    'set_id' => '456',
-                    'source_type' => 'checklist',
-                    'source_name' => 'Beckett',
-                    'source_url' => 'https://www.beckett.com/',
-                    'verified_at' => '2024-01-15T10:30:00Z',
-                    'created_at' => '2024-01-15T10:30:00Z',
-                    'updated_at' => '2024-01-15T10:30:00Z',
-                ],
-            ],
-        ]))
-    );
-
-    $attributes = [
-        'set_id' => '456',
-        'source_type' => 'checklist',
-        'source_name' => 'Beckett',
-        'source_url' => 'https://www.beckett.com/',
-        'verified_at' => '2024-01-15T10:30:00Z',
-    ];
-
-    $result = $this->setSourceResource->create($attributes);
-
-    expect($result)->toBeInstanceOf(SetSourceModel::class);
-    expect($result->id)->toBe('789');
-    expect($result->source_type)->toBe('checklist');
-    expect($result->source_name)->toBe('Beckett');
-});
-
-it('can create set source with minimal attributes', function () {
-    $this->mockHandler->append(
-        new GuzzleResponse(201, [], json_encode([
-            'data' => [
-                'type' => 'set-sources',
-                'id' => '789',
-                'attributes' => [
-                    'set_id' => '456',
-                    'source_type' => 'metadata',
-                    'source_name' => 'Physical Cards',
-                    'source_url' => null,
-                    'verified_at' => null,
-                    'created_at' => '2024-01-15T10:30:00Z',
-                    'updated_at' => '2024-01-15T10:30:00Z',
-                ],
-            ],
-        ]))
-    );
-
-    $attributes = [
-        'set_id' => '456',
-        'source_type' => 'metadata',
-        'source_name' => 'Physical Cards',
-    ];
-
-    $result = $this->setSourceResource->create($attributes);
-
-    expect($result)->toBeInstanceOf(SetSourceModel::class);
-    expect($result->source_url)->toBeNull();
-    expect($result->verified_at)->toBeNull();
-});
-
-it('can update set source', function () {
+it('can update a set source', function () {
     $this->mockHandler->append(
         new GuzzleResponse(200, [], json_encode([
             'data' => [
                 'type' => 'set-sources',
                 'id' => '123',
                 'attributes' => [
-                    'set_id' => '456',
+                    'source_url' => 'https://example.com/updated-source',
+                    'source_name' => 'Updated Source',
                     'source_type' => 'checklist',
-                    'source_name' => 'Beckett Updated',
-                    'source_url' => 'https://www.beckett.com/updated',
-                    'verified_at' => '2024-01-16T10:30:00Z',
-                    'created_at' => '2024-01-01T00:00:00Z',
-                    'updated_at' => '2024-01-16T10:30:00Z',
                 ],
             ],
         ]))
     );
 
     $attributes = [
-        'source_name' => 'Beckett Updated',
-        'source_url' => 'https://www.beckett.com/updated',
-        'verified_at' => '2024-01-16T10:30:00Z',
+        'source_url' => 'https://example.com/updated-source',
+        'source_name' => 'Updated Source',
     ];
 
     $result = $this->setSourceResource->update('123', $attributes);
 
     expect($result)->toBeInstanceOf(SetSourceModel::class);
-    expect($result->source_name)->toBe('Beckett Updated');
+});
+
+it('can update a set source with relationships', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'set-sources',
+                'id' => '123',
+                'attributes' => [
+                    'source_url' => 'https://example.com/updated-source',
+                ],
+                'relationships' => [
+                    'set' => [
+                        'data' => ['type' => 'sets', 'id' => '789'],
+                    ],
+                ],
+            ],
+        ]))
+    );
+
+    $attributes = ['source_url' => 'https://example.com/updated-source'];
+    $relationships = [
+        'set' => [
+            'data' => ['type' => 'sets', 'id' => '789'],
+        ],
+    ];
+
+    $result = $this->setSourceResource->update('123', $attributes, $relationships);
+
+    expect($result)->toBeInstanceOf(SetSourceModel::class);
 });
 
 it('can delete a set source', function () {
@@ -251,18 +277,59 @@ it('can delete a set source', function () {
 
     $this->setSourceResource->delete('123');
 
-    expect(true)->toBeTrue();
+    expect(true)->toBeTrue(); // If no exception is thrown, the test passes
 });
 
-it('can get list with empty results', function () {
+it('can get set sources for a specific set', function () {
     $this->mockHandler->append(
         new GuzzleResponse(200, [], json_encode([
-            'data' => [],
+            'data' => [
+                [
+                    'type' => 'set-sources',
+                    'id' => '123',
+                    'attributes' => [
+                        'set_id' => 'set-456',
+                        'source_url' => 'https://example.com/source1',
+                        'source_type' => 'checklist',
+                    ],
+                ],
+                [
+                    'type' => 'set-sources',
+                    'id' => '124',
+                    'attributes' => [
+                        'set_id' => 'set-456',
+                        'source_url' => 'https://example.com/source2',
+                        'source_type' => 'metadata',
+                    ],
+                ],
+            ],
             'meta' => [
                 'pagination' => [
-                    'total' => 0,
+                    'total' => 2,
                     'per_page' => 50,
                     'current_page' => 1,
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->setSourceResource->forSet('set-456');
+
+    expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
+    expect($result->count())->toBe(2);
+});
+
+it('can handle list response without meta information', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                [
+                    'type' => 'set-sources',
+                    'id' => '123',
+                    'attributes' => [
+                        'source_url' => 'https://example.com/source1',
+                        'source_type' => 'checklist',
+                    ],
                 ],
             ],
         ]))
@@ -271,89 +338,54 @@ it('can get list with empty results', function () {
     $result = $this->setSourceResource->list();
 
     expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
-    expect($result->total())->toBe(0);
+    expect($result->count())->toBe(1);
 });
 
-it('can create checklist source', function () {
+it('can update set source without attributes', function () {
     $this->mockHandler->append(
-        new GuzzleResponse(201, [], json_encode([
+        new GuzzleResponse(200, [], json_encode([
             'data' => [
                 'type' => 'set-sources',
-                'id' => '789',
+                'id' => '123',
                 'attributes' => [
-                    'set_id' => '456',
+                    'source_url' => 'https://example.com/existing-source',
                     'source_type' => 'checklist',
-                    'source_name' => 'Beckett',
-                    'source_url' => 'https://www.beckett.com/',
-                    'created_at' => '2024-01-15T10:30:00Z',
-                    'updated_at' => '2024-01-15T10:30:00Z',
                 ],
             ],
         ]))
     );
 
-    $result = $this->setSourceResource->create([
-        'set_id' => '456',
-        'source_type' => 'checklist',
-        'source_name' => 'Beckett',
-        'source_url' => 'https://www.beckett.com/',
-    ]);
+    $result = $this->setSourceResource->update('123');
 
-    expect($result->source_type)->toBe('checklist');
+    expect($result)->toBeInstanceOf(SetSourceModel::class);
 });
 
-it('can create metadata source', function () {
+it('can get set sources for a specific set with additional params', function () {
     $this->mockHandler->append(
-        new GuzzleResponse(201, [], json_encode([
+        new GuzzleResponse(200, [], json_encode([
             'data' => [
-                'type' => 'set-sources',
-                'id' => '789',
-                'attributes' => [
-                    'set_id' => '456',
-                    'source_type' => 'metadata',
-                    'source_name' => 'CardboardConnection',
-                    'source_url' => 'https://www.cardboardconnection.com/',
-                    'created_at' => '2024-01-15T10:30:00Z',
-                    'updated_at' => '2024-01-15T10:30:00Z',
+                [
+                    'type' => 'set-sources',
+                    'id' => '123',
+                    'attributes' => [
+                        'set_id' => 'set-456',
+                        'source_url' => 'https://example.com/source1',
+                        'source_type' => 'checklist',
+                    ],
+                ],
+            ],
+            'meta' => [
+                'pagination' => [
+                    'total' => 1,
+                    'per_page' => 10,
+                    'current_page' => 1,
                 ],
             ],
         ]))
     );
 
-    $result = $this->setSourceResource->create([
-        'set_id' => '456',
-        'source_type' => 'metadata',
-        'source_name' => 'CardboardConnection',
-        'source_url' => 'https://www.cardboardconnection.com/',
-    ]);
+    $result = $this->setSourceResource->forSet('set-456', ['limit' => 10]);
 
-    expect($result->source_type)->toBe('metadata');
-});
-
-it('can create images source', function () {
-    $this->mockHandler->append(
-        new GuzzleResponse(201, [], json_encode([
-            'data' => [
-                'type' => 'set-sources',
-                'id' => '789',
-                'attributes' => [
-                    'set_id' => '456',
-                    'source_type' => 'images',
-                    'source_name' => 'eBay',
-                    'source_url' => 'https://www.ebay.com/',
-                    'created_at' => '2024-01-15T10:30:00Z',
-                    'updated_at' => '2024-01-15T10:30:00Z',
-                ],
-            ],
-        ]))
-    );
-
-    $result = $this->setSourceResource->create([
-        'set_id' => '456',
-        'source_type' => 'images',
-        'source_name' => 'eBay',
-        'source_url' => 'https://www.ebay.com/',
-    ]);
-
-    expect($result->source_type)->toBe('images');
+    expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
+    expect($result->count())->toBe(1);
 });

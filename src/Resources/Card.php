@@ -6,6 +6,7 @@ use CardTechie\TradingCardApiSdk\Models\Card as CardModel;
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  * Class Card
@@ -53,7 +54,7 @@ class Card
     }
 
     /**
-     * Retrieve a set by ID
+     * Retrieve a card by ID
      *
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
@@ -73,7 +74,37 @@ class Card
     }
 
     /**
-     * Update the set
+     * List cards with pagination
+     *
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function list(array $params = []): LengthAwarePaginator
+    {
+        $defaultParams = [
+            'limit' => 50,
+            'page' => 1,
+            'pageName' => 'page',
+        ];
+        $params = array_merge($defaultParams, $params);
+
+        $url = sprintf('/v1/cards?%s', http_build_query($params));
+        $response = $this->makeRequest($url);
+
+        $totalPages = $response->meta->pagination->total;
+        $perPage = $response->meta->pagination->per_page;
+        $page = $response->meta->pagination->current_page;
+        $options = [
+            'path' => LengthAwarePaginator::resolveCurrentPath(),
+            'pageName' => $params['pageName'],
+        ];
+        $parsedResponse = Response::parse(json_encode($response));
+
+        return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
+    }
+
+    /**
+     * Update the card
      *
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException

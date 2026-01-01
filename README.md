@@ -62,6 +62,12 @@ $cards = TradingCardApiSdk::card()->getList(['name' => 'Pikachu']);
 
 // Get player information
 $player = TradingCardApiSdk::player()->get('player-id');
+
+// Get paginated list of players
+$players = TradingCardApiSdk::player()->list(['limit' => 25, 'page' => 1]);
+
+// Search for players
+$players = TradingCardApiSdk::player()->getList(['full_name' => 'Michael Jordan']);
 ```
 
 ### Using the Helper Function
@@ -75,80 +81,6 @@ $team = tradingcardapi()->team()->create([
     'name' => 'New Team',
     'location' => 'City Name'
 ]);
-```
-
-## 🔐 Authentication
-
-The SDK supports two authentication methods:
-
-### Personal Access Token (PAT) - Recommended for Simple Use Cases
-
-Personal Access Tokens provide a simpler authentication flow ideal for:
-- Testing and development
-- Single-user applications
-- AI/GPT integrations
-- Simple scripts and tools
-
-```php
-use CardTechie\TradingCardApiSdk\TradingCardApi;
-
-// Method 1: Direct instantiation with token
-$api = TradingCardApi::withPersonalAccessToken('your-pat-token-here');
-
-// Method 2: From configuration
-$api = TradingCardApi::withPersonalAccessToken(
-    config('tradingcardapi.personal_access_token')
-);
-
-// Use normally
-$card = $api->card()->get('card-id');
-```
-
-**Environment Configuration:**
-
-```env
-# .env
-TRADINGCARDAPI_URL=https://api.tradingcardapi.com
-TRADINGCARDAPI_PAT=your-personal-access-token
-```
-
-**Security Considerations:**
-- ⚠️ PAT tokens are long-lived and should be kept secret
-- Never commit tokens to version control
-- Always use environment variables
-- Rotate tokens periodically
-- Consider OAuth2 for production multi-user applications
-
-### OAuth2 Client Credentials - Recommended for Production
-
-OAuth2 Client Credentials flow is ideal for:
-- Production applications
-- Multi-user systems
-- Applications requiring token refresh
-
-```php
-use CardTechie\TradingCardApiSdk\TradingCardApi;
-
-// Method 1: Using static method
-$api = TradingCardApi::withClientCredentials(
-    clientId: config('tradingcardapi.client_id'),
-    clientSecret: config('tradingcardapi.client_secret')
-);
-
-// Method 2: Using default constructor (uses config)
-$api = new TradingCardApi();
-
-// Use normally
-$card = $api->card()->get('card-id');
-```
-
-**Environment Configuration:**
-
-```env
-# .env
-TRADINGCARDAPI_URL=https://api.tradingcardapi.com
-TRADINGCARDAPI_CLIENT_ID=your-client-id
-TRADINGCARDAPI_CLIENT_SECRET=your-client-secret
 ```
 
 ### Error Handling
@@ -188,536 +120,125 @@ $api = new TradingCardApi();
 $genres = $api->genre()->getList();
 ```
 
-## 📸 Working with Card Images
+## 👥 Working with Players
 
-The SDK provides comprehensive support for uploading, managing, and retrieving card images with automatic thumbnail generation and CDN delivery.
+The Player resource provides comprehensive CRUD operations and relationship management:
 
-### Upload Card Images
+### Basic Operations
 
 ```php
 use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
 
-// Upload from file path
-$image = TradingCardApiSdk::cardImage()->upload(
-    file: '/path/to/card-front.jpg',
-    cardId: 'card-uuid-here',
-    imageType: 'front'
-);
+// Get a specific player
+$player = TradingCardApiSdk::player()->get('player-id');
 
-// Upload from Laravel UploadedFile (e.g., from request)
-$image = TradingCardApiSdk::cardImage()->upload(
-    file: $request->file('image'),
-    cardId: 'card-uuid-here',
-    imageType: 'back'
-);
+// Create a new player
+$player = TradingCardApiSdk::player()->create([
+    'first_name' => 'Michael',
+    'last_name' => 'Jordan'
+]);
 
-// Upload with additional attributes
-$image = TradingCardApiSdk::cardImage()->upload(
-    file: '/path/to/image.jpg',
-    cardId: 'card-uuid',
-    imageType: 'front',
-    attributes: ['storage_disk' => 's3']
-);
+// Update player information
+$player = TradingCardApiSdk::player()->update('player-id', [
+    'first_name' => 'Michael Jeffrey',
+    'last_name' => 'Jordan'
+]);
 
-echo $image->id;           // UUID of uploaded image
-echo $image->download_url; // CDN URL for the image
+// Delete a player
+TradingCardApiSdk::player()->delete('player-id');
 ```
 
-### Retrieve Card Images
+### Listing and Searching
 
 ```php
-// Get a specific card image with metadata
-$image = TradingCardApiSdk::cardImage()->get('image-uuid');
-
-// Access image properties
-echo $image->file_size;    // File size in bytes
-echo $image->mime_type;    // e.g., "image/jpeg"
-echo $image->width;        // Image width in pixels
-echo $image->height;       // Image height in pixels
-
-// Get related card
-$card = $image->card();
-```
-
-### Image Variants & CDN URLs
-
-The API automatically generates thumbnail variants (small, medium, large) for uploaded images:
-
-```php
-$image = TradingCardApiSdk::cardImage()->get('image-uuid');
-
-// Get original image URL
-echo $image->getCdnUrl();           // Original size
-echo $image->getCdnUrl('original'); // Explicit original
-
-// Get thumbnail URLs
-echo $image->getCdnUrl('small');    // Small thumbnail (150px)
-echo $image->getCdnUrl('medium');   // Medium thumbnail (300px)
-echo $image->getCdnUrl('large');    // Large thumbnail (600px)
-
-// Get cache-busted versioned URLs
-echo $image->getVersionedUrl();         // Original with version parameter
-echo $image->getVersionedUrl('small');  // Small variant with version
-
-// Check if variant exists
-if ($image->hasVariant('small')) {
-    echo $image->getVariantUrl('small');
-}
-
-// Get all available variant sizes
-$sizes = $image->getVariantSizes(); // ['small', 'medium', 'large']
-```
-
-### Responsive Images
-
-Generate responsive image markup for optimal loading:
-
-```php
-$image = TradingCardApiSdk::cardImage()->get('image-uuid');
-
-// Get srcset for responsive images
-echo "<img src='{$image->download_url}'
-           srcset='{$image->srcset}'
-           sizes='{$image->sizes}'
-           alt='Card Image' />";
-
-// Output example:
-// <img src="https://cdn.example.com/image.jpg"
-//      srcset="https://cdn.example.com/small.jpg 150w,
-//              https://cdn.example.com/medium.jpg 300w,
-//              https://cdn.example.com/image.jpg 600w"
-//      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-//      alt="Card Image" />
-```
-
-### List and Filter Card Images
-
-```php
-// List all card images with pagination
-$images = TradingCardApiSdk::cardImage()->list([
-    'page' => 1,
+// Get paginated list of players
+$players = TradingCardApiSdk::player()->list([
     'limit' => 50,
-]);
-
-// Filter by card
-$images = TradingCardApiSdk::cardImage()->list([
-    'filter' => ['card_id' => 'card-uuid'],
-    'include' => 'card',
-]);
-
-// Iterate through paginated results
-foreach ($images as $image) {
-    echo "{$image->image_type}: {$image->download_url}\n";
-}
-```
-
-### Update Image Metadata
-
-```php
-// Update image type or other metadata
-$image = TradingCardApiSdk::cardImage()->update('image-uuid', [
-    'image_type' => 'back',  // Change from front to back
-]);
-```
-
-### Delete Card Images
-
-```php
-// Soft delete a card image
-TradingCardApiSdk::cardImage()->delete('image-uuid');
-```
-
-### Get Download URLs
-
-```php
-// Get download URL for specific size
-$url = TradingCardApiSdk::cardImage()->getDownloadUrl('image-uuid');          // Original
-$url = TradingCardApiSdk::cardImage()->getDownloadUrl('image-uuid', 'small'); // Small variant
-```
-
-### Access Card Images from a Card
-
-You can load a card with its images and access them using convenient Collection-based methods:
-
-```php
-use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
-
-// Load card with images included
-$card = TradingCardApiSdk::card()->get('card-uuid', [
-    'include' => 'images',
-]);
-
-// Get all images as a Collection
-$images = $card->images(); // Returns Collection<CardImage>
-
-// Use Collection methods for filtering and manipulation
-$frontImages = $images->filter(fn($img) => $img->image_type === 'front');
-$downloadUrls = $images->pluck('download_url');
-
-// Check if card has any images
-if ($card->hasImages()) {
-    echo "This card has {$images->count()} image(s)";
-}
-
-// Get specific images using convenience methods
-$frontImage = $card->getFrontImage();
-if ($frontImage) {
-    echo "Front image: {$frontImage->download_url}";
-}
-
-$backImage = $card->getBackImage();
-if ($backImage) {
-    echo "Back image: {$backImage->download_url}";
-}
-```
-
-## 📊 Working with Set Sources (Data Provenance)
-
-The SDK provides support for tracking data provenance for trading card sets through the Set Sources API. Track where checklist, metadata, and image data came from.
-
-### Create Set Source
-
-```php
-use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
-
-// Create checklist source
-$source = TradingCardApiSdk::setSource()->create([
-    'set_id' => 'set-uuid-here',
-    'source_type' => 'checklist',
-    'source_name' => 'Beckett',
-    'source_url' => 'https://www.beckett.com/...',
-    'verified_at' => now(),
-]);
-
-echo $source->id;          // UUID of created source
-echo $source->source_type; // "checklist"
-```
-
-### Get Set Source
-
-```php
-$source = TradingCardApiSdk::setSource()->get('source-uuid', [
-    'include' => 'set',
-]);
-
-echo $source->source_name;  // e.g., "Beckett"
-echo $source->source_type;  // e.g., "checklist"
-echo $source->set->name;    // e.g., "1989 Topps Baseball" (if included)
-```
-
-### Get Set Sources from a Set
-
-```php
-// Fetch a set with its sources included
-$set = TradingCardApiSdk::set()->get('set-uuid', [
-    'include' => 'set-sources',
-]);
-
-// Get all sources as a Collection
-$sources = $set->sources(); // Returns Collection<SetSource>
-
-// Use Collection methods for filtering and manipulation
-$verifiedSources = $sources->filter(fn($s) => $s->verified_at !== null);
-$sourceNames = $sources->pluck('source_name');
-
-// Check if set has any sources
-if ($set->hasSources()) {
-    echo "This set has {$sources->count()} source(s)";
-}
-
-// Get specific source types using convenience methods
-$checklistSource = $set->getChecklistSource();
-if ($checklistSource) {
-    echo "Checklist source: {$checklistSource->source_name}";
-}
-
-$metadataSource = $set->getMetadataSource();
-if ($metadataSource) {
-    echo "Metadata source: {$metadataSource->source_name}";
-}
-
-$imagesSource = $set->getImagesSource();
-if ($imagesSource) {
-    echo "Images source: {$imagesSource->source_name}";
-}
-
-// Or iterate directly (Collections are iterable)
-foreach ($set->sources() as $source) {
-    echo "{$source->source_type}: {$source->source_name}\n";
-}
-```
-
-### List Set Sources
-
-```php
-// List all set sources with pagination
-$sources = TradingCardApiSdk::setSource()->list([
     'page' => 1,
-    'limit' => 50,
+    'sort' => 'last_name'
 ]);
 
-// Filter by set
-$sources = TradingCardApiSdk::setSource()->list([
-    'filter' => ['set_id' => 'set-uuid'],
-    'include' => 'set',
+// Search for players (returns Collection)
+$players = TradingCardApiSdk::player()->getList([
+    'full_name' => 'Michael Jordan',
+    'parent_id' => null  // Only parent players, not aliases
 ]);
 
-// Iterate through paginated results
-foreach ($sources as $source) {
-    echo "{$source->source_type}: {$source->source_name}\n";
+// Find players by partial name
+$players = TradingCardApiSdk::player()->getList([
+    'first_name' => 'Michael'
+]);
+```
+
+### Player Relationships
+
+```php
+// Working with player relationships
+$player = TradingCardApiSdk::player()->get('player-id');
+
+// Get parent player (if this is an alias)
+$parent = $player->getParent();
+
+// Get all aliases of this player
+$aliases = $player->getAliases();
+
+// Get teams this player has been associated with
+$teams = $player->getTeams();
+
+// Get all player-team relationships
+$playerteams = $player->getPlayerteams();
+
+// Check if player is an alias
+if ($player->isAlias()) {
+    echo "This is an alias of: " . $player->getParent()->full_name;
+}
+
+// Check if player has aliases
+if ($player->hasAliases()) {
+    echo "This player has " . $player->getAliases()->count() . " aliases";
 }
 ```
 
-### Update Set Source
+### Creating Player Hierarchies
 
 ```php
-// Update source URL and verification timestamp
-$source = TradingCardApiSdk::setSource()->update('source-uuid', [
-    'source_url' => 'https://updated-url.com',
-    'verified_at' => now(),
+// Create a parent player
+$parent = TradingCardApiSdk::player()->create([
+    'first_name' => 'Michael',
+    'last_name' => 'Jordan'
 ]);
+
+// Create an alias player with parent relationship
+$alias = TradingCardApiSdk::player()->create(
+    ['first_name' => 'Mike', 'last_name' => 'Jordan'],
+    ['parent' => ['data' => ['type' => 'players', 'id' => $parent->id]]]
+);
 ```
 
-### Delete Set Source
+### Working with Deleted Players
 
 ```php
-// Delete a set source
-TradingCardApiSdk::setSource()->delete('source-uuid');
+// List deleted players
+$deletedPlayers = TradingCardApiSdk::player()->listDeleted();
+
+// Get a specific deleted player
+$deletedPlayer = TradingCardApiSdk::player()->deleted('player-id');
 ```
 
-### Source Types
-
-Valid values for `source_type`:
-
-- **`checklist`** - Source of card checklist data
-- **`metadata`** - Source of set metadata (year, manufacturer, etc.)
-- **`images`** - Source of card images
-
-**Note:** Each set can have only one source per type. The API enforces unique constraints.
-
-### Usage Examples
-
-**Track multiple sources for a set:**
+### Player Model Attributes
 
 ```php
-// Checklist from Beckett
-$checklistSource = TradingCardApiSdk::setSource()->create([
-    'set_id' => 'set-123',
-    'source_type' => 'checklist',
-    'source_name' => 'Beckett',
-    'source_url' => 'https://www.beckett.com/...',
-]);
+$player = TradingCardApiSdk::player()->get('player-id');
 
-// Metadata from CardboardConnection
-$metadataSource = TradingCardApiSdk::setSource()->create([
-    'set_id' => 'set-123',
-    'source_type' => 'metadata',
-    'source_name' => 'CardboardConnection',
-    'source_url' => 'https://www.cardboardconnection.com/...',
-]);
+// Access player data
+echo $player->first_name;        // "Michael"
+echo $player->last_name;         // "Jordan"
+echo $player->full_name;         // "Michael Jordan" (computed attribute)
+echo $player->last_name_first;   // "Jordan, Michael" (computed attribute)
 
-// Images from eBay
-$imagesSource = TradingCardApiSdk::setSource()->create([
-    'set_id' => 'set-123',
-    'source_type' => 'images',
-    'source_name' => 'eBay',
-    'source_url' => 'https://www.ebay.com/...',
-]);
+// Check relationships
+echo $player->parent_id;         // UUID of parent player (if alias)
 ```
-
-**Update verification timestamp:**
-
-```php
-$source = TradingCardApiSdk::setSource()->update('source-uuid', [
-    'verified_at' => now(), // Mark as verified today
-]);
-
-echo $source->verified_at->format('Y-m-d'); // Carbon instance
-```
-
-## 🔗 Working with Model Relationships & Collections
-
-The SDK uses Laravel Collections for all relationship methods, providing a powerful and fluent API for working with related data. All relationship methods return `Collection` instances, giving you access to 80+ collection methods for filtering, mapping, and transforming data.
-
-### Set Relationships
-
-#### Subsets Collection
-
-```php
-// Load a set with subsets included
-$set = TradingCardApiSdk::set()->get('set-uuid', [
-    'include' => 'subsets',
-]);
-
-// Get all subsets as a Collection
-$subsets = $set->subsets(); // Returns Collection<Set>
-
-// Use Collection methods
-$activeSubsets = $subsets->filter(fn($subset) => $subset->status === 'active');
-$subsetNames = $subsets->pluck('name');
-$firstSubset = $subsets->first();
-
-// Check if set has subsets
-if ($set->hasSubsets()) {
-    echo "This set has {$subsets->count()} subset(s)";
-}
-```
-
-#### Checklist Collection
-
-```php
-// Load a set with checklist included
-$set = TradingCardApiSdk::set()->get('set-uuid', [
-    'include' => 'checklist',
-]);
-
-// Get all checklist cards as a Collection
-$checklist = $set->checklist(); // Returns Collection<Card>
-
-// Use Collection methods
-$rookieCards = $checklist->filter(fn($card) => $card->is_rookie === true);
-$cardNumbers = $checklist->pluck('number');
-$cardCount = $checklist->count();
-
-// Check if set has checklist
-if ($set->hasChecklist()) {
-    echo "This set has {$checklist->count()} card(s)";
-}
-
-// Navigate through checklist
-$currentCard = $checklist->first();
-$nextCard = $set->nextCard($currentCard);
-$previousCard = $set->previousCard($currentCard);
-```
-
-### Card Relationships
-
-#### OnCard Collection
-
-```php
-// Load a card with oncard relationships included
-$card = TradingCardApiSdk::card()->get('card-uuid', [
-    'include' => 'oncard',
-]);
-
-// Get all oncard items as a Collection
-$oncard = $card->oncard(); // Returns Collection<mixed>
-
-// Use Collection methods
-$players = $oncard->filter(fn($item) => $item->on_cardable_type === 'players');
-$teams = $oncard->filter(fn($item) => $item->on_cardable_type === 'teams');
-
-// Check if card has oncard items
-if ($card->hasOncard()) {
-    echo "This card features {$oncard->count()} item(s)";
-}
-```
-
-#### Extra Attributes Collection
-
-```php
-// Load a card with extra attributes included
-$card = TradingCardApiSdk::card()->get('card-uuid', [
-    'include' => 'attributes',
-]);
-
-// Get all extra attributes as a Collection
-$attributes = $card->extraAttributes(); // Returns Collection<mixed>
-
-// Use Collection methods
-$specialAttributes = $attributes->filter(fn($attr, $key) => str_starts_with($key, 'special_'));
-
-// Check if card has extra attributes
-if ($card->hasExtraAttributes()) {
-    echo "This card has {$attributes->count()} extra attribute(s)";
-}
-```
-
-### ObjectAttribute Relationships
-
-#### Cards Collection
-
-```php
-// Load an object attribute with cards included
-$attribute = TradingCardApiSdk::objectAttribute()->get('attribute-uuid', [
-    'include' => 'cards',
-]);
-
-// Get all cards with this attribute as a Collection
-$cards = $attribute->cards(); // Returns Collection<Card>
-
-// Use Collection methods
-$recentCards = $cards->sortByDesc('created_at')->take(10);
-$cardNames = $cards->pluck('name');
-
-// Check if attribute has cards
-if ($attribute->hasCards()) {
-    echo "This attribute is used on {$cards->count()} card(s)";
-}
-```
-
-### Year, Brand, Manufacturer Relationships
-
-#### Sets Collection
-
-```php
-// These models all have sets() relationships that return Collections
-
-// Load a year with its sets
-$year = TradingCardApiSdk::year()->get('year-uuid', [
-    'include' => 'sets',
-]);
-
-$sets = $year->sets(); // Returns Collection<Set>
-
-// Same pattern for Brand and Manufacturer
-$brand = TradingCardApiSdk::brand()->get('brand-uuid', ['include' => 'sets']);
-$brandSets = $brand->sets();
-
-$manufacturer = TradingCardApiSdk::manufacturer()->get('manufacturer-uuid', ['include' => 'sets']);
-$manufacturerSets = $manufacturer->sets();
-
-// Use Collection methods
-$recentSets = $sets->sortByDesc('release_date')->take(5);
-$setNames = $sets->pluck('name');
-
-// Check if entity has sets
-if ($year->hasSets()) {
-    echo "This year has {$sets->count()} set(s)";
-}
-
-if ($brand->hasSets()) {
-    echo "This brand has {$brandSets->count()} set(s)";
-}
-
-if ($manufacturer->hasSets()) {
-    echo "This manufacturer has {$manufacturerSets->count()} set(s)";
-}
-```
-
-### Collection Methods Available
-
-All relationship methods return Laravel Collections, giving you access to powerful methods:
-
-**Filtering & Searching:**
-- `filter()`, `reject()`, `first()`, `last()`, `firstWhere()`, `where()`
-
-**Transformation:**
-- `map()`, `pluck()`, `flatMap()`, `groupBy()`, `keyBy()`
-
-**Aggregation:**
-- `count()`, `sum()`, `avg()`, `min()`, `max()`
-
-**Sorting:**
-- `sort()`, `sortBy()`, `sortByDesc()`, `reverse()`
-
-**Chunking & Pagination:**
-- `take()`, `skip()`, `chunk()`, `forPage()`
-
-**Boolean Checks:**
-- `isEmpty()`, `isNotEmpty()`, `contains()`, `doesntContain()`
-
-See the full [Laravel Collections Documentation](https://laravel.com/docs/11.x/collections) for all available methods.
 
 ## 📚 Available Resources
 
@@ -726,18 +247,93 @@ The SDK provides access to the following Trading Card API resources:
 | Resource | Description | Methods |
 |----------|-------------|---------|
 | **Cards** | Individual trading cards | `get()`, `create()`, `update()`, `delete()` |
-| **CardImages** | Card image uploads and management | `get()`, `list()`, `upload()`, `update()`, `delete()`, `getDownloadUrl()` |
 | **Sets** | Card sets and collections | `get()`, `list()`, `create()`, `update()`, `delete()`, `checklist($id)`, `addMissingCards($id)`, `addChecklist($request, $id)` |
-| **SetSources** | Data provenance tracking for sets | `get()`, `list()`, `create()`, `update()`, `delete()` |
-| **Players** | Player information | `get()`, `getList()`, `create()` |
+| **Players** | Player information | `get()`, `list()`, `getList()`, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |
 | **Teams** | Team data | `get()`, `getList()`, `create()` |
 | **Genres** | Card categories/types | `get()`, `list()`, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |
 | **Brands** | Trading card brands | `get()`, `list()`, `create()`, `update()`, `delete()` |
 | **Manufacturers** | Trading card manufacturers | `get()`, `list()`, `create()`, `update()`, `delete()` |
 | **Years** | Trading card years | `get()`, `list()`, `create()`, `update()`, `delete()` |
 | **ObjectAttributes** | Object attributes | `get()`, `list()`, `create()`, `update()`, `delete()` |
-| **Stats** | Model statistics | `get($type)` |
+| **SetSources** | Set data sources | `get()`, `list()`, `create()`, `update()`, `delete()`, `forSet($setId)` |
+| **Stats** | Entity statistics and analytics | `get($type)`, `getCounts()`, `getSnapshots()`, `getGrowth()` |
 | **Attributes** | Card attributes | `get()`, `getList()` |
+
+### Stats Resource
+
+The Stats resource provides analytics and tracking capabilities for entity counts:
+
+```php
+// Get current counts for all entity types
+$counts = $api->stats()->getCounts();
+
+// Access counts for a specific entity type
+$setsCount = $counts->getByEntityType('sets');
+echo $setsCount->total;      // Total count
+echo $setsCount->published;  // Published count
+echo $setsCount->draft;      // Draft count
+echo $setsCount->archived;   // Archived count
+
+// Get growth metrics (default: 7 days)
+$growth = $api->stats()->getGrowth();
+// Or specify a period: '7d', '30d', '90d', 'week', 'month'
+$growth = $api->stats()->getGrowth('30d');
+
+$setsGrowth = $growth->getByEntityType('sets');
+echo $setsGrowth->current;          // Current count
+echo $setsGrowth->previous;         // Previous period count
+echo $setsGrowth->change;           // Absolute change
+echo $setsGrowth->percentageChange; // Percentage change
+
+// Get historical snapshots
+$snapshots = $api->stats()->getSnapshots();
+
+// With filters
+$snapshots = $api->stats()->getSnapshots([
+    'entity_type' => 'sets',
+    'from' => '2024-11-01',
+    'to' => '2024-11-30',
+]);
+
+foreach ($snapshots->snapshots as $snapshot) {
+    echo $snapshot->date;        // Snapshot date
+    echo $snapshot->entityType;  // Entity type
+    echo $snapshot->total;       // Total at that point
+}
+```
+
+### SetSource Resource
+
+The SetSource resource manages data sources for trading card sets (checklists, metadata, images):
+
+```php
+// Get all sources for a specific set
+$sources = $api->setSource()->forSet('set-id');
+
+// Get a specific source
+$source = $api->setSource()->get('source-id');
+
+// Create a new set source
+$source = $api->setSource()->create([
+    'set_id' => 'set-uuid',
+    'source_url' => 'https://example.com/checklist',
+    'source_name' => 'Example Source',
+    'source_type' => 'checklist',  // checklist, metadata, or images
+]);
+
+// Update a source
+$source = $api->setSource()->update('source-id', [
+    'source_url' => 'https://example.com/updated-checklist',
+    'verified_at' => '2024-01-15T10:30:00Z',
+]);
+
+// Delete a source
+$api->setSource()->delete('source-id');
+
+// Include sources when fetching a set
+$set = $api->set()->get('set-id', ['include' => 'sources']);
+$sources = $set->sources();  // Returns array of SetSource models
+```
 
 ## 🔧 Configuration
 
@@ -749,85 +345,38 @@ return [
     'ssl_verify' => (bool) env('TRADINGCARDAPI_SSL_VERIFY', true),
     'client_id' => env('TRADINGCARDAPI_CLIENT_ID', ''),
     'client_secret' => env('TRADINGCARDAPI_CLIENT_SECRET', ''),
+    'scope' => env('TRADINGCARDAPI_SCOPE', 'read:published'),
 ];
 ```
 
-## 🔄 API Versions
+### OAuth Scopes
 
-The Trading Card API provides both v1 and v2 endpoints with different response structures to support various JSON:API compliance levels.
+Configure the OAuth scopes to request when authenticating. Available scopes:
 
-### v1 Endpoints (Default)
+- **`read:published`** (default) - Access published content only
+- **`read:draft`** - Access published and draft content
+- **`read:all-status`** - Access all content regardless of status
+- **`write`** - Create and update resources
+- **`delete`** - Delete resources
 
-**The SDK uses v1 endpoints by default.** These endpoints follow a relationship-focused JSON:API pattern where related resources are returned in the `included` array alongside the primary resource.
+#### Examples
 
-**Example:** `GET /v1/sets/{id}/checklist`
-
-```json
-{
-  "data": {
-    "type": "sets",
-    "id": "set-uuid",
-    "attributes": {
-      "name": "1989 Topps Baseball"
-    }
-  },
-  "included": [
-    {
-      "type": "cards",
-      "id": "card-1",
-      "attributes": { "number": "1", "name": "Player 1" }
-    },
-    {
-      "type": "cards",
-      "id": "card-2",
-      "attributes": { "number": "2", "name": "Player 2" }
-    }
-  ]
-}
+**Read-only access to published content:**
+```env
+TRADINGCARDAPI_SCOPE="read:published"
 ```
 
-**Characteristics:**
-- Primary resource in `data` object
-- Related resources in `included` array
-- Follows JSON:API relationship pattern
-- Optimal for accessing both the parent resource and related data
-
-### v2 Endpoints (Stricter JSON:API Compliance)
-
-The API also provides v2 endpoints with stricter JSON:API compliance. These endpoints return collections as the primary `data` array when accessing relationship endpoints.
-
-**Example:** `GET /v2/sets/{id}/checklist`
-
-```json
-{
-  "data": [
-    {
-      "type": "cards",
-      "id": "card-1",
-      "attributes": { "number": "1", "name": "Player 1" }
-    },
-    {
-      "type": "cards",
-      "id": "card-2",
-      "attributes": { "number": "2", "name": "Player 2" }
-    }
-  ]
-}
+**Admin access with full permissions:**
+```env
+TRADINGCARDAPI_SCOPE="read:all-status write delete"
 ```
 
-**Characteristics:**
-- Collection resources in `data` array
-- More JSON:API compliant for collection endpoints
-- Focuses on the requested collection rather than parent resource
-- Cleaner structure when you only need the related resources
+**Content management (no delete):**
+```env
+TRADINGCARDAPI_SCOPE="read:draft write"
+```
 
-### Version Support
-
-**Current SDK Support:** v1 endpoints only
-
-**Future Plans:** v2 endpoint support may be added in a future SDK version based on user feedback and demand. Both versions return the same data, just structured differently according to JSON:API specifications.
-
-**Need v2 Support?** If you require v2 endpoint support, please [open an issue](https://github.com/cardtechie/tradingcardapi-sdk-php/issues) describing your use case.
+Multiple scopes should be separated by spaces. If not specified, the default scope (`read:published`) is used.
 
 ## 🧪 Development & Testing
 

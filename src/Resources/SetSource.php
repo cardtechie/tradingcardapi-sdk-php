@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace CardTechie\TradingCardApiSdk\Resources;
 
 use CardTechie\TradingCardApiSdk\Models\SetSource as SetSourceModel;
@@ -13,7 +11,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 /**
  * Class SetSource
  *
- * Handles set source operations for tracking data provenance.
+ * Resource for managing set sources (checklist, metadata, and image sources).
  */
 class SetSource
 {
@@ -28,41 +26,36 @@ class SetSource
     }
 
     /**
-     * Retrieve a list of set sources
-     *
-     * @param  array  $params  Query parameters (filter, include, page, limit, etc.)
+     * Create a set source with the passed in attributes
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function list(array $params = []): LengthAwarePaginator
+    public function create(array $attributes = [], array $relationships = []): SetSourceModel
     {
-        $defaultParams = [
-            'limit' => 50,
-            'page' => 1,
-            'pageName' => 'page',
+        $request = [
+            'json' => [
+                'data' => [
+                    'type' => 'set-sources',
+                ],
+            ],
         ];
-        $params = array_merge($defaultParams, $params);
 
-        $url = sprintf('/v1/set-sources?%s', http_build_query($params));
-        $response = $this->makeRequest($url);
+        if (count($attributes)) {
+            $request['json']['data']['attributes'] = $attributes;
+        }
 
-        $totalPages = $response->meta->pagination->total;
-        $perPage = $response->meta->pagination->per_page;
-        $page = $response->meta->pagination->current_page;
-        $options = [
-            'path' => LengthAwarePaginator::resolveCurrentPath(),
-            'pageName' => $params['pageName'],
-        ];
-        $parsedResponse = Response::parse(json_encode($response));
+        if (count($relationships)) {
+            $request['json']['data']['relationships'] = $relationships;
+        }
 
-        return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
+        $response = $this->makeRequest('/v1/set-sources', 'POST', $request);
+        $formattedResponse = new Response(json_encode($response));
+
+        return $formattedResponse->mainObject;
     }
 
     /**
      * Retrieve a set source by ID
-     *
-     * @param  string  $id  Set source UUID
-     * @param  array  $params  Query parameters (include, etc.)
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -81,39 +74,41 @@ class SetSource
     }
 
     /**
-     * Create a new set source
-     *
-     * @param  array  $attributes  Set source attributes
+     * Retrieve a list of set sources
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function create(array $attributes): SetSourceModel
+    public function list(array $params = []): LengthAwarePaginator
     {
-        $url = '/v1/set-sources';
-        $request = [
-            'json' => [
-                'data' => [
-                    'type' => 'set-sources',
-                    'attributes' => $attributes,
-                ],
-            ],
+        $defaultParams = [
+            'limit' => 50,
+            'page' => 1,
+            'pageName' => 'page',
         ];
+        $params = array_merge($defaultParams, $params);
 
-        $response = $this->makeRequest($url, 'POST', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $url = sprintf('/v1/set-sources?%s', http_build_query($params));
+        $response = $this->makeRequest($url);
 
-        return $formattedResponse->mainObject;
+        // Handle missing meta information gracefully
+        $totalPages = isset($response->meta->pagination->total) ? $response->meta->pagination->total : count($response->data);
+        $perPage = isset($response->meta->pagination->per_page) ? $response->meta->pagination->per_page : ($params['limit'] ?? 50);
+        $page = isset($response->meta->pagination->current_page) ? $response->meta->pagination->current_page : ($params['page'] ?? 1);
+        $options = [
+            'path' => LengthAwarePaginator::resolveCurrentPath(),
+            'pageName' => $params['pageName'],
+        ];
+        $parsedResponse = Response::parse(json_encode($response));
+
+        return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
     }
 
     /**
-     * Update set source
-     *
-     * @param  string  $id  Set source UUID
-     * @param  array  $attributes  Attributes to update
+     * Update a set source
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function update(string $id, array $attributes): SetSourceModel
+    public function update(string $id, array $attributes = [], array $relationships = []): SetSourceModel
     {
         $url = sprintf('/v1/set-sources/%s', $id);
         $request = [
@@ -121,10 +116,17 @@ class SetSource
                 'data' => [
                     'type' => 'set-sources',
                     'id' => $id,
-                    'attributes' => $attributes,
                 ],
             ],
         ];
+
+        if (count($attributes)) {
+            $request['json']['data']['attributes'] = $attributes;
+        }
+
+        if (count($relationships)) {
+            $request['json']['data']['relationships'] = $relationships;
+        }
 
         $response = $this->makeRequest($url, 'PUT', $request);
         $formattedResponse = new Response(json_encode($response));
@@ -135,13 +137,23 @@ class SetSource
     /**
      * Delete a set source
      *
-     * @param  string  $id  Set source UUID
-     *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function delete(string $id): void
     {
         $url = '/v1/set-sources/'.$id;
         $this->makeRequest($url, 'DELETE');
+    }
+
+    /**
+     * Get all sources for a specific set
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function forSet(string $setId, array $params = []): LengthAwarePaginator
+    {
+        $params['filter[set_id]'] = $setId;
+
+        return $this->list($params);
     }
 }

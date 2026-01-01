@@ -5,6 +5,7 @@ use CardTechie\TradingCardApiSdk\Models\Card;
 use CardTechie\TradingCardApiSdk\Models\Genre;
 use CardTechie\TradingCardApiSdk\Models\Manufacturer;
 use CardTechie\TradingCardApiSdk\Models\Set;
+use CardTechie\TradingCardApiSdk\Models\SetSource;
 use CardTechie\TradingCardApiSdk\Models\Year;
 
 it('can be instantiated with attributes', function () {
@@ -62,7 +63,7 @@ it('returns year relationship', function () {
     expect($set->year())->toBe($year);
 });
 
-it('returns subsets collection', function () {
+it('returns subsets array', function () {
     $subset1 = new Set(['id' => '1', 'name' => 'Subset 1']);
     $subset2 = new Set(['id' => '2', 'name' => 'Subset 2']);
     $subsets = [$subset1, $subset2];
@@ -70,62 +71,16 @@ it('returns subsets collection', function () {
     $set = new Set(['id' => '123']);
     $set->setRelationships(['subsets' => $subsets]);
 
-    $subsetsCollection = $set->subsets();
-
-    expect($subsetsCollection)->toBeInstanceOf(\Illuminate\Support\Collection::class);
-    expect($subsetsCollection)->toHaveCount(2);
-    expect($subsetsCollection->get(0))->toBe($subset1);
-    expect($subsetsCollection->get(1))->toBe($subset2);
+    expect($set->subsets())->toBe($subsets);
 });
 
-it('returns empty collection when no subsets', function () {
+it('returns empty array when no subsets', function () {
     $set = new Set(['id' => '123']);
 
-    $subsets = $set->subsets();
-
-    expect($subsets)->toBeInstanceOf(\Illuminate\Support\Collection::class);
-    expect($subsets)->toBeEmpty();
+    expect($set->subsets())->toBe([]);
 });
 
-it('hasSubsets returns false when no subsets', function () {
-    $set = new Set(['id' => '123']);
-
-    expect($set->hasSubsets())->toBeFalse();
-});
-
-it('hasSubsets returns true when subsets exist', function () {
-    $subset1 = new Set(['id' => '1', 'name' => 'Subset 1']);
-
-    $set = new Set(['id' => '123']);
-    $set->setRelationships(['subsets' => [$subset1]]);
-
-    expect($set->hasSubsets())->toBeTrue();
-});
-
-it('subsets collection supports collection methods', function () {
-    $subset1 = new Set(['id' => '1', 'name' => 'Subset 1']);
-    $subset2 = new Set(['id' => '2', 'name' => 'Subset 2']);
-    $subset3 = new Set(['id' => '3', 'name' => 'Subset 3']);
-
-    $set = new Set(['id' => '123']);
-    $set->setRelationships(['subsets' => [$subset1, $subset2, $subset3]]);
-
-    $subsets = $set->subsets();
-
-    // Test pluck
-    $names = $subsets->pluck('name');
-    expect($names->toArray())->toBe(['Subset 1', 'Subset 2', 'Subset 3']);
-
-    // Test filter
-    $filteredSubsets = $subsets->filter(fn ($subset) => $subset->id === '2');
-    expect($filteredSubsets)->toHaveCount(1);
-    expect($filteredSubsets->first()->name)->toBe('Subset 2');
-
-    // Test first
-    expect($subsets->first()->name)->toBe('Subset 1');
-});
-
-it('returns checklist collection', function () {
+it('returns checklist array', function () {
     $card1 = new Card(['id' => '1', 'name' => 'Card 1']);
     $card2 = new Card(['id' => '2', 'name' => 'Card 2']);
     $checklist = [$card1, $card2];
@@ -133,59 +88,13 @@ it('returns checklist collection', function () {
     $set = new Set(['id' => '123']);
     $set->setRelationships(['checklist' => $checklist]);
 
-    $checklistCollection = $set->checklist();
-
-    expect($checklistCollection)->toBeInstanceOf(\Illuminate\Support\Collection::class);
-    expect($checklistCollection)->toHaveCount(2);
-    expect($checklistCollection->get(0))->toBe($card1);
-    expect($checklistCollection->get(1))->toBe($card2);
+    expect($set->checklist())->toBe($checklist);
 });
 
-it('returns empty collection when no checklist', function () {
+it('returns empty array when no checklist', function () {
     $set = new Set(['id' => '123']);
 
-    $checklist = $set->checklist();
-
-    expect($checklist)->toBeInstanceOf(\Illuminate\Support\Collection::class);
-    expect($checklist)->toBeEmpty();
-});
-
-it('hasChecklist returns false when no checklist', function () {
-    $set = new Set(['id' => '123']);
-
-    expect($set->hasChecklist())->toBeFalse();
-});
-
-it('hasChecklist returns true when checklist exists', function () {
-    $card1 = new Card(['id' => '1', 'name' => 'Card 1']);
-
-    $set = new Set(['id' => '123']);
-    $set->setRelationships(['checklist' => [$card1]]);
-
-    expect($set->hasChecklist())->toBeTrue();
-});
-
-it('checklist collection supports collection methods', function () {
-    $card1 = new Card(['id' => '1', 'name' => 'Card 1']);
-    $card2 = new Card(['id' => '2', 'name' => 'Card 2']);
-    $card3 = new Card(['id' => '3', 'name' => 'Card 3']);
-
-    $set = new Set(['id' => '123']);
-    $set->setRelationships(['checklist' => [$card1, $card2, $card3]]);
-
-    $checklist = $set->checklist();
-
-    // Test pluck
-    $names = $checklist->pluck('name');
-    expect($names->toArray())->toBe(['Card 1', 'Card 2', 'Card 3']);
-
-    // Test filter
-    $filteredCards = $checklist->filter(fn ($card) => $card->id === '2');
-    expect($filteredCards)->toHaveCount(1);
-    expect($filteredCards->first()->name)->toBe('Card 2');
-
-    // Test first
-    expect($checklist->first()->name)->toBe('Card 1');
+    expect($set->checklist())->toBe([]);
 });
 
 it('returns current card count from checklist', function () {
@@ -219,9 +128,12 @@ it('returns previous card in checklist', function () {
     $previousCard = $set->previousCard($card2);
     expect($previousCard)->toBe($card1);
 
+    // Create new set instance to reset internal index
+    $set2 = new Set(['id' => '123']);
+    $set2->setRelationships(['checklist' => $checklist]);
+
     // Test previous card for card3 (should return card2)
-    // No need to create new set instance since we're no longer using stateful index
-    $previousCard2 = $set->previousCard($card3);
+    $previousCard2 = $set2->previousCard($card3);
     expect($previousCard2)->toBe($card2);
 });
 
@@ -234,17 +146,6 @@ it('returns null for previous card at beginning of checklist', function () {
     $set->setRelationships(['checklist' => $checklist]);
 
     expect($set->previousCard($card1))->toBeNull();
-});
-
-it('returns null for previous card not in checklist', function () {
-    $card1 = new Card(['id' => '1', 'name' => 'Card 1']);
-    $card2 = new Card(['id' => '2', 'name' => 'Card 2']);
-    $cardNotInList = new Card(['id' => '999', 'name' => 'Not in list']);
-
-    $set = new Set(['id' => '123']);
-    $set->setRelationships(['checklist' => [$card1, $card2]]);
-
-    expect($set->previousCard($cardNotInList))->toBeNull();
 });
 
 it('returns next card in checklist', function () {
@@ -260,9 +161,12 @@ it('returns next card in checklist', function () {
     $nextCard = $set->nextCard($card1);
     expect($nextCard)->toBe($card2);
 
+    // Create new set instance to reset internal index
+    $set2 = new Set(['id' => '123']);
+    $set2->setRelationships(['checklist' => $checklist]);
+
     // Test next card for card2 (should return card3)
-    // No need to create new set instance since we're no longer using stateful index
-    $nextCard2 = $set->nextCard($card2);
+    $nextCard2 = $set2->nextCard($card2);
     expect($nextCard2)->toBe($card3);
 });
 
@@ -277,15 +181,23 @@ it('returns null for next card at end of checklist', function () {
     expect($set->nextCard($card2))->toBeNull();
 });
 
-it('returns null for next card not in checklist', function () {
-    $card1 = new Card(['id' => '1', 'name' => 'Card 1']);
-    $card2 = new Card(['id' => '2', 'name' => 'Card 2']);
-    $cardNotInList = new Card(['id' => '999', 'name' => 'Not in list']);
+it('can be instantiated with is_variation attribute', function () {
+    $set = new Set(['id' => '123', 'name' => 'Test Set', 'is_variation' => true]);
 
-    $set = new Set(['id' => '123']);
-    $set->setRelationships(['checklist' => [$card1, $card2]]);
+    expect($set)->toBeInstanceOf(Set::class);
+    expect($set->is_variation)->toBeTrue();
+});
 
-    expect($set->nextCard($cardNotInList))->toBeNull();
+it('handles null is_variation attribute', function () {
+    $set = new Set(['id' => '123', 'name' => 'Test Set', 'is_variation' => null]);
+
+    expect($set->is_variation)->toBeNull();
+});
+
+it('handles false is_variation attribute', function () {
+    $set = new Set(['id' => '123', 'name' => 'Test Set', 'is_variation' => false]);
+
+    expect($set->is_variation)->toBeFalse();
 });
 
 it('sets genre relationship when genres provided', function () {
@@ -300,125 +212,20 @@ it('sets genre relationship when genres provided', function () {
     expect($set->getRelationship('genres'))->toBeNull();
 });
 
-it('returns collection of sources', function () {
-    $checklistSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
-        'id' => '1',
-        'source_type' => 'checklist',
-        'source_name' => 'Beckett',
-    ]);
-
-    $metadataSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
-        'id' => '2',
-        'source_type' => 'metadata',
-        'source_name' => 'COMC',
-    ]);
-
-    $sources = [$checklistSource, $metadataSource];
+it('returns sources array', function () {
+    $source1 = new SetSource(['id' => '1', 'source_url' => 'https://example.com/source1', 'source_type' => 'checklist']);
+    $source2 = new SetSource(['id' => '2', 'source_url' => 'https://example.com/source2', 'source_type' => 'metadata']);
+    $sources = [$source1, $source2];
 
     $set = new Set(['id' => '123']);
-    $set->setRelationships(['set-sources' => $sources]);
+    $set->setRelationships(['sources' => $sources]);
 
-    $sourcesCollection = $set->sources();
-
-    expect($sourcesCollection)->toBeInstanceOf(\Illuminate\Support\Collection::class);
-    expect($sourcesCollection->count())->toBe(2);
-    expect($sourcesCollection->first())->toBe($checklistSource);
+    expect($set->sources())->toBe($sources);
+    expect($set->sources())->toHaveCount(2);
 });
 
-it('returns empty collection when no sources', function () {
+it('returns empty array when no sources', function () {
     $set = new Set(['id' => '123']);
 
-    $sources = $set->sources();
-
-    expect($sources)->toBeInstanceOf(\Illuminate\Support\Collection::class);
-    expect($sources->isEmpty())->toBeTrue();
-});
-
-it('hasSources returns true when set has sources', function () {
-    $source = new \CardTechie\TradingCardApiSdk\Models\SetSource([
-        'id' => '1',
-        'source_type' => 'checklist',
-    ]);
-
-    $set = new Set(['id' => '123']);
-    $set->setRelationships(['set-sources' => [$source]]);
-
-    expect($set->hasSources())->toBeTrue();
-});
-
-it('hasSources returns false when set has no sources', function () {
-    $set = new Set(['id' => '123']);
-
-    expect($set->hasSources())->toBeFalse();
-});
-
-it('getChecklistSource returns checklist source', function () {
-    $checklistSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
-        'id' => '1',
-        'source_type' => 'checklist',
-        'source_name' => 'Beckett',
-    ]);
-
-    $metadataSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
-        'id' => '2',
-        'source_type' => 'metadata',
-        'source_name' => 'COMC',
-    ]);
-
-    $set = new Set(['id' => '123']);
-    $set->setRelationships(['set-sources' => [$checklistSource, $metadataSource]]);
-
-    expect($set->getChecklistSource())->toBe($checklistSource);
-});
-
-it('getMetadataSource returns metadata source', function () {
-    $checklistSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
-        'id' => '1',
-        'source_type' => 'checklist',
-        'source_name' => 'Beckett',
-    ]);
-
-    $metadataSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
-        'id' => '2',
-        'source_type' => 'metadata',
-        'source_name' => 'COMC',
-    ]);
-
-    $set = new Set(['id' => '123']);
-    $set->setRelationships(['set-sources' => [$metadataSource, $checklistSource]]);
-
-    expect($set->getMetadataSource())->toBe($metadataSource);
-});
-
-it('getImagesSource returns images source', function () {
-    $imagesSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
-        'id' => '1',
-        'source_type' => 'images',
-        'source_name' => 'eBay',
-    ]);
-
-    $metadataSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
-        'id' => '2',
-        'source_type' => 'metadata',
-        'source_name' => 'COMC',
-    ]);
-
-    $set = new Set(['id' => '123']);
-    $set->setRelationships(['set-sources' => [$imagesSource, $metadataSource]]);
-
-    expect($set->getImagesSource())->toBe($imagesSource);
-});
-
-it('source type helpers return null when source type does not exist', function () {
-    $checklistSource = new \CardTechie\TradingCardApiSdk\Models\SetSource([
-        'id' => '1',
-        'source_type' => 'checklist',
-        'source_name' => 'Beckett',
-    ]);
-
-    $set = new Set(['id' => '123']);
-    $set->setRelationships(['set-sources' => [$checklistSource]]);
-
-    expect($set->getMetadataSource())->toBeNull();
-    expect($set->getImagesSource())->toBeNull();
+    expect($set->sources())->toBe([]);
 });

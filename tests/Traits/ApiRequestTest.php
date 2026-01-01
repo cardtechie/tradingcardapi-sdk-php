@@ -67,9 +67,8 @@ it('can make a request with token retrieval', function () {
 });
 
 it('uses cached token when available', function () {
-    // Set a cached token with the new cache key format (includes credentials hash)
-    $cacheKey = 'tcapi_token_'.md5('test-client-idtest-client-secret');
-    cache()->put($cacheKey, 'cached-token', 60);
+    // Set a cached token
+    cache()->put('tcapi_token', 'cached-token', 60);
 
     $client = m::mock(Client::class);
 
@@ -149,6 +148,101 @@ it('includes custom headers in request', function () {
     $result = $instance->testMakeRequest('/test', 'POST', [], ['Custom-Header' => 'custom-value']);
 
     expect($result->success)->toBeTrue();
+});
+
+it('requests token with configured scope', function () {
+    $this->app['config']->set('tradingcardapi.scope', 'read:all-status write delete');
+
+    $client = m::mock(Client::class);
+
+    // Mock the OAuth token request with scope verification
+    $tokenResponse = new GuzzleResponse(200, [], json_encode([
+        'access_token' => 'test-token',
+        'token_type' => 'Bearer',
+    ]));
+
+    $apiResponse = new GuzzleResponse(200, [], json_encode(['data' => ['id' => '123']]));
+
+    $client->shouldReceive('request')
+        ->with('POST', '/oauth/token', m::on(function ($request) {
+            return isset($request['form_params']['scope']) &&
+                   $request['form_params']['scope'] === 'read:all-status write delete';
+        }))
+        ->once()
+        ->andReturn($tokenResponse);
+
+    $client->shouldReceive('request')
+        ->with('GET', '/test', m::type('array'))
+        ->once()
+        ->andReturn($apiResponse);
+
+    $instance = new TestApiRequestClass($client);
+    $result = $instance->testMakeRequest('/test');
+
+    expect($result)->toBeObject();
+});
+
+it('uses default scope when not configured', function () {
+    // Default scope should be 'read:published'
+    $this->app['config']->set('tradingcardapi.scope', 'read:published');
+
+    $client = m::mock(Client::class);
+
+    $tokenResponse = new GuzzleResponse(200, [], json_encode([
+        'access_token' => 'test-token',
+        'token_type' => 'Bearer',
+    ]));
+
+    $apiResponse = new GuzzleResponse(200, [], json_encode(['data' => ['id' => '123']]));
+
+    $client->shouldReceive('request')
+        ->with('POST', '/oauth/token', m::on(function ($request) {
+            return isset($request['form_params']['scope']) &&
+                   $request['form_params']['scope'] === 'read:published';
+        }))
+        ->once()
+        ->andReturn($tokenResponse);
+
+    $client->shouldReceive('request')
+        ->with('GET', '/test', m::type('array'))
+        ->once()
+        ->andReturn($apiResponse);
+
+    $instance = new TestApiRequestClass($client);
+    $result = $instance->testMakeRequest('/test');
+
+    expect($result)->toBeObject();
+});
+
+it('handles empty scope configuration', function () {
+    $this->app['config']->set('tradingcardapi.scope', '');
+
+    $client = m::mock(Client::class);
+
+    $tokenResponse = new GuzzleResponse(200, [], json_encode([
+        'access_token' => 'test-token',
+        'token_type' => 'Bearer',
+    ]));
+
+    $apiResponse = new GuzzleResponse(200, [], json_encode(['data' => ['id' => '123']]));
+
+    $client->shouldReceive('request')
+        ->with('POST', '/oauth/token', m::on(function ($request) {
+            return isset($request['form_params']['scope']) &&
+                   $request['form_params']['scope'] === '';
+        }))
+        ->once()
+        ->andReturn($tokenResponse);
+
+    $client->shouldReceive('request')
+        ->with('GET', '/test', m::type('array'))
+        ->once()
+        ->andReturn($apiResponse);
+
+    $instance = new TestApiRequestClass($client);
+    $result = $instance->testMakeRequest('/test');
+
+    expect($result)->toBeObject();
 });
 
 it('sets Content-Type header to application/vnd.api+json for POST requests', function () {
