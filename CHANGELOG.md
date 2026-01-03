@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.17] - 2026-01-03
+
+### Fixed
+
+- **SetSource JSON:API type correction** - Fixed request type from `set-sources` to `set_sources` to match API expectations (Issue #158)
+
+## [0.1.16] - 2026-01-02
+
+### Fixed
+
+- **Subsets type handling** - Fixed Response class to handle plural `subsets` type from API responses, preventing "Unknown model type" errors on subsets view
+
 ## [0.1.15] - 2025-12-31
 
 ### Added
@@ -253,7 +265,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.15...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.17...HEAD
+[0.1.17]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.16...0.1.17
+[0.1.16]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.15...0.1.16
 [0.1.15]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.14...0.1.15
 [0.1.14]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.13...0.1.14
 [0.1.13]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.12...0.1.13
