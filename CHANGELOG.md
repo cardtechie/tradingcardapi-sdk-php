@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.16] - 2026-01-03
+
 ### Fixed
 
 - **SetSource JSON:API type correction** - Fixed request type from `set-sources` to `set_sources` to match API expectations (Issue #158)
