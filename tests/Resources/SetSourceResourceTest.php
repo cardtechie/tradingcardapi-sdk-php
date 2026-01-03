@@ -5,8 +5,10 @@ use CardTechie\TradingCardApiSdk\Resources\SetSource;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Psr\Http\Message\RequestInterface;
 
 beforeEach(function () {
     // Set up configuration
@@ -388,4 +390,87 @@ it('can get set sources for a specific set with additional params', function () 
 
     expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
     expect($result->count())->toBe(1);
+});
+
+// Tests for issue #158 - Verify correct JSON:API type in request payload
+it('sends correct JSON:API type in create request payload', function () {
+    $container = [];
+    $history = Middleware::history($container);
+
+    $mockHandler = new MockHandler([
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'set-sources',
+                'id' => '123',
+                'attributes' => [
+                    'source_url' => 'https://example.com/source',
+                    'source_type' => 'checklist',
+                ],
+            ],
+        ])),
+    ]);
+
+    $handlerStack = HandlerStack::create($mockHandler);
+    $handlerStack->push($history);
+    $client = new Client(['handler' => $handlerStack]);
+
+    // Pre-populate cache with token to avoid OAuth requests
+    cache()->put('tcapi_token', 'test-token', 60);
+
+    $setSourceResource = new SetSource($client);
+    $setSourceResource->create(['source_url' => 'https://example.com/source', 'source_type' => 'checklist']);
+
+    expect($container)->toHaveCount(1);
+
+    $request = $container[0]['request'];
+    expect($request)->toBeInstanceOf(RequestInterface::class);
+
+    $body = (string) $request->getBody();
+    $payload = json_decode($body, true);
+
+    expect($payload)->toHaveKey('data');
+    expect($payload['data'])->toHaveKey('type');
+    expect($payload['data']['type'])->toBe('set_sources');
+});
+
+it('sends correct JSON:API type in update request payload', function () {
+    $container = [];
+    $history = Middleware::history($container);
+
+    $mockHandler = new MockHandler([
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'set-sources',
+                'id' => '123',
+                'attributes' => [
+                    'source_url' => 'https://example.com/updated-source',
+                    'source_type' => 'metadata',
+                ],
+            ],
+        ])),
+    ]);
+
+    $handlerStack = HandlerStack::create($mockHandler);
+    $handlerStack->push($history);
+    $client = new Client(['handler' => $handlerStack]);
+
+    // Pre-populate cache with token to avoid OAuth requests
+    cache()->put('tcapi_token', 'test-token', 60);
+
+    $setSourceResource = new SetSource($client);
+    $setSourceResource->update('123', ['source_url' => 'https://example.com/updated-source']);
+
+    expect($container)->toHaveCount(1);
+
+    $request = $container[0]['request'];
+    expect($request)->toBeInstanceOf(RequestInterface::class);
+
+    $body = (string) $request->getBody();
+    $payload = json_decode($body, true);
+
+    expect($payload)->toHaveKey('data');
+    expect($payload['data'])->toHaveKey('type');
+    expect($payload['data']['type'])->toBe('set_sources');
+    expect($payload['data'])->toHaveKey('id');
+    expect($payload['data']['id'])->toBe('123');
 });
