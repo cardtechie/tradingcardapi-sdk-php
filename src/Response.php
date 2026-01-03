@@ -81,7 +81,7 @@ class Response
     private static function normalizeType(string $type): string
     {
         // Handle special cases
-        if ($type === 'parentset' || $type === 'subset') {
+        if ($type === 'parentset' || $type === 'subset' || $type === 'subsets') {
             return 'Set';
         }
         if ($type === 'checklist') {

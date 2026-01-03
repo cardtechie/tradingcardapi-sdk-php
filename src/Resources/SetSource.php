@@ -35,7 +35,7 @@ class SetSource
         $request = [
             'json' => [
                 'data' => [
-                    'type' => 'set-sources',
+                    'type' => 'set_sources',
                 ],
             ],
         ];
@@ -114,7 +114,7 @@ class SetSource
         $request = [
             'json' => [
                 'data' => [
-                    'type' => 'set-sources',
+                    'type' => 'set_sources',
                     'id' => $id,
                 ],
             ],
