@@ -4,6 +4,7 @@ namespace CardTechie\TradingCardApiSdk\Services;
 
 use CardTechie\TradingCardApiSdk\Exceptions\AuthenticationException;
 use CardTechie\TradingCardApiSdk\Exceptions\AuthorizationException;
+use CardTechie\TradingCardApiSdk\Exceptions\ConflictException;
 use CardTechie\TradingCardApiSdk\Exceptions\NetworkException;
 use CardTechie\TradingCardApiSdk\Exceptions\RateLimitException;
 use CardTechie\TradingCardApiSdk\Exceptions\ResourceNotFoundException;
@@ -127,6 +128,16 @@ class ErrorResponseParser
                 return new ValidationException(
                     $message,
                     422,
+                    $previous,
+                    $apiErrorCode,
+                    $apiErrors,
+                    $context
+                );
+
+            case 409:
+                return new ConflictException(
+                    $message,
+                    409,
                     $previous,
                     $apiErrorCode,
                     $apiErrors,
@@ -262,6 +273,7 @@ class ErrorResponseParser
             401 => 'Authentication failed',
             403 => 'Access forbidden',
             404 => 'Resource not found',
+            409 => 'Conflict detected',
             422 => 'Validation failed',
             429 => 'Rate limit exceeded',
             500 => 'Internal server error',
