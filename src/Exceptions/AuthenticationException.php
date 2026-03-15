@@ -38,6 +38,8 @@ class AuthenticationException extends TradingCardApiException
 
     /**
      * Create exception for invalid credentials
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function invalidCredentials(array $context = []): self
     {
@@ -53,6 +55,8 @@ class AuthenticationException extends TradingCardApiException
 
     /**
      * Create exception for expired token
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function expiredToken(array $context = []): self
     {

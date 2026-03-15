@@ -33,15 +33,16 @@ it('can be instantiated without attributes', function () {
     expect($objectAttribute)->toBeInstanceOf(ObjectAttribute::class);
 });
 
-it('returns empty array when no cards', function () {
+it('returns empty collection when no cards', function () {
     $objectAttribute = new ObjectAttribute(['id' => '123', 'name' => 'Test Attribute']);
 
     $cards = $objectAttribute->cards();
 
-    expect($cards)->toBe([]);
+    expect($cards)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($cards)->toBeEmpty();
 });
 
-it('returns cards array when cards relationship exists', function () {
+it('returns cards collection when cards relationship exists', function () {
     $objectAttribute = new ObjectAttribute(['id' => '123', 'name' => 'Test Attribute']);
 
     $cardData = [
@@ -53,11 +54,56 @@ it('returns cards array when cards relationship exists', function () {
 
     $cards = $objectAttribute->cards();
 
+    expect($cards)->toBeInstanceOf(\Illuminate\Support\Collection::class);
     expect($cards)->toHaveCount(2);
-    expect($cards[0])->toBeInstanceOf(Card::class);
-    expect($cards[0]->name)->toBe('Card 1');
-    expect($cards[1])->toBeInstanceOf(Card::class);
-    expect($cards[1]->name)->toBe('Card 2');
+    expect($cards->get(0))->toBeInstanceOf(Card::class);
+    expect($cards->get(0)->name)->toBe('Card 1');
+    expect($cards->get(1))->toBeInstanceOf(Card::class);
+    expect($cards->get(1)->name)->toBe('Card 2');
+});
+
+it('hasCards returns false when no cards', function () {
+    $objectAttribute = new ObjectAttribute(['id' => '123', 'name' => 'Test Attribute']);
+
+    expect($objectAttribute->hasCards())->toBeFalse();
+});
+
+it('hasCards returns true when cards exist', function () {
+    $objectAttribute = new ObjectAttribute(['id' => '123', 'name' => 'Test Attribute']);
+
+    $cardData = [
+        new Card(['id' => '1', 'name' => 'Card 1']),
+    ];
+
+    $objectAttribute->setRelationships(['cards' => $cardData]);
+
+    expect($objectAttribute->hasCards())->toBeTrue();
+});
+
+it('cards collection supports collection methods', function () {
+    $objectAttribute = new ObjectAttribute(['id' => '123', 'name' => 'Test Attribute']);
+
+    $cardData = [
+        new Card(['id' => '1', 'name' => 'Card 1']),
+        new Card(['id' => '2', 'name' => 'Card 2']),
+        new Card(['id' => '3', 'name' => 'Card 3']),
+    ];
+
+    $objectAttribute->setRelationships(['cards' => $cardData]);
+
+    $cards = $objectAttribute->cards();
+
+    // Test pluck
+    $names = $cards->pluck('name');
+    expect($names->toArray())->toBe(['Card 1', 'Card 2', 'Card 3']);
+
+    // Test filter
+    $filteredCards = $cards->filter(fn ($card) => $card->id === '2');
+    expect($filteredCards)->toHaveCount(1);
+    expect($filteredCards->first()->name)->toBe('Card 2');
+
+    // Test first
+    expect($cards->first()->name)->toBe('Card 1');
 });
 
 it('handles null attributes gracefully', function () {

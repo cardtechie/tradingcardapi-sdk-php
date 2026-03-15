@@ -2,6 +2,8 @@
 
 namespace CardTechie\TradingCardApiSdk\Models;
 
+use Illuminate\Support\Collection;
+
 /**
  * Class Set
  *
@@ -11,8 +13,6 @@ namespace CardTechie\TradingCardApiSdk\Models;
  */
 class Set extends Model
 {
-    private int $checklistIndex = 0;
-
     /**
      * Retrieve the genre of the set.
      */
@@ -54,27 +54,96 @@ class Set extends Model
     }
 
     /**
-     * Retrieve the subsets of the set.
+     * Retrieve collection of set sources.
+     *
+     * @return Collection<int, SetSource>
      */
-    public function subsets(): array
+    public function sources(): Collection
     {
-        if (array_key_exists('subsets', $this->relationships)) {
-            return $this->relationships['subsets'];
+        if (array_key_exists('set-sources', $this->relationships)) {
+            return collect($this->relationships['set-sources']);
         }
 
-        return [];
+        return collect([]);
     }
 
     /**
-     * Retrieve the checklist of the set.
+     * Check if set has any sources.
      */
-    public function checklist(): array
+    public function hasSources(): bool
     {
-        if (array_key_exists('checklist', $this->relationships)) {
-            return $this->relationships['checklist'];
+        return $this->sources()->isNotEmpty();
+    }
+
+    /**
+     * Get the checklist source for the set.
+     */
+    public function getChecklistSource(): ?SetSource
+    {
+        return $this->sources()
+            ->firstWhere('source_type', 'checklist');
+    }
+
+    /**
+     * Get the metadata source for the set.
+     */
+    public function getMetadataSource(): ?SetSource
+    {
+        return $this->sources()
+            ->firstWhere('source_type', 'metadata');
+    }
+
+    /**
+     * Get the images source for the set.
+     */
+    public function getImagesSource(): ?SetSource
+    {
+        return $this->sources()
+            ->firstWhere('source_type', 'images');
+    }
+
+    /**
+     * Retrieve collection of subsets of the set.
+     *
+     * @return Collection<int, Set>
+     */
+    public function subsets(): Collection
+    {
+        if (array_key_exists('subsets', $this->relationships)) {
+            return collect($this->relationships['subsets']);
         }
 
-        return [];
+        return collect([]);
+    }
+
+    /**
+     * Check if set has any subsets.
+     */
+    public function hasSubsets(): bool
+    {
+        return $this->subsets()->isNotEmpty();
+    }
+
+    /**
+     * Retrieve collection of checklist cards in the set.
+     *
+     * @return Collection<int, Card>
+     */
+    public function checklist(): Collection
+    {
+        if (array_key_exists('checklist', $this->relationships)) {
+            return collect($this->relationships['checklist']);
+        }
+
+        return collect([]);
+    }
+
+    /**
+     * Check if set has any checklist cards.
+     */
+    public function hasChecklist(): bool
+    {
+        return $this->checklist()->isNotEmpty();
     }
 
     /**
@@ -94,19 +163,15 @@ class Set extends Model
      */
     public function getCurrentCardCountAttribute(): int
     {
-        return count($this->checklist());
+        return $this->checklist()->count();
     }
 
     /**
-     * Get the index of the current card in the checklist and save as a class prop
+     * Get the index of the current card in the checklist.
      */
-    private function setIndexInChecklist(Card $currentCard): void
+    private function setIndexInChecklist(Card $currentCard): int|false
     {
-        foreach ($this->relationships['checklist'] as $index => $card) {
-            if ($currentCard->id === $card->id) {
-                $this->checklistIndex = $index;
-            }
-        }
+        return $this->checklist()->search(fn ($card) => $card->id === $currentCard->id);
     }
 
     /**
@@ -114,16 +179,13 @@ class Set extends Model
      */
     public function previousCard(Card $currentCard): ?Card
     {
-        if (! $this->checklistIndex) {
-            $this->setIndexInChecklist($currentCard);
+        $index = $this->setIndexInChecklist($currentCard);
+
+        if ($index === false || $index === 0) {
+            return null;
         }
 
-        $index = $this->checklistIndex - 1;
-        if ($index >= 0) {
-            return $this->relationships['checklist'][$index];
-        }
-
-        return null;
+        return $this->checklist()->get($index - 1);
     }
 
     /**
@@ -131,16 +193,13 @@ class Set extends Model
      */
     public function nextCard(Card $currentCard): ?Card
     {
-        if (! $this->checklistIndex) {
-            $this->setIndexInChecklist($currentCard);
+        $index = $this->setIndexInChecklist($currentCard);
+
+        if ($index === false) {
+            return null;
         }
 
-        $index = $this->checklistIndex + 1;
-        if ($index < count($this->relationships['checklist'])) {
-            return $this->relationships['checklist'][$index];
-        }
-
-        return null;
+        return $this->checklist()->get($index + 1);
     }
 
     /**

@@ -38,6 +38,8 @@ class AuthorizationException extends TradingCardApiException
 
     /**
      * Create exception for insufficient permissions
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function insufficientPermissions(string $resource = '', array $context = []): self
     {
@@ -57,6 +59,8 @@ class AuthorizationException extends TradingCardApiException
 
     /**
      * Create exception for suspended account
+     *
+     * @param  array<string, mixed>  $context
      */
     public static function accountSuspended(array $context = []): self
     {
