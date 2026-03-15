@@ -2,9 +2,9 @@ name: Code Quality
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
   phpstan:
@@ -67,4 +67,6 @@ jobs:
         uses: ramsey/composer-install@v3
 
       - name: Run tests with coverage
+        env:
+          XDEBUG_MODE: coverage
         run: ./vendor/bin/pest --coverage --min=80
