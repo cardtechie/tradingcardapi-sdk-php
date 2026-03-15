@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `workflow()` method to `Set` resource for `GET /v1/sets/{id}/workflow` endpoint (#166)
+
 ## [0.1.18] - 2026-01-22
 
 ### Added
