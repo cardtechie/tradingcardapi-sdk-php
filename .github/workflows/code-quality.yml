@@ -62,11 +62,10 @@ jobs:
           php-version: '8.1'
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
           coverage: xdebug
+          ini-values: xdebug.mode=coverage
 
       - name: Install composer dependencies
         uses: ramsey/composer-install@v3
 
       - name: Run tests with coverage
-        env:
-          XDEBUG_MODE: coverage
         run: ./vendor/bin/pest --coverage --min=80
