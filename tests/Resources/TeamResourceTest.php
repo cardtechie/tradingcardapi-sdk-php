@@ -6,6 +6,8 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 beforeEach(function () {
     // Set up configuration
@@ -57,7 +59,7 @@ it('can get a list of teams', function () {
 
     $result = $this->teamResource->getList();
 
-    expect($result)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($result)->toBeInstanceOf(Collection::class);
     expect($result->count())->toBe(2);
 });
 
@@ -81,7 +83,7 @@ it('can get a list of teams with params', function () {
     $params = ['name' => 'Yankees', 'limit' => 10];
     $result = $this->teamResource->getList($params);
 
-    expect($result)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($result)->toBeInstanceOf(Collection::class);
     expect($result->count())->toBe(1);
 });
 
@@ -239,7 +241,7 @@ it('can list teams with pagination', function () {
 
     $result = $this->teamResource->list(['limit' => 25, 'page' => 1]);
 
-    expect($result)->toBeInstanceOf(\Illuminate\Pagination\LengthAwarePaginator::class);
+    expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
     expect($result->total())->toBe(50);
 });
 
@@ -351,7 +353,7 @@ it('can list deleted teams', function () {
 
     $result = $this->teamResource->listDeleted();
 
-    expect($result)->toBeInstanceOf(\Illuminate\Pagination\LengthAwarePaginator::class);
+    expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
     expect($result->total())->toBe(10);
 });
 
@@ -364,7 +366,7 @@ it('can handle empty deleted teams list', function () {
 
     $result = $this->teamResource->listDeleted();
 
-    expect($result)->toBeInstanceOf(\Illuminate\Pagination\LengthAwarePaginator::class);
+    expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
     expect($result->total())->toBe(0);
 });
 

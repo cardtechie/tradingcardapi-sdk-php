@@ -216,7 +216,7 @@ it('can upload from UploadedFile', function () {
 
 it('throws exception for invalid file input', function () {
     expect(fn () => $this->cardImageResource->upload('nonexistent-file.jpg', '456', 'front'))
-        ->toThrow(\InvalidArgumentException::class);
+        ->toThrow(InvalidArgumentException::class);
 });
 
 it('can upload with additional attributes', function () {

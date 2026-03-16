@@ -86,8 +86,8 @@ it('logs validation errors when configured', function () {
     Log::shouldReceive('warning')
         ->once()
         ->with(
-            \Mockery::pattern('/API response validation failed for card/'),
-            \Mockery::type('array')
+            Mockery::pattern('/API response validation failed for card/'),
+            Mockery::type('array')
         );
 
     $validator = new ResponseValidator;

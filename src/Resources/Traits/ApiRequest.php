@@ -3,9 +3,12 @@
 namespace CardTechie\TradingCardApiSdk\Resources\Traits;
 
 use CardTechie\TradingCardApiSdk\Exceptions\AuthenticationException;
+use CardTechie\TradingCardApiSdk\Exceptions\TradingCardApiException;
 use CardTechie\TradingCardApiSdk\Services\ErrorResponseParser;
 use CardTechie\TradingCardApiSdk\Services\ResponseValidator;
+use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 use stdClass;
 
 /**
@@ -23,7 +26,7 @@ trait ApiRequest
     /**
      * The client to make API requests
      *
-     * @var \GuzzleHttp\Client
+     * @var Client
      */
     private $client;
 
@@ -96,8 +99,8 @@ trait ApiRequest
      * @param  array  $request  Additional parameters to include in the request
      * @param  array  $headers  HTTP headers
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \CardTechie\TradingCardApiSdk\Exceptions\TradingCardApiException
+     * @throws InvalidArgumentException
+     * @throws TradingCardApiException
      */
     public function makeRequest(string $url, string $method = 'GET', array $request = [], array $headers = []): object
     {
@@ -159,8 +162,8 @@ trait ApiRequest
     /**
      * Retrieve a token required for authentication
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \CardTechie\TradingCardApiSdk\Exceptions\TradingCardApiException
+     * @throws InvalidArgumentException
+     * @throws TradingCardApiException
      */
     private function retrieveToken(): void
     {

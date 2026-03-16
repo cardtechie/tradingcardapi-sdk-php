@@ -1,7 +1,9 @@
 <?php
 
+use CardTechie\TradingCardApiSdk\Schemas\CardSchema;
 use CardTechie\TradingCardApiSdk\Services\ResponseValidator;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Validator;
 
 beforeEach(function () {
     // Clear schema cache before each test
@@ -119,10 +121,10 @@ it('handles large response data efficiently', function () {
     $startTime = microtime(true);
 
     // Use collection rules for this test
-    $schema = new \CardTechie\TradingCardApiSdk\Schemas\CardSchema;
+    $schema = new CardSchema;
     $rules = $schema->getCollectionRules();
 
-    $validator = \Illuminate\Support\Facades\Validator::make($largeCollection, $rules);
+    $validator = Validator::make($largeCollection, $rules);
     $result = $validator->passes();
 
     $endTime = microtime(true);

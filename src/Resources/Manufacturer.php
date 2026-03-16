@@ -7,6 +7,7 @@ use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class Manufacturer
@@ -26,7 +27,7 @@ class Manufacturer
     /**
      * Create a manufacturer with the passed in attributes
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function create(array $attributes = [], array $relationships = []): ManufacturerModel
     {
@@ -55,7 +56,7 @@ class Manufacturer
     /**
      * Retrieve a manufacturer by ID
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function get(string $id, array $params = []): ManufacturerModel
     {
@@ -74,7 +75,7 @@ class Manufacturer
     /**
      * Retrieve a list of manufacturers
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function list(array $params = []): LengthAwarePaginator
     {
@@ -104,7 +105,7 @@ class Manufacturer
     /**
      * Update a manufacturer
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function update(string $id, array $attributes = [], array $relationships = []): ManufacturerModel
     {
@@ -135,7 +136,7 @@ class Manufacturer
     /**
      * Delete a manufacturer
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function delete(string $id): void
     {

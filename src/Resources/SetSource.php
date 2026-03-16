@@ -7,6 +7,7 @@ use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class SetSource
@@ -28,7 +29,7 @@ class SetSource
     /**
      * Create a set source with the passed in attributes
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function create(array $attributes = [], array $relationships = []): SetSourceModel
     {
@@ -57,7 +58,7 @@ class SetSource
     /**
      * Retrieve a set source by ID
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function get(string $id, array $params = []): SetSourceModel
     {
@@ -76,7 +77,7 @@ class SetSource
     /**
      * Retrieve a list of set sources
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function list(array $params = []): LengthAwarePaginator
     {
@@ -106,7 +107,7 @@ class SetSource
     /**
      * Update a set source
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function update(string $id, array $attributes = [], array $relationships = []): SetSourceModel
     {
@@ -137,7 +138,7 @@ class SetSource
     /**
      * Delete a set source
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function delete(string $id): void
     {
@@ -148,7 +149,7 @@ class SetSource
     /**
      * Get all sources for a specific set
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function forSet(string $setId, array $params = []): LengthAwarePaginator
     {

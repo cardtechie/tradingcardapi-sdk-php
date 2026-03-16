@@ -122,7 +122,7 @@ it('correctly classifies error types based on HTTP status', function () {
 });
 
 it('handles previous exception chaining', function () {
-    $previous = new \Exception('Previous error');
+    $previous = new Exception('Previous error');
     $exception = new TestTradingCardApiException(
         'Current error',
         0,

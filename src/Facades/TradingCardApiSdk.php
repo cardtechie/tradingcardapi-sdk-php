@@ -6,7 +6,7 @@ use CardTechie\TradingCardApiSdk\TradingCardApi;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @see \CardTechie\TradingCardApiSdk\TradingCardApi
+ * @see TradingCardApi
  */
 class TradingCardApiSdk extends Facade
 {

@@ -7,6 +7,7 @@ use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class Brand
@@ -26,7 +27,7 @@ class Brand
     /**
      * Create a brand with the passed in attributes
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function create(array $attributes = [], array $relationships = []): BrandModel
     {
@@ -55,7 +56,7 @@ class Brand
     /**
      * Retrieve a brand by ID
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function get(string $id, array $params = []): BrandModel
     {
@@ -74,7 +75,7 @@ class Brand
     /**
      * Retrieve a list of brands
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function list(array $params = []): LengthAwarePaginator
     {
@@ -104,7 +105,7 @@ class Brand
     /**
      * Update a brand
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function update(string $id, array $attributes = [], array $relationships = []): BrandModel
     {
@@ -135,7 +136,7 @@ class Brand
     /**
      * Delete a brand
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function delete(string $id): void
     {

@@ -4,6 +4,7 @@ use CardTechie\TradingCardApiSdk\Models\Card as CardModel;
 use CardTechie\TradingCardApiSdk\Resources\Card;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Mockery as m;
 
 beforeEach(function () {
@@ -219,6 +220,6 @@ it('can list cards with pagination', function () {
     $card = new Card($client);
     $result = $card->list();
 
-    expect($result)->toBeInstanceOf(\Illuminate\Pagination\LengthAwarePaginator::class);
+    expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
     expect($result->count())->toBe(2);
 });

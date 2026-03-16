@@ -2,6 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk\Models;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 /**
@@ -99,7 +100,7 @@ class Model
     /**
      * Magic method to get a relationship.
      *
-     * @return \Illuminate\Support\Collection|mixed
+     * @return Collection|mixed
      *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
      */

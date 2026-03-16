@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
+use Illuminate\Support\Collection;
 
 beforeEach(function () {
     // Set up configuration
@@ -93,7 +94,7 @@ it('can get a list of attributes', function () {
 
     $result = $this->attributeResource->list();
 
-    expect($result)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($result)->toBeInstanceOf(Collection::class);
     expect($result->count())->toBe(2);
 });
 

@@ -1,7 +1,13 @@
 <?php
 
 use CardTechie\TradingCardApiSdk\Models\Card;
+use CardTechie\TradingCardApiSdk\Models\CardImage;
+use CardTechie\TradingCardApiSdk\Models\Model;
+use CardTechie\TradingCardApiSdk\Models\Player;
+use CardTechie\TradingCardApiSdk\Models\Playerteam;
 use CardTechie\TradingCardApiSdk\Models\Set;
+use CardTechie\TradingCardApiSdk\Models\Team;
+use Illuminate\Support\Collection;
 
 it('can be instantiated with attributes', function () {
     $card = new Card(['id' => '123', 'name' => 'Test Card']);
@@ -36,14 +42,14 @@ it('returns oncard relationships collection', function () {
     $card = new Card(['id' => '123']);
 
     // Create mock oncard objects that extend Model
-    $oncard1 = new class(['on_cardable_type' => 'players', 'on_cardable_id' => '1']) extends \CardTechie\TradingCardApiSdk\Models\Model
+    $oncard1 = new class(['on_cardable_type' => 'players', 'on_cardable_id' => '1']) extends Model
     {
         public $on_cardable_type = 'players';
 
         public $on_cardable_id = '1';
     };
 
-    $oncard2 = new class(['on_cardable_type' => 'players', 'on_cardable_id' => '2']) extends \CardTechie\TradingCardApiSdk\Models\Model
+    $oncard2 = new class(['on_cardable_type' => 'players', 'on_cardable_id' => '2']) extends Model
     {
         public $on_cardable_type = 'players';
 
@@ -56,7 +62,7 @@ it('returns oncard relationships collection', function () {
 
     $oncardCollection = $card->oncard();
 
-    expect($oncardCollection)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($oncardCollection)->toBeInstanceOf(Collection::class);
     expect($oncardCollection)->toHaveCount(2);
     expect($oncardCollection->get(0))->toBe($oncard1);
     expect($oncardCollection->get(1))->toBe($oncard2);
@@ -67,7 +73,7 @@ it('returns empty collection when no oncard relationships', function () {
 
     $oncard = $card->oncard();
 
-    expect($oncard)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($oncard)->toBeInstanceOf(Collection::class);
     expect($oncard)->toBeEmpty();
 });
 
@@ -80,7 +86,7 @@ it('hasOncard returns false when no oncard relationships', function () {
 it('hasOncard returns true when oncard relationships exist', function () {
     $card = new Card(['id' => '123']);
 
-    $oncard1 = new class(['on_cardable_type' => 'players', 'on_cardable_id' => '1']) extends \CardTechie\TradingCardApiSdk\Models\Model
+    $oncard1 = new class(['on_cardable_type' => 'players', 'on_cardable_id' => '1']) extends Model
     {
         public $on_cardable_type = 'players';
 
@@ -95,14 +101,14 @@ it('hasOncard returns true when oncard relationships exist', function () {
 it('oncard collection supports collection methods', function () {
     $card = new Card(['id' => '123']);
 
-    $oncard1 = new class(['on_cardable_type' => 'players', 'on_cardable_id' => '1']) extends \CardTechie\TradingCardApiSdk\Models\Model
+    $oncard1 = new class(['on_cardable_type' => 'players', 'on_cardable_id' => '1']) extends Model
     {
         public $on_cardable_type = 'players';
 
         public $on_cardable_id = '1';
     };
 
-    $oncard2 = new class(['on_cardable_type' => 'teams', 'on_cardable_id' => '2']) extends \CardTechie\TradingCardApiSdk\Models\Model
+    $oncard2 = new class(['on_cardable_type' => 'teams', 'on_cardable_id' => '2']) extends Model
     {
         public $on_cardable_type = 'teams';
 
@@ -133,7 +139,7 @@ it('returns extra attributes collection', function () {
 
     $extraAttrs = $card->extraAttributes();
 
-    expect($extraAttrs)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($extraAttrs)->toBeInstanceOf(Collection::class);
     expect($extraAttrs->toArray())->toBe($attributes);
 });
 
@@ -142,7 +148,7 @@ it('returns empty collection when no extra attributes', function () {
 
     $extraAttrs = $card->extraAttributes();
 
-    expect($extraAttrs)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($extraAttrs)->toBeInstanceOf(Collection::class);
     expect($extraAttrs)->toBeEmpty();
 });
 
@@ -179,14 +185,14 @@ it('returns null when no set relationship', function () {
 it('handles complex relationships in setRelationships', function () {
     $card = new Card(['id' => '123']);
 
-    $playerteam = new \CardTechie\TradingCardApiSdk\Models\Playerteam([
+    $playerteam = new Playerteam([
         'id' => 'pt1',
         'player_id' => 'p1',
         'team_id' => 't1',
     ]);
 
-    $player = new \CardTechie\TradingCardApiSdk\Models\Player(['id' => 'p1', 'name' => 'Player 1']);
-    $team = new \CardTechie\TradingCardApiSdk\Models\Team(['id' => 't1', 'name' => 'Team 1']);
+    $player = new Player(['id' => 'p1', 'name' => 'Player 1']);
+    $team = new Team(['id' => 't1', 'name' => 'Team 1']);
 
     $relationships = [
         'playerteam' => [$playerteam],
@@ -203,13 +209,13 @@ it('handles complex relationships in setRelationships', function () {
 it('returns collection of images', function () {
     $card = new Card(['id' => '123']);
 
-    $frontImage = new \CardTechie\TradingCardApiSdk\Models\CardImage([
+    $frontImage = new CardImage([
         'id' => 'img1',
         'image_type' => 'front',
         'download_url' => 'https://example.com/front.jpg',
     ]);
 
-    $backImage = new \CardTechie\TradingCardApiSdk\Models\CardImage([
+    $backImage = new CardImage([
         'id' => 'img2',
         'image_type' => 'back',
         'download_url' => 'https://example.com/back.jpg',
@@ -219,7 +225,7 @@ it('returns collection of images', function () {
 
     $images = $card->images();
 
-    expect($images)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($images)->toBeInstanceOf(Collection::class);
     expect($images->count())->toBe(2);
     expect($images->first())->toBe($frontImage);
 });
@@ -229,14 +235,14 @@ it('returns empty collection when no images', function () {
 
     $images = $card->images();
 
-    expect($images)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($images)->toBeInstanceOf(Collection::class);
     expect($images->isEmpty())->toBeTrue();
 });
 
 it('hasImages returns true when card has images', function () {
     $card = new Card(['id' => '123']);
 
-    $image = new \CardTechie\TradingCardApiSdk\Models\CardImage([
+    $image = new CardImage([
         'id' => 'img1',
         'image_type' => 'front',
     ]);
@@ -255,13 +261,13 @@ it('hasImages returns false when card has no images', function () {
 it('getFrontImage returns front image', function () {
     $card = new Card(['id' => '123']);
 
-    $frontImage = new \CardTechie\TradingCardApiSdk\Models\CardImage([
+    $frontImage = new CardImage([
         'id' => 'img1',
         'image_type' => 'front',
         'download_url' => 'https://example.com/front.jpg',
     ]);
 
-    $backImage = new \CardTechie\TradingCardApiSdk\Models\CardImage([
+    $backImage = new CardImage([
         'id' => 'img2',
         'image_type' => 'back',
         'download_url' => 'https://example.com/back.jpg',
@@ -275,13 +281,13 @@ it('getFrontImage returns front image', function () {
 it('getBackImage returns back image', function () {
     $card = new Card(['id' => '123']);
 
-    $frontImage = new \CardTechie\TradingCardApiSdk\Models\CardImage([
+    $frontImage = new CardImage([
         'id' => 'img1',
         'image_type' => 'front',
         'download_url' => 'https://example.com/front.jpg',
     ]);
 
-    $backImage = new \CardTechie\TradingCardApiSdk\Models\CardImage([
+    $backImage = new CardImage([
         'id' => 'img2',
         'image_type' => 'back',
         'download_url' => 'https://example.com/back.jpg',
@@ -295,7 +301,7 @@ it('getBackImage returns back image', function () {
 it('getFrontImage returns null when no front image exists', function () {
     $card = new Card(['id' => '123']);
 
-    $backImage = new \CardTechie\TradingCardApiSdk\Models\CardImage([
+    $backImage = new CardImage([
         'id' => 'img1',
         'image_type' => 'back',
     ]);
@@ -308,7 +314,7 @@ it('getFrontImage returns null when no front image exists', function () {
 it('getBackImage returns null when no back image exists', function () {
     $card = new Card(['id' => '123']);
 
-    $frontImage = new \CardTechie\TradingCardApiSdk\Models\CardImage([
+    $frontImage = new CardImage([
         'id' => 'img1',
         'image_type' => 'front',
     ]);

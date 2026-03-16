@@ -27,7 +27,7 @@ it('returns onCardable configuration', function () {
 });
 
 it('build method sets player and team relationships', function () {
-    $taxonomy = new \stdClass;
+    $taxonomy = new stdClass;
     $taxonomy->player_id = '1';
     $taxonomy->team_id = '2';
     $taxonomy->relationships = [];
@@ -47,7 +47,7 @@ it('build method sets player and team relationships', function () {
 });
 
 it('build method handles no matching player', function () {
-    $taxonomy = new \stdClass;
+    $taxonomy = new stdClass;
     $taxonomy->player_id = '999';
     $taxonomy->team_id = '2';
     $taxonomy->relationships = [];
@@ -101,7 +101,7 @@ it('prepare method throws exception for invalid player UUID', function () {
 
     expect(function () use ($data) {
         Playerteam::prepare($data);
-    })->toThrow(\InvalidArgumentException::class);
+    })->toThrow(InvalidArgumentException::class);
 });
 
 it('prepare method throws exception for invalid team UUID', function () {
@@ -109,7 +109,7 @@ it('prepare method throws exception for invalid team UUID', function () {
 
     expect(function () use ($data) {
         Playerteam::prepare($data);
-    })->toThrow(\InvalidArgumentException::class);
+    })->toThrow(InvalidArgumentException::class);
 });
 
 it('lookup method returns new Playerteam instance', function () {

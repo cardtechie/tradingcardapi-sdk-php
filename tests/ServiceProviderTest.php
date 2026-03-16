@@ -2,6 +2,7 @@
 
 use CardTechie\TradingCardApiSdk\TradingCardApiServiceProvider;
 use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 it('can configure package correctly', function () {
     $provider = new TradingCardApiServiceProvider(app());
@@ -15,5 +16,5 @@ it('can configure package correctly', function () {
 it('extends PackageServiceProvider', function () {
     $provider = new TradingCardApiServiceProvider(app());
 
-    expect($provider)->toBeInstanceOf(\Spatie\LaravelPackageTools\PackageServiceProvider::class);
+    expect($provider)->toBeInstanceOf(PackageServiceProvider::class);
 });

@@ -2,6 +2,7 @@
 
 use CardTechie\TradingCardApiSdk\Models\Brand;
 use CardTechie\TradingCardApiSdk\Models\Set;
+use Illuminate\Support\Collection;
 
 beforeEach(function () {
     // Set up configuration
@@ -36,7 +37,7 @@ it('returns empty collection when no sets', function () {
 
     $sets = $brand->sets();
 
-    expect($sets)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($sets)->toBeInstanceOf(Collection::class);
     expect($sets)->toBeEmpty();
 });
 
@@ -52,7 +53,7 @@ it('returns sets collection when sets relationship exists', function () {
 
     $sets = $brand->sets();
 
-    expect($sets)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($sets)->toBeInstanceOf(Collection::class);
     expect($sets)->toHaveCount(2);
     expect($sets->get(0))->toBeInstanceOf(Set::class);
     expect($sets->get(0)->name)->toBe('Set 1');

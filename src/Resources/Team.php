@@ -8,6 +8,7 @@ use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class Team
@@ -28,7 +29,7 @@ class Team
      * Retrieve a list of teams
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getList(array $params = []): Collection
     {
@@ -46,7 +47,7 @@ class Team
      * @param  array  $relationships  Team relationships
      * @return TeamModel The created team
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function create(array $attributes = [], array $relationships = []): TeamModel
     {
@@ -79,7 +80,7 @@ class Team
      * @param  array  $params  Additional parameters (e.g., include relationships)
      * @return TeamModel The team
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function get(string $id, array $params = []): TeamModel
     {
@@ -96,7 +97,7 @@ class Team
      * @param  array  $params  Query parameters (limit, page, sort, filters, etc.)
      * @return LengthAwarePaginator Paginated team results
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function list(array $params = []): LengthAwarePaginator
     {
@@ -131,7 +132,7 @@ class Team
      * @param  array  $relationships  Team relationships to update
      * @return TeamModel The updated team
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function update(string $id, array $attributes = [], array $relationships = []): TeamModel
     {
@@ -164,7 +165,7 @@ class Team
      *
      * @param  string  $id  Team ID
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function delete(string $id): void
     {
@@ -177,7 +178,7 @@ class Team
      *
      * @return LengthAwarePaginator Paginated deleted team results
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function listDeleted(): LengthAwarePaginator
     {
@@ -201,7 +202,7 @@ class Team
      * @param  string  $id  Team ID
      * @return TeamModel The deleted team
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function deleted(string $id): TeamModel
     {

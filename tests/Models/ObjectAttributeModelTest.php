@@ -2,6 +2,7 @@
 
 use CardTechie\TradingCardApiSdk\Models\Card;
 use CardTechie\TradingCardApiSdk\Models\ObjectAttribute;
+use Illuminate\Support\Collection;
 
 beforeEach(function () {
     // Set up configuration
@@ -38,7 +39,7 @@ it('returns empty collection when no cards', function () {
 
     $cards = $objectAttribute->cards();
 
-    expect($cards)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($cards)->toBeInstanceOf(Collection::class);
     expect($cards)->toBeEmpty();
 });
 
@@ -54,7 +55,7 @@ it('returns cards collection when cards relationship exists', function () {
 
     $cards = $objectAttribute->cards();
 
-    expect($cards)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($cards)->toBeInstanceOf(Collection::class);
     expect($cards)->toHaveCount(2);
     expect($cards->get(0))->toBeInstanceOf(Card::class);
     expect($cards->get(0)->name)->toBe('Card 1');
