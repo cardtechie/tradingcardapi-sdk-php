@@ -41,6 +41,45 @@ trait ApiRequest
     private $errorParser;
 
     /**
+     * Authentication type ('oauth2' or 'pat')
+     *
+     * @var string
+     */
+    private $authType = 'oauth2';
+
+    /**
+     * Personal Access Token (for PAT auth mode)
+     *
+     * @var string|null
+     */
+    private $personalAccessToken;
+
+    /**
+     * OAuth2 Client ID
+     *
+     * @var string|null
+     */
+    private $oauthClientId;
+
+    /**
+     * OAuth2 Client Secret
+     *
+     * @var string|null
+     */
+    private $oauthClientSecret;
+
+    /**
+     * Set authentication information on this resource.
+     */
+    public function setAuthInfo(string $authType, ?string $personalAccessToken, ?string $clientId, ?string $clientSecret, ?string $scope = null): void
+    {
+        $this->authType = $authType;
+        $this->personalAccessToken = $personalAccessToken;
+        $this->oauthClientId = $clientId;
+        $this->oauthClientSecret = $clientSecret;
+    }
+
+    /**
      * Makes a request to an API endpoint or webpage and returns its response
      *
      * @param  string  $url  Url of the api or webpage
@@ -106,14 +145,13 @@ trait ApiRequest
      */
     private function retrieveToken(): void
     {
-        $tokenKey = 'tcapi_token';
+        $config = config('tradingcardapi');
+        $tokenKey = 'tcapi_token_'.md5($config['client_id'].'|'.$config['client_secret']);
         if (cache()->has($tokenKey)) {
             $this->token = cache()->get($tokenKey);
 
             return;
         }
-
-        $config = config('tradingcardapi');
 
         $url = '/oauth/token';
         $headers = [

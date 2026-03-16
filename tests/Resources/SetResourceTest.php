@@ -18,7 +18,7 @@ beforeEach(function () {
     ]);
 
     // Pre-populate cache with token to avoid OAuth requests
-    cache()->put('tcapi_token_'.md5('test-client-idtest-client-secret'), 'test-token', 60);
+    cache()->put('tcapi_token_'.md5('test-client-id|test-client-secret'), 'test-token', 60);
 
     $this->mockHandler = new MockHandler;
     $handlerStack = HandlerStack::create($this->mockHandler);
@@ -183,6 +183,26 @@ it('can get checklist for a set', function () {
     );
 
     $result = $this->setResource->checklist('123');
+
+    expect($result)->toBeObject();
+});
+
+it('can get workflow for a set', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'workflow' => [
+                'priority' => 'high',
+                'current_step' => 'validate',
+                'todos' => [
+                    ['step' => 'discover_sources', 'status' => 'completed', 'completed_at' => '2026-01-01', 'completed_by' => 'orchestrator'],
+                    ['step' => 'validate', 'status' => 'in_progress', 'started_at' => '2026-01-02'],
+                    ['step' => 'cleanup', 'status' => 'pending'],
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->setResource->workflow('123');
 
     expect($result)->toBeObject();
 });

@@ -20,7 +20,7 @@ beforeEach(function () {
     ]);
 
     // Pre-populate cache with token to avoid OAuth requests
-    cache()->put('tcapi_token', 'test-token', 60);
+    cache()->put('tcapi_token_'.md5('test-client-id|test-client-secret'), 'test-token', 60);
 
     $this->mockHandler = new MockHandler;
     $handlerStack = HandlerStack::create($this->mockHandler);
@@ -415,7 +415,7 @@ it('sends correct JSON:API type in create request payload', function () {
     $client = new Client(['handler' => $handlerStack]);
 
     // Pre-populate cache with token to avoid OAuth requests
-    cache()->put('tcapi_token', 'test-token', 60);
+    cache()->put('tcapi_token_'.md5('test-client-id|test-client-secret'), 'test-token', 60);
 
     $setSourceResource = new SetSource($client);
     $setSourceResource->create(['source_url' => 'https://example.com/source', 'source_type' => 'checklist']);
@@ -455,7 +455,7 @@ it('sends correct JSON:API type in update request payload', function () {
     $client = new Client(['handler' => $handlerStack]);
 
     // Pre-populate cache with token to avoid OAuth requests
-    cache()->put('tcapi_token', 'test-token', 60);
+    cache()->put('tcapi_token_'.md5('test-client-id|test-client-secret'), 'test-token', 60);
 
     $setSourceResource = new SetSource($client);
     $setSourceResource->update('123', ['source_url' => 'https://example.com/updated-source']);

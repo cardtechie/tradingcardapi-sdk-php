@@ -22,6 +22,7 @@ class Response
         'Attribute',
         'Brand',
         'Card',
+        'CardImage',
         'Genre',
         'Manufacturer',
         'ObjectAttribute',

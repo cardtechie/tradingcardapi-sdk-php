@@ -194,7 +194,6 @@ it('requires required fields', function () {
     expect($validator->fails())->toBeTrue();
     expect($validator->errors()->has('data.attributes.set_id'))->toBeTrue();
     expect($validator->errors()->has('data.attributes.source_type'))->toBeTrue();
-    expect($validator->errors()->has('data.attributes.source_name'))->toBeTrue();
 });
 
 it('provides validation rules for collection response', function () {

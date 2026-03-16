@@ -3,6 +3,7 @@
 use CardTechie\TradingCardApiSdk\Exceptions\AuthenticationException;
 use CardTechie\TradingCardApiSdk\Exceptions\AuthorizationException;
 use CardTechie\TradingCardApiSdk\Exceptions\CardNotFoundException;
+use CardTechie\TradingCardApiSdk\Exceptions\ConflictException;
 use CardTechie\TradingCardApiSdk\Exceptions\NetworkException;
 use CardTechie\TradingCardApiSdk\Exceptions\RateLimitException;
 use CardTechie\TradingCardApiSdk\Exceptions\ResourceNotFoundException;
@@ -57,6 +58,20 @@ it('parses 403 response as authorization exception', function () {
     expect($exception)->toBeInstanceOf(AuthorizationException::class);
     expect($exception->getMessage())->toBe('Access forbidden');
     expect($exception->getHttpStatusCode())->toBe(403);
+});
+
+it('parses 409 response as conflict exception', function () {
+    $response = new Response(409, [], json_encode([
+        'message' => 'Resource already exists',
+    ]));
+    $request = new Request('POST', '/api/cards');
+    $guzzleException = new ClientException('409 Conflict', $request, $response);
+
+    $exception = $this->parser->parseGuzzleException($guzzleException);
+
+    expect($exception)->toBeInstanceOf(ConflictException::class);
+    expect($exception->getMessage())->toBe('Resource already exists');
+    expect($exception->getHttpStatusCode())->toBe(409);
 });
 
 it('parses 404 response as resource not found exception', function () {
