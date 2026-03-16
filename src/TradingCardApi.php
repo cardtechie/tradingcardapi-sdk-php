@@ -15,6 +15,7 @@ use CardTechie\TradingCardApiSdk\Resources\Set;
 use CardTechie\TradingCardApiSdk\Resources\SetSource;
 use CardTechie\TradingCardApiSdk\Resources\Stats;
 use CardTechie\TradingCardApiSdk\Resources\Team;
+use CardTechie\TradingCardApiSdk\Resources\Workflow;
 use CardTechie\TradingCardApiSdk\Resources\Year;
 use GuzzleHttp\Client;
 
@@ -302,5 +303,13 @@ class TradingCardApi
     public function stats(): Stats
     {
         return $this->createResource(Stats::class);
+    }
+
+    /**
+     * Retrieve the workflow resource.
+     */
+    public function workflow(): Workflow
+    {
+        return $this->createResource(Workflow::class);
     }
 }
