@@ -2,6 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk\Resources\Traits;
 
+use CardTechie\TradingCardApiSdk\Exceptions\AuthenticationException;
 use CardTechie\TradingCardApiSdk\Services\ErrorResponseParser;
 use CardTechie\TradingCardApiSdk\Services\ResponseValidator;
 use Psr\Http\Message\ResponseInterface;
@@ -155,6 +156,9 @@ trait ApiRequest
     {
         // PAT path: skip OAuth entirely, use token directly
         if ($this->authType === 'pat') {
+            if (empty($this->personalAccessToken)) {
+                throw new AuthenticationException('Personal Access Token is required when using PAT authentication.');
+            }
             $this->token = $this->personalAccessToken;
 
             return;

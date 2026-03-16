@@ -1,5 +1,6 @@
 <?php
 
+use CardTechie\TradingCardApiSdk\Exceptions\AuthenticationException;
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
@@ -420,6 +421,28 @@ it('uses PAT directly without making OAuth token request', function () {
 
     expect($result)->toBeObject();
     expect($result->data->id)->toBe('123');
+});
+
+it('throws AuthenticationException when PAT is null', function () {
+    $client = m::mock(Client::class);
+    $client->shouldNotReceive('request');
+
+    $instance = new TestApiRequestClass($client);
+    $instance->setAuthInfo('pat', null, null, null);
+
+    expect(fn () => $instance->testMakeRequest('/test'))
+        ->toThrow(AuthenticationException::class, 'Personal Access Token is required');
+});
+
+it('throws AuthenticationException when PAT is empty string', function () {
+    $client = m::mock(Client::class);
+    $client->shouldNotReceive('request');
+
+    $instance = new TestApiRequestClass($client);
+    $instance->setAuthInfo('pat', '', null, null);
+
+    expect(fn () => $instance->testMakeRequest('/test'))
+        ->toThrow(AuthenticationException::class, 'Personal Access Token is required');
 });
 
 it('uses instance OAuth credentials over config credentials', function () {
