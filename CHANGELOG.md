@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Sub-resource endpoints (`/v1/sets/{id}/workflow`, `/v1/sets/{id}/checklist`, etc.) no longer trigger JSON:API validation — `extractResourceType()` now returns `null` for paths with 3+ segments after the version prefix, preventing `ValidationException` in `strict_mode: true` (#170)
 - `setAuthInfo()` auth plumbing now wired into `retrieveToken()`: PAT tokens used directly (no OAuth request), instance OAuth credentials respected over config, `$scope` stored and included in cache key to prevent scope collisions (#169)
 
 ## [0.1.18] - 2026-01-22

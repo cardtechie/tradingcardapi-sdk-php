@@ -438,6 +438,48 @@ it('can handle large pagination in list', function () {
     expect($result->currentPage())->toBe(25);
 });
 
+it('does not throw in strict_mode for workflow sub-resource endpoint', function () {
+    $this->app['config']->set('tradingcardapi.validation.enabled', true);
+    $this->app['config']->set('tradingcardapi.validation.strict_mode', true);
+
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'workflow' => [
+                'priority' => 'high',
+                'current_step' => 'validate',
+                'todos' => [
+                    ['step' => 'discover_sources', 'status' => 'completed'],
+                    ['step' => 'validate', 'status' => 'in_progress'],
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->setResource->workflow('123');
+
+    expect($result)->toBeObject();
+    expect($result->workflow)->toBeObject();
+    expect($result->workflow->priority)->toBe('high');
+});
+
+it('does not throw in strict_mode for checklist sub-resource endpoint', function () {
+    $this->app['config']->set('tradingcardapi.validation.enabled', true);
+    $this->app['config']->set('tradingcardapi.validation.strict_mode', true);
+
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'checklist' => ['card1', 'card2'],
+                'missing' => ['card3'],
+            ],
+        ]))
+    );
+
+    $result = $this->setResource->checklist('123');
+
+    expect($result)->toBeObject();
+});
+
 it('can add checklist with complex request structure', function () {
     $this->mockHandler->append(
         new GuzzleResponse(200, [], json_encode([

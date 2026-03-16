@@ -57,7 +57,7 @@ it('extracts resource type from API URLs correctly', function () {
     expect($resource->testExtractResourceType('/v1/cards'))->toBe('card');
     expect($resource->testExtractResourceType('/v1/cards/123'))->toBe('card');
     expect($resource->testExtractResourceType('/v1/players'))->toBe('player');
-    expect($resource->testExtractResourceType('/v1/sets/456/checklist'))->toBe('set');
+    expect($resource->testExtractResourceType('/v1/sets/456/checklist'))->toBeNull();
     expect($resource->testExtractResourceType('/v1/genres'))->toBe('genre');
     expect($resource->testExtractResourceType('/v1/object-attributes'))->toBe('objectattribute');
     expect($resource->testExtractResourceType('/v1/playerteams'))->toBe('playerteam');
