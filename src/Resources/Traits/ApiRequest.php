@@ -257,6 +257,12 @@ trait ApiRequest
 
         // Match common API patterns
         if (preg_match('#/v\d+/([^/]+)#', $path, $matches)) {
+            // Sub-resource paths (e.g. /v1/sets/123/workflow) are not JSON:API
+            // resource responses — skip validation to avoid false failures
+            if (preg_match('#/v\d+/[^/]+/[^/]+/.+#', $path)) {
+                return null;
+            }
+
             $resource = $matches[1];
 
             // Normalize resource names
