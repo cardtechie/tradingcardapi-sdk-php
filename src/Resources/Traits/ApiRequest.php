@@ -146,6 +146,11 @@ trait ApiRequest
         return json_decode($body);
     }
 
+    /**
+     * Build the cache key used to store an OAuth token.
+     *
+     * @internal Intended for use by this trait and test helpers only.
+     */
     public static function buildTokenCacheKey(string $clientId, string $clientSecret, string $scope = ''): string
     {
         return 'tcapi_token_'.md5($clientId.'|'.$clientSecret.'|'.$scope);

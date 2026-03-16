@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Centralized token cache key derivation: extracted `ApiRequest::buildTokenCacheKey()` static method and updated all test files to use a shared `tokenCacheKey()` helper (#171)
+- Centralized token cache key derivation: extracted `buildTokenCacheKey()` static method on the `ApiRequest` trait and updated all test files to use a shared `tokenCacheKey()` helper (#171)
 
 ### Fixed
 
