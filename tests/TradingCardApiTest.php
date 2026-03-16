@@ -12,6 +12,7 @@ use CardTechie\TradingCardApiSdk\Resources\Set;
 use CardTechie\TradingCardApiSdk\Resources\SetSource;
 use CardTechie\TradingCardApiSdk\Resources\Stats;
 use CardTechie\TradingCardApiSdk\Resources\Team;
+use CardTechie\TradingCardApiSdk\Resources\Workflow;
 use CardTechie\TradingCardApiSdk\Resources\Year;
 use CardTechie\TradingCardApiSdk\TradingCardApi;
 use GuzzleHttp\Client;
@@ -107,6 +108,12 @@ it('returns set source resource', function () {
     $api = new TradingCardApi;
     $setSource = $api->setSource();
     expect($setSource)->toBeInstanceOf(SetSource::class);
+});
+
+it('returns workflow resource', function () {
+    $api = new TradingCardApi;
+    $workflow = $api->workflow();
+    expect($workflow)->toBeInstanceOf(Workflow::class);
 });
 
 it('creates guzzle client with correct configuration', function () {
