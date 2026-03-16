@@ -118,6 +118,12 @@ class Model
         $output = $this->attributes;
 
         foreach ($this->relationships as $type => $relations) {
+            if (is_object($relations) && property_exists($relations, 'attributes')) {
+                $output[$type] = $relations->attributes;
+
+                continue;
+            }
+
             foreach ($relations as $relation) {
                 if (is_array($relation) && array_key_exists('attributes', $relation)) {
                     $output[$type][] = $relation['attributes'];
