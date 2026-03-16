@@ -106,6 +106,20 @@ it('converts to string with relationships', function () {
     expect($decoded['users'])->toHaveCount(2);
 });
 
+it('converts to string with single-object relationship', function () {
+    $model = new Model(['id' => '123']);
+    $genre = (object) ['attributes' => ['id' => 'abc', 'name' => 'Baseball']];
+
+    $model->setRelationships(['genre' => $genre]);
+
+    $result = (string) $model;
+    $decoded = json_decode($result, true);
+
+    expect($decoded)->toHaveKey('id', '123');
+    expect($decoded)->toHaveKey('genre');
+    expect($decoded['genre'])->toBe(['id' => 'abc', 'name' => 'Baseball']);
+});
+
 it('handles custom attribute accessors', function () {
     $customModel = new class(['first_name' => 'John', 'last_name' => 'Doe']) extends Model
     {
