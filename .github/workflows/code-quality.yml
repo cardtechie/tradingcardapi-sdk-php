@@ -51,7 +51,7 @@ jobs:
   coverage:
     name: Test Coverage Report
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -64,7 +64,7 @@ jobs:
           coverage: pcov
 
       - name: Install composer dependencies
-        uses: ramsey/composer-install@v3
+        run: composer install --no-interaction --no-progress --prefer-dist
 
       - name: Run tests with coverage
         run: ./vendor/bin/pest --coverage --min=80
