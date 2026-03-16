@@ -40,7 +40,7 @@ beforeEach(function () {
     ]);
 
     // Pre-populate cache with token to avoid OAuth requests
-    cache()->put('tcapi_token_'.md5('test-client-idtest-client-secret'), 'test-token', 60);
+    cache()->put('tcapi_token_'.md5('test-client-id|test-client-secret'), 'test-token', 60);
 
     // Mock cache function for testing
     if (! function_exists('cache')) {
@@ -205,7 +205,7 @@ it('provides access to error parser instance', function () {
     $client = new Client(['handler' => $handlerStack]);
 
     // Clear cached token
-    $tokenKey = 'tcapi_token_'.md5('test-client-idtest-client-secret');
+    $tokenKey = 'tcapi_token_'.md5('test-client-id|test-client-secret');
     cache()->put($tokenKey, null, 0);
 
     $apiRequest = new ApiRequestTestClass($client);
@@ -237,7 +237,7 @@ it('handles authentication errors during token retrieval', function () {
     $client = new Client(['handler' => $handlerStack]);
 
     // Create fresh instance without cached token
-    $tokenKey = 'tcapi_token_'.md5('test-client-idtest-client-secret');
+    $tokenKey = 'tcapi_token_'.md5('test-client-id|test-client-secret');
     cache()->put($tokenKey, null, 0); // Clear token
 
     $apiRequest = new ApiRequestTestClass($client);
@@ -266,7 +266,7 @@ it('successfully makes request when no errors occur', function () {
     $client = new Client(['handler' => $handlerStack]);
 
     // Clear cached token to force token retrieval
-    $tokenKey = 'tcapi_token_'.md5('test-client-idtest-client-secret');
+    $tokenKey = 'tcapi_token_'.md5('test-client-id|test-client-secret');
     cache()->put($tokenKey, null, 0);
 
     $apiRequest = new ApiRequestTestClass($client);

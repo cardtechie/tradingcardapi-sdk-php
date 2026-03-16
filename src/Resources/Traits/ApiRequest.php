@@ -146,7 +146,7 @@ trait ApiRequest
     private function retrieveToken(): void
     {
         $config = config('tradingcardapi');
-        $tokenKey = 'tcapi_token_'.md5($config['client_id'].$config['client_secret']);
+        $tokenKey = 'tcapi_token_'.md5($config['client_id'].'|'.$config['client_secret']);
         if (cache()->has($tokenKey)) {
             $this->token = cache()->get($tokenKey);
 
