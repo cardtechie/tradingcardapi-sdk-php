@@ -14,7 +14,7 @@ beforeEach(function () {
         'client_secret' => 'test-client-secret',
     ]);
 
-    cache()->put('tcapi_token_'.md5('test-client-id|test-client-secret'), 'test-token', 60);
+    cache()->put('tcapi_token_'.md5('test-client-id|test-client-secret|'), 'test-token', 60);
 
     $this->mockHandler = new MockHandler;
     $handlerStack = HandlerStack::create($this->mockHandler);

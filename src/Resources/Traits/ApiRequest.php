@@ -2,6 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk\Resources\Traits;
 
+use CardTechie\TradingCardApiSdk\Exceptions\AuthenticationException;
 use CardTechie\TradingCardApiSdk\Services\ErrorResponseParser;
 use CardTechie\TradingCardApiSdk\Services\ResponseValidator;
 use Psr\Http\Message\ResponseInterface;
@@ -69,6 +70,13 @@ trait ApiRequest
     private $oauthClientSecret;
 
     /**
+     * OAuth2 Scope
+     *
+     * @var string|null
+     */
+    private $scope;
+
+    /**
      * Set authentication information on this resource.
      */
     public function setAuthInfo(string $authType, ?string $personalAccessToken, ?string $clientId, ?string $clientSecret, ?string $scope = null): void
@@ -77,6 +85,7 @@ trait ApiRequest
         $this->personalAccessToken = $personalAccessToken;
         $this->oauthClientId = $clientId;
         $this->oauthClientSecret = $clientSecret;
+        $this->scope = $scope;
     }
 
     /**
@@ -145,8 +154,25 @@ trait ApiRequest
      */
     private function retrieveToken(): void
     {
+        // PAT path: skip OAuth entirely, use token directly
+        if ($this->authType === 'pat') {
+            if (empty($this->personalAccessToken)) {
+                throw new AuthenticationException('Personal Access Token is required when using PAT authentication.');
+            }
+            $this->token = $this->personalAccessToken;
+
+            return;
+        }
+
+        // OAuth2 path: use instance credentials if set, fall back to config
         $config = config('tradingcardapi');
-        $tokenKey = 'tcapi_token_'.md5($config['client_id'].'|'.$config['client_secret']);
+        $clientId = $this->oauthClientId ?? $config['client_id'];
+        $clientSecret = $this->oauthClientSecret ?? $config['client_secret'];
+        $scope = $this->scope ?? $config['scope'] ?? '';
+
+        // Include scope in cache key so different scopes don't collide
+        $tokenKey = 'tcapi_token_'.md5($clientId.'|'.$clientSecret.'|'.$scope);
+
         if (cache()->has($tokenKey)) {
             $this->token = cache()->get($tokenKey);
 
@@ -154,21 +180,18 @@ trait ApiRequest
         }
 
         $url = '/oauth/token';
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/x-www-form-urlencoded',
+        $request = [
+            'headers' => [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/x-www-form-urlencoded',
+            ],
+            'form_params' => [
+                'grant_type' => 'client_credentials',
+                'client_id' => $clientId,
+                'client_secret' => $clientSecret,
+                'scope' => $scope,
+            ],
         ];
-
-        $body = [
-            'grant_type' => 'client_credentials',
-            'client_id' => $config['client_id'],
-            'client_secret' => $config['client_secret'],
-            'scope' => $config['scope'] ?? '',
-        ];
-
-        $request = [];
-        $request['headers'] = $headers;
-        $request['form_params'] = $body;
 
         try {
             $response = $this->doRequest($url, 'POST', $request);
@@ -179,9 +202,7 @@ trait ApiRequest
             throw $this->errorParser->parseGuzzleException($exception);
         }
 
-        $body = (string) $response->getBody();
-        $json = json_decode($body);
-
+        $json = json_decode((string) $response->getBody());
         $this->token = $json->access_token;
         cache()->put($tokenKey, $this->token, 60);
     }
