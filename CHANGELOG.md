@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Workflow` resource with `actionableSets()` method for `GET /v1/workflow/actionable-sets` endpoint (#167)
 - `workflow()` method to `Set` resource for `GET /v1/sets/{id}/workflow` endpoint (#166)
 
+### Changed
+
+- Centralized token cache key derivation: extracted `buildTokenCacheKey()` static method on the `ApiRequest` trait and updated all test files to use a shared `tokenCacheKey()` helper (#171)
+
 ### Fixed
 
 - Sub-resource endpoints (`/v1/sets/{id}/workflow`, `/v1/sets/{id}/checklist`, etc.) no longer trigger JSON:API validation — `extractResourceType()` now returns `null` for paths with 3+ segments after the version prefix, preventing `ValidationException` in `strict_mode: true` (#170)
