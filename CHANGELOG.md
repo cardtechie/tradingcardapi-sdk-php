@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Centralized token cache key derivation: extracted `buildTokenCacheKey()` static method on the `ApiRequest` trait and updated all test files to use a shared `tokenCacheKey()` helper (#171)
+- Updated `phpunit/phpunit` constraint to include v11 and v12 (`^10.0|^11.0|^12.0`)
+- Updated `pestphp/pest` constraint to include v3 (`^2.0|^3.0`)
+- Updated `pestphp/pest-plugin-laravel` constraint to include v3 (`^2.0|^3.0`)
+- Upgraded Docker development environment from PHP 8.1 to PHP 8.4
+- Updated GitHub Actions `actions/checkout` from v5 to v6
+- Updated `stefanzweifel/git-auto-commit-action` from v6 to v7
+- Ran `composer update` to refresh all dependency lock file entries (PHPUnit 11.5.50, Pest 3.8.6, Larastan 3.9.3, PHPStan 2.1.40, Laravel 12)
 
 ### Fixed
 

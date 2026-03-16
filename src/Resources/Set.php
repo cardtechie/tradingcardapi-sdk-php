@@ -7,6 +7,7 @@ use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class Set
@@ -27,7 +28,7 @@ class Set
      * Create the set with the passed in attributes
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function create(array $attributes): SetModel
     {
@@ -49,7 +50,7 @@ class Set
      * Retrieve a set by ID
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function get(string $id, array $params = []): SetModel
     {
@@ -69,7 +70,7 @@ class Set
      * Retrieve a list of sets
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function list(array $params = []): LengthAwarePaginator
     {
@@ -99,7 +100,7 @@ class Set
      * Update the set
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function update(string $id, array $attributes): SetModel
     {
@@ -123,7 +124,7 @@ class Set
      * Get the checklist for a set
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function checklist(string $id): object
     {
@@ -136,7 +137,7 @@ class Set
      * Get the workflow for a set
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function workflow(string $id): object
     {
@@ -149,7 +150,7 @@ class Set
      * Add the missing cards (as empty cards) to the specified set
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function addMissingCards(string $id): object
     {
@@ -162,7 +163,7 @@ class Set
      * Add the checklist to the set
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function addChecklist(array $request, string $id): object
     {
@@ -175,7 +176,7 @@ class Set
      * Delete a set
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function delete(string $id): void
     {

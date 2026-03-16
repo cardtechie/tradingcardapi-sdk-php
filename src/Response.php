@@ -2,6 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use stdClass;
 
@@ -165,7 +166,7 @@ class Response
     /**
      * Parse the JSON and convert it into an object
      *
-     * @return \Illuminate\Support\Collection|object
+     * @return Collection|object
      */
     public static function parse(string $json)
     {

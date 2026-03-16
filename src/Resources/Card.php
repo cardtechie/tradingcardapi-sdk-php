@@ -7,6 +7,7 @@ use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class Card
@@ -27,7 +28,7 @@ class Card
      * Create the card with the passed in attributes
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function create(array $attributes = [], array $relationships = []): CardModel
     {
@@ -57,7 +58,7 @@ class Card
      * Retrieve a card by ID
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function get(string $id, array $params = []): CardModel
     {
@@ -77,7 +78,7 @@ class Card
      * List cards with pagination
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function list(array $params = []): LengthAwarePaginator
     {
@@ -107,7 +108,7 @@ class Card
      * Update the card
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function update(string $id, array $attributes = [], array $relationships = []): CardModel
     {
@@ -139,7 +140,7 @@ class Card
      * Delete a card
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function delete(string $id): void
     {

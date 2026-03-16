@@ -7,6 +7,7 @@ use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class Year
@@ -26,7 +27,7 @@ class Year
     /**
      * Create a year with the passed in attributes
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function create(array $attributes = [], array $relationships = []): YearModel
     {
@@ -55,7 +56,7 @@ class Year
     /**
      * Retrieve a year by ID
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function get(string $id, array $params = []): YearModel
     {
@@ -74,7 +75,7 @@ class Year
     /**
      * Retrieve a list of years
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function list(array $params = []): LengthAwarePaginator
     {
@@ -105,7 +106,7 @@ class Year
     /**
      * Update a year
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function update(string $id, array $attributes = [], array $relationships = []): YearModel
     {
@@ -136,7 +137,7 @@ class Year
     /**
      * Delete a year
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function delete(string $id): void
     {
@@ -147,7 +148,7 @@ class Year
     /**
      * Retrieve parent years (years without a parent_year)
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function listParents(array $params = []): LengthAwarePaginator
     {
@@ -166,7 +167,7 @@ class Year
     /**
      * Retrieve child years for a specific parent year
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function listChildren(string $parentYearId, array $params = []): LengthAwarePaginator
     {

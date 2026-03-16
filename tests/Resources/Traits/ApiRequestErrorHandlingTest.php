@@ -217,7 +217,7 @@ it('provides access to error parser instance', function () {
     // Trigger an exception to initialize error parser
     try {
         $apiRequest->testMakeRequest('/api/not-found');
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         // Exception expected
     }
 

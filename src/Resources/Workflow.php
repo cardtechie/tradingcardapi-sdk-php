@@ -4,6 +4,7 @@ namespace CardTechie\TradingCardApiSdk\Resources;
 
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use GuzzleHttp\Client;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class Workflow
 {
@@ -19,7 +20,7 @@ class Workflow
      *
      * @param  array<string, mixed>  $params
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function actionableSets(array $params = []): object
     {

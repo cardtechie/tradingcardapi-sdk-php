@@ -1,6 +1,7 @@
 <?php
 
 use CardTechie\TradingCardApiSdk\Models\Player;
+use CardTechie\TradingCardApiSdk\Models\Taxonomy;
 
 it('can be instantiated with attributes', function () {
     $player = new Player(['id' => '123', 'first_name' => 'John', 'last_name' => 'Doe']);
@@ -69,11 +70,11 @@ it('has relationship methods defined', function () {
 it('implements Taxonomy interface', function () {
     $player = new Player;
 
-    expect($player)->toBeInstanceOf(\CardTechie\TradingCardApiSdk\Models\Taxonomy::class);
+    expect($player)->toBeInstanceOf(Taxonomy::class);
 });
 
 it('build method returns the taxonomy object', function () {
-    $taxonomy = new \stdClass;
+    $taxonomy = new stdClass;
     $taxonomy->id = '123';
     $data = ['test' => 'data'];
 
@@ -84,10 +85,10 @@ it('build method returns the taxonomy object', function () {
 });
 
 it('build method sets player relationship when matching data exists', function () {
-    $taxonomy = new \stdClass;
+    $taxonomy = new stdClass;
     $taxonomy->id = '123';
 
-    $playerData = new \stdClass;
+    $playerData = new stdClass;
     $playerData->id = '123';
     $playerData->name = 'John Doe';
 
@@ -99,10 +100,10 @@ it('build method sets player relationship when matching data exists', function (
 });
 
 it('build method handles direct player object data', function () {
-    $taxonomy = new \stdClass;
+    $taxonomy = new stdClass;
     $taxonomy->id = '123';
 
-    $playerData = new \stdClass;
+    $playerData = new stdClass;
     $playerData->id = '123';
     $playerData->name = 'John Doe';
 
@@ -176,7 +177,7 @@ it('prepare method throws exception for invalid player UUID', function () {
 
     expect(function () use ($data) {
         Player::prepare($data);
-    })->toThrow(\InvalidArgumentException::class, 'Player with UUID 550e8400-e29b-41d4-a716-446655440000 not found');
+    })->toThrow(InvalidArgumentException::class, 'Player with UUID 550e8400-e29b-41d4-a716-446655440000 not found');
 });
 
 it('prepare method preserves exception chain for invalid UUID', function () {
@@ -185,7 +186,7 @@ it('prepare method preserves exception chain for invalid UUID', function () {
     try {
         Player::prepare($data);
         $this->fail('Expected InvalidArgumentException');
-    } catch (\InvalidArgumentException $e) {
+    } catch (InvalidArgumentException $e) {
         expect($e->getPrevious())->not->toBeNull();
     }
 });

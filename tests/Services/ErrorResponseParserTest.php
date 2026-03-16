@@ -13,6 +13,7 @@ use CardTechie\TradingCardApiSdk\Exceptions\ValidationException;
 use CardTechie\TradingCardApiSdk\Services\ErrorResponseParser;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException as GuzzleServerException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
@@ -267,7 +268,7 @@ it('parses headers correctly', function () {
 
 it('handles RequestException without response', function () {
     $request = new Request('GET', 'https://api.example.com');
-    $guzzleException = new \GuzzleHttp\Exception\RequestException('Request failed', $request);
+    $guzzleException = new RequestException('Request failed', $request);
 
     $exception = $this->parser->parseGuzzleException($guzzleException);
 
@@ -277,7 +278,7 @@ it('handles RequestException without response', function () {
 });
 
 it('handles generic exceptions', function () {
-    $genericException = new \Exception('Something went wrong');
+    $genericException = new Exception('Something went wrong');
 
     $exception = $this->parser->parseGuzzleException($genericException);
 

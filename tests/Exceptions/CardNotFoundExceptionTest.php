@@ -1,6 +1,7 @@
 <?php
 
 use CardTechie\TradingCardApiSdk\Exceptions\CardNotFoundException;
+use CardTechie\TradingCardApiSdk\Exceptions\ResourceNotFoundException;
 
 it('creates card not found exception by ID', function () {
     $exception = CardNotFoundException::byId('card123', ['user_id' => 'user456']);
@@ -31,5 +32,5 @@ it('creates card not found exception by criteria', function () {
 
 it('inherits from ResourceNotFoundException', function () {
     $exception = CardNotFoundException::byId('test123');
-    expect($exception)->toBeInstanceOf(\CardTechie\TradingCardApiSdk\Exceptions\ResourceNotFoundException::class);
+    expect($exception)->toBeInstanceOf(ResourceNotFoundException::class);
 });

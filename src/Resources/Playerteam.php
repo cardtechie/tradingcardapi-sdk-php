@@ -7,6 +7,7 @@ use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
 use Illuminate\Support\Collection;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class Playerteam
@@ -27,7 +28,7 @@ class Playerteam
      * Retrieve a playerteam by player and/or team id
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getList(array $params = []): Collection
     {
@@ -42,7 +43,7 @@ class Playerteam
      * Create a playerteam
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function create(array $attributes): PlayerteamModel
     {

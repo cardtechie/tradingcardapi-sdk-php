@@ -7,6 +7,7 @@ use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
 use Illuminate\Support\Collection;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class Attribute
@@ -27,7 +28,7 @@ class Attribute
      * Create the attribute with the passed in attributes
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function create(array $attributes = []): AttributeModel
     {
@@ -53,7 +54,7 @@ class Attribute
      * Return a list of attributes.
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function list(): Collection
     {
@@ -65,7 +66,7 @@ class Attribute
     /**
      * Retrieve an attribute.
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function get(string $id): AttributeModel
     {
@@ -80,7 +81,7 @@ class Attribute
      * Update the attribute
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function update(string $id, array $attributes): AttributeModel
     {

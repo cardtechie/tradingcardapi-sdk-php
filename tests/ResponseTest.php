@@ -2,6 +2,7 @@
 
 use CardTechie\TradingCardApiSdk\Models\Card;
 use CardTechie\TradingCardApiSdk\Models\Player;
+use CardTechie\TradingCardApiSdk\Models\Set;
 use CardTechie\TradingCardApiSdk\Response;
 use Illuminate\Support\Collection;
 
@@ -170,7 +171,7 @@ it('handles special type mappings in included', function () {
 
     expect($response->relationships)->toHaveKey('parentset');
     expect($response->relationships)->toHaveKey('checklist');
-    expect($response->relationships['parentset'][0])->toBeInstanceOf(\CardTechie\TradingCardApiSdk\Models\Set::class);
+    expect($response->relationships['parentset'][0])->toBeInstanceOf(Set::class);
     expect($response->relationships['checklist'][0])->toBeInstanceOf(Card::class);
 });
 

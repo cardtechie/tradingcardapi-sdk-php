@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
+use Illuminate\Support\Collection;
 
 beforeEach(function () {
     // Set up configuration
@@ -55,7 +56,7 @@ it('can get a list of playerteams', function () {
 
     $result = $this->playerteamResource->getList();
 
-    expect($result)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($result)->toBeInstanceOf(Collection::class);
     expect($result->count())->toBe(2);
 });
 
@@ -78,7 +79,7 @@ it('can get a list of playerteams with params', function () {
     $params = ['player_id' => '456', 'team_id' => '789'];
     $result = $this->playerteamResource->getList($params);
 
-    expect($result)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+    expect($result)->toBeInstanceOf(Collection::class);
     expect($result->count())->toBe(1);
 });
 

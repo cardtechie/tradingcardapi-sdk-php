@@ -5,6 +5,7 @@ namespace CardTechie\TradingCardApiSdk\Models;
 use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
 use CardTechie\TradingCardApiSdk\Models\Traits\OnCardable;
 use CardTechie\TradingCardApiSdk\Utils\StringHelpers;
+use Illuminate\Support\Collection;
 
 /**
  * Class Playerteam
@@ -60,7 +61,7 @@ class Playerteam extends Model implements Taxonomy
         ]);
 
         // Handle case where Player::getFromApi() might return a collection
-        if ($player instanceof \Illuminate\Support\Collection) {
+        if ($player instanceof Collection) {
             if ($player->isEmpty()) {
                 throw new \InvalidArgumentException("No player found with name: {$params['player']}");
             }
@@ -117,7 +118,7 @@ class Playerteam extends Model implements Taxonomy
                 // We have a name, look up the player
                 try {
                     $player = Player::getFromApi(['player' => $data['player']]);
-                    if ($player instanceof \Illuminate\Support\Collection) {
+                    if ($player instanceof Collection) {
                         if ($player->isEmpty()) {
                             throw new \InvalidArgumentException("No player found with name: {$data['player']}");
                         }
