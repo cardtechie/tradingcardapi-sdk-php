@@ -146,6 +146,11 @@ trait ApiRequest
         return json_decode($body);
     }
 
+    public static function buildTokenCacheKey(string $clientId, string $clientSecret, string $scope = ''): string
+    {
+        return 'tcapi_token_'.md5($clientId.'|'.$clientSecret.'|'.$scope);
+    }
+
     /**
      * Retrieve a token required for authentication
      *
@@ -171,7 +176,7 @@ trait ApiRequest
         $scope = $this->scope ?? $config['scope'] ?? '';
 
         // Include scope in cache key so different scopes don't collide
-        $tokenKey = 'tcapi_token_'.md5($clientId.'|'.$clientSecret.'|'.$scope);
+        $tokenKey = static::buildTokenCacheKey($clientId, $clientSecret, $scope);
 
         if (cache()->has($tokenKey)) {
             $this->token = cache()->get($tokenKey);

@@ -69,7 +69,7 @@ it('can make a request with token retrieval', function () {
 
 it('uses cached token when available', function () {
     // Set a cached token — key now includes scope (empty string by default)
-    cache()->put('tcapi_token_'.md5('test-client-id|test-client-secret|'), 'cached-token', 60);
+    cache()->put(tokenCacheKey(), 'cached-token', 60);
 
     $client = m::mock(Client::class);
 
@@ -541,8 +541,8 @@ it('uses separate cache keys for different scopes', function () {
     $instance2->setAuthInfo('oauth2', null, 'test-client-id', 'test-client-secret', 'scope-b');
     $instance2->testMakeRequest('/test');
 
-    $keyA = 'tcapi_token_'.md5('test-client-id|test-client-secret|scope-a');
-    $keyB = 'tcapi_token_'.md5('test-client-id|test-client-secret|scope-b');
+    $keyA = tokenCacheKey(scope: 'scope-a');
+    $keyB = tokenCacheKey(scope: 'scope-b');
 
     expect($keyA)->not->toBe($keyB);
     expect(cache()->get($keyA))->toBe('token-scope-a');
