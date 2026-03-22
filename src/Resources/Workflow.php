@@ -31,4 +31,53 @@ class Workflow
 
         return $this->makeRequest($url, 'GET');
     }
+
+    /**
+     * Update a workflow step (set-todo) status.
+     *
+     * @param  array<string, mixed>  $attributes
+     *
+     * @throws InvalidArgumentException
+     */
+    public function updateSetTodo(string $todoId, array $attributes): object
+    {
+        $url = sprintf('/v1/set-todos/%s', $todoId);
+        $request = [
+            'json' => [
+                'data' => [
+                    'type' => 'set-todos',
+                    'id' => $todoId,
+                    'attributes' => $attributes,
+                ],
+            ],
+        ];
+
+        return $this->makeRequest($url, 'PATCH', $request);
+    }
+
+    /**
+     * Bulk initialize workflow todos for existing sets.
+     *
+     * @param  array<string, mixed>  $params
+     *
+     * @throws InvalidArgumentException
+     */
+    public function bulkInitializeWorkflow(array $params = []): object
+    {
+        $request = ! empty($params) ? ['json' => $params] : [];
+
+        return $this->makeRequest('/v1/workflow/bulk-initialize', 'POST', $request);
+    }
+
+    /**
+     * Check the status of a bulk initialization job.
+     *
+     * @throws InvalidArgumentException
+     */
+    public function getBulkInitializeStatus(string $jobId): object
+    {
+        $url = sprintf('/v1/workflow/bulk-initialize/%s', $jobId);
+
+        return $this->makeRequest($url, 'GET');
+    }
 }

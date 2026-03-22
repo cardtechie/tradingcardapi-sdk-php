@@ -292,6 +292,9 @@ trait ApiRequest
                 'object-attributes' => 'objectattribute',
                 'playerteams' => 'playerteam',
                 'stats' => 'stats',
+                // Action-style endpoints that don't return standard JSON:API responses
+                'workflow' => null,
+                'set-todos' => null,
             ];
 
             return $normalizedResources[$resource] ?? $resource;
