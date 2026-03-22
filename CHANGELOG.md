@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated GitHub Actions `actions/checkout` from v5 to v6
 - Updated `stefanzweifel/git-auto-commit-action` from v6 to v7
 - Ran `composer update` to refresh all dependency lock file entries (PHPUnit 11.5.50, Pest 3.8.6, Larastan 3.9.3, PHPStan 2.1.40, Laravel 12)
+- Bumped minimum PHP requirement from 8.1 to 8.2 (PHP 8.1 reached EOL in November 2024 and Pest/paratest dropped 8.1 support)
 
 ### Fixed
 

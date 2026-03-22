@@ -20,7 +20,7 @@ A modern PHP SDK for integrating with the Trading Card API. This Laravel package
 
 ## 📋 Requirements
 
-- PHP 8.1 or higher
+- PHP 8.2 or higher
 - Laravel 10.0 or higher
 - GuzzleHTTP 7.5 or higher
 
