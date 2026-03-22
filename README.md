@@ -338,7 +338,7 @@ $api->setSource()->delete('source-id');
 
 // Include sources when fetching a set
 $set = $api->set()->get('set-id', ['include' => 'sources']);
-$sources = $set->sources();  // Returns array of SetSource models
+$sources = $set->sources();  // Returns Illuminate\Support\Collection of SetSource models
 ```
 
 ### Workflow Resource

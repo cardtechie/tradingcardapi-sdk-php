@@ -130,10 +130,16 @@ class CardImage
             ],
         ];
 
-        $response = $this->makeRequest('/v1/card-images', 'POST', $request);
-        $formattedResponse = new Response(json_encode($response));
+        try {
+            $response = $this->makeRequest('/v1/card-images', 'POST', $request);
+            $formattedResponse = new Response(json_encode($response));
 
-        return $formattedResponse->mainObject;
+            return $formattedResponse->mainObject;
+        } finally {
+            if (is_resource($fileContents)) {
+                fclose($fileContents);
+            }
+        }
     }
 
     /**
@@ -186,14 +192,6 @@ class CardImage
      */
     public function getDownloadUrl(string $id, string $size = 'original'): string
     {
-        // For the original size, use the standard download endpoint
-        if ($size === 'original') {
-            $url = sprintf('/v1/card-images/%s/download', $id);
-        } else {
-            // For variants, add size as query parameter
-            $url = sprintf('/v1/card-images/%s/download?size=%s', $id, $size);
-        }
-
         // Get the image metadata which includes the download URL
         $image = $this->get($id);
 

@@ -292,6 +292,8 @@ trait ApiRequest
                 'object-attributes' => 'objectattribute',
                 'playerteams' => 'playerteam',
                 'stats' => 'stats',
+                'card-images' => 'cardimage',
+                'set-sources' => 'setsource',
                 // Action-style endpoints that don't return standard JSON:API responses
                 'workflow' => null,
                 'set-todos' => null,
