@@ -528,3 +528,69 @@ it('builds the correct URL for getSetTodos', function () {
     expect((string) $capturedRequest->getUri())->toContain('/v1/workflow/sets/set-abc/todos');
     expect($capturedRequest->getMethod())->toBe('GET');
 });
+
+it('can get set todos returns multiple todos with correct structure', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'todos' => [
+                [
+                    'id' => 'uuid-001',
+                    'step' => 'discover_sources',
+                    'status' => 'completed',
+                    'sort_order' => 0,
+                    'started_at' => '2024-03-15T09:00:00+00:00',
+                    'completed_at' => '2024-03-15T09:15:00+00:00',
+                ],
+                [
+                    'id' => 'uuid-002',
+                    'step' => 'import_cards',
+                    'status' => 'pending',
+                    'sort_order' => 1,
+                    'started_at' => null,
+                    'completed_at' => null,
+                ],
+                [
+                    'id' => 'uuid-003',
+                    'step' => 'review_cards',
+                    'status' => 'pending',
+                    'sort_order' => 2,
+                    'started_at' => null,
+                    'completed_at' => null,
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->workflowResource->getSetTodos('set-multi');
+
+    expect($result)->toBeObject();
+    expect($result->todos)->toBeArray();
+    expect($result->todos)->toHaveCount(3);
+    expect($result->todos[0]->id)->toBe('uuid-001');
+    expect($result->todos[0]->status)->toBe('completed');
+    expect($result->todos[1]->id)->toBe('uuid-002');
+    expect($result->todos[1]->step)->toBe('import_cards');
+    expect($result->todos[2]->sort_order)->toBe(2);
+});
+
+it('throws an exception when getSetTodos receives a 401', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(401, [], json_encode([
+            'message' => 'Unauthenticated',
+        ]))
+    );
+
+    expect(fn () => $this->workflowResource->getSetTodos('set-abc'))
+        ->toThrow(AuthenticationException::class);
+});
+
+it('throws an exception when getSetTodos receives a 500', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(500, [], json_encode([
+            'message' => 'Internal server error',
+        ]))
+    );
+
+    expect(fn () => $this->workflowResource->getSetTodos('set-abc'))
+        ->toThrow(ServerException::class);
+});
