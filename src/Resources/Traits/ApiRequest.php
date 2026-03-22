@@ -139,14 +139,14 @@ trait ApiRequest
             return new stdClass;
         }
 
-        $jsonData = json_decode($body, true);
+        $decoded = json_decode($body);
 
-        // Validate response if validation is enabled
+        // Validate response if validation is enabled; decode as array only when needed
         if ($this->shouldValidate()) {
-            $this->validateResponse($url, $jsonData);
+            $this->validateResponse($url, json_decode($body, true));
         }
 
-        return json_decode($body);
+        return $decoded;
     }
 
     /**
