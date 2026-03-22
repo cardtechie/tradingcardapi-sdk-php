@@ -247,7 +247,7 @@ The SDK provides access to the following Trading Card API resources:
 | Resource | Description | Methods |
 |----------|-------------|---------|
 | **Cards** | Individual trading cards | `get()`, `create()`, `update()`, `delete()` |
-| **Sets** | Card sets and collections | `get()`, `list()`, `create()`, `update()`, `delete()`, `checklist($id)`, `addMissingCards($id)`, `addChecklist($request, $id)` |
+| **Sets** | Card sets and collections | `get()`, `list()`, `create()`, `update()`, `delete()`, `checklist($id)`, `workflow($id)`, `addMissingCards($id)`, `addChecklist($request, $id)` |
 | **Players** | Player information | `get()`, `list()`, `getList()`, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |
 | **Teams** | Team data | `get()`, `getList()`, `create()` |
 | **Genres** | Card categories/types | `get()`, `list()`, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |
@@ -258,6 +258,7 @@ The SDK provides access to the following Trading Card API resources:
 | **SetSources** | Set data sources | `get()`, `list()`, `create()`, `update()`, `delete()`, `forSet($setId)` |
 | **Stats** | Entity statistics and analytics | `get($type)`, `getCounts()`, `getSnapshots()`, `getGrowth()` |
 | **Attributes** | Card attributes | `get()`, `getList()` |
+| **Workflow** | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($id, $attrs)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)` |
 
 ### Stats Resource
 
@@ -333,6 +334,45 @@ $api->setSource()->delete('source-id');
 // Include sources when fetching a set
 $set = $api->set()->get('set-id', ['include' => 'sources']);
 $sources = $set->sources();  // Returns array of SetSource models
+```
+
+### Workflow Resource
+
+The Workflow resource manages set workflow steps (todos) and bulk initialization:
+
+```php
+// Get sets that have actionable workflow steps
+$actionable = $api->workflow()->actionableSets();
+foreach ($actionable->data as $set) {
+    echo $set->attributes->name;
+}
+
+// Filter actionable sets
+$actionable = $api->workflow()->actionableSets(['filter[sport]' => 'baseball']);
+
+// Get workflow status for a specific set (via Set resource)
+$workflow = $api->set()->workflow('set-id');
+
+// Update a workflow step (set-todo) status
+$result = $api->workflow()->updateSetTodo('todo-id', [
+    'status' => 'completed',
+]);
+
+// Bulk initialize workflow todos for all existing sets
+$job = $api->workflow()->bulkInitializeWorkflow();
+echo $job->data->job_id;   // Job ID to poll for status
+echo $job->data->status;   // 'queued'
+
+// Initialize workflow todos for specific sets only
+$job = $api->workflow()->bulkInitializeWorkflow([
+    'set_ids' => ['set-id-1', 'set-id-2'],
+]);
+
+// Poll bulk initialization job status
+$status = $api->workflow()->getBulkInitializeStatus($job->data->job_id);
+echo $status->data->status;     // 'queued', 'processing', or 'completed'
+echo $status->data->processed;  // Sets processed so far
+echo $status->data->total;      // Total sets to process
 ```
 
 ## 🔧 Configuration
