@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `updateSetTodo(string $todoId, array $attributes)` method to `Workflow` resource for `PATCH /v1/set-todos/{id}` endpoint (#179)
 - `bulkInitializeWorkflow(array $params = [])` method to `Workflow` resource for `POST /v1/workflow/bulk-initialize` endpoint (#179)
 - `getBulkInitializeStatus(string $jobId)` method to `Workflow` resource for `GET /v1/workflow/bulk-initialize/{job_id}` endpoint (#179)
+- `getSetTodos(string $setId)` method to `Workflow` resource for `GET /v1/workflow/sets/{id}/todos` endpoint (#181)
 
 ### Changed
 

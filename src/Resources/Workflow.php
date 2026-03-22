@@ -80,4 +80,16 @@ class Workflow
 
         return $this->makeRequest($url, 'GET');
     }
+
+    /**
+     * Get the workflow todos for a set.
+     *
+     * @throws InvalidArgumentException
+     */
+    public function getSetTodos(string $setId): object
+    {
+        $url = sprintf('/v1/workflow/sets/%s/todos', $setId);
+
+        return $this->makeRequest($url, 'GET');
+    }
 }
