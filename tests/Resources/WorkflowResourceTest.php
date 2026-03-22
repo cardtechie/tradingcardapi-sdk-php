@@ -401,6 +401,32 @@ it('builds the correct URL for getBulkInitializeStatus', function () {
     expect((string) $capturedRequest->getUri())->toContain('/v1/workflow/bulk-initialize/my-job-id');
 });
 
+it('sends the correct method, URL, and body for bulkInitializeWorkflow', function () {
+    $capturedRequest = null;
+
+    $customHandler = new MockHandler([
+        new GuzzleResponse(202, [], json_encode([
+            'data' => ['job_id' => 'job-abc', 'status' => 'queued'],
+        ])),
+    ]);
+
+    $middleware = Middleware::tap(function (RequestInterface $request) use (&$capturedRequest) {
+        $capturedRequest = $request;
+    });
+
+    $handlerStack = HandlerStack::create($customHandler);
+    $handlerStack->push($middleware);
+    $client = new Client(['handler' => $handlerStack]);
+    $resource = new Workflow($client);
+
+    $resource->bulkInitializeWorkflow(['set_ids' => ['1', '2']]);
+
+    expect($capturedRequest->getMethod())->toBe('POST');
+    expect((string) $capturedRequest->getUri())->toContain('/v1/workflow/bulk-initialize');
+    $body = json_decode((string) $capturedRequest->getBody(), true);
+    expect($body['set_ids'])->toBe(['1', '2']);
+});
+
 // --- actionableSets edge cases ---
 
 it('can get actionable sets and returns an empty list', function () {
