@@ -258,7 +258,7 @@ The SDK provides access to the following Trading Card API resources:
 | **SetSources** | Set data sources | `get()`, `list()`, `create()`, `update()`, `delete()`, `forSet($setId)` |
 | **Stats** | Entity statistics and analytics | `get($type)`, `getCounts()`, `getSnapshots()`, `getGrowth()` |
 | **Attributes** | Card attributes | `get()`, `getList()` |
-| **Workflow** | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($id, $attrs)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)` |
+| **Workflow** | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($id, $attrs)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)` |
 
 ### Stats Resource
 
@@ -373,6 +373,14 @@ $status = $api->workflow()->getBulkInitializeStatus($job->data->job_id);
 echo $status->data->status;     // 'queued', 'processing', or 'completed'
 echo $status->data->processed;  // Sets processed so far
 echo $status->data->total;      // Total sets to process
+
+// Get workflow todos for a specific set
+$result = $api->workflow()->getSetTodos('set-id');
+foreach ($result->todos as $todo) {
+    echo $todo->step;    // e.g. 'discover_sources'
+    echo $todo->status;  // e.g. 'completed'
+}
+// Returns empty todos array when set exists but has no initialized workflow
 ```
 
 ## 🔧 Configuration
