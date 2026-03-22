@@ -258,7 +258,7 @@ The SDK provides access to the following Trading Card API resources:
 | **SetSources** | Set data sources | `get()`, `list()`, `create()`, `update()`, `delete()`, `forSet($setId)` |
 | **Stats** | Entity statistics and analytics | `get($type)`, `getCounts()`, `getSnapshots()`, `getGrowth()` |
 | **Attributes** | Card attributes | `get()`, `getList()` |
-| **Workflow** | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($id, $attrs)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)` |
+| **Workflow** | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($todoId, $attributes)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)` |
 
 ### Stats Resource
 
