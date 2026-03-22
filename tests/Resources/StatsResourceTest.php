@@ -22,7 +22,7 @@ beforeEach(function () {
     ]);
 
     // Pre-populate cache with token to avoid OAuth requests
-    cache()->put('tcapi_token', 'test-token', 60);
+    cache()->put(tokenCacheKey(), 'test-token', 60);
 
     $this->mockHandler = new MockHandler;
     $handlerStack = HandlerStack::create($this->mockHandler);
@@ -62,7 +62,7 @@ it('can get cards stats', function () {
 
     $result = $this->statsResource->get('cards');
 
-    expect($result)->toBeInstanceOf(\stdClass::class);
+    expect($result)->toBeInstanceOf(stdClass::class);
     expect($result->model)->toBe('cards');
     expect($result->unit)->toBe('daily');
     expect($result->count)->toBe(2);
@@ -99,7 +99,7 @@ it('can get sets stats', function () {
 
     $result = $this->statsResource->get('sets');
 
-    expect($result)->toBeInstanceOf(\stdClass::class);
+    expect($result)->toBeInstanceOf(stdClass::class);
     expect($result->model)->toBe('sets');
     expect($result->unit)->toBe('daily');
     expect($result->count)->toBe(1);
@@ -143,7 +143,7 @@ it('can get players stats', function () {
 
     $result = $this->statsResource->get('players');
 
-    expect($result)->toBeInstanceOf(\stdClass::class);
+    expect($result)->toBeInstanceOf(stdClass::class);
     expect($result->model)->toBe('players');
     expect($result->unit)->toBe('daily');
     expect($result->count)->toBe(3);
@@ -176,7 +176,7 @@ it('can get teams stats', function () {
 
     $result = $this->statsResource->get('teams');
 
-    expect($result)->toBeInstanceOf(\stdClass::class);
+    expect($result)->toBeInstanceOf(stdClass::class);
     expect($result->model)->toBe('teams');
     expect($result->count)->toBe(1);
     expect($result->stats)->toHaveCount(1);
@@ -210,7 +210,7 @@ it('can get brands stats', function () {
 
     $result = $this->statsResource->get('brands');
 
-    expect($result)->toBeInstanceOf(\stdClass::class);
+    expect($result)->toBeInstanceOf(stdClass::class);
     expect($result->model)->toBe('brands');
     expect($result->count)->toBe(2);
     expect($result->stats)->toHaveCount(2);
@@ -233,7 +233,7 @@ it('handles empty stats response', function () {
 
     $result = $this->statsResource->get('manufacturers');
 
-    expect($result)->toBeInstanceOf(\stdClass::class);
+    expect($result)->toBeInstanceOf(stdClass::class);
     expect($result->model)->toBe('manufacturers');
     expect($result->count)->toBe(0);
     expect($result->stats)->toBeArray();

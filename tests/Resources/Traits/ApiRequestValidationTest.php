@@ -39,10 +39,14 @@ beforeEach(function () {
     Cache::shouldReceive('has')->andReturn(true);
     Cache::shouldReceive('get')->andReturn('test_token');
 
-    Config::set('tradingcardapi.validation', [
-        'enabled' => true,
-        'strict_mode' => false,
-        'log_validation_errors' => true,
+    Config::set('tradingcardapi', [
+        'client_id' => 'test-client-id',
+        'client_secret' => 'test-client-secret',
+        'validation' => [
+            'enabled' => true,
+            'strict_mode' => false,
+            'log_validation_errors' => true,
+        ],
     ]);
 });
 
@@ -53,7 +57,7 @@ it('extracts resource type from API URLs correctly', function () {
     expect($resource->testExtractResourceType('/v1/cards'))->toBe('card');
     expect($resource->testExtractResourceType('/v1/cards/123'))->toBe('card');
     expect($resource->testExtractResourceType('/v1/players'))->toBe('player');
-    expect($resource->testExtractResourceType('/v1/sets/456/checklist'))->toBe('set');
+    expect($resource->testExtractResourceType('/v1/sets/456/checklist'))->toBeNull();
     expect($resource->testExtractResourceType('/v1/genres'))->toBe('genre');
     expect($resource->testExtractResourceType('/v1/object-attributes'))->toBe('objectattribute');
     expect($resource->testExtractResourceType('/v1/playerteams'))->toBe('playerteam');

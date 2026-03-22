@@ -2,6 +2,7 @@
 
 use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
 use CardTechie\TradingCardApiSdk\TradingCardApi;
+use Illuminate\Support\Facades\Facade;
 
 it('facade returns correct accessor', function () {
     $reflection = new ReflectionClass(TradingCardApiSdk::class);
@@ -16,5 +17,5 @@ it('facade returns correct accessor', function () {
 it('facade extends Laravel Facade', function () {
     $reflection = new ReflectionClass(TradingCardApiSdk::class);
 
-    expect($reflection->getParentClass()->getName())->toBe(\Illuminate\Support\Facades\Facade::class);
+    expect($reflection->getParentClass()->getName())->toBe(Facade::class);
 });

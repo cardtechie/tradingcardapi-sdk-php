@@ -31,7 +31,7 @@ it('implements Taxonomy interface', function () {
 });
 
 it('build method returns the taxonomy object', function () {
-    $taxonomy = new \stdClass;
+    $taxonomy = new stdClass;
     $taxonomy->id = '456';
     $data = ['test' => 'data'];
 
@@ -42,10 +42,10 @@ it('build method returns the taxonomy object', function () {
 });
 
 it('build method sets team relationship when matching data exists', function () {
-    $taxonomy = new \stdClass;
+    $taxonomy = new stdClass;
     $taxonomy->id = '456';
 
-    $teamData = new \stdClass;
+    $teamData = new stdClass;
     $teamData->id = '456';
     $teamData->name = 'New York Yankees';
 
@@ -57,10 +57,10 @@ it('build method sets team relationship when matching data exists', function () 
 });
 
 it('build method handles direct team object data', function () {
-    $taxonomy = new \stdClass;
+    $taxonomy = new stdClass;
     $taxonomy->id = '456';
 
-    $teamData = new \stdClass;
+    $teamData = new stdClass;
     $teamData->id = '456';
     $teamData->name = 'New York Yankees';
 
@@ -133,7 +133,7 @@ it('prepare method throws exception for invalid team UUID', function () {
 
     expect(function () use ($data) {
         Team::prepare($data);
-    })->toThrow(\InvalidArgumentException::class, 'Team with UUID 550e8400-e29b-41d4-a716-446655440000 not found');
+    })->toThrow(InvalidArgumentException::class, 'Team with UUID 550e8400-e29b-41d4-a716-446655440000 not found');
 });
 
 it('prepare method preserves exception chain for invalid UUID', function () {
@@ -142,7 +142,7 @@ it('prepare method preserves exception chain for invalid UUID', function () {
     try {
         Team::prepare($data);
         $this->fail('Expected InvalidArgumentException');
-    } catch (\InvalidArgumentException $e) {
+    } catch (InvalidArgumentException $e) {
         expect($e->getPrevious())->not->toBeNull();
     }
 });

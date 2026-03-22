@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-03-22
+
+### Added
+
+- `Workflow` resource with `actionableSets()` method for `GET /v1/workflow/actionable-sets` endpoint (#167)
+- `workflow()` method to `Set` resource for `GET /v1/sets/{id}/workflow` endpoint (#166)
+- `updateSetTodo(string $todoId, array $attributes)` method to `Workflow` resource for `PATCH /v1/set-todos/{id}` endpoint (#179)
+- `bulkInitializeWorkflow(array $params = [])` method to `Workflow` resource for `POST /v1/workflow/bulk-initialize` endpoint (#179)
+- `getBulkInitializeStatus(string $jobId)` method to `Workflow` resource for `GET /v1/workflow/bulk-initialize/{job_id}` endpoint (#179)
+- `getSetTodos(string $setId)` method to `Workflow` resource for `GET /v1/workflow/sets/{id}/todos` endpoint (#181)
+
+### Changed
+
+- Centralized token cache key derivation: extracted `buildTokenCacheKey()` static method on the `ApiRequest` trait and updated all test files to use a shared `tokenCacheKey()` helper (#171)
+- Updated `phpunit/phpunit` constraint to include v11 and v12 (`^10.0|^11.0|^12.0`)
+- Updated `pestphp/pest` constraint to include v3 (`^2.0|^3.0`)
+- Updated `pestphp/pest-plugin-laravel` constraint to include v3 (`^2.0|^3.0`)
+- Upgraded Docker development environment from PHP 8.1 to PHP 8.4
+- Updated GitHub Actions `actions/checkout` from v5 to v6
+- Updated `stefanzweifel/git-auto-commit-action` from v6 to v7
+- Ran `composer update` to refresh all dependency lock file entries (PHPUnit 11.5.50, Pest 3.8.6, Larastan 3.9.3, PHPStan 2.1.40, Laravel 12)
+- Bumped minimum PHP requirement from 8.1 to 8.2 (PHP 8.1 reached EOL in November 2024 and Pest/paratest dropped 8.1 support)
+
+### Fixed
+
+- Sub-resource endpoints (`/v1/sets/{id}/workflow`, `/v1/sets/{id}/checklist`, etc.) no longer trigger JSON:API validation — `extractResourceType()` now returns `null` for paths with 3+ segments after the version prefix, preventing `ValidationException` in `strict_mode: true` (#170)
+- `setAuthInfo()` auth plumbing now wired into `retrieveToken()`: PAT tokens used directly (no OAuth request), instance OAuth credentials respected over config, `$scope` stored and included in cache key to prevent scope collisions (#169)
+
 ## [0.1.18] - 2026-01-22
 
 ### Added
@@ -271,7 +299,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.18...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.18...0.2.0
 [0.1.18]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.17...0.1.18
 [0.1.17]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.16...0.1.17
 [0.1.16]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.15...0.1.16

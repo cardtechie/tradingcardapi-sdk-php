@@ -2,9 +2,13 @@
 
 namespace CardTechie\TradingCardApiSdk\Resources\Traits;
 
+use CardTechie\TradingCardApiSdk\Exceptions\AuthenticationException;
+use CardTechie\TradingCardApiSdk\Exceptions\TradingCardApiException;
 use CardTechie\TradingCardApiSdk\Services\ErrorResponseParser;
 use CardTechie\TradingCardApiSdk\Services\ResponseValidator;
+use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 use stdClass;
 
 /**
@@ -22,7 +26,7 @@ trait ApiRequest
     /**
      * The client to make API requests
      *
-     * @var \GuzzleHttp\Client
+     * @var Client
      */
     private $client;
 
@@ -41,6 +45,53 @@ trait ApiRequest
     private $errorParser;
 
     /**
+     * Authentication type ('oauth2' or 'pat')
+     *
+     * @var string
+     */
+    private $authType = 'oauth2';
+
+    /**
+     * Personal Access Token (for PAT auth mode)
+     *
+     * @var string|null
+     */
+    private $personalAccessToken;
+
+    /**
+     * OAuth2 Client ID
+     *
+     * @var string|null
+     */
+    private $oauthClientId;
+
+    /**
+     * OAuth2 Client Secret
+     *
+     * @var string|null
+     */
+    private $oauthClientSecret;
+
+    /**
+     * OAuth2 Scope
+     *
+     * @var string|null
+     */
+    private $scope;
+
+    /**
+     * Set authentication information on this resource.
+     */
+    public function setAuthInfo(string $authType, ?string $personalAccessToken, ?string $clientId, ?string $clientSecret, ?string $scope = null): void
+    {
+        $this->authType = $authType;
+        $this->personalAccessToken = $personalAccessToken;
+        $this->oauthClientId = $clientId;
+        $this->oauthClientSecret = $clientSecret;
+        $this->scope = $scope;
+    }
+
+    /**
      * Makes a request to an API endpoint or webpage and returns its response
      *
      * @param  string  $url  Url of the api or webpage
@@ -48,8 +99,8 @@ trait ApiRequest
      * @param  array  $request  Additional parameters to include in the request
      * @param  array  $headers  HTTP headers
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \CardTechie\TradingCardApiSdk\Exceptions\TradingCardApiException
+     * @throws InvalidArgumentException
+     * @throws TradingCardApiException
      */
     public function makeRequest(string $url, string $method = 'GET', array $request = [], array $headers = []): object
     {
@@ -88,49 +139,72 @@ trait ApiRequest
             return new stdClass;
         }
 
-        $jsonData = json_decode($body, true);
+        $decoded = json_decode($body);
 
-        // Validate response if validation is enabled
+        // Validate response if validation is enabled; decode as array only when needed
         if ($this->shouldValidate()) {
-            $this->validateResponse($url, $jsonData);
+            $this->validateResponse($url, json_decode($body, true));
         }
 
-        return json_decode($body);
+        return $decoded;
+    }
+
+    /**
+     * Build the cache key used to store an OAuth token.
+     *
+     * @internal Intended for use by this trait and test helpers only.
+     */
+    public static function buildTokenCacheKey(string $clientId, string $clientSecret, string $scope = ''): string
+    {
+        return 'tcapi_token_'.md5($clientId.'|'.$clientSecret.'|'.$scope);
     }
 
     /**
      * Retrieve a token required for authentication
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \CardTechie\TradingCardApiSdk\Exceptions\TradingCardApiException
+     * @throws InvalidArgumentException
+     * @throws TradingCardApiException
      */
     private function retrieveToken(): void
     {
-        $tokenKey = 'tcapi_token';
+        // PAT path: skip OAuth entirely, use token directly
+        if ($this->authType === 'pat') {
+            if (empty($this->personalAccessToken)) {
+                throw new AuthenticationException('Personal Access Token is required');
+            }
+            $this->token = $this->personalAccessToken;
+
+            return;
+        }
+
+        // OAuth2 path: use instance credentials if set, fall back to config
+        $config = config('tradingcardapi');
+        $clientId = $this->oauthClientId ?? $config['client_id'];
+        $clientSecret = $this->oauthClientSecret ?? $config['client_secret'];
+        $scope = $this->scope ?? $config['scope'] ?? '';
+
+        // Include scope in cache key so different scopes don't collide
+        $tokenKey = static::buildTokenCacheKey($clientId, $clientSecret, $scope);
+
         if (cache()->has($tokenKey)) {
             $this->token = cache()->get($tokenKey);
 
             return;
         }
 
-        $config = config('tradingcardapi');
-
         $url = '/oauth/token';
-        $headers = [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/x-www-form-urlencoded',
+        $request = [
+            'headers' => [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/x-www-form-urlencoded',
+            ],
+            'form_params' => [
+                'grant_type' => 'client_credentials',
+                'client_id' => $clientId,
+                'client_secret' => $clientSecret,
+                'scope' => $scope,
+            ],
         ];
-
-        $body = [
-            'grant_type' => 'client_credentials',
-            'client_id' => $config['client_id'],
-            'client_secret' => $config['client_secret'],
-            'scope' => $config['scope'] ?? '',
-        ];
-
-        $request = [];
-        $request['headers'] = $headers;
-        $request['form_params'] = $body;
 
         try {
             $response = $this->doRequest($url, 'POST', $request);
@@ -141,9 +215,7 @@ trait ApiRequest
             throw $this->errorParser->parseGuzzleException($exception);
         }
 
-        $body = (string) $response->getBody();
-        $json = json_decode($body);
-
+        $json = json_decode((string) $response->getBody());
         $this->token = $json->access_token;
         cache()->put($tokenKey, $this->token, 60);
     }
@@ -198,6 +270,12 @@ trait ApiRequest
 
         // Match common API patterns
         if (preg_match('#/v\d+/([^/]+)#', $path, $matches)) {
+            // Sub-resource paths (e.g. /v1/sets/123/workflow) are not JSON:API
+            // resource responses — skip validation to avoid false failures
+            if (preg_match('#/v\d+/[^/]+/[^/]+/.+#', $path)) {
+                return null;
+            }
+
             $resource = $matches[1];
 
             // Normalize resource names
@@ -214,6 +292,11 @@ trait ApiRequest
                 'object-attributes' => 'objectattribute',
                 'playerteams' => 'playerteam',
                 'stats' => 'stats',
+                'card-images' => 'card-image',
+                'set-sources' => 'set-source',
+                // Action-style endpoints that don't return standard JSON:API responses
+                'workflow' => null,
+                'set-todos' => null,
             ];
 
             return $normalizedResources[$resource] ?? $resource;

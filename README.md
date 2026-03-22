@@ -20,7 +20,7 @@ A modern PHP SDK for integrating with the Trading Card API. This Laravel package
 
 ## 📋 Requirements
 
-- PHP 8.1 or higher
+- PHP 8.2 or higher
 - Laravel 10.0 or higher
 - GuzzleHTTP 7.5 or higher
 
@@ -90,6 +90,7 @@ The SDK provides comprehensive error handling with specific exception classes:
 ```php
 use CardTechie\TradingCardApiSdk\Exceptions\{
     CardNotFoundException,
+    ConflictException,
     ValidationException,
     RateLimitException,
     AuthenticationException
@@ -100,6 +101,9 @@ try {
 } catch (CardNotFoundException $e) {
     // Handle missing card
     echo "Card not found: " . $e->getMessage();
+} catch (ConflictException $e) {
+    // Handle duplicate resource (HTTP 409)
+    echo "Conflict: " . $e->getMessage();
 } catch (ValidationException $e) {
     // Handle validation errors
     foreach ($e->getValidationErrors() as $field => $errors) {
@@ -247,7 +251,7 @@ The SDK provides access to the following Trading Card API resources:
 | Resource | Description | Methods |
 |----------|-------------|---------|
 | **Cards** | Individual trading cards | `get()`, `create()`, `update()`, `delete()` |
-| **Sets** | Card sets and collections | `get()`, `list()`, `create()`, `update()`, `delete()`, `checklist($id)`, `addMissingCards($id)`, `addChecklist($request, $id)` |
+| **Sets** | Card sets and collections | `get()`, `list()`, `create()`, `update()`, `delete()`, `checklist($id)`, `workflow($id)`, `addMissingCards($id)`, `addChecklist($request, $id)` |
 | **Players** | Player information | `get()`, `list()`, `getList()`, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |
 | **Teams** | Team data | `get()`, `getList()`, `create()` |
 | **Genres** | Card categories/types | `get()`, `list()`, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |
@@ -258,6 +262,8 @@ The SDK provides access to the following Trading Card API resources:
 | **SetSources** | Set data sources | `get()`, `list()`, `create()`, `update()`, `delete()`, `forSet($setId)` |
 | **Stats** | Entity statistics and analytics | `get($type)`, `getCounts()`, `getSnapshots()`, `getGrowth()` |
 | **Attributes** | Card attributes | `get()`, `getList()` |
+| **Workflow** | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($todoId, $attributes)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)` |
+| **CardImages** | Card image upload and management | `list()`, `get($id)`, `upload($file, $cardId, $imageType)`, `update($id, $attributes)`, `delete($id)`, `getDownloadUrl($id, $size)` |
 
 ### Stats Resource
 
@@ -332,7 +338,100 @@ $api->setSource()->delete('source-id');
 
 // Include sources when fetching a set
 $set = $api->set()->get('set-id', ['include' => 'sources']);
-$sources = $set->sources();  // Returns array of SetSource models
+
+// Returns an Illuminate\Support\Collection of SetSource models
+$sources = $set->sources();
+
+if ($sources->isEmpty()) {
+    echo 'No sources found for this set.';
+} else {
+    $firstSource = $sources->first();
+    echo $firstSource->source_name;
+}
+```
+
+### Workflow Resource
+
+The Workflow resource manages set workflow steps (todos) and bulk initialization:
+
+```php
+// Get sets that have actionable workflow steps
+$actionable = $api->workflow()->actionableSets();
+foreach ($actionable->data as $set) {
+    echo $set->attributes->name;
+}
+
+// Filter actionable sets
+$actionable = $api->workflow()->actionableSets(['filter[sport]' => 'baseball']);
+
+// Get workflow status for a specific set (via Set resource)
+$workflow = $api->set()->workflow('set-id');
+
+// Update a workflow step (set-todo) status
+$result = $api->workflow()->updateSetTodo('todo-id', [
+    'status' => 'completed',
+]);
+
+// Bulk initialize workflow todos for all existing sets
+$job = $api->workflow()->bulkInitializeWorkflow();
+echo $job->data->job_id;   // Job ID to poll for status
+echo $job->data->status;   // 'queued'
+
+// Initialize workflow todos for specific sets only
+$job = $api->workflow()->bulkInitializeWorkflow([
+    'set_ids' => ['set-id-1', 'set-id-2'],
+]);
+
+// Poll bulk initialization job status
+$status = $api->workflow()->getBulkInitializeStatus($job->data->job_id);
+echo $status->data->status;     // 'queued', 'processing', or 'completed'
+echo $status->data->processed;  // Sets processed so far
+echo $status->data->total;      // Total sets to process
+
+// Get workflow todos for a specific set
+$result = $api->workflow()->getSetTodos('set-id');
+foreach ($result->todos as $todo) {
+    echo $todo->step;    // e.g. 'discover_sources'
+    echo $todo->status;  // e.g. 'completed'
+}
+// Returns empty todos array when set exists but has no initialized workflow
+```
+
+### CardImage Resource
+
+The CardImage resource handles card image uploads and management:
+
+```php
+// Upload a card image
+$image = $api->cardImage()->upload(
+    $request->file('image'),  // UploadedFile or file path
+    'card-id',
+    'front'  // 'front' or 'back'
+);
+
+// Upload with additional attributes
+$image = $api->cardImage()->upload(
+    '/path/to/image.jpg',
+    'card-id',
+    'front',
+    ['is_primary' => true]
+);
+
+// Get a card image
+$image = $api->cardImage()->get('image-id');
+
+// Get download URL
+$url = $api->cardImage()->getDownloadUrl('image-id');           // original size
+$url = $api->cardImage()->getDownloadUrl('image-id', 'small');  // small variant
+
+// Update image metadata
+$image = $api->cardImage()->update('image-id', ['is_primary' => true]);
+
+// List card images with filtering
+$images = $api->cardImage()->list(['filter[card_id]' => 'card-id']);
+
+// Delete a card image
+$api->cardImage()->delete('image-id');
 ```
 
 ## 🔧 Configuration

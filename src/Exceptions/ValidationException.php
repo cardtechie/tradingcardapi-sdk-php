@@ -77,6 +77,9 @@ class ValidationException extends TradingCardApiException
 
     /**
      * Create exception for missing required fields
+     *
+     * @param  array<int, string>  $fields
+     * @param  array<string, mixed>  $context
      */
     public static function missingRequiredFields(array $fields, array $context = []): self
     {
@@ -101,6 +104,9 @@ class ValidationException extends TradingCardApiException
 
     /**
      * Create exception for invalid field values
+     *
+     * @param  array<string, string>  $fieldErrors
+     * @param  array<string, mixed>  $context
      */
     public static function invalidFieldValues(array $fieldErrors, array $context = []): self
     {

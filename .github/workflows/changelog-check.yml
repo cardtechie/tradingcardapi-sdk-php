@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -43,8 +43,8 @@ jobs:
           if [ "$PR_BASE_BRANCH" = "main" ]; then
             echo "🎯 PR targets main branch - release changelog validation required"
             
-            # Extract the base semantic version (remove any suffixes like -hotfix.xxx)
-            RELEASE_VERSION=$(echo "$CURRENT_VERSION" | sed 's/-.*$//')
+            # Extract the base semantic version (remove RC/hotfix suffixes like .rc-N or -hotfix.xxx)
+            RELEASE_VERSION=$(echo "$CURRENT_VERSION" | sed 's/[.-]rc[.-][0-9]*$//' | sed 's/-.*$//')
             echo "Expected release version: $RELEASE_VERSION"
             
             # Check that CHANGELOG.md has section for this release version

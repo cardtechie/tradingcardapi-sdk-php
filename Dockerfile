@@ -28,7 +28,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/nginx.gpg] https://nginx.org/packag
     && ln -sf /dev/stderr /var/log/nginx/error.log
 
 # Install PHP and extensions
-ENV PHP_MINOR=8.1
+ENV PHP_MINOR=8.4
 ENV PHP_INI_DIR=/etc/php/${PHP_MINOR}/fpm
 RUN add-apt-repository ppa:ondrej/php \
     && apt-install-min \

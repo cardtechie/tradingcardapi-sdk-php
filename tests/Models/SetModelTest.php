@@ -71,13 +71,14 @@ it('returns subsets array', function () {
     $set = new Set(['id' => '123']);
     $set->setRelationships(['subsets' => $subsets]);
 
-    expect($set->subsets())->toBe($subsets);
+    expect($set->subsets())->toHaveCount(2);
+    expect($set->subsets()->first())->toBe($subset1);
 });
 
 it('returns empty array when no subsets', function () {
     $set = new Set(['id' => '123']);
 
-    expect($set->subsets())->toBe([]);
+    expect($set->subsets()->isEmpty())->toBeTrue();
 });
 
 it('returns checklist array', function () {
@@ -88,13 +89,14 @@ it('returns checklist array', function () {
     $set = new Set(['id' => '123']);
     $set->setRelationships(['checklist' => $checklist]);
 
-    expect($set->checklist())->toBe($checklist);
+    expect($set->checklist())->toHaveCount(2);
+    expect($set->checklist()->first())->toBe($card1);
 });
 
 it('returns empty array when no checklist', function () {
     $set = new Set(['id' => '123']);
 
-    expect($set->checklist())->toBe([]);
+    expect($set->checklist()->isEmpty())->toBeTrue();
 });
 
 it('returns current card count from checklist', function () {
@@ -218,14 +220,14 @@ it('returns sources array', function () {
     $sources = [$source1, $source2];
 
     $set = new Set(['id' => '123']);
-    $set->setRelationships(['sources' => $sources]);
+    $set->setRelationships(['set-sources' => $sources]);
 
-    expect($set->sources())->toBe($sources);
     expect($set->sources())->toHaveCount(2);
+    expect($set->sources()->first())->toBe($source1);
 });
 
 it('returns empty array when no sources', function () {
     $set = new Set(['id' => '123']);
 
-    expect($set->sources())->toBe([]);
+    expect($set->sources()->isEmpty())->toBeTrue();
 });

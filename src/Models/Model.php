@@ -2,6 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk\Models;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 /**
@@ -99,7 +100,7 @@ class Model
     /**
      * Magic method to get a relationship.
      *
-     * @return \Illuminate\Support\Collection|mixed
+     * @return Collection|mixed
      *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
      */
@@ -117,6 +118,12 @@ class Model
         $output = $this->attributes;
 
         foreach ($this->relationships as $type => $relations) {
+            if (is_object($relations) && property_exists($relations, 'attributes')) {
+                $output[$type] = $relations->attributes;
+
+                continue;
+            }
+
             foreach ($relations as $relation) {
                 if (is_array($relation) && array_key_exists('attributes', $relation)) {
                     $output[$type][] = $relation['attributes'];

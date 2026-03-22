@@ -8,6 +8,7 @@ use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class Player
@@ -28,7 +29,7 @@ class Player
      * Retrieve a list of players
      *
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getList(array $params = []): Collection
     {
@@ -46,7 +47,7 @@ class Player
      * @param  array  $relationships  Player relationships
      * @return PlayerModel The created player
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function create(array $attributes = [], array $relationships = []): PlayerModel
     {
@@ -79,7 +80,7 @@ class Player
      * @param  array  $params  Additional parameters (e.g., include relationships)
      * @return PlayerModel The player
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function get(string $id, array $params = []): PlayerModel
     {
@@ -96,7 +97,7 @@ class Player
      * @param  array  $params  Query parameters (limit, page, sort, filters, etc.)
      * @return LengthAwarePaginator Paginated player results
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function list(array $params = []): LengthAwarePaginator
     {
@@ -131,7 +132,7 @@ class Player
      * @param  array  $relationships  Player relationships to update
      * @return PlayerModel The updated player
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function update(string $id, array $attributes = [], array $relationships = []): PlayerModel
     {
@@ -164,7 +165,7 @@ class Player
      *
      * @param  string  $id  Player ID
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function delete(string $id): void
     {
@@ -177,7 +178,7 @@ class Player
      *
      * @return LengthAwarePaginator Paginated deleted player results
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function listDeleted(): LengthAwarePaginator
     {
@@ -201,7 +202,7 @@ class Player
      * @param  string  $id  Player ID
      * @return PlayerModel The deleted player
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function deleted(string $id): PlayerModel
     {

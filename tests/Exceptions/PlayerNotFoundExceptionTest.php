@@ -1,6 +1,7 @@
 <?php
 
 use CardTechie\TradingCardApiSdk\Exceptions\PlayerNotFoundException;
+use CardTechie\TradingCardApiSdk\Exceptions\ResourceNotFoundException;
 
 it('creates player not found exception by ID', function () {
     $exception = PlayerNotFoundException::byId('player456', ['team_id' => 'team789']);
@@ -30,5 +31,5 @@ it('creates player not found exception by name', function () {
 
 it('inherits from ResourceNotFoundException', function () {
     $exception = PlayerNotFoundException::byId('test123');
-    expect($exception)->toBeInstanceOf(\CardTechie\TradingCardApiSdk\Exceptions\ResourceNotFoundException::class);
+    expect($exception)->toBeInstanceOf(ResourceNotFoundException::class);
 });

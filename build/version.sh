@@ -73,8 +73,10 @@ case "$branch" in
         ;;
     release/*)
         # Release branch: RC version
-        branch_version=${branch#release/}
-        if [[ "$branch_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        # Extract semver from end of branch name (handles formats like "183-phpsdk-0.2.0" or "0.2.0")
+        branch_suffix=${branch#release/}
+        if [[ "$branch_suffix" =~ ([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            branch_version="${BASH_REMATCH[1]}"
             # Find existing RC tags for this version
             rc_count=$(git tag -l "${branch_version}.rc-*" | wc -l | tr -d ' ')
             next_rc=$((rc_count + 1))

@@ -4,11 +4,14 @@ namespace CardTechie\TradingCardApiSdk\Services;
 
 use CardTechie\TradingCardApiSdk\Exceptions\AuthenticationException;
 use CardTechie\TradingCardApiSdk\Exceptions\AuthorizationException;
+use CardTechie\TradingCardApiSdk\Exceptions\CardNotFoundException;
 use CardTechie\TradingCardApiSdk\Exceptions\ConflictException;
 use CardTechie\TradingCardApiSdk\Exceptions\NetworkException;
+use CardTechie\TradingCardApiSdk\Exceptions\PlayerNotFoundException;
 use CardTechie\TradingCardApiSdk\Exceptions\RateLimitException;
 use CardTechie\TradingCardApiSdk\Exceptions\ResourceNotFoundException;
 use CardTechie\TradingCardApiSdk\Exceptions\ServerException;
+use CardTechie\TradingCardApiSdk\Exceptions\SetNotFoundException;
 use CardTechie\TradingCardApiSdk\Exceptions\TradingCardApiException;
 use CardTechie\TradingCardApiSdk\Exceptions\ValidationException;
 use GuzzleHttp\Exception\ConnectException;
@@ -303,9 +306,9 @@ class ErrorResponseParser
     public function createResourceNotFoundException(string $resourceType, string $resourceId, array $context = []): ResourceNotFoundException
     {
         $exceptionClass = match ($resourceType) {
-            'card' => \CardTechie\TradingCardApiSdk\Exceptions\CardNotFoundException::class,
-            'player' => \CardTechie\TradingCardApiSdk\Exceptions\PlayerNotFoundException::class,
-            'set' => \CardTechie\TradingCardApiSdk\Exceptions\SetNotFoundException::class,
+            'card' => CardNotFoundException::class,
+            'player' => PlayerNotFoundException::class,
+            'set' => SetNotFoundException::class,
             default => ResourceNotFoundException::class
         };
 

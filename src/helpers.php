@@ -6,7 +6,7 @@ if (! function_exists('tradingcardapi')) {
     /**
      * Easy access to the trading card api
      *
-     * @return \CardTechie\TradingCardApiSdk\TradingCardApi
+     * @return TradingCardApi
      */
     function tradingcardapi()
     {
