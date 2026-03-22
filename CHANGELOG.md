@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-03-22
+
 ### Added
 
 - `Workflow` resource with `actionableSets()` method for `GET /v1/workflow/actionable-sets` endpoint (#167)
@@ -26,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated GitHub Actions `actions/checkout` from v5 to v6
 - Updated `stefanzweifel/git-auto-commit-action` from v6 to v7
 - Ran `composer update` to refresh all dependency lock file entries (PHPUnit 11.5.50, Pest 3.8.6, Larastan 3.9.3, PHPStan 2.1.40, Laravel 12)
+- Bumped minimum PHP requirement from 8.1 to 8.2 (PHP 8.1 reached EOL in November 2024 and Pest/paratest dropped 8.1 support)
 
 ### Fixed
 
@@ -296,7 +299,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.18...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.18...0.2.0
 [0.1.18]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.17...0.1.18
 [0.1.17]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.16...0.1.17
 [0.1.16]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.15...0.1.16
