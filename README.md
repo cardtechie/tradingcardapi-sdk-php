@@ -338,7 +338,16 @@ $api->setSource()->delete('source-id');
 
 // Include sources when fetching a set
 $set = $api->set()->get('set-id', ['include' => 'sources']);
-$sources = $set->sources();  // Returns Illuminate\Support\Collection of SetSource models
+
+// Returns an Illuminate\Support\Collection of SetSource models
+$sources = $set->sources();
+
+if ($sources->isEmpty()) {
+    echo 'No sources found for this set.';
+} else {
+    $firstSource = $sources->first();
+    echo $firstSource->source_name;
+}
 ```
 
 ### Workflow Resource

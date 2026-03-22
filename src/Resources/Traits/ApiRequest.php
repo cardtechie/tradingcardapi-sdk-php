@@ -170,7 +170,7 @@ trait ApiRequest
         // PAT path: skip OAuth entirely, use token directly
         if ($this->authType === 'pat') {
             if (empty($this->personalAccessToken)) {
-                throw new AuthenticationException('Personal Access Token is required when using PAT authentication.');
+                throw new AuthenticationException('Personal Access Token is required');
             }
             $this->token = $this->personalAccessToken;
 
@@ -292,8 +292,8 @@ trait ApiRequest
                 'object-attributes' => 'objectattribute',
                 'playerteams' => 'playerteam',
                 'stats' => 'stats',
-                'card-images' => 'cardimage',
-                'set-sources' => 'setsource',
+                'card-images' => 'card-image',
+                'set-sources' => 'set-source',
                 // Action-style endpoints that don't return standard JSON:API responses
                 'workflow' => null,
                 'set-todos' => null,
