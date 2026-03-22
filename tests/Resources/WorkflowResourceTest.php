@@ -86,3 +86,77 @@ it('can get actionable sets with params', function () {
     expect($result->data[0]->id)->toBe('3');
     expect($result->data[0]->attributes->sport)->toBe('baseball');
 });
+
+it('can update a set todo', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'id' => 'todo-123',
+                'type' => 'set-todos',
+                'attributes' => [
+                    'status' => 'completed',
+                    'completed_at' => '2024-01-01T00:00:00Z',
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->workflowResource->updateSetTodo('todo-123', ['status' => 'completed']);
+
+    expect($result)->toBeObject();
+    expect($result->data->id)->toBe('todo-123');
+    expect($result->data->attributes->status)->toBe('completed');
+});
+
+it('can bulk initialize workflow', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(202, [], json_encode([
+            'data' => [
+                'job_id' => 'job-abc-123',
+                'status' => 'queued',
+            ],
+        ]))
+    );
+
+    $result = $this->workflowResource->bulkInitializeWorkflow(['set_ids' => ['1', '2', '3']]);
+
+    expect($result)->toBeObject();
+    expect($result->data->job_id)->toBe('job-abc-123');
+    expect($result->data->status)->toBe('queued');
+});
+
+it('can bulk initialize workflow with no params', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(202, [], json_encode([
+            'data' => [
+                'job_id' => 'job-xyz-456',
+                'status' => 'queued',
+            ],
+        ]))
+    );
+
+    $result = $this->workflowResource->bulkInitializeWorkflow();
+
+    expect($result)->toBeObject();
+    expect($result->data->job_id)->toBe('job-xyz-456');
+});
+
+it('can get bulk initialize status', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'job_id' => 'job-abc-123',
+                'status' => 'completed',
+                'processed' => 150,
+                'total' => 150,
+            ],
+        ]))
+    );
+
+    $result = $this->workflowResource->getBulkInitializeStatus('job-abc-123');
+
+    expect($result)->toBeObject();
+    expect($result->data->job_id)->toBe('job-abc-123');
+    expect($result->data->status)->toBe('completed');
+    expect($result->data->processed)->toBe(150);
+});
