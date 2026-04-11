@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Auto-assign sprint workflow to assign new issues to the current sprint iteration on the org project board (#190)
+
 ## [0.2.0] - 2026-03-22
 
 ### Added
