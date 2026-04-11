@@ -315,7 +315,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.1...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.2...HEAD
+[0.2.2]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.1...0.2.2
 [0.2.1]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.18...0.2.0
 [0.1.18]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.17...0.1.18
