@@ -1,0 +1,112 @@
+name: Assign Sprint to New Issues
+
+on:
+  issues:
+    types: [opened]
+
+permissions: {}
+
+jobs:
+  assign-sprint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign issue to current sprint
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECT_TOKEN }}
+          script: |
+            const org = 'cardtechie';
+            const projectNumber = 13;
+            const issueNodeId = context.payload.issue.node_id;
+
+            // Step 1: Find the project ID and Sprint field metadata
+            const projectQuery = await github.graphql(`
+              query($org: String!, $projectNumber: Int!) {
+                organization(login: $org) {
+                  projectV2(number: $projectNumber) {
+                    id
+                    fields(first: 50) {
+                      nodes {
+                        ... on ProjectV2IterationField {
+                          id
+                          name
+                          configuration {
+                            iterations {
+                              id
+                              title
+                              startDate
+                              duration
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `, { org, projectNumber });
+
+            const project = projectQuery.organization.projectV2;
+            const projectId = project.id;
+
+            // Find the Sprint iteration field
+            const sprintField = project.fields.nodes.find(
+              f => f.name === 'Sprint' && f.configuration
+            );
+
+            if (!sprintField) {
+              core.warning('Sprint iteration field not found on project');
+              return;
+            }
+
+            // Find the current iteration (active today)
+            const today = new Date().toISOString().split('T')[0];
+            const currentIteration = sprintField.configuration.iterations.find(iter => {
+              const start = new Date(iter.startDate);
+              const end = new Date(start);
+              end.setDate(end.getDate() + iter.duration);
+              return today >= iter.startDate && today < end.toISOString().split('T')[0];
+            });
+
+            if (!currentIteration) {
+              core.warning('No current sprint iteration found');
+              return;
+            }
+
+            core.info(`Current sprint: ${currentIteration.title}`);
+
+            // Step 2: Add the issue to the project (idempotent - returns existing item if already present)
+            const addResult = await github.graphql(`
+              mutation($projectId: ID!, $contentId: ID!) {
+                addProjectV2ItemById(input: {projectId: $projectId, contentId: $contentId}) {
+                  item {
+                    id
+                  }
+                }
+              }
+            `, { projectId, contentId: issueNodeId });
+
+            const itemId = addResult.addProjectV2ItemById.item.id;
+
+            // Step 3: Set the Sprint field on the item
+            await github.graphql(`
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $iterationId: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId
+                  itemId: $itemId
+                  fieldId: $fieldId
+                  value: { iterationId: $iterationId }
+                }) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }
+            `, {
+              projectId,
+              itemId,
+              fieldId: sprintField.id,
+              iterationId: currentIteration.id
+            });
+
+            core.info(`Successfully assigned issue #${context.payload.issue.number} to sprint "${currentIteration.title}"`);
