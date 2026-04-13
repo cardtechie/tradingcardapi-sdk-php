@@ -262,7 +262,7 @@ The SDK provides access to the following Trading Card API resources:
 | **SetSources** | Set data sources | `get()`, `list()`, `create()`, `update()`, `delete()`, `forSet($setId)` |
 | **Stats** | Entity statistics and analytics | `get($type)`, `getCounts()`, `getSnapshots()`, `getGrowth()` |
 | **Attributes** | Card attributes | `get()`, `getList()` |
-| **Workflow** | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($todoId, $attributes)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)` |
+| **Workflow** | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($todoId, $attributes)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)`, `getReviewQueue($step, $params)`, `flagForReview($todoId, $reason)`, `resolveReview($todoId, $notes)` |
 | **CardImages** | Card image upload and management | `list()`, `get($id)`, `upload($file, $cardId, $imageType)`, `update($id, $attributes)`, `delete($id)`, `getDownloadUrl($id, $size)` |
 
 ### Stats Resource
@@ -395,6 +395,37 @@ foreach ($result->todos as $todo) {
     echo $todo->status;  // e.g. 'completed'
 }
 // Returns empty todos array when set exists but has no initialized workflow
+
+// --- Review Queue ---
+
+// Get all sets blocked for human review
+$reviewQueue = $api->workflow()->getReviewQueue();
+
+// Filter review queue by workflow step
+$parseReview = $api->workflow()->getReviewQueue('parse');
+
+// With additional params
+$reviewQueue = $api->workflow()->getReviewQueue(null, ['filter[sport]' => 'baseball']);
+
+// Flag a workflow step for human review
+$api->workflow()->flagForReview('todo-id', 'Data quality issue detected');
+
+// Resolve a review (resets to pending)
+$api->workflow()->resolveReview('todo-id');
+$api->workflow()->resolveReview('todo-id', 'Verified card data is correct');
+
+// --- Enums ---
+
+// Use WorkflowStatus enum instead of magic strings
+use CardTechie\TradingCardApiSdk\Enums\WorkflowStatus;
+use CardTechie\TradingCardApiSdk\Enums\WorkflowStep;
+
+$api->workflow()->updateSetTodo('todo-id', [
+    'status' => WorkflowStatus::COMPLETED->value,
+]);
+
+// Filter by step using the enum
+$reviewQueue = $api->workflow()->getReviewQueue(WorkflowStep::PARSE->value);
 ```
 
 ### CardImage Resource

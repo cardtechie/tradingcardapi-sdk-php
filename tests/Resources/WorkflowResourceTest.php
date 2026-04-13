@@ -594,3 +594,254 @@ it('throws an exception when getSetTodos receives a 500', function () {
     expect(fn () => $this->workflowResource->getSetTodos('set-abc'))
         ->toThrow(ServerException::class);
 });
+
+// --- getReviewQueue ---
+
+it('can get review queue', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                [
+                    'id' => '1',
+                    'type' => 'sets',
+                    'attributes' => [
+                        'name' => '2024 Topps Baseball',
+                        'status' => 'review',
+                    ],
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->workflowResource->getReviewQueue();
+
+    expect($result)->toBeObject();
+    expect($result->data)->toBeArray();
+    expect($result->data)->toHaveCount(1);
+    expect($result->data[0]->attributes->status)->toBe('review');
+});
+
+it('can get review queue filtered by step', function () {
+    $capturedRequest = null;
+
+    $customHandler = new MockHandler([
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [],
+        ])),
+    ]);
+
+    $middleware = Middleware::tap(function (RequestInterface $request) use (&$capturedRequest) {
+        $capturedRequest = $request;
+    });
+
+    $handlerStack = HandlerStack::create($customHandler);
+    $handlerStack->push($middleware);
+    $client = new Client(['handler' => $handlerStack]);
+    $resource = new Workflow($client);
+
+    $resource->getReviewQueue('parse');
+
+    $uri = (string) $capturedRequest->getUri();
+    expect($uri)->toContain('status=review');
+    expect($uri)->toContain('step=parse');
+});
+
+it('can get review queue with additional params', function () {
+    $capturedRequest = null;
+
+    $customHandler = new MockHandler([
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [],
+        ])),
+    ]);
+
+    $middleware = Middleware::tap(function (RequestInterface $request) use (&$capturedRequest) {
+        $capturedRequest = $request;
+    });
+
+    $handlerStack = HandlerStack::create($customHandler);
+    $handlerStack->push($middleware);
+    $client = new Client(['handler' => $handlerStack]);
+    $resource = new Workflow($client);
+
+    $resource->getReviewQueue(null, ['filter[sport]' => 'baseball']);
+
+    $uri = (string) $capturedRequest->getUri();
+    expect($uri)->toContain('status=review');
+    expect($uri)->toContain('filter%5Bsport%5D=baseball');
+    expect($uri)->not->toContain('step=');
+});
+
+it('can get review queue and returns an empty list', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [],
+        ]))
+    );
+
+    $result = $this->workflowResource->getReviewQueue();
+
+    expect($result)->toBeObject();
+    expect($result->data)->toBeArray();
+    expect($result->data)->toHaveCount(0);
+});
+
+// --- flagForReview ---
+
+it('can flag a todo for review', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'id' => 'todo-123',
+                'type' => 'set-todos',
+                'attributes' => [
+                    'status' => 'review',
+                    'notes' => 'Data quality issue detected',
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->workflowResource->flagForReview('todo-123', 'Data quality issue detected');
+
+    expect($result)->toBeObject();
+    expect($result->data->id)->toBe('todo-123');
+    expect($result->data->attributes->status)->toBe('review');
+    expect($result->data->attributes->notes)->toBe('Data quality issue detected');
+});
+
+it('builds the correct JSON:API envelope for flagForReview', function () {
+    $capturedRequest = null;
+
+    $customHandler = new MockHandler([
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'id' => 'todo-456',
+                'type' => 'set-todos',
+                'attributes' => ['status' => 'review', 'notes' => 'Needs review'],
+            ],
+        ])),
+    ]);
+
+    $middleware = Middleware::tap(function (RequestInterface $request) use (&$capturedRequest) {
+        $capturedRequest = $request;
+    });
+
+    $handlerStack = HandlerStack::create($customHandler);
+    $handlerStack->push($middleware);
+    $client = new Client(['handler' => $handlerStack]);
+    $resource = new Workflow($client);
+
+    $resource->flagForReview('todo-456', 'Needs review');
+
+    $body = json_decode((string) $capturedRequest->getBody(), true);
+    expect($body['data']['type'])->toBe('set-todos');
+    expect($body['data']['id'])->toBe('todo-456');
+    expect($body['data']['attributes']['status'])->toBe('review');
+    expect($body['data']['attributes']['notes'])->toBe('Needs review');
+});
+
+// --- resolveReview ---
+
+it('can resolve a review with default notes', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'id' => 'todo-789',
+                'type' => 'set-todos',
+                'attributes' => [
+                    'status' => 'pending',
+                    'notes' => 'Resolved by human review',
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->workflowResource->resolveReview('todo-789');
+
+    expect($result)->toBeObject();
+    expect($result->data->id)->toBe('todo-789');
+    expect($result->data->attributes->status)->toBe('pending');
+    expect($result->data->attributes->notes)->toBe('Resolved by human review');
+});
+
+it('can resolve a review with custom notes', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'id' => 'todo-789',
+                'type' => 'set-todos',
+                'attributes' => [
+                    'status' => 'pending',
+                    'notes' => 'Verified card data is correct',
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->workflowResource->resolveReview('todo-789', 'Verified card data is correct');
+
+    expect($result)->toBeObject();
+    expect($result->data->attributes->status)->toBe('pending');
+    expect($result->data->attributes->notes)->toBe('Verified card data is correct');
+});
+
+it('builds the correct JSON:API envelope for resolveReview with default notes', function () {
+    $capturedRequest = null;
+
+    $customHandler = new MockHandler([
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'id' => 'todo-789',
+                'type' => 'set-todos',
+                'attributes' => ['status' => 'pending', 'notes' => 'Resolved by human review'],
+            ],
+        ])),
+    ]);
+
+    $middleware = Middleware::tap(function (RequestInterface $request) use (&$capturedRequest) {
+        $capturedRequest = $request;
+    });
+
+    $handlerStack = HandlerStack::create($customHandler);
+    $handlerStack->push($middleware);
+    $client = new Client(['handler' => $handlerStack]);
+    $resource = new Workflow($client);
+
+    $resource->resolveReview('todo-789');
+
+    $body = json_decode((string) $capturedRequest->getBody(), true);
+    expect($body['data']['type'])->toBe('set-todos');
+    expect($body['data']['id'])->toBe('todo-789');
+    expect($body['data']['attributes']['status'])->toBe('pending');
+    expect($body['data']['attributes']['notes'])->toBe('Resolved by human review');
+});
+
+it('builds the correct JSON:API envelope for resolveReview with custom notes', function () {
+    $capturedRequest = null;
+
+    $customHandler = new MockHandler([
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'id' => 'todo-789',
+                'type' => 'set-todos',
+                'attributes' => ['status' => 'pending', 'notes' => 'Custom note'],
+            ],
+        ])),
+    ]);
+
+    $middleware = Middleware::tap(function (RequestInterface $request) use (&$capturedRequest) {
+        $capturedRequest = $request;
+    });
+
+    $handlerStack = HandlerStack::create($customHandler);
+    $handlerStack->push($middleware);
+    $client = new Client(['handler' => $handlerStack]);
+    $resource = new Workflow($client);
+
+    $resource->resolveReview('todo-789', 'Custom note');
+
+    $body = json_decode((string) $capturedRequest->getBody(), true);
+    expect($body['data']['attributes']['status'])->toBe('pending');
+    expect($body['data']['attributes']['notes'])->toBe('Custom note');
+});

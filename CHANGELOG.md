@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `WorkflowStatus` enum with status constants (`pending`, `in_progress`, `completed`, `skipped`, `review`) (#188)
+- `WorkflowStep` enum with step constants (`discover_sources`, `fetch`, `parse`, `populate`, `validate`, `cleanup`, `publish`) (#188)
+- `getReviewQueue()` method on Workflow resource to query sets blocked for human review (#188)
+- `flagForReview()` and `resolveReview()` helper methods on Workflow resource (#188)
+
 ## [0.2.2] - 2026-04-11
 
 ### Security
