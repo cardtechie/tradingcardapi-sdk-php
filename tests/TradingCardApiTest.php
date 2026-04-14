@@ -1,6 +1,7 @@
 <?php
 
 use CardTechie\TradingCardApiSdk\Resources\Attribute;
+use CardTechie\TradingCardApiSdk\Resources\AuditLog;
 use CardTechie\TradingCardApiSdk\Resources\Brand;
 use CardTechie\TradingCardApiSdk\Resources\Card;
 use CardTechie\TradingCardApiSdk\Resources\Genre;
@@ -114,6 +115,12 @@ it('returns workflow resource', function () {
     $api = new TradingCardApi;
     $workflow = $api->workflow();
     expect($workflow)->toBeInstanceOf(Workflow::class);
+});
+
+it('returns audit log resource', function () {
+    $api = new TradingCardApi;
+    $auditLog = $api->auditLog();
+    expect($auditLog)->toBeInstanceOf(AuditLog::class);
 });
 
 it('creates guzzle client with correct configuration', function () {

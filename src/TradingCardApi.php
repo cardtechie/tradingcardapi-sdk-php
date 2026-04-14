@@ -3,6 +3,7 @@
 namespace CardTechie\TradingCardApiSdk;
 
 use CardTechie\TradingCardApiSdk\Resources\Attribute;
+use CardTechie\TradingCardApiSdk\Resources\AuditLog;
 use CardTechie\TradingCardApiSdk\Resources\Brand;
 use CardTechie\TradingCardApiSdk\Resources\Card;
 use CardTechie\TradingCardApiSdk\Resources\CardImage;
@@ -191,6 +192,14 @@ class TradingCardApi
         }
 
         return $resource;
+    }
+
+    /**
+     * Retrieve the audit log resource.
+     */
+    public function auditLog(): AuditLog
+    {
+        return $this->createResource(AuditLog::class);
     }
 
     /**
