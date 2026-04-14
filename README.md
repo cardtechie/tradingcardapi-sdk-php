@@ -262,7 +262,7 @@ The SDK provides access to the following Trading Card API resources:
 | **SetSources** | Set data sources | `get()`, `list()`, `create()`, `update()`, `delete()`, `forSet($setId)` |
 | **Stats** | Entity statistics and analytics | `get($type)`, `getCounts()`, `getSnapshots()`, `getGrowth()` |
 | **Attributes** | Card attributes | `get()`, `getList()` |
-| **Workflow** | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($todoId, $attributes)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)`, `getReviewQueue($step, $params)`, `flagForReview($todoId, $reason)`, `resolveReview($todoId, $notes)` |
+| **Workflow** | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($todoId, $attributes)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)`, `getReviewQueue($step?, $params?)`, `flagForReview($todoId, $reason)`, `resolveReview($todoId, $notes?)` |
 | **CardImages** | Card image upload and management | `list()`, `get($id)`, `upload($file, $cardId, $imageType)`, `update($id, $attributes)`, `delete($id)`, `getDownloadUrl($id, $size)` |
 
 ### Stats Resource

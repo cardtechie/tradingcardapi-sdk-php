@@ -134,7 +134,7 @@ class Workflow
     {
         return $this->updateSetTodo($todoId, [
             'status' => WorkflowStatus::PENDING->value,
-            'notes' => $notes ?: 'Resolved by human review',
+            'notes' => $notes !== '' ? $notes : 'Resolved by human review',
         ]);
     }
 }

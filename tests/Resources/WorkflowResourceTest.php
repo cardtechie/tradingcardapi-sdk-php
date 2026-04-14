@@ -598,7 +598,9 @@ it('throws an exception when getSetTodos receives a 500', function () {
 // --- getReviewQueue ---
 
 it('can get review queue', function () {
-    $this->mockHandler->append(
+    $capturedRequest = null;
+
+    $customHandler = new MockHandler([
         new GuzzleResponse(200, [], json_encode([
             'data' => [
                 [
@@ -610,15 +612,25 @@ it('can get review queue', function () {
                     ],
                 ],
             ],
-        ]))
-    );
+        ])),
+    ]);
 
-    $result = $this->workflowResource->getReviewQueue();
+    $middleware = Middleware::tap(function (RequestInterface $request) use (&$capturedRequest) {
+        $capturedRequest = $request;
+    });
+
+    $handlerStack = HandlerStack::create($customHandler);
+    $handlerStack->push($middleware);
+    $client = new Client(['handler' => $handlerStack]);
+    $resource = new Workflow($client);
+
+    $result = $resource->getReviewQueue();
 
     expect($result)->toBeObject();
     expect($result->data)->toBeArray();
     expect($result->data)->toHaveCount(1);
     expect($result->data[0]->attributes->status)->toBe('review');
+    expect((string) $capturedRequest->getUri())->toContain('status=review');
 });
 
 it('can get review queue filtered by step', function () {
@@ -673,17 +685,29 @@ it('can get review queue with additional params', function () {
 });
 
 it('can get review queue and returns an empty list', function () {
-    $this->mockHandler->append(
+    $capturedRequest = null;
+
+    $customHandler = new MockHandler([
         new GuzzleResponse(200, [], json_encode([
             'data' => [],
-        ]))
-    );
+        ])),
+    ]);
 
-    $result = $this->workflowResource->getReviewQueue();
+    $middleware = Middleware::tap(function (RequestInterface $request) use (&$capturedRequest) {
+        $capturedRequest = $request;
+    });
+
+    $handlerStack = HandlerStack::create($customHandler);
+    $handlerStack->push($middleware);
+    $client = new Client(['handler' => $handlerStack]);
+    $resource = new Workflow($client);
+
+    $result = $resource->getReviewQueue();
 
     expect($result)->toBeObject();
     expect($result->data)->toBeArray();
     expect($result->data)->toHaveCount(0);
+    expect((string) $capturedRequest->getUri())->toContain('status=review');
 });
 
 // --- flagForReview ---
