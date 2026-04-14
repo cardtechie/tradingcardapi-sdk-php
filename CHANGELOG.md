@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Audit log resource for listing, filtering, and creating audit events (#195)
+
 ## [0.2.3] - 2026-04-13
 
 ### Added

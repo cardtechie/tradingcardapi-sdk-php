@@ -21,6 +21,7 @@ class Response
      */
     private const ALLOWED_MODEL_TYPES = [
         'Attribute',
+        'AuditLog',
         'Brand',
         'Card',
         'CardImage',
