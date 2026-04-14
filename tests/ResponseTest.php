@@ -1,5 +1,6 @@
 <?php
 
+use CardTechie\TradingCardApiSdk\Models\AuditLog as AuditLogModel;
 use CardTechie\TradingCardApiSdk\Models\Card;
 use CardTechie\TradingCardApiSdk\Models\Player;
 use CardTechie\TradingCardApiSdk\Models\Set;
@@ -188,4 +189,49 @@ it('handles response without included section', function () {
 
     expect($response->relationships)->toBe([]);
     expect($response->mainObject)->toBeInstanceOf(Card::class);
+});
+
+it('resolves audit-logs type to AuditLog model', function () {
+    $json = json_encode([
+        'data' => [
+            'id' => '42',
+            'type' => 'audit-logs',
+            'attributes' => [
+                'event_type' => 'created',
+                'auditable_type' => 'Set',
+                'auditable_id' => 'set-123',
+            ],
+        ],
+    ]);
+
+    $response = new Response($json);
+
+    expect($response->mainObject)->toBeInstanceOf(AuditLogModel::class);
+    expect($response->mainObject->id)->toBe('42');
+    expect($response->mainObject->event_type)->toBe('created');
+});
+
+it('resolves audit-logs type via static parse method', function () {
+    $json = json_encode([
+        'data' => [
+            [
+                'id' => '1',
+                'type' => 'audit-logs',
+                'attributes' => ['event_type' => 'created'],
+            ],
+            [
+                'id' => '2',
+                'type' => 'audit-logs',
+                'attributes' => ['event_type' => 'updated'],
+            ],
+        ],
+    ]);
+
+    $result = Response::parse($json);
+
+    expect($result)->toHaveCount(2);
+    expect($result->first())->toBeInstanceOf(AuditLogModel::class);
+    expect($result->first()->event_type)->toBe('created');
+    expect($result->last())->toBeInstanceOf(AuditLogModel::class);
+    expect($result->last()->event_type)->toBe('updated');
 });

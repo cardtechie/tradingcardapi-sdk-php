@@ -427,6 +427,34 @@ $reviewQueue = $api->workflow()->getReviewQueue(
 );
 ```
 
+### AuditLog Resource
+
+The AuditLog resource provides access to audit logging endpoints for tracking and creating audit events:
+
+```php
+// Get audit logs with pagination
+$logs = $api->auditLog()->getAuditLogs();
+
+// Filter audit logs
+$logs = $api->auditLog()->getAuditLogs([
+    'auditable_type' => 'Set',
+    'auditable_id' => 'set-uuid',
+    'event_type' => 'created',
+    'start_date' => '2026-01-01',
+    'end_date' => '2026-04-13',
+    'per_page' => 25,
+    'page' => 1,
+]);
+
+// Create an audit event
+$event = $api->auditLog()->createAuditEvent([
+    'auditable_type' => 'Set',
+    'auditable_id' => 'set-uuid',
+    'event_type' => 'manual_review',
+    'description' => 'Manual review completed',
+]);
+```
+
 ### CardImage Resource
 
 The CardImage resource handles card image uploads and management:

@@ -294,7 +294,8 @@ trait ApiRequest
                 'stats' => 'stats',
                 'card-images' => 'card-image',
                 'set-sources' => 'set-source',
-                // Action-style endpoints that don't return standard JSON:API responses
+                // Endpoints without a response schema — skip validation
+                'audit-logs' => null,
                 'workflow' => null,
                 'set-todos' => null,
             ];
