@@ -2,6 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk\Resources;
 
+use CardTechie\TradingCardApiSdk\Enums\WorkflowStatus;
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use GuzzleHttp\Client;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -91,5 +92,49 @@ class Workflow
         $url = sprintf('/v1/workflow/sets/%s/todos', $setId);
 
         return $this->makeRequest($url, 'GET');
+    }
+
+    /**
+     * Get all sets currently blocked for human review,
+     * optionally filtered by workflow step.
+     *
+     * @param  array<string, mixed>  $params
+     *
+     * @throws InvalidArgumentException
+     */
+    public function getReviewQueue(?string $step = null, array $params = []): object
+    {
+        $params['status'] = WorkflowStatus::REVIEW->value;
+        if ($step !== null) {
+            $params['step'] = $step;
+        }
+
+        return $this->actionableSets($params);
+    }
+
+    /**
+     * Flag a workflow step (set-todo) for human review.
+     *
+     * @throws InvalidArgumentException
+     */
+    public function flagForReview(string $todoId, string $reason): object
+    {
+        return $this->updateSetTodo($todoId, [
+            'status' => WorkflowStatus::REVIEW->value,
+            'notes' => $reason,
+        ]);
+    }
+
+    /**
+     * Resolve a review by resetting a workflow step (set-todo) back to pending.
+     *
+     * @throws InvalidArgumentException
+     */
+    public function resolveReview(string $todoId, string $notes = ''): object
+    {
+        return $this->updateSetTodo($todoId, [
+            'status' => WorkflowStatus::PENDING->value,
+            'notes' => $notes !== '' ? $notes : 'Resolved by human review',
+        ]);
     }
 }
