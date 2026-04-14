@@ -416,16 +416,15 @@ $api->workflow()->resolveReview('todo-id', 'Verified card data is correct');
 
 // --- Enums ---
 
-// Use WorkflowStatus enum instead of magic strings
-use CardTechie\TradingCardApiSdk\Enums\WorkflowStatus;
-use CardTechie\TradingCardApiSdk\Enums\WorkflowStep;
-
+// Use WorkflowStatus and WorkflowStep enums instead of magic strings
 $api->workflow()->updateSetTodo('todo-id', [
-    'status' => WorkflowStatus::COMPLETED->value,
+    'status' => \CardTechie\TradingCardApiSdk\Enums\WorkflowStatus::COMPLETED->value,
 ]);
 
 // Filter by step using the enum
-$reviewQueue = $api->workflow()->getReviewQueue(WorkflowStep::PARSE->value);
+$reviewQueue = $api->workflow()->getReviewQueue(
+    \CardTechie\TradingCardApiSdk\Enums\WorkflowStep::PARSE->value
+);
 ```
 
 ### CardImage Resource
