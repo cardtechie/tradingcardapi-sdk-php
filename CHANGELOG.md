@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **[Issue #203]** Direct Claude to create GitHub issues via the `create_cross_repo_issues` MCP tool instead of `gh issue create` in `.claude/CLAUDE.md`.
+
 ## [0.2.4] - 2026-04-14
 
 ### Added
