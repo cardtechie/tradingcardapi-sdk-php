@@ -1,7 +1,7 @@
 <?php
 
+use CardTechie\TradingCardApiSdk\Internal\InternalClient;
 use CardTechie\TradingCardApiSdk\Resources\Attribute;
-use CardTechie\TradingCardApiSdk\Resources\AuditLog;
 use CardTechie\TradingCardApiSdk\Resources\Brand;
 use CardTechie\TradingCardApiSdk\Resources\Card;
 use CardTechie\TradingCardApiSdk\Resources\Genre;
@@ -13,7 +13,6 @@ use CardTechie\TradingCardApiSdk\Resources\Set;
 use CardTechie\TradingCardApiSdk\Resources\SetSource;
 use CardTechie\TradingCardApiSdk\Resources\Stats;
 use CardTechie\TradingCardApiSdk\Resources\Team;
-use CardTechie\TradingCardApiSdk\Resources\Workflow;
 use CardTechie\TradingCardApiSdk\Resources\Year;
 use CardTechie\TradingCardApiSdk\TradingCardApi;
 use GuzzleHttp\Client;
@@ -111,16 +110,10 @@ it('returns set source resource', function () {
     expect($setSource)->toBeInstanceOf(SetSource::class);
 });
 
-it('returns workflow resource', function () {
+it('returns internal client', function () {
     $api = new TradingCardApi;
-    $workflow = $api->workflow();
-    expect($workflow)->toBeInstanceOf(Workflow::class);
-});
-
-it('returns audit log resource', function () {
-    $api = new TradingCardApi;
-    $auditLog = $api->auditLog();
-    expect($auditLog)->toBeInstanceOf(AuditLog::class);
+    $internal = $api->internal();
+    expect($internal)->toBeInstanceOf(InternalClient::class);
 });
 
 it('creates guzzle client with correct configuration', function () {
