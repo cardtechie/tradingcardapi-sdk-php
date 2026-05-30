@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **[Issue #201]** Unify memory assertion threshold in ValidationPerformanceTest to prevent false failures in Docker.
+- Unify memory assertion threshold in ValidationPerformanceTest to prevent false failures in Docker. (#201)
 
 ## [0.2.4] - 2026-04-14
 
