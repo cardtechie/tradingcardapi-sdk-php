@@ -294,8 +294,8 @@ trait ApiRequest
                 'stats' => 'stats',
                 'card-images' => 'card-image',
                 'set-sources' => 'set-source',
+                'audit-logs' => 'audit-log',
                 // Endpoints without a response schema — skip validation
-                'audit-logs' => null,
                 'workflow' => null,
                 'set-todos' => null,
             ];
