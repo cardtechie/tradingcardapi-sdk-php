@@ -183,8 +183,8 @@ it('measures memory usage during validation', function () {
     $memoryAfter = memory_get_usage(true);
     $memoryUsed = $memoryAfter - $memoryBefore;
 
-    // Memory usage should be reasonable (less than 5MB for a single validation)
-    // CI environments may have different memory allocation patterns
-    $memoryLimit = getenv('CI') ? (5 * 1024 * 1024) : (1024 * 1024);
-    expect($memoryUsed)->toBeLessThan($memoryLimit);
+    // Memory usage should be reasonable (less than 5MB for a single validation).
+    // A unified limit avoids false failures in Docker and other non-CI environments
+    // where PHP allocates memory in larger page-aligned chunks than bare metal.
+    expect($memoryUsed)->toBeLessThan(5 * 1024 * 1024);
 });
