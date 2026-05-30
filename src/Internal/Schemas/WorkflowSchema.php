@@ -1,9 +1,11 @@
 <?php
 
-namespace CardTechie\TradingCardApiSdk\Schemas;
+namespace CardTechie\TradingCardApiSdk\Internal\Schemas;
+
+use CardTechie\TradingCardApiSdk\Schemas\BaseSchema;
 
 /**
- * Schema for Workflow API responses
+ * Schema for internal Workflow API responses
  */
 class WorkflowSchema extends BaseSchema
 {
