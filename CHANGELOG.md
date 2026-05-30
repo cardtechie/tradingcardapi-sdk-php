@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **[Issue #214]** Move workflow, set-todo, and audit-log resources into the `Internal\` namespace behind a new `internal()` accessor.
+  - Breaking change: `TradingCardApi::workflow()` and `TradingCardApi::auditLog()` are removed; callers must switch to `$api->internal()->workflow()` and `$api->internal()->auditLog()`. Credentials must carry the `internal` OAuth scope.
+
 ## [0.2.4] - 2026-04-14
 
 ### Added
