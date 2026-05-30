@@ -447,6 +447,7 @@ $logs = $auditLog->getAuditLogs();
 $logs = $auditLog->getAuditLogs([
     'auditable_type' => 'Set',
     'auditable_id' => 'set-uuid',
+    'agent_id' => 'agent-uuid',
     'event_type' => 'created',
     'start_date' => '2026-01-01',
     'end_date' => '2026-04-13',

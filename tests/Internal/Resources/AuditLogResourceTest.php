@@ -220,6 +220,70 @@ it('sends default per_page and page params in the query string', function () {
     expect($capturedRequest->getMethod())->toBe('GET');
 });
 
+// --- filter params are forwarded ---
+
+it('includes filter params in the query string', function () {
+    $capturedRequest = null;
+
+    $customHandler = new MockHandler([
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [],
+            'meta' => ['pagination' => ['total' => 0, 'per_page' => 25, 'current_page' => 1]],
+        ])),
+    ]);
+
+    $middleware = Middleware::tap(function (RequestInterface $request) use (&$capturedRequest) {
+        $capturedRequest = $request;
+    });
+
+    $handlerStack = HandlerStack::create($customHandler);
+    $handlerStack->push($middleware);
+    $client = new Client(['handler' => $handlerStack]);
+    $resource = new AuditLog($client);
+
+    $resource->getAuditLogs([
+        'auditable_type' => 'Set',
+        'event_type' => 'created',
+        'start_date' => '2026-04-01',
+        'end_date' => '2026-04-13',
+        'per_page' => 25,
+    ]);
+
+    $uri = (string) $capturedRequest->getUri();
+    expect($uri)->toContain('auditable_type=Set');
+    expect($uri)->toContain('event_type=created');
+    expect($uri)->toContain('start_date=2026-04-01');
+    expect($uri)->toContain('end_date=2026-04-13');
+    expect($uri)->toContain('per_page=25');
+});
+
+it('includes agent_id filter in the query string', function () {
+    $capturedRequest = null;
+
+    $customHandler = new MockHandler([
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [],
+            'meta' => ['pagination' => ['total' => 0, 'per_page' => 50, 'current_page' => 1]],
+        ])),
+    ]);
+
+    $middleware = Middleware::tap(function (RequestInterface $request) use (&$capturedRequest) {
+        $capturedRequest = $request;
+    });
+
+    $handlerStack = HandlerStack::create($customHandler);
+    $handlerStack->push($middleware);
+    $client = new Client(['handler' => $handlerStack]);
+    $resource = new AuditLog($client);
+
+    $resource->getAuditLogs(['agent_id' => 'agent-uuid-1']);
+
+    $uri = (string) $capturedRequest->getUri();
+    expect($uri)->toContain('agent_id=agent-uuid-1');
+});
+
+// --- createAuditEvent request shape ---
+
 it('builds the correct JSON:API envelope for createAuditEvent with attributes', function () {
     $capturedRequest = null;
 
