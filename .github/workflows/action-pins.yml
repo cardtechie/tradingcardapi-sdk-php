@@ -1,0 +1,51 @@
+name: Enforce SHA-Pinned GitHub Actions
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  check-action-pins:
+    name: Check Action Pins
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Run actionlint
+        uses: rhysd/actionlint@914e7df21a07ef503a81201c76d2b11c789d3fca # v1.7.12
+        with:
+          flags: >-
+            -format '{{range $err := .}}::error file={{$err.Filepath}},line={{$err.Line}},col={{$err.Column}}::{{$err.Message}}%0A```%0A{{replace $err.Snippet "\n" "%0A"}}%0A```\n{{end}}'
+
+      - name: Check for unpinned uses references
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          UNPINNED=$(grep -rn --include='*.yml' --include='*.yaml' \
+            -E '^\s+-?\s*uses: [^@]+@[^0-9a-f]' \
+            .github/workflows/ \
+            | grep -v '\.github/workflows/action-pins\.yml' \
+            | grep -v '#' \
+            || true)
+
+          if [[ -n "$UNPINNED" ]]; then
+            echo "::error::Unpinned GitHub Actions references detected. Pin each 'uses:' to a full 40-char commit SHA:"
+            echo ""
+            echo "$UNPINNED"
+            echo ""
+            echo "Required format:"
+            echo "  uses: owner/action@<40-char-sha> # vX.Y.Z"
+            echo ""
+            echo "Example:"
+            echo "  uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6"
+            exit 1
+          fi
+
+          echo "All 'uses:' references in .github/workflows/ are SHA-pinned."
