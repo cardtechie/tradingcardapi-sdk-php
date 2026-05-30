@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **[Issue #212]** Add CI guardrail to enforce SHA-pinned GitHub Actions references and pin all existing workflow actions.
 - **[Issue #210]** Add `agent_id` filter param to audit log queries.
 
 ### Changed
