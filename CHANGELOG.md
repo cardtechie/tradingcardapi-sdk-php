@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **[Issue #200]** Add AuditLogSchema to enable response validation for audit log endpoints.
+
 ## [0.2.4] - 2026-04-14
 
 ### Added
