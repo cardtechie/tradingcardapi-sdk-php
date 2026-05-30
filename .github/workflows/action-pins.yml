@@ -1,0 +1,48 @@
+name: Enforce SHA-Pinned GitHub Actions
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  check-action-pins:
+    name: Check Action Pins
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Check for unpinned uses references
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Match any uses: line where the ref after @ is not exactly a 40-char hex SHA.
+          # Uses -P (Perl-compatible regex) for the negative lookahead that enforces
+          # the full 40-char length.  GNU grep (ubuntu-latest) supports -P.
+          # Local reusable-workflow refs (uses: ./.github/...) are excluded because
+          # they reference a file path, not an external action that needs pinning.
+          UNPINNED=$(grep -rn --include='*.yml' --include='*.yaml' \
+            -P '^\s+-?\s*uses: [^.][^@]+@(?![0-9a-f]{40}([\s#]|$))' \
+            .github/workflows/ \
+            || true)
+
+          if [[ -n "$UNPINNED" ]]; then
+            echo "::error::Unpinned GitHub Actions references detected. Pin each 'uses:' to a full 40-char commit SHA:"
+            echo ""
+            echo "$UNPINNED"
+            echo ""
+            echo "Required format:"
+            echo "  uses: owner/action@<40-char-sha> # vX.Y.Z"
+            echo ""
+            echo "Example:"
+            echo "  uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6"
+            exit 1
+          fi
+
+          echo "All 'uses:' references in .github/workflows/ are SHA-pinned."

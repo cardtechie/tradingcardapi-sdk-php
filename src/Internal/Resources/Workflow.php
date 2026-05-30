@@ -1,6 +1,6 @@
 <?php
 
-namespace CardTechie\TradingCardApiSdk\Resources;
+namespace CardTechie\TradingCardApiSdk\Internal\Resources;
 
 use CardTechie\TradingCardApiSdk\Enums\WorkflowStatus;
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
@@ -25,7 +25,7 @@ class Workflow
      */
     public function actionableSets(array $params = []): object
     {
-        $url = '/v1/workflow/actionable-sets';
+        $url = '/internal/workflow/actionable-sets';
         if (! empty($params)) {
             $url .= '?'.http_build_query($params);
         }
@@ -42,7 +42,7 @@ class Workflow
      */
     public function updateSetTodo(string $todoId, array $attributes): object
     {
-        $url = sprintf('/v1/set-todos/%s', $todoId);
+        $url = sprintf('/internal/set-todos/%s', $todoId);
         $request = [
             'json' => [
                 'data' => [
@@ -67,7 +67,7 @@ class Workflow
     {
         $request = ! empty($params) ? ['json' => $params] : [];
 
-        return $this->makeRequest('/v1/workflow/bulk-initialize', 'POST', $request);
+        return $this->makeRequest('/internal/workflow/bulk-initialize', 'POST', $request);
     }
 
     /**
@@ -77,7 +77,7 @@ class Workflow
      */
     public function getBulkInitializeStatus(string $jobId): object
     {
-        $url = sprintf('/v1/workflow/bulk-initialize/%s', $jobId);
+        $url = sprintf('/internal/workflow/bulk-initialize/%s', $jobId);
 
         return $this->makeRequest($url, 'GET');
     }
@@ -89,7 +89,7 @@ class Workflow
      */
     public function getSetTodos(string $setId): object
     {
-        $url = sprintf('/v1/workflow/sets/%s/todos', $setId);
+        $url = sprintf('/internal/workflow/sets/%s/todos', $setId);
 
         return $this->makeRequest($url, 'GET');
     }

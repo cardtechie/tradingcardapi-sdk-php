@@ -10,6 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **[Issue #200]** Add AuditLogSchema to enable response validation for audit log endpoints.
+- **[Issue #212]** Add CI guardrail to enforce SHA-pinned GitHub Actions references and pin all existing workflow actions.
+- **[Issue #210]** Add `agent_id` filter param to audit log queries.
+
+### Changed
+
+- **[Issue #214]** Move workflow, set-todo, and audit-log resources into the `Internal\` namespace behind a new `internal()` accessor.
+  - Breaking change: `TradingCardApi::workflow()` and `TradingCardApi::auditLog()` are removed; callers must switch to `$api->internal()->workflow()` and `$api->internal()->auditLog()`. Credentials must carry the `internal` OAuth scope.
+- Direct Claude to create GitHub issues via the `create_cross_repo_issues` MCP tool instead of `gh issue create` in `.claude/CLAUDE.md` (#203).
+
+### Fixed
+
+- Unify memory assertion threshold in ValidationPerformanceTest to prevent false failures in Docker. (#201)
 
 ## [0.2.4] - 2026-04-14
 
