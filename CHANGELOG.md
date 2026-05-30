@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **[Issue #210]** Add `agent_id` filter param to `AuditLog::getAuditLogs()`.
+
 ## [0.2.4] - 2026-04-14
 
 ### Added
