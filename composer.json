@@ -41,7 +41,6 @@
         ],
         "psr-4": {
             "CardTechie\\TradingCardApiSdk\\": "src",
-            "CardTechie\\TradingCardApiSdk\\Internal\\": "src/Internal",
             "CardTechie\\TradingCardApiSdk\\Database\\Factories\\": "database/factories"
         }
     },
