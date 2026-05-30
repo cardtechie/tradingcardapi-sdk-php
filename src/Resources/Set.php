@@ -141,7 +141,7 @@ class Set
      */
     public function workflow(string $id): object
     {
-        $url = sprintf('/v1/sets/%s/workflow', $id);
+        $url = sprintf('/internal/sets/%s/workflow', $id);
 
         return $this->makeRequest($url, 'GET');
     }

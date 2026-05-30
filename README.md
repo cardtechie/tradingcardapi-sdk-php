@@ -262,8 +262,9 @@ The SDK provides access to the following Trading Card API resources:
 | **SetSources** | Set data sources | `get()`, `list()`, `create()`, `update()`, `delete()`, `forSet($setId)` |
 | **Stats** | Entity statistics and analytics | `get($type)`, `getCounts()`, `getSnapshots()`, `getGrowth()` |
 | **Attributes** | Card attributes | `get()`, `getList()` |
-| **Workflow** | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($todoId, $attributes)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)`, `getReviewQueue($step?, $params?)`, `flagForReview($todoId, $reason)`, `resolveReview($todoId, $notes?)` |
 | **CardImages** | Card image upload and management | `list()`, `get($id)`, `upload($file, $cardId, $imageType)`, `update($id, $attributes)`, `delete($id)`, `getDownloadUrl($id, $size)` |
+| **Internal\Workflow** _(internal only)_ | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($todoId, $attributes)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)`, `getReviewQueue($step?, $params?)`, `flagForReview($todoId, $reason)`, `resolveReview($todoId, $notes?)` |
+| **Internal\AuditLog** _(internal only)_ | Audit log tracking and creation | `getAuditLogs($params?)`, `createAuditEvent($attributes?)` |
 
 ### Stats Resource
 
@@ -350,95 +351,103 @@ if ($sources->isEmpty()) {
 }
 ```
 
-### Workflow Resource
+### Internal Namespace
 
-The Workflow resource manages set workflow steps (todos) and bulk initialization:
+> **Internal use only — not part of the public API contract; may change without semver guarantees.**
+>
+> The `Internal\` namespace is intended for internal callers (admin tooling, tradingcardapi-mcp, tradingcardapi-tools). Credentials must carry the `internal` OAuth scope; calls will fail with a 403 if this scope is absent.
+
+Access the internal client via `$api->internal()`:
 
 ```php
+$internal = $api->internal();
+
+// workflow and audit-log resources are now under internal()
+$actionable = $internal->workflow()->actionableSets();
+$logs       = $internal->auditLog()->getAuditLogs();
+```
+
+#### Internal\Workflow Resource
+
+The internal Workflow resource manages set workflow steps (todos) and bulk initialization via `/internal/*` routes:
+
+```php
+$workflow = $api->internal()->workflow();
+
 // Get sets that have actionable workflow steps
-$actionable = $api->workflow()->actionableSets();
+$actionable = $workflow->actionableSets();
 foreach ($actionable->data as $set) {
     echo $set->attributes->name;
 }
 
 // Filter actionable sets
-$actionable = $api->workflow()->actionableSets(['filter[sport]' => 'baseball']);
+$actionable = $workflow->actionableSets(['filter[sport]' => 'baseball']);
 
-// Get workflow status for a specific set (via Set resource)
-$workflow = $api->set()->workflow('set-id');
+// Get workflow status for a specific set (via Set resource — still public)
+$workflowStatus = $api->set()->workflow('set-id');
 
 // Update a workflow step (set-todo) status
-$result = $api->workflow()->updateSetTodo('todo-id', [
+$result = $workflow->updateSetTodo('todo-id', [
     'status' => 'completed',
 ]);
 
 // Bulk initialize workflow todos for all existing sets
-$job = $api->workflow()->bulkInitializeWorkflow();
+$job = $workflow->bulkInitializeWorkflow();
 echo $job->data->job_id;   // Job ID to poll for status
 echo $job->data->status;   // 'queued'
 
 // Initialize workflow todos for specific sets only
-$job = $api->workflow()->bulkInitializeWorkflow([
+$job = $workflow->bulkInitializeWorkflow([
     'set_ids' => ['set-id-1', 'set-id-2'],
 ]);
 
 // Poll bulk initialization job status
-$status = $api->workflow()->getBulkInitializeStatus($job->data->job_id);
+$status = $workflow->getBulkInitializeStatus($job->data->job_id);
 echo $status->data->status;     // 'queued', 'processing', or 'completed'
 echo $status->data->processed;  // Sets processed so far
 echo $status->data->total;      // Total sets to process
 
 // Get workflow todos for a specific set
-$result = $api->workflow()->getSetTodos('set-id');
+$result = $workflow->getSetTodos('set-id');
 foreach ($result->todos as $todo) {
     echo $todo->step;    // e.g. 'discover_sources'
     echo $todo->status;  // e.g. 'completed'
 }
-// Returns empty todos array when set exists but has no initialized workflow
-
-// --- Review Queue ---
 
 // Get all sets blocked for human review
-$reviewQueue = $api->workflow()->getReviewQueue();
+$reviewQueue = $workflow->getReviewQueue();
 
 // Filter review queue by workflow step
-$parseReview = $api->workflow()->getReviewQueue('parse');
-
-// With additional params
-$reviewQueue = $api->workflow()->getReviewQueue(null, ['filter[sport]' => 'baseball']);
+$parseReview = $workflow->getReviewQueue('parse');
 
 // Flag a workflow step for human review
-$api->workflow()->flagForReview('todo-id', 'Data quality issue detected');
+$workflow->flagForReview('todo-id', 'Data quality issue detected');
 
 // Resolve a review (resets to pending)
-$api->workflow()->resolveReview('todo-id');
-$api->workflow()->resolveReview('todo-id', 'Verified card data is correct');
-
-// --- Enums ---
+$workflow->resolveReview('todo-id');
+$workflow->resolveReview('todo-id', 'Verified card data is correct');
 
 // Use WorkflowStatus and WorkflowStep enums instead of magic strings
-$api->workflow()->updateSetTodo('todo-id', [
+$workflow->updateSetTodo('todo-id', [
     'status' => \CardTechie\TradingCardApiSdk\Enums\WorkflowStatus::COMPLETED->value,
 ]);
-
-// Filter by step using the enum
-$reviewQueue = $api->workflow()->getReviewQueue(
-    \CardTechie\TradingCardApiSdk\Enums\WorkflowStep::PARSE->value
-);
 ```
 
-### AuditLog Resource
+#### Internal\AuditLog Resource
 
-The AuditLog resource provides access to audit logging endpoints for tracking and creating audit events:
+The internal AuditLog resource provides access to audit logging endpoints via `/internal/*` routes:
 
 ```php
+$auditLog = $api->internal()->auditLog();
+
 // Get audit logs with pagination
-$logs = $api->auditLog()->getAuditLogs();
+$logs = $auditLog->getAuditLogs();
 
 // Filter audit logs
-$logs = $api->auditLog()->getAuditLogs([
+$logs = $auditLog->getAuditLogs([
     'auditable_type' => 'Set',
     'auditable_id' => 'set-uuid',
+    'agent_id' => 'agent-uuid',
     'event_type' => 'created',
     'start_date' => '2026-01-01',
     'end_date' => '2026-04-13',
@@ -447,7 +456,7 @@ $logs = $api->auditLog()->getAuditLogs([
 ]);
 
 // Create an audit event
-$event = $api->auditLog()->createAuditEvent([
+$event = $auditLog->createAuditEvent([
     'auditable_type' => 'Set',
     'auditable_id' => 'set-uuid',
     'event_type' => 'manual_review',

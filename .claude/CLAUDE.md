@@ -125,6 +125,16 @@ make check          # Verify all quality standards
 
 The README.md is the public face of this repository and should always accurately represent the current state of the project.
 
+## Issue Creation
+
+Always use the `create_cross_repo_issues` MCP tool (from `picklewagon-mcp`) to
+create GitHub issues — do not call `gh issue create` directly, including for
+post-merge follow-ups or ad-hoc work. The MCP tool automatically:
+
+- Runs duplicate detection before creating the issue
+- Performs cross-repo impact analysis and creates linked sub-issues in affected repos
+- Applies the correct project board, labels, and Type field
+
 ## Release Management
 
 **CRITICAL: Packagist Version Management**
