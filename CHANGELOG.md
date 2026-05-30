@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **[Issue #210]** Add `agent_id` filter param to `AuditLog::getAuditLogs()`.
 
+### Changed
+
+- Direct Claude to create GitHub issues via the `create_cross_repo_issues` MCP tool instead of `gh issue create` in `.claude/CLAUDE.md` (#203).
+
 ## [0.2.4] - 2026-04-14
 
 ### Added
