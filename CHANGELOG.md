@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **[Issue #212]** Add CI guardrail to enforce SHA-pinned GitHub Actions references and pin all existing workflow actions.
+
 ## [0.2.4] - 2026-04-14
 
 ### Added
