@@ -284,6 +284,31 @@ it('includes filter params in the query string', function () {
     expect($uri)->toContain('per_page=25');
 });
 
+it('includes agent_id filter in the query string', function () {
+    $capturedRequest = null;
+
+    $customHandler = new MockHandler([
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [],
+            'meta' => ['pagination' => ['total' => 0, 'per_page' => 50, 'current_page' => 1]],
+        ])),
+    ]);
+
+    $middleware = Middleware::tap(function (RequestInterface $request) use (&$capturedRequest) {
+        $capturedRequest = $request;
+    });
+
+    $handlerStack = HandlerStack::create($customHandler);
+    $handlerStack->push($middleware);
+    $client = new Client(['handler' => $handlerStack]);
+    $resource = new AuditLog($client);
+
+    $resource->getAuditLogs(['agent_id' => 'agent-uuid-1']);
+
+    $uri = (string) $capturedRequest->getUri();
+    expect($uri)->toContain('agent_id=agent-uuid-1');
+});
+
 // --- createAuditEvent request shape ---
 
 it('builds the correct JSON:API envelope for createAuditEvent with attributes', function () {
