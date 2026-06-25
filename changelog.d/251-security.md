@@ -1,0 +1,1 @@
+- **[Issue #251]** Redact Authorization headers, OAuth client_secret, and access_token from exception context and logs, and stop serializing raw auth response bodies.
