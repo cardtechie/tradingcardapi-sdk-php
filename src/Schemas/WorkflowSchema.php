@@ -18,8 +18,24 @@ class WorkflowSchema extends BaseSchema
     {
         return $this->mergeRules(
             $this->getJsonApiRules(),
-            $this->getMetaLinksRules()
+            $this->getMetaLinksRules(),
+            $this->getWorkflowSpecificRules()
         );
+    }
+
+    /**
+     * Get Workflow-specific validation rules
+     *
+     * Constrains data.type to the expected resource type(s), matching every
+     * other JSON:API schema in this namespace (e.g. SetTodoSchema). Both the
+     * plural and singular forms are accepted so the rule does not reject a
+     * server that emits either spelling.
+     */
+    private function getWorkflowSpecificRules(): array
+    {
+        return [
+            'data.type' => 'required|string|in:workflows,workflow',
+        ];
     }
 
     /**
@@ -29,7 +45,18 @@ class WorkflowSchema extends BaseSchema
     {
         return $this->mergeRules(
             $this->getJsonApiCollectionRules(),
-            $this->getMetaLinksRules()
+            $this->getMetaLinksRules(),
+            $this->getWorkflowCollectionSpecificRules()
         );
+    }
+
+    /**
+     * Get Workflow collection-specific validation rules
+     */
+    private function getWorkflowCollectionSpecificRules(): array
+    {
+        return [
+            'data.*.type' => 'required|string|in:workflows,workflow',
+        ];
     }
 }

@@ -279,7 +279,7 @@ trait ApiRequest
             'manufacturers' => 'manufacturer',
             'years' => 'year',
             'attributes' => 'attribute',
-            'object-attributes' => 'objectattribute',
+            'object-attributes' => 'object-attribute',
             'playerteams' => 'playerteam',
             'stats' => 'stats',
             'card-images' => 'card-image',
