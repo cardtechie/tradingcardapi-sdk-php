@@ -309,13 +309,16 @@ trait ApiRequest
         if (preg_match('#^/internal/([^/]+)(?:/([^/]+))?(/.+)?$#', $path, $matches)) {
             $resource = $matches[1];
             $second = $matches[2] ?? null;
-            $rest = $matches[3] ?? null;
+            // The trailing (/.+)? group only participates for paths deeper than
+            // /internal/<resource>/<segment>; preg_match omits it otherwise, so a
+            // non-empty third match means there are extra path segments.
+            $hasDeeperPath = ! empty($matches[3]);
 
             // Anything deeper than /internal/<resource>/<segment> is a
             // multi-segment sub-resource (e.g. /internal/workflow/sets/{id}/todos
             // or /internal/sets/{id}/workflow) and is not a single JSON:API
             // resource response — skip validation.
-            if ($rest !== null && $rest !== '') {
+            if ($hasDeeperPath) {
                 return null;
             }
 
