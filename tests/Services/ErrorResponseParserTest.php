@@ -266,6 +266,77 @@ it('parses headers correctly', function () {
     expect($context['headers']['X-Custom-Header'])->toBe('value1, value2');
 });
 
+it('redacts the Authorization header from exception context', function () {
+    $response = new Response(401, [
+        'Authorization' => 'Bearer super-secret-token',
+        'Content-Type' => 'application/json',
+    ], json_encode([
+        'error' => 'invalid_token',
+        'message' => 'Token expired',
+    ]));
+
+    $exception = $this->parser->parseHttpResponse($response);
+
+    $context = $exception->getContext();
+    expect($context['headers']['Authorization'])->toBe('[REDACTED]');
+    expect($context['headers']['Content-Type'])->toBe('application/json');
+    expect(json_encode($context))->not->toContain('super-secret-token');
+});
+
+it('redacts access_token and client_secret from getContext and toArray', function () {
+    $response = new Response(401, [
+        'Authorization' => 'Bearer leak-me',
+    ], json_encode([
+        'error' => 'invalid_client',
+        'access_token' => 'leaked-access-token',
+        'client_secret' => 'leaked-client-secret',
+        'message' => 'Client authentication failed',
+    ]));
+
+    $exception = $this->parser->parseHttpResponse($response);
+
+    $contextJson = json_encode($exception->getContext());
+    expect($contextJson)->not->toContain('leaked-access-token');
+    expect($contextJson)->not->toContain('leaked-client-secret');
+    expect($contextJson)->not->toContain('leak-me');
+
+    // The parsed response must keep the keys but with redacted values.
+    expect($exception->getContext()['parsed_response']['access_token'])->toBe('[REDACTED]');
+    expect($exception->getContext()['parsed_response']['client_secret'])->toBe('[REDACTED]');
+
+    $arrayJson = json_encode($exception->toArray());
+    expect($arrayJson)->not->toContain('leaked-access-token');
+    expect($arrayJson)->not->toContain('leaked-client-secret');
+});
+
+it('redacts the raw response_body so bearer tokens do not leak', function () {
+    $response = new Response(401, [], 'auth failed for Bearer abc123secret456');
+
+    $exception = $this->parser->parseHttpResponse($response);
+
+    $context = $exception->getContext();
+    expect($context['response_body'])->not->toContain('abc123secret456');
+    expect($context['response_body'])->toContain('[REDACTED]');
+});
+
+it('preserves non-sensitive context while redacting secrets', function () {
+    $response = new Response(401, [
+        'Content-Type' => 'application/json',
+    ], json_encode([
+        'error' => 'invalid_token',
+        'message' => 'Token expired',
+        'access_token' => 'should-not-appear',
+    ]));
+
+    $exception = $this->parser->parseHttpResponse($response);
+
+    // Non-sensitive error metadata is still accurately extracted.
+    expect($exception->getMessage())->toBe('Token expired');
+    expect($exception->getHttpStatusCode())->toBe(401);
+    expect($exception->getContext()['http_status_code'])->toBe(401);
+    expect($exception->getContext()['headers']['Content-Type'])->toBe('application/json');
+});
+
 it('handles RequestException without response', function () {
     $request = new Request('GET', 'https://api.example.com');
     $guzzleException = new RequestException('Request failed', $request);
