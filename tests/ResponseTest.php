@@ -52,6 +52,63 @@ it('can parse response with included relationships', function () {
     expect($response->relationships['players'][0])->toBeInstanceOf(Player::class);
 });
 
+it('attaches the set genre via JSON:API relationships linkage (constructor path)', function () {
+    // After tradingcardapi-api#1491 the flat genre_id attribute is gone; the genre
+    // is matched via data.relationships.genre.data.id against the included genres.
+    $json = json_encode([
+        'data' => [
+            'id' => '123',
+            'type' => 'sets',
+            'attributes' => ['name' => 'Test Set'],
+            'relationships' => [
+                'genre' => [
+                    'data' => ['type' => 'genres', 'id' => '2'],
+                ],
+            ],
+        ],
+        'included' => [
+            ['id' => '1', 'type' => 'genres', 'attributes' => ['name' => 'Genre 1']],
+            ['id' => '2', 'type' => 'genres', 'attributes' => ['name' => 'Genre 2']],
+        ],
+    ]);
+
+    $response = new Response($json);
+    $set = $response->mainObject;
+
+    expect($set)->toBeInstanceOf(Set::class);
+    expect($set->linkage)->toHaveKey('genre');
+    expect($set->linkage['genre']['id'])->toBe('2');
+    expect($set->genre())->not->toBeNull();
+    expect($set->genre()->id)->toBe('2');
+    expect($set->getRelationship('genres'))->toBeNull();
+});
+
+it('attaches the set genre via JSON:API relationships linkage (static parse path)', function () {
+    $json = json_encode([
+        'data' => [
+            'id' => '123',
+            'type' => 'sets',
+            'attributes' => ['name' => 'Test Set'],
+            'relationships' => [
+                'genre' => [
+                    'data' => ['type' => 'genres', 'id' => '1'],
+                ],
+            ],
+        ],
+        'included' => [
+            ['id' => '1', 'type' => 'genres', 'attributes' => ['name' => 'Genre 1']],
+            ['id' => '2', 'type' => 'genres', 'attributes' => ['name' => 'Genre 2']],
+        ],
+    ]);
+
+    $set = Response::parse($json);
+
+    expect($set)->toBeInstanceOf(Set::class);
+    expect($set->genre())->not->toBeNull();
+    expect($set->genre()->id)->toBe('1');
+    expect($set->getRelationship('genres'))->toBeNull();
+});
+
 it('static parse method handles array of data', function () {
     $json = json_encode([
         'data' => [

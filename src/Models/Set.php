@@ -8,7 +8,6 @@ use Illuminate\Support\Collection;
  * Class Set
  *
  * @property string $number_prefix
- * @property string $genre_id
  * @property bool|null $is_variation
  */
 class Set extends Model
@@ -199,12 +198,17 @@ class Set extends Model
         parent::setRelationships($relationships);
 
         if (array_key_exists('genres', $this->relationships)) {
-            // A set has one genre and one genre only
-            $genreId = $this->genre_id;
-            foreach ($this->relationships['genres'] as $index => $genre) {
-                if ($genreId === $genre->id) {
-                    $this->relationships['genre'] = $genre;
-                    unset($this->relationships['genres']);
+            // A set has one genre and one genre only. The flat genre_id attribute was
+            // removed from the Set API response in tradingcardapi-api#1491, so match the
+            // included genre via the JSON:API relationships linkage (relationships.genre.data.id)
+            // instead. A missing linkage simply no-ops the match rather than mis-matching.
+            $genreId = $this->linkage['genre']['id'] ?? null;
+            if ($genreId !== null) {
+                foreach ($this->relationships['genres'] as $index => $genre) {
+                    if ($genreId === $genre->id) {
+                        $this->relationships['genre'] = $genre;
+                        unset($this->relationships['genres']);
+                    }
                 }
             }
         }
