@@ -310,6 +310,49 @@ $connectionRefused = NetworkException::connectionRefused('api.example.com', 443)
 $sslError = NetworkException::sslError('Certificate verification failed');
 ```
 
+## HTTP Timeouts and Automatic Retries
+
+### Default timeouts
+
+The SDK applies a **10-second request timeout** and a **5-second connect
+timeout** to every request out of the box. Guzzle's own default is *no
+timeout*, which means a hung API would otherwise block the calling PHP-FPM
+worker indefinitely. Both are configurable (and may be set to `0` to disable):
+
+```env
+TRADINGCARDAPI_TIMEOUT=10          # total seconds to wait for a response
+TRADINGCARDAPI_CONNECT_TIMEOUT=5   # seconds to wait while connecting
+```
+
+Because a connect timeout is now set, `NetworkException::connectionTimeout`
+can actually fire — previously it was unreachable, since no timeout was ever
+configured. A connection that exceeds the connect timeout surfaces as a
+`NetworkException` with reason `connection_timeout`.
+
+### Opt-in retry / backoff
+
+Retrying transient failures is **opt-in** and disabled by default. When
+enabled, the SDK automatically retries:
+
+- HTTP `429` (rate limited)
+- HTTP `5xx` (server errors)
+- connection errors (`ConnectException`)
+
+with exponential backoff (`base_delay * 2^(attempt-1)` milliseconds). When a
+`429` response carries a numeric `Retry-After` header, that value is honored
+in preference to the computed backoff — so you no longer have to hand-roll
+rate-limit handling around `RateLimitException`.
+
+```env
+TRADINGCARDAPI_RETRY_ENABLED=true
+TRADINGCARDAPI_RETRY_MAX_ATTEMPTS=3
+TRADINGCARDAPI_RETRY_BASE_DELAY_MS=1000
+```
+
+If all retries are exhausted, the final failing response is parsed into the
+usual exception (`RateLimitException`, `ServerException`, etc.) so existing
+`catch` blocks continue to work — retries simply reduce how often they fire.
+
 ## Error Handling Strategies
 
 ### 1. Catch Specific Exceptions

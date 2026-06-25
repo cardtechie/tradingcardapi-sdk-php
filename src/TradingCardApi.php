@@ -2,6 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk;
 
+use CardTechie\TradingCardApiSdk\Http\RetryMiddleware;
 use CardTechie\TradingCardApiSdk\Internal\InternalClient;
 use CardTechie\TradingCardApiSdk\Resources\Attribute;
 use CardTechie\TradingCardApiSdk\Resources\Brand;
@@ -18,6 +19,7 @@ use CardTechie\TradingCardApiSdk\Resources\Stats;
 use CardTechie\TradingCardApiSdk\Resources\Team;
 use CardTechie\TradingCardApiSdk\Resources\Year;
 use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
 
 /**
  * Class TradingCardApi
@@ -77,10 +79,24 @@ class TradingCardApi
         $config = config('tradingcardapi') ?: [];
         $mergedConfig = array_merge($config, $options);
 
-        $this->client = new Client([
+        $clientOptions = [
             'verify' => $mergedConfig['ssl_verify'] ?? true,
             'base_uri' => $mergedConfig['url'] ?? '',
-        ]);
+            'timeout' => (float) ($mergedConfig['timeout'] ?? 10),
+            'connect_timeout' => (float) ($mergedConfig['connect_timeout'] ?? 5),
+        ];
+
+        // Opt-in retry/backoff: when enabled, push the retry middleware onto a
+        // handler stack so transient failures (429/5xx/connection errors) are
+        // retried with exponential backoff that honors Retry-After.
+        $retryConfig = $mergedConfig['retry'] ?? [];
+        if (! empty($retryConfig['enabled'])) {
+            $stack = HandlerStack::create();
+            $stack->push(RetryMiddleware::make($retryConfig));
+            $clientOptions['handler'] = $stack;
+        }
+
+        $this->client = new Client($clientOptions);
 
         // Auto-detect auth type if not explicitly set
         if (! isset($mergedConfig['auth_type'])) {
