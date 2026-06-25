@@ -38,9 +38,14 @@ jobs:
             exit 0
           fi
 
-          # A fragment is any newly-added markdown file under changelog.d/.
+          # A fragment is a newly-added markdown file under changelog.d/ that
+          # follows the documented <num>-<type>.md naming convention, where
+          # <type> is one of: added | changed | fixed | security | removed |
+          # deprecated. Anchoring the pattern to that convention prevents a PR
+          # from satisfying the gate by adding an unrelated .md file such as
+          # changelog.d/README.md.
           ADDED_FRAGMENT=$(git diff --name-only --diff-filter=A "origin/${BASE_REF}...HEAD" \
-            | grep -E '^changelog\.d/.*\.md$' || true)
+            | grep -E '^changelog\.d/[0-9]+-(added|changed|fixed|security|removed|deprecated)\.md$' || true)
 
           if [[ -n "$ADDED_FRAGMENT" ]]; then
             echo "✅ Changelog fragment present:"

@@ -132,8 +132,10 @@ Add a one-line `changelog.d/<issue>-<type>.md` file, where `<type>` is one of
 `added | changed | fixed | security | removed | deprecated`. Do **not** append
 to the shared `## [Unreleased]` section — fragments avoid the merge conflicts
 that section caused. Fragments are collated into `CHANGELOG.md` once, at the
-release step. See [`changelog.d/README.md`](../changelog.d/README.md) for the
-convention.
+release step — a **manual** step today: `make changelog-update` /
+`build/update-changelog.sh` does not read `changelog.d/` fragments yet, so the
+release operator collates them by hand until dedicated tooling ships. See
+[`changelog.d/README.md`](../changelog.d/README.md) for the convention.
 
 ## Issue Creation
 

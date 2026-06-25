@@ -131,9 +131,13 @@ Creates comprehensive GitHub release notes with AI-powered summaries.
    make version  # Shows: 1.3.0.beta-12
    ```
 
-`make changelog-update` is a **release-step** operation that collates the
-accumulated `changelog.d/` fragments into a versioned `CHANGELOG.md` section
-(see the Release Process below), not a per-PR step.
+Fragment collation into a versioned `CHANGELOG.md` section is a **release-step**
+operation (see the Release Process below), not a per-PR step. Note that
+`make changelog-update` / `build/update-changelog.sh` does **not** currently read
+`changelog.d/` fragments — it derives the new version section from the existing
+`## [Unreleased]` content and/or git commits. Until dedicated fragment-collation
+tooling ships, the release operator collates the accumulated fragments into
+`CHANGELOG.md` by hand.
 
 ### Release Process
 
@@ -278,8 +282,11 @@ Per-PR changelog entries are written as **fragments** under `changelog.d/`
 `## [Unreleased]` section of `CHANGELOG.md`. Because each PR adds a unique new
 path, concurrent PRs never conflict on the changelog — there is no shared
 section to merge. See [`changelog.d/README.md`](../changelog.d/README.md) for
-the convention. `make changelog-update` and the `## [Unreleased]` collation are
-**release-step** operations, not per-PR work.
+the convention. Collating fragments into a versioned `CHANGELOG.md` section is a
+**release-step** operation, not per-PR work. Today that collation is manual:
+`make changelog-update` / `build/update-changelog.sh` does not yet consume
+`changelog.d/` fragments, so the release operator merges them into `CHANGELOG.md`
+by hand until dedicated tooling lands.
 
 ## Best Practices
 

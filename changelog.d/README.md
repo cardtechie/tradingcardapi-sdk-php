@@ -42,19 +42,22 @@ what's in the linked issue.
 ## Collation into `CHANGELOG.md`
 
 Fragments are collated into the human-readable `CHANGELOG.md` **once, at the
-release step**: the release tooling reads every `changelog.d/*.md` fragment,
+release step**. Collation reads every `changelog.d/<num>-<type>.md` fragment,
 groups the lines under the correct `### Added` / `### Changed` / `### Fixed` /
 `### Security` / `### Removed` / `### Deprecated` headings in the new versioned
-section, writes `CHANGELOG.md`, and deletes the fragments. See
+section, writes `CHANGELOG.md`, and deletes the collated fragments. See
 [`docs/VERSION-MANAGEMENT.md`](../docs/VERSION-MANAGEMENT.md) for this repo's
 release flow.
 
-> **Interim (until release-step collation ships).** Automated collation is
-> deferred to the Release workflow milestone (see #672). Until it lands,
-> fragments accumulate here and the release operator collates them by hand (or
-> with a throwaway script) when cutting a version, then deletes the collated
-> fragments. The goal of the ship-now slice is to stop the conflict generation
-> at the source; automating release assembly follows.
+> **This is a manual step today — no tooling reads fragments yet.** Automated
+> collation is deferred to the Release workflow milestone (see #672), and the
+> current release tooling (`build/update-changelog.sh` / `make changelog-update`)
+> does **not** consume `changelog.d/` fragments — it works off the existing
+> `## [Unreleased]` content and/or git commits. Until automation lands, fragments
+> accumulate here and the release operator collates them by hand (or with a
+> throwaway script) when cutting a version, then deletes the collated fragments.
+> The goal of the ship-now slice is to stop the conflict generation at the
+> source; automating release assembly follows.
 
 The `.gitkeep` file keeps this directory tracked in git when no fragments are
 pending.
