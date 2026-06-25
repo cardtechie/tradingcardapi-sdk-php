@@ -1,0 +1,171 @@
+name: Sync develop and stable
+
+# Keeps the integration branch (develop) and the stable/default branch (main)
+# in sync in BOTH directions:
+#   - push to develop -> merge develop into main   (promote)
+#   - push to main    -> merge main into develop   (back-merge)
+# A clean merge is pushed directly; a conflicting merge opens a PR for manual
+# resolution. The job never force-merges or auto-resolves conflicts.
+#
+# Portability: this file is intended to be copied verbatim across repos. Only
+# the branch names below differ per repo (some sibling repos use `master`
+# instead of `main` for the stable branch). Adjust STABLE_BRANCH /
+# INTEGRATION_BRANCH and the `on.push.branches` list to match.
+
+on:
+  push:
+    branches: [develop, main]
+
+# Serialize overlapping pushes so two merges can't race into the same target.
+concurrency:
+  group: sync-develop-and-stable-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  # --- Per-repo branch-name knobs (only thing that changes when copied) ---
+  INTEGRATION_BRANCH: develop
+  STABLE_BRANCH: main
+  # Sentinel embedded in sync-merge commit subjects. The loop guard skips any
+  # push whose head commit subject contains this string, so a sync push to one
+  # branch cannot retrigger the opposite direction into a ping-pong.
+  SYNC_SENTINEL: "chore(sync):"
+  SYNC_BOT_NAME: "github-actions[bot]"
+  SYNC_BOT_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+
+jobs:
+  sync:
+    name: Sync branches
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+          # Use a PAT/App token (PROJECT_TOKEN) rather than the default
+          # GITHUB_TOKEN: pushes made with GITHUB_TOKEN do NOT trigger
+          # downstream workflows, and a direct push to main/develop here must
+          # still fire branch-protection / CI as if a human pushed. PROJECT_TOKEN
+          # is the existing secret already used by assign-sprint.yml; it must
+          # carry contents:write + PR-creation scope on this repo. If a
+          # dedicated token is preferred, swap this for a SYNC_TOKEN secret —
+          # only the secret name changes.
+          token: ${{ secrets.PROJECT_TOKEN }}
+
+      - name: Loop guard (skip sync-authored pushes)
+        id: guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          subject="$(git log -1 --pretty=%s)"
+          author_email="$(git log -1 --pretty=%ae)"
+          echo "Head commit subject: $subject"
+          echo "Head commit author:  $author_email"
+
+          # Skip if the head commit is a sync merge we wrote (sentinel subject,
+          # or [skip ci], or authored by the sync bot). Any one is sufficient.
+          if [[ "$subject" == *"$SYNC_SENTINEL"* ]] \
+             || [[ "$subject" == *"[skip ci]"* ]] \
+             || [[ "$author_email" == "$SYNC_BOT_EMAIL" ]]; then
+            echo "Head commit is a sync-authored commit — skipping to avoid a sync loop."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Resolve direction
+        id: direction
+        if: steps.guard.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          ref="${GITHUB_REF#refs/heads/}"
+          if [[ "$ref" == "$INTEGRATION_BRANCH" ]]; then
+            source="$INTEGRATION_BRANCH"
+            target="$STABLE_BRANCH"
+            pr_branch="auto/sync-develop-to-main"
+            title="Sync develop into main"
+          elif [[ "$ref" == "$STABLE_BRANCH" ]]; then
+            source="$STABLE_BRANCH"
+            target="$INTEGRATION_BRANCH"
+            pr_branch="auto/sync-main-to-develop"
+            title="Sync main into develop"
+          else
+            echo "Push ref '$ref' is neither '$INTEGRATION_BRANCH' nor '$STABLE_BRANCH' — nothing to sync."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Direction: $source -> $target (conflict PR branch: $pr_branch)"
+          {
+            echo "source=$source"
+            echo "target=$target"
+            echo "pr_branch=$pr_branch"
+            echo "title=$title"
+            echo "skip=false"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Sync source into target
+        if: steps.guard.outputs.skip != 'true' && steps.direction.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          SOURCE: ${{ steps.direction.outputs.source }}
+          TARGET: ${{ steps.direction.outputs.target }}
+          PR_BRANCH: ${{ steps.direction.outputs.pr_branch }}
+          PR_TITLE: ${{ steps.direction.outputs.title }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name  "$SYNC_BOT_NAME"
+          git config user.email "$SYNC_BOT_EMAIL"
+
+          # Make sure we have up-to-date local refs for both branches.
+          git fetch origin "$SOURCE" "$TARGET"
+
+          # Idempotency: if target already contains source, this is a no-op.
+          if git merge-base --is-ancestor "origin/$SOURCE" "origin/$TARGET"; then
+            echo "origin/$TARGET already contains origin/$SOURCE — nothing to sync (no-op)."
+            exit 0
+          fi
+
+          # Check out the target branch (tracking origin) so we can merge onto it.
+          git checkout -B "$TARGET" "origin/$TARGET"
+
+          # Attempt a no-fast-forward merge with the sync sentinel + [skip ci] in
+          # the subject so the loop guard recognizes (and skips) the resulting
+          # push if it lands on a branch this workflow also watches.
+          if git merge --no-ff \
+               -m "$SYNC_SENTINEL merge $SOURCE into $TARGET [skip ci]" \
+               "origin/$SOURCE"; then
+            echo "Clean merge — pushing $TARGET directly."
+            git push origin "HEAD:$TARGET"
+            exit 0
+          fi
+
+          echo "Merge conflict — aborting merge and opening a PR for manual resolution."
+          git merge --abort
+
+          # If a conflict PR is already open for this direction, leave it alone:
+          # it may carry in-progress manual conflict resolution that a force-push
+          # of the raw source would clobber. The existing PR is the manual-merge
+          # surface; nothing more to do this run.
+          existing="$(gh pr list --state open --head "$PR_BRANCH" --base "$TARGET" \
+            --json number --jq 'length')"
+          if [[ "$existing" -gt 0 ]]; then
+            echo "A PR for $PR_BRANCH -> $TARGET is already open — leaving it for manual resolution."
+            exit 0
+          fi
+
+          # No open PR yet: (re)point the dedicated conflict-PR branch at the
+          # current source tip and open the PR. Force is safe here because this
+          # branch is owned exclusively by this workflow and has no open PR.
+          git push --force origin "origin/$SOURCE:refs/heads/$PR_BRANCH"
+
+          gh pr create \
+            --base "$TARGET" \
+            --head "$PR_BRANCH" \
+            --title "$PR_TITLE" \
+            --body "Automated branch sync (\`$SOURCE\` → \`$TARGET\`) could not be merged cleanly. Resolve the conflicts here and merge to keep the two branches in sync. Opened by the \`sync-develop-and-stable\` workflow."
