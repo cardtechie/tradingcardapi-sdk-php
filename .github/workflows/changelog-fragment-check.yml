@@ -1,0 +1,61 @@
+name: Changelog Fragment Check
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  check-fragment:
+    name: Check for changelog fragment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Verify PR adds a changelog.d fragment
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BASE_REF="${{ github.base_ref }}"
+          git fetch --no-tags origin "$BASE_REF"
+
+          # Files changed in this PR relative to the merge base with the target branch.
+          CHANGED=$(git diff --name-only "origin/${BASE_REF}...HEAD")
+
+          # A PR is "trivial" (exempt from the fragment requirement) when it touches
+          # no application source or tests. Source lives under src/; Pest/PHPUnit
+          # tests live under tests/.
+          SOURCE_TOUCHED=$(echo "$CHANGED" | grep -E '^(src|tests)/' || true)
+
+          if [[ -z "$SOURCE_TOUCHED" ]]; then
+            echo "✅ No src/ or tests/ changes detected — trivial PR, changelog fragment not required."
+            exit 0
+          fi
+
+          # A fragment is any newly-added markdown file under changelog.d/.
+          ADDED_FRAGMENT=$(git diff --name-only --diff-filter=A "origin/${BASE_REF}...HEAD" \
+            | grep -E '^changelog\.d/.*\.md$' || true)
+
+          if [[ -n "$ADDED_FRAGMENT" ]]; then
+            echo "✅ Changelog fragment present:"
+            echo "$ADDED_FRAGMENT"
+            exit 0
+          fi
+
+          echo "::error::This PR changes src/ or tests/ but adds no changelog fragment."
+          echo ""
+          echo "Add a one-line fragment at changelog.d/<issue>-<type>.md, where <type> is one of:"
+          echo "  added | changed | fixed | security | removed | deprecated"
+          echo ""
+          echo "Example:"
+          echo "  changelog.d/245-added.md"
+          echo ""
+          echo "See changelog.d/README.md for the convention. Do NOT edit the shared"
+          echo "## [Unreleased] section of CHANGELOG.md — that is collated at release time."
+          exit 1

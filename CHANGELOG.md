@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+<!-- New entries go to changelog.d/<issue>-<type>.md fragments, not here. This
+section is collated from those fragments at release time. See changelog.d/README.md. -->
+
 ### Added
 
 - **[Issue #200]** Add AuditLogSchema to enable response validation for audit log endpoints.

@@ -125,6 +125,16 @@ make check          # Verify all quality standards
 
 The README.md is the public face of this repository and should always accurately represent the current state of the project.
 
+## CHANGELOG
+
+Per-PR work writes a **changelog fragment**, not an edit to `CHANGELOG.md`.
+Add a one-line `changelog.d/<issue>-<type>.md` file, where `<type>` is one of
+`added | changed | fixed | security | removed | deprecated`. Do **not** append
+to the shared `## [Unreleased]` section — fragments avoid the merge conflicts
+that section caused. Fragments are collated into `CHANGELOG.md` once, at the
+release step. See [`changelog.d/README.md`](../changelog.d/README.md) for the
+convention.
+
 ## Issue Creation
 
 Always use the `create_cross_repo_issues` MCP tool (from `picklewagon-mcp`) to

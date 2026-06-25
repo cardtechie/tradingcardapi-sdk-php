@@ -118,17 +118,22 @@ Creates comprehensive GitHub release notes with AI-powered summaries.
    make version  # Shows: 1.2.3-alpha.5
    ```
 
-2. **Merge to Develop**
+2. **Add a Changelog Fragment**
+   Write a one-line `changelog.d/<issue>-<type>.md` fragment for the change
+   (see [`changelog.d/README.md`](../changelog.d/README.md)). Do **not** edit
+   the shared `## [Unreleased]` section — fragments avoid the merge conflicts
+   that section caused.
+
+3. **Merge to Develop**
    ```bash
    git checkout develop
    git merge feature/new-endpoint
    make version  # Shows: 1.3.0.beta-12
    ```
 
-3. **Update Changelog**
-   ```bash
-   make changelog-update
-   ```
+`make changelog-update` is a **release-step** operation that collates the
+accumulated `changelog.d/` fragments into a versioned `CHANGELOG.md` section
+(see the Release Process below), not a per-PR step.
 
 ### Release Process
 
@@ -268,11 +273,13 @@ The system expects semantic version tags. Ensure tags follow the pattern:
 
 ### Changelog Conflicts
 
-If multiple developers update the changelog simultaneously:
-
-1. Resolve merge conflicts in the `[Unreleased]` section
-2. Run `make changelog-update` to regenerate the entry
-3. Review and commit the result
+Per-PR changelog entries are written as **fragments** under `changelog.d/`
+(one `changelog.d/<issue>-<type>.md` file per PR), not appended to the shared
+`## [Unreleased]` section of `CHANGELOG.md`. Because each PR adds a unique new
+path, concurrent PRs never conflict on the changelog — there is no shared
+section to merge. See [`changelog.d/README.md`](../changelog.d/README.md) for
+the convention. `make changelog-update` and the `## [Unreleased]` collation are
+**release-step** operations, not per-PR work.
 
 ## Best Practices
 
