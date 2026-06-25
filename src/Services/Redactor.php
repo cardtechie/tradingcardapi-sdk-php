@@ -64,7 +64,7 @@ class Redactor
     {
         $redacted = [];
         foreach ($headers as $name => $value) {
-            if (is_string($name) && in_array(strtolower($name), self::SENSITIVE_HEADERS, true)) {
+            if (in_array(strtolower((string) $name), self::SENSITIVE_HEADERS, true)) {
                 $redacted[$name] = self::REDACTED;
             } else {
                 $redacted[$name] = $value;
