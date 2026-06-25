@@ -149,7 +149,12 @@ class Response
     }
 
     /**
-     * Get the meta data from the response.
+     * Get the meta data from the most recent parse() in this process.
+     *
+     * WARNING: this static accessor reflects only the most recent parse() call
+     * and is NOT safe across interleaved or concurrent parses — a later parse
+     * overwrites it. For cross-parse-safe access, read the per-result meta off
+     * the parsed model instead: `$model->getMeta()`.
      */
     public static function getMeta(): object
     {
@@ -157,7 +162,12 @@ class Response
     }
 
     /**
-     * Get the links data from the response.
+     * Get the links data from the most recent parse() in this process.
+     *
+     * WARNING: this static accessor reflects only the most recent parse() call
+     * and is NOT safe across interleaved or concurrent parses — a later parse
+     * overwrites it. For cross-parse-safe access, read the per-result links off
+     * the parsed model instead: `$model->getLinks()`.
      */
     public static function getLinks(): object
     {
@@ -173,14 +183,26 @@ class Response
     {
         $response = json_decode($json);
 
-        self::parseMeta($response);
-        self::parseLinks($response);
+        // Compute meta/links locally for this parse so they travel with the
+        // parsed result rather than living in a shared static slot.
+        $meta = self::parseMeta($response);
+        $links = self::parseLinks($response);
+
+        // Best-effort, single-threaded-only convenience: record this parse's
+        // meta/links into the static fields so the historic
+        // Response::parse(); Response::getMeta(); pattern keeps working. These
+        // statics reflect only the most recent parse — use the per-result
+        // $model->getMeta()/getLinks() for cross-parse-safe access.
+        self::$meta = $meta;
+        self::$links = $links;
 
         if (is_array($response->data)) {
             $objects = [];
             foreach ($response->data as $data) {
                 $object = self::parseDataObject($data);
                 $object->setRelationships(self::getIncluded($response));
+                $object->setMeta($meta);
+                $object->setLinks($links);
                 $objects[] = $object;
             }
 
@@ -188,6 +210,8 @@ class Response
         } else {
             $object = self::parseDataObject($response->data);
             $object->setRelationships(self::getIncluded($response));
+            $object->setMeta($meta);
+            $object->setLinks($links);
 
             return $object;
         }
@@ -235,32 +259,34 @@ class Response
     }
 
     /**
-     * Parse the meta from the response and set the $meta field of this class.
+     * Parse the meta from the decoded response and return it.
+     *
+     * Returns an empty stdClass when the response has no top-level `meta` key,
+     * preserving the historic empty-object behavior. Pure helper — it does not
+     * write any shared static state, so the caller owns the returned object.
      */
-    private static function parseMeta($data): void
+    private static function parseMeta($data): stdClass
     {
-        $meta = new stdClass;
         if (! property_exists($data, 'meta')) {
-            self::$meta = $meta;
-
-            return;
+            return new stdClass;
         }
 
-        self::$meta = $data->meta;
+        return $data->meta;
     }
 
     /**
-     * Parse the links from the response and set the $links field of this class.
+     * Parse the links from the decoded response and return them.
+     *
+     * Returns an empty stdClass when the response has no top-level `links` key,
+     * preserving the historic empty-object behavior. Pure helper — it does not
+     * write any shared static state, so the caller owns the returned object.
      */
-    private static function parseLinks($data): void
+    private static function parseLinks($data): stdClass
     {
-        $links = new stdClass;
         if (! property_exists($data, 'links')) {
-            self::$links = $links;
-
-            return;
+            return new stdClass;
         }
 
-        self::$links = $data->links;
+        return $data->links;
     }
 }

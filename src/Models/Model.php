@@ -4,6 +4,7 @@ namespace CardTechie\TradingCardApiSdk\Models;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use stdClass;
 
 /**
  * Class Model
@@ -15,11 +16,29 @@ class Model
     public array $relationships = [];
 
     /**
+     * Per-result top-level JSON:API meta for the parse that produced this model.
+     *
+     * Carried on the instance (not shared static state) so concurrent or
+     * sequential parses cannot bleed meta into one another.
+     */
+    public object $meta;
+
+    /**
+     * Per-result top-level JSON:API links for the parse that produced this model.
+     *
+     * Carried on the instance (not shared static state) so concurrent or
+     * sequential parses cannot bleed links into one another.
+     */
+    public object $links;
+
+    /**
      * Model constructor.
      */
     public function __construct(array $attributes = [])
     {
         $this->attributes = $attributes;
+        $this->meta = new stdClass;
+        $this->links = new stdClass;
     }
 
     /**
@@ -36,6 +55,46 @@ class Model
     public function getRelationships(): array
     {
         return $this->relationships;
+    }
+
+    /**
+     * Set the per-result meta for this parsed model.
+     */
+    public function setMeta(object $meta): void
+    {
+        $this->meta = $meta;
+    }
+
+    /**
+     * Return the per-result meta for this parsed model.
+     *
+     * This is the cross-parse-safe way to read a parse's meta — unlike the
+     * static Response::getMeta(), it reflects this specific result and cannot
+     * be clobbered by another parse.
+     */
+    public function getMeta(): object
+    {
+        return $this->meta;
+    }
+
+    /**
+     * Set the per-result links for this parsed model.
+     */
+    public function setLinks(object $links): void
+    {
+        $this->links = $links;
+    }
+
+    /**
+     * Return the per-result links for this parsed model.
+     *
+     * This is the cross-parse-safe way to read a parse's links — unlike the
+     * static Response::getLinks(), it reflects this specific result and cannot
+     * be clobbered by another parse.
+     */
+    public function getLinks(): object
+    {
+        return $this->links;
     }
 
     /**
