@@ -80,7 +80,7 @@ it('attaches the set genre via JSON:API relationships linkage (constructor path)
     expect($set->linkage['genre']['id'])->toBe('2');
     expect($set->genre())->not->toBeNull();
     expect($set->genre()->id)->toBe('2');
-    expect($set->getRelationship('genres'))->toBeNull();
+    expect($set->getRelationships())->not->toHaveKey('genres');
 });
 
 it('attaches the set genre via JSON:API relationships linkage (static parse path)', function () {
@@ -106,7 +106,7 @@ it('attaches the set genre via JSON:API relationships linkage (static parse path
     expect($set)->toBeInstanceOf(Set::class);
     expect($set->genre())->not->toBeNull();
     expect($set->genre()->id)->toBe('1');
-    expect($set->getRelationship('genres'))->toBeNull();
+    expect($set->getRelationships())->not->toHaveKey('genres');
 });
 
 it('static parse method handles array of data', function () {

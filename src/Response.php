@@ -84,7 +84,7 @@ class Response
      * from the Set response, this linkage block is the only signal tying a resource
      * to its included relationships, so it must be carried through to the model.
      *
-     * @return array<string, array{type?: string, id?: string}>
+     * @return array<string, array{type?: string|null, id?: string|null}>
      */
     private static function extractLinkage(object $data): array
     {

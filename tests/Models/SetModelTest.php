@@ -212,7 +212,7 @@ it('sets genre relationship when genres provided', function () {
     $set->setRelationships(['genres' => $genres]);
 
     expect($set->genre())->toBe($genre1);
-    expect($set->getRelationship('genres'))->toBeNull();
+    expect($set->getRelationships())->not->toHaveKey('genres');
 });
 
 it('attaches only the linkage-matched genre when multiple genres are included', function () {
@@ -226,7 +226,7 @@ it('attaches only the linkage-matched genre when multiple genres are included', 
     $set->setRelationships(['genres' => $genres]);
 
     expect($set->genre())->toBe($genre2);
-    expect($set->getRelationship('genres'))->toBeNull();
+    expect($set->getRelationships())->not->toHaveKey('genres');
 });
 
 it('does not attach a genre when no linkage is present', function () {

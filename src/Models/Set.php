@@ -204,10 +204,12 @@ class Set extends Model
             // instead. A missing linkage simply no-ops the match rather than mis-matching.
             $genreId = $this->linkage['genre']['id'] ?? null;
             if ($genreId !== null) {
-                foreach ($this->relationships['genres'] as $index => $genre) {
+                foreach ($this->relationships['genres'] as $genre) {
                     if ($genreId === $genre->id) {
                         $this->relationships['genre'] = $genre;
                         unset($this->relationships['genres']);
+
+                        break;
                     }
                 }
             }

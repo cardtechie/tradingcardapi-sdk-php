@@ -20,7 +20,7 @@ class Model
      * resource's `data.relationships` block; defaults to empty so direct-construction
      * callers (and tests) that never set linkage keep working unchanged.
      *
-     * @var array<string, array{type?: string, id?: string}>
+     * @var array<string, array{type?: string|null, id?: string|null}>
      */
     public array $linkage = [];
 
@@ -51,7 +51,7 @@ class Model
     /**
      * Set the JSON:API per-resource relationships linkage map for the object.
      *
-     * @param  array<string, array{type?: string, id?: string}>  $linkage
+     * @param  array<string, array{type?: string|null, id?: string|null}>  $linkage
      */
     public function setLinkage(array $linkage): void
     {
@@ -61,7 +61,7 @@ class Model
     /**
      * Return the JSON:API per-resource relationships linkage map.
      *
-     * @return array<string, array{type?: string, id?: string}>
+     * @return array<string, array{type?: string|null, id?: string|null}>
      */
     public function getLinkage(): array
     {
