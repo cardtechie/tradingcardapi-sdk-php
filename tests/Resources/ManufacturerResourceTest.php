@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Models\Manufacturer as ManufacturerModel;
 use CardTechie\TradingCardApiSdk\Resources\Manufacturer;
 use GuzzleHttp\Client;

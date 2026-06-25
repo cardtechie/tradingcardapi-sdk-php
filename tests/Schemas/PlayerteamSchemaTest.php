@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Schemas\PlayerteamSchema;
 
 it('has required validation rules for single playerteam', function () {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Models\Genre as GenreModel;
 use CardTechie\TradingCardApiSdk\Resources\Genre;
 use GuzzleHttp\Client;

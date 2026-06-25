@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CardTechie\TradingCardApiSdk;
 
 use Illuminate\Support\Collection;

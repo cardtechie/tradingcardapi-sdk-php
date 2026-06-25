@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Models\Brand as BrandModel;
 use CardTechie\TradingCardApiSdk\Resources\Brand;
 use GuzzleHttp\Client;

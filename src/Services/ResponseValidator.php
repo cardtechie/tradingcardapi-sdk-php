@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CardTechie\TradingCardApiSdk\Services;
 
 use Illuminate\Support\Facades\Log;
