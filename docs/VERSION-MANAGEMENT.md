@@ -206,7 +206,7 @@ Validation workflow (`.github/workflows/changelog-check.yml`) fails any PR to
 generated value instead:
 
 ```bash
-VERSION=$(./build/version.sh)
+VERSION=$(bash build/version.sh)
 ```
 
 ## Manual Overrides

@@ -55,8 +55,11 @@ push to main (or workflow_dispatch)
 Version generation is branch-aware (`build/version.sh`). For the release flow
 the relevant case is `main`:
 
-- On `main`, exactly on the latest tag → the version equals that tag (no new
-  release is produced — `should_release` still gates on a *new* stable version).
+- On `main`, exactly on the latest tag → the version equals that tag. Note that
+  `should_release` only checks for a stable `X.Y.Z` result on `main` — it does
+  **not** compare against existing tags, so the `release` job will still run and
+  attempt to (re)create a GitHub Release for that tag. Avoid pushing to `main`
+  with no new commits since the last tag unless you intend that.
 - On `main`, with N commits since the latest tag → the **patch** is
   incremented (`X.Y.Z` → `X.Y.(Z+1)`).
 
@@ -70,15 +73,20 @@ make changelog-preview                    # commits that would be included
 
 > **Minor/major bumps.** `version.sh` only auto-increments the patch on `main`.
 > To cut a new minor or major release, create and push the target tag yourself
-> (see *Manual / emergency tagging* below) — the workflow will then build a
-> release for that tag.
+> (see *Manual / emergency tagging* below), then run the workflow on `main` via
+> `workflow_dispatch` — `version.sh` reads the just-pushed tag and generates the
+> matching version. The **Build and Release** workflow triggers only on pushes
+> to `main` and `workflow_dispatch`; pushing a tag alone does **not** start it.
 
 ## Required repository secrets
 
-Configure these under **Settings → Secrets and variables → Actions**. The
-pipeline degrades gracefully when the optional ones are absent (notes fall back
-to a template; the Packagist ping no-ops with a logged message), but a fully
-working release needs all three.
+Configure these under **Settings → Secrets and variables → Actions**. None are
+strictly required for the workflow to *run* — the pipeline degrades gracefully
+when any are absent (release notes fall back to a template; the Packagist ping
+no-ops with a logged message). For a *fully* working release the two Packagist
+secrets are needed to auto-update the published package, while `CLAUDE_API_KEY`
+is optional and only upgrades release-note generation from template to
+AI-assisted.
 
 | Secret | Used by | Required? | Purpose |
 | --- | --- | --- | --- |
@@ -182,4 +190,8 @@ There is no "un-release" button; recover forward.
   git push origin 0.3.0
   ```
 
-  Pushing a tag also satisfies the workflow's `refs/tags/*` release gate.
+  Pushing a tag does **not** start the workflow on its own — **Build and
+  Release** triggers only on pushes to `main` and `workflow_dispatch`. After
+  pushing the tag, run the workflow on `main` via `workflow_dispatch`
+  (`gh workflow run build-release.yml --ref main`); `version.sh` picks up the
+  new tag and the `release` job builds the matching release.
