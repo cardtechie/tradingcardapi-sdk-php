@@ -66,9 +66,11 @@ jobs:
           echo "Head commit author:  $author_email"
 
           # Skip if the head commit is a sync merge we wrote (sentinel subject,
-          # or [skip ci], or authored by the sync bot). Any one is sufficient.
+          # or authored by the sync bot). Either one is sufficient. We do NOT
+          # match on [skip ci]: a legitimate human push whose subject happens to
+          # contain [skip ci] must still be synced, and the sentinel + bot-author
+          # pair already covers every sync-authored commit.
           if [[ "$subject" == *"$SYNC_SENTINEL"* ]] \
-             || [[ "$subject" == *"[skip ci]"* ]] \
              || [[ "$author_email" == "$SYNC_BOT_EMAIL" ]]; then
             echo "Head commit is a sync-authored commit — skipping to avoid a sync loop."
             echo "skip=true" >> "$GITHUB_OUTPUT"
@@ -134,11 +136,15 @@ jobs:
           # Check out the target branch (tracking origin) so we can merge onto it.
           git checkout -B "$TARGET" "origin/$TARGET"
 
-          # Attempt a no-fast-forward merge with the sync sentinel + [skip ci] in
-          # the subject so the loop guard recognizes (and skips) the resulting
-          # push if it lands on a branch this workflow also watches.
+          # Attempt a no-fast-forward merge tagged with the sync sentinel so the
+          # loop guard recognizes (and skips) the resulting push if it lands on a
+          # branch this workflow also watches. We deliberately do NOT add
+          # [skip ci]: a sync push to main/develop must still fire that branch's
+          # CI / branch-protection checks as if a human pushed (the whole reason
+          # PROJECT_TOKEN is used over GITHUB_TOKEN above). Loop prevention is
+          # handled by the sentinel + bot author, not by suppressing CI.
           if git merge --no-ff \
-               -m "$SYNC_SENTINEL merge $SOURCE into $TARGET [skip ci]" \
+               -m "$SYNC_SENTINEL merge $SOURCE into $TARGET" \
                "origin/$SOURCE"; then
             echo "Clean merge — pushing $TARGET directly."
             git push origin "HEAD:$TARGET"
