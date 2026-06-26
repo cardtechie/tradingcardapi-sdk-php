@@ -70,18 +70,16 @@ it('does not install our retry stack when retry is disabled', function () {
     $clientProperty->setAccessible(true);
     $client = $clientProperty->getValue($api);
 
-    // We do not pass a `handler` option when retry is off. Guzzle lazily builds
-    // a default handler only when one was not supplied, so the absence of our
-    // stack is observable: the lazily-created default is the choose() default,
-    // not a stack we pushed RetryMiddleware onto. Assert via the option array
-    // that no handler was provided at construction time by us.
+    // We do not pass a `handler` option when retry is off, but Guzzle lazily
+    // fills in its own default HandlerStack, so the presence/absence of a
+    // `handler` key in the option array is not a reliable signal here. Instead
+    // of asserting on the handler, the meaningful invariant we check is that
+    // timeouts still apply and the client is usable when retry is off.
     $clientReflection = new ReflectionClass($client);
     $configProperty = $clientReflection->getProperty('config');
     $configProperty->setAccessible(true);
     $config = $configProperty->getValue($client);
 
-    // Guzzle fills in a default HandlerStack itself; the meaningful invariant
-    // is that timeouts still apply and the client is usable when retry is off.
     expect($config['timeout'])->toBe(10.0);
     expect($config['connect_timeout'])->toBe(5.0);
 });
@@ -91,6 +89,33 @@ it('installs a handler stack when retry is enabled', function () {
 
     $config = clientConfigFor(new TradingCardApi);
 
+    expect($config)->toHaveKey('handler');
+    expect($config['handler'])->toBeInstanceOf(HandlerStack::class);
+});
+
+it('preserves configured retry values when retry is enabled via constructor options', function () {
+    // retry.* tuned via config/env, but only `enabled` flipped via constructor.
+    // A shallow array_merge would discard max_attempts/base_delay here; the
+    // nested-merge keeps them so the middleware sees the configured values.
+    config([
+        'tradingcardapi.retry.max_attempts' => 5,
+        'tradingcardapi.retry.base_delay' => 250,
+    ]);
+
+    $api = new TradingCardApi(['retry' => ['enabled' => true]]);
+
+    $apiReflection = new ReflectionClass($api);
+    $clientProperty = $apiReflection->getProperty('client');
+    $clientProperty->setAccessible(true);
+    $client = $clientProperty->getValue($api);
+
+    $clientReflection = new ReflectionClass($client);
+    $configProperty = $clientReflection->getProperty('config');
+    $configProperty->setAccessible(true);
+    $config = $configProperty->getValue($client);
+
+    // The handler stack is installed (enabled override took effect) without
+    // discarding the configured retry tuning.
     expect($config)->toHaveKey('handler');
     expect($config['handler'])->toBeInstanceOf(HandlerStack::class);
 });

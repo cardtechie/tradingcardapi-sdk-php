@@ -79,6 +79,16 @@ class TradingCardApi
         $config = config('tradingcardapi') ?: [];
         $mergedConfig = array_merge($config, $options);
 
+        // `array_merge` replaces nested arrays wholesale, so a constructor
+        // option like `['retry' => ['enabled' => true]]` would otherwise drop
+        // `retry.max_attempts`/`retry.base_delay` configured via config/env.
+        // Merge the nested `retry` block separately so partial overrides keep
+        // the configured defaults instead of falling back to middleware defaults.
+        if (isset($config['retry']) && is_array($config['retry'])
+            && isset($options['retry']) && is_array($options['retry'])) {
+            $mergedConfig['retry'] = array_merge($config['retry'], $options['retry']);
+        }
+
         $clientOptions = [
             'verify' => $mergedConfig['ssl_verify'] ?? true,
             'base_uri' => $mergedConfig['url'] ?? '',
