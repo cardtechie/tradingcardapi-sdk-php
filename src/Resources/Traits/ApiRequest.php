@@ -92,7 +92,7 @@ trait ApiRequest
     }
 
     /**
-     * Makes a request to an API endpoint or webpage and returns its response.
+     * Makes a request to a JSON API endpoint and returns its decoded response.
      *
      * This is the low-level transport primitive: it deliberately returns the
      * raw `json_decode` result (a `stdClass` tree, or an empty `stdClass` for
@@ -102,7 +102,7 @@ trait ApiRequest
      * unstructured endpoints). Callers should prefer the typed resource
      * methods over calling `makeRequest` directly.
      *
-     * @param  string  $url  Url of the api or webpage
+     * @param  string  $url  Url of the JSON API endpoint
      * @param  string  $method  HTTP method
      * @param  array  $request  Additional parameters to include in the request
      * @param  array  $headers  HTTP headers
