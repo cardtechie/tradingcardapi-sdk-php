@@ -53,6 +53,23 @@ class Redactor
     private const BEARER_PATTERN = '/\bBearer\s+[A-Za-z0-9\-._~+\/]+=*/i';
 
     /**
+     * Credential key names that must be masked when they appear as `key=value`
+     * pairs inside free-text bodies (e.g. form-urlencoded or plain-text token
+     * responses that are not valid JSON). Mirrors the credential surface of
+     * SENSITIVE_KEYS so non-JSON payloads get the same protection as JSON ones.
+     *
+     * @var string[]
+     */
+    private const SENSITIVE_PARAM_NAMES = [
+        'client_secret',
+        'access_token',
+        'refresh_token',
+        'id_token',
+        'password',
+        'secret',
+    ];
+
+    /**
      * Redact a flat headers map. Any header whose name matches the
      * sensitive-header deny list (case-insensitive) has its value replaced
      * with the redaction sentinel; all other headers pass through untouched.
@@ -100,7 +117,7 @@ class Redactor
             }
 
             if (is_string($value)) {
-                $redacted[$key] = $this->maskBearerTokens($value);
+                $redacted[$key] = $this->maskFreeText($value);
 
                 continue;
             }
@@ -134,7 +151,24 @@ class Redactor
             }
         }
 
-        return $this->maskBearerTokens($body);
+        return $this->maskFreeText($body);
+    }
+
+    /**
+     * Mask credential material embedded in a free-text (non-JSON) string.
+     *
+     * Two passes run: bearer tokens (`Bearer <token>`) are masked, and any
+     * `key=value` pair whose key matches a sensitive credential name
+     * (client_secret, access_token, etc.) has its value replaced with the
+     * redaction sentinel. The second pass covers form-urlencoded and plain-text
+     * token responses that are not valid JSON, so they get the same protection
+     * as JSON bodies redacted by key.
+     */
+    private function maskFreeText(string $value): string
+    {
+        $value = $this->maskBearerTokens($value);
+
+        return $this->maskCredentialParams($value);
     }
 
     /**
@@ -144,5 +178,23 @@ class Redactor
     private function maskBearerTokens(string $value): string
     {
         return (string) preg_replace(self::BEARER_PATTERN, 'Bearer '.self::REDACTED, $value);
+    }
+
+    /**
+     * Replace the value of any `key=value` credential pair in a free-text
+     * string with the redaction sentinel. The key is preserved (so the shape
+     * of the body stays useful for debugging) and the credential value, up to
+     * the next delimiter (`&`, whitespace, or end of string), is masked.
+     */
+    private function maskCredentialParams(string $value): string
+    {
+        $names = implode('|', array_map(
+            static fn (string $name): string => preg_quote($name, '/'),
+            self::SENSITIVE_PARAM_NAMES
+        ));
+
+        $pattern = '/\b('.$names.')(\s*=\s*)[^&\s]+/i';
+
+        return (string) preg_replace($pattern, '$1$2'.self::REDACTED, $value);
     }
 }

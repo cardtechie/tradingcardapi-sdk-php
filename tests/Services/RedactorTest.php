@@ -117,6 +117,29 @@ it('masks bearer tokens in a raw body string', function () {
     expect($masked)->toContain(Redactor::REDACTED);
 });
 
+it('masks key=value credential pairs in a non-JSON form-urlencoded body', function () {
+    $body = 'grant_type=client_credentials&client_secret=super-secret&access_token=tok-123';
+
+    $masked = $this->redactor->redactBody($body);
+
+    expect($masked)->not->toContain('super-secret');
+    expect($masked)->not->toContain('tok-123');
+    expect($masked)->toContain('client_secret='.Redactor::REDACTED);
+    expect($masked)->toContain('access_token='.Redactor::REDACTED);
+    // Non-credential params survive so the body stays useful for debugging.
+    expect($masked)->toContain('grant_type=client_credentials');
+});
+
+it('masks key=value credential pairs case-insensitively in free text', function () {
+    $body = 'auth failed: CLIENT_SECRET=leak Password=hunter2 still bad';
+
+    $masked = $this->redactor->redactBody($body);
+
+    expect($masked)->not->toContain('leak');
+    expect($masked)->not->toContain('hunter2');
+    expect($masked)->toContain(Redactor::REDACTED);
+});
+
 it('returns null and empty bodies unchanged', function () {
     expect($this->redactor->redactBody(null))->toBeNull();
     expect($this->redactor->redactBody(''))->toBe('');
