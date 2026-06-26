@@ -1,0 +1,1 @@
+- **[Issue #246]** Resolve the Set genre relationship via the JSON:API include linkage instead of the removed flat `genre_id` attribute, so `Set::genre()` works again after tradingcardapi-api#1491.
