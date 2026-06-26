@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **[Issue #244]** Repoint genre `listDeleted()` and `deleted($id)` off the deprecated v1 literal-segment routes onto the JSON:API query-parameter endpoints.
 - **[Issue #214]** Move workflow, set-todo, and audit-log resources into the `Internal\` namespace behind a new `internal()` accessor.
   - Breaking change: `TradingCardApi::workflow()` and `TradingCardApi::auditLog()` are removed; callers must switch to `$api->internal()->workflow()` and `$api->internal()->auditLog()`. Credentials must carry the `internal` OAuth scope.
 - Direct Claude to create GitHub issues via the `create_cross_repo_issues` MCP tool instead of `gh issue create` in `.claude/CLAUDE.md` (#203).
