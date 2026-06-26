@@ -2,7 +2,6 @@
 
 namespace CardTechie\TradingCardApiSdk\Models;
 
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 /**
@@ -98,15 +97,23 @@ class Model
     }
 
     /**
-     * Magic method to get a relationship.
+     * Magic method invoked for inaccessible/undefined instance methods.
      *
-     * @return Collection|mixed
+     * Previously this was a silent no-op that returned null, so a typo like
+     * `$player->team()` (when `team()` lives on Playerteam, not Player) returned
+     * null instead of failing. Throw so unknown method calls surface loudly.
+     *
+     * @return never
+     *
+     * @throws \BadMethodCallException Always, for any undefined method.
      *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
      */
     public function __call($methodName, $arguments)
     {
-        //
+        throw new \BadMethodCallException(
+            sprintf('Call to undefined method %s::%s()', static::class, $methodName)
+        );
     }
 
     /**

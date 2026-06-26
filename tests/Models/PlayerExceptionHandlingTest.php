@@ -1,0 +1,72 @@
+<?php
+
+use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
+use CardTechie\TradingCardApiSdk\Models\Player;
+use CardTechie\TradingCardApiSdk\Resources\Card as CardResource;
+use CardTechie\TradingCardApiSdk\Resources\Player as PlayerResource;
+use CardTechie\TradingCardApiSdk\Resources\Playerteam as PlayerteamResource;
+use CardTechie\TradingCardApiSdk\TradingCardApi;
+use Mockery as m;
+
+afterEach(function () {
+    m::close();
+});
+
+/**
+ * Swap the TradingCardApi instance behind the facade so a given resource
+ * accessor (player/playerteam/card) returns a resource mock whose request
+ * method throws. This proves the Player getter lets the exception propagate
+ * rather than masking it as an empty collection.
+ *
+ * The resource mock is typed against the concrete Resource class so it
+ * satisfies the accessor's declared return type (e.g. TradingCardApi::player()
+ * is typed `: Resources\Player`).
+ *
+ * @param  class-string  $resourceClass
+ */
+function swapResourceToThrow(string $accessor, string $resourceClass, string $method, Throwable $exception): void
+{
+    $resource = m::mock($resourceClass);
+    $resource->shouldReceive($method)->andThrow($exception);
+
+    $api = m::mock(TradingCardApi::class);
+    $api->shouldReceive($accessor)->andReturn($resource);
+
+    TradingCardApiSdk::swap($api);
+}
+
+it('getAliases propagates exceptions instead of returning an empty collection', function () {
+    swapResourceToThrow('player', PlayerResource::class, 'getList', new RuntimeException('network down'));
+
+    $player = new Player(['id' => 'player-1']);
+
+    expect(fn () => $player->getAliases())
+        ->toThrow(RuntimeException::class, 'network down');
+});
+
+it('getTeams propagates exceptions instead of returning an empty collection', function () {
+    swapResourceToThrow('playerteam', PlayerteamResource::class, 'getList', new RuntimeException('network down'));
+
+    $player = new Player(['id' => 'player-1']);
+
+    expect(fn () => $player->getTeams())
+        ->toThrow(RuntimeException::class, 'network down');
+});
+
+it('getPlayerteams propagates exceptions instead of returning an empty collection', function () {
+    swapResourceToThrow('playerteam', PlayerteamResource::class, 'getList', new RuntimeException('network down'));
+
+    $player = new Player(['id' => 'player-1']);
+
+    expect(fn () => $player->getPlayerteams())
+        ->toThrow(RuntimeException::class, 'network down');
+});
+
+it('getCards propagates exceptions instead of returning an empty collection', function () {
+    swapResourceToThrow('card', CardResource::class, 'list', new RuntimeException('network down'));
+
+    $player = new Player(['id' => 'player-1']);
+
+    expect(fn () => $player->getCards())
+        ->toThrow(RuntimeException::class, 'network down');
+});

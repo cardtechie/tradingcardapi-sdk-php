@@ -211,7 +211,10 @@ it('sets genre relationship when genres provided', function () {
     $set->setRelationships(['genres' => $genres]);
 
     expect($set->genre())->toBe($genre1);
-    expect($set->getRelationship('genres'))->toBeNull();
+    // genre() collapses the plural `genres` relationship into the singular
+    // `genre` key and removes `genres`, so it should no longer be present.
+    expect($set->getRelationships())->not->toHaveKey('genres');
+    expect($set->getRelationships())->toHaveKey('genre');
 });
 
 it('returns sources array', function () {
