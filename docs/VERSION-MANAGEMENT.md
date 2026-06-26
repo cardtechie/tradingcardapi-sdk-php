@@ -118,17 +118,26 @@ Creates comprehensive GitHub release notes with AI-powered summaries.
    make version  # Shows: 1.2.3-alpha.5
    ```
 
-2. **Merge to Develop**
+2. **Add a Changelog Fragment**
+   Write a one-line `changelog.d/<issue>-<type>.md` fragment for the change
+   (see [`changelog.d/README.md`](../changelog.d/README.md)). Do **not** edit
+   the shared `## [Unreleased]` section — fragments avoid the merge conflicts
+   that section caused.
+
+3. **Merge to Develop**
    ```bash
    git checkout develop
    git merge feature/new-endpoint
    make version  # Shows: 1.3.0.beta-12
    ```
 
-3. **Update Changelog**
-   ```bash
-   make changelog-update
-   ```
+Fragment collation into a versioned `CHANGELOG.md` section is a **release-step**
+operation (see the Release Process below), not a per-PR step. Note that
+`make changelog-update` / `build/update-changelog.sh` does **not** currently read
+`changelog.d/` fragments — it derives the new version section from the existing
+`## [Unreleased]` content and/or git commits. Until dedicated fragment-collation
+tooling ships, the release operator collates the accumulated fragments into
+`CHANGELOG.md` by hand.
 
 ### Release Process
 
@@ -274,11 +283,16 @@ The system expects semantic version tags. Ensure tags follow the pattern:
 
 ### Changelog Conflicts
 
-If multiple developers update the changelog simultaneously:
-
-1. Resolve merge conflicts in the `[Unreleased]` section
-2. Run `make changelog-update` to regenerate the entry
-3. Review and commit the result
+Per-PR changelog entries are written as **fragments** under `changelog.d/`
+(one `changelog.d/<issue>-<type>.md` file per PR), not appended to the shared
+`## [Unreleased]` section of `CHANGELOG.md`. Because each PR adds a unique new
+path, concurrent PRs never conflict on the changelog — there is no shared
+section to merge. See [`changelog.d/README.md`](../changelog.d/README.md) for
+the convention. Collating fragments into a versioned `CHANGELOG.md` section is a
+**release-step** operation, not per-PR work. Today that collation is manual:
+`make changelog-update` / `build/update-changelog.sh` does not yet consume
+`changelog.d/` fragments, so the release operator merges them into `CHANGELOG.md`
+by hand until dedicated tooling lands.
 
 ## Best Practices
 
