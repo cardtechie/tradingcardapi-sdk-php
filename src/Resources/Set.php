@@ -2,6 +2,7 @@
 
 namespace CardTechie\TradingCardApiSdk\Resources;
 
+use CardTechie\TradingCardApiSdk\DTOs\Set\ChecklistResponse;
 use CardTechie\TradingCardApiSdk\Models\Set as SetModel;
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
@@ -121,21 +122,29 @@ class Set
     }
 
     /**
-     * Get the checklist for a set
+     * Get the checklist for a set.
      *
+     * Returns a typed {@see ChecklistResponse} carrying the cards on the
+     * checklist, the cards still missing, and the total card count.
      *
      * @throws InvalidArgumentException
      */
-    public function checklist(string $id): object
+    public function checklist(string $id): ChecklistResponse
     {
         $url = sprintf('/v1/sets/%s/checklist', $id);
 
-        return $this->makeRequest($url, 'GET');
+        return ChecklistResponse::fromResponse($this->makeRequest($url, 'GET'));
     }
 
     /**
-     * Get the workflow for a set
+     * Get the workflow for a set.
      *
+     * Returns the raw decoded `/internal/sets/{id}/workflow` response as a
+     * deliberately-unstructured object: this sub-resource endpoint has no
+     * stable JSON:API schema, so callers read the `workflow` property tree
+     * (priority, current_step, todos) directly off the returned object.
+     *
+     * @return object The decoded workflow payload (unstructured)
      *
      * @throws InvalidArgumentException
      */
@@ -147,8 +156,13 @@ class Set
     }
 
     /**
-     * Add the missing cards (as empty cards) to the specified set
+     * Add the missing cards (as empty cards) to the specified set.
      *
+     * Returns the raw decoded acknowledgement object (`success`, `message`,
+     * and any operation-specific fields the API includes); this endpoint
+     * returns an unstructured ack rather than a typed resource.
+     *
+     * @return object The decoded acknowledgement payload (unstructured)
      *
      * @throws InvalidArgumentException
      */
@@ -160,8 +174,13 @@ class Set
     }
 
     /**
-     * Add the checklist to the set
+     * Add the checklist to the set.
      *
+     * Returns the raw decoded acknowledgement object (`success`, `message`,
+     * and any operation-specific fields the API includes); this endpoint
+     * returns an unstructured ack rather than a typed resource.
+     *
+     * @return object The decoded acknowledgement payload (unstructured)
      *
      * @throws InvalidArgumentException
      */

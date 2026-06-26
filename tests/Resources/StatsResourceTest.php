@@ -6,6 +6,8 @@ use CardTechie\TradingCardApiSdk\DTOs\Stats\GrowthMetric;
 use CardTechie\TradingCardApiSdk\DTOs\Stats\GrowthResponse;
 use CardTechie\TradingCardApiSdk\DTOs\Stats\Snapshot;
 use CardTechie\TradingCardApiSdk\DTOs\Stats\SnapshotsResponse;
+use CardTechie\TradingCardApiSdk\DTOs\Stats\StatPoint;
+use CardTechie\TradingCardApiSdk\DTOs\Stats\StatsResponse;
 use CardTechie\TradingCardApiSdk\Resources\Stats;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
@@ -62,12 +64,13 @@ it('can get cards stats', function () {
 
     $result = $this->statsResource->get('cards');
 
-    expect($result)->toBeInstanceOf(stdClass::class);
+    expect($result)->toBeInstanceOf(StatsResponse::class);
     expect($result->model)->toBe('cards');
     expect($result->unit)->toBe('daily');
     expect($result->count)->toBe(2);
     expect($result->stats)->toBeArray();
     expect($result->stats)->toHaveCount(2);
+    expect($result->stats[0])->toBeInstanceOf(StatPoint::class);
     expect($result->stats[0]->date)->toBe('2024-01-15');
     expect($result->stats[0]->count)->toBe(50);
     expect($result->stats[0]->total)->toBe(50);
@@ -99,7 +102,7 @@ it('can get sets stats', function () {
 
     $result = $this->statsResource->get('sets');
 
-    expect($result)->toBeInstanceOf(stdClass::class);
+    expect($result)->toBeInstanceOf(StatsResponse::class);
     expect($result->model)->toBe('sets');
     expect($result->unit)->toBe('daily');
     expect($result->count)->toBe(1);
@@ -143,7 +146,7 @@ it('can get players stats', function () {
 
     $result = $this->statsResource->get('players');
 
-    expect($result)->toBeInstanceOf(stdClass::class);
+    expect($result)->toBeInstanceOf(StatsResponse::class);
     expect($result->model)->toBe('players');
     expect($result->unit)->toBe('daily');
     expect($result->count)->toBe(3);
@@ -176,7 +179,7 @@ it('can get teams stats', function () {
 
     $result = $this->statsResource->get('teams');
 
-    expect($result)->toBeInstanceOf(stdClass::class);
+    expect($result)->toBeInstanceOf(StatsResponse::class);
     expect($result->model)->toBe('teams');
     expect($result->count)->toBe(1);
     expect($result->stats)->toHaveCount(1);
@@ -210,7 +213,7 @@ it('can get brands stats', function () {
 
     $result = $this->statsResource->get('brands');
 
-    expect($result)->toBeInstanceOf(stdClass::class);
+    expect($result)->toBeInstanceOf(StatsResponse::class);
     expect($result->model)->toBe('brands');
     expect($result->count)->toBe(2);
     expect($result->stats)->toHaveCount(2);
@@ -233,7 +236,7 @@ it('handles empty stats response', function () {
 
     $result = $this->statsResource->get('manufacturers');
 
-    expect($result)->toBeInstanceOf(stdClass::class);
+    expect($result)->toBeInstanceOf(StatsResponse::class);
     expect($result->model)->toBe('manufacturers');
     expect($result->count)->toBe(0);
     expect($result->stats)->toBeArray();

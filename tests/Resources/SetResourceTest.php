@@ -1,5 +1,6 @@
 <?php
 
+use CardTechie\TradingCardApiSdk\DTOs\Set\ChecklistResponse;
 use CardTechie\TradingCardApiSdk\Models\Set as SetModel;
 use CardTechie\TradingCardApiSdk\Resources\Set;
 use GuzzleHttp\Client;
@@ -184,7 +185,10 @@ it('can get checklist for a set', function () {
 
     $result = $this->setResource->checklist('123');
 
-    expect($result)->toBeObject();
+    expect($result)->toBeInstanceOf(ChecklistResponse::class);
+    expect($result->checklist)->toBe(['card1', 'card2', 'card3']);
+    expect($result->missing)->toBe(['card4', 'card5']);
+    expect($result->totalCards)->toBeNull();
 });
 
 it('can get workflow for a set', function () {
@@ -406,7 +410,10 @@ it('can get checklist with empty results', function () {
 
     $result = $this->setResource->checklist('123');
 
-    expect($result)->toBeObject();
+    expect($result)->toBeInstanceOf(ChecklistResponse::class);
+    expect($result->checklist)->toBe([]);
+    expect($result->missing)->toBe([]);
+    expect($result->totalCards)->toBe(0);
 });
 
 it('can handle large pagination in list', function () {
@@ -477,7 +484,9 @@ it('does not throw in strict_mode for checklist sub-resource endpoint', function
 
     $result = $this->setResource->checklist('123');
 
-    expect($result)->toBeObject();
+    expect($result)->toBeInstanceOf(ChecklistResponse::class);
+    expect($result->checklist)->toBe(['card1', 'card2']);
+    expect($result->missing)->toBe(['card3']);
 });
 
 it('can add checklist with complex request structure', function () {
