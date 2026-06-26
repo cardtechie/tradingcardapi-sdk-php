@@ -27,8 +27,6 @@ fragments yet. See changelog.d/README.md. -->
 
 ### Fixed
 
-- **[Issue #253]** Fix `Response` meta/links bleeding across separate parses by attaching them to each parsed result instead of shared static state.
-  - The static `Response::getMeta()` / `getLinks()` reflect only the most recent parse in the process; use the per-result `$model->getMeta()` / `getLinks()` for cross-parse-safe access.
 - Unify memory assertion threshold in ValidationPerformanceTest to prevent false failures in Docker. (#201)
 
 ## [0.2.4] - 2026-04-14

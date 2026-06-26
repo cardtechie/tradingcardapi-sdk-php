@@ -16,7 +16,6 @@ class Model
     public array $relationships = [];
 
     /**
-// CONFLICT: review needed — kept HEAD side; incoming side follows in comment
      * Per-result top-level JSON:API meta for the parse that produced this model.
      *
      * Carried on the instance (not shared static state) so concurrent or
@@ -31,16 +30,16 @@ class Model
      * sequential parses cannot bleed links into one another.
      */
     public object $links;
-    // --- incoming side (theirs) ---
-    //      * The JSON:API per-resource relationships linkage map, keyed by relationship
-    //      * name => ['type' => ..., 'id' => ...]. Populated by Response when parsing a
-    //      * resource's `data.relationships` block; defaults to empty so direct-construction
-    //      * callers (and tests) that never set linkage keep working unchanged.
-    //      *
-    //      * @var array<string, array{type?: string|null, id?: string|null}>
-    //      */
-    //     public array $linkage = [];
-    // --- end incoming side ---
+
+    /**
+     * The JSON:API per-resource relationships linkage map, keyed by relationship
+     * name => ['type' => ..., 'id' => ...]. Populated by Response when parsing a
+     * resource's `data.relationships` block; defaults to empty so direct-construction
+     * callers (and tests) that never set linkage keep working unchanged.
+     *
+     * @var array<string, array{type?: string|null, id?: string|null}>
+     */
+    public array $linkage = [];
 
     /**
      * Model constructor.
@@ -69,7 +68,6 @@ class Model
     }
 
     /**
-// CONFLICT: review needed — kept HEAD side; incoming side follows in comment
      * Set the per-result meta for this parsed model.
      */
     public function setMeta(object $meta): void
@@ -107,25 +105,26 @@ class Model
     public function getLinks(): object
     {
         return $this->links;
-        // --- incoming side (theirs) ---
-        //      * Set the JSON:API per-resource relationships linkage map for the object.
-        //      *
-        //      * @param  array<string, array{type?: string|null, id?: string|null}>  $linkage
-        //      */
-        //     public function setLinkage(array $linkage): void
-        //     {
-        //         $this->linkage = $linkage;
-        //     }
-        //
-        //     /**
-        //      * Return the JSON:API per-resource relationships linkage map.
-        //      *
-        //      * @return array<string, array{type?: string|null, id?: string|null}>
-        //      */
-        //     public function getLinkage(): array
-        //     {
-        //         return $this->linkage;
-        // --- end incoming side ---
+    }
+
+    /**
+     * Set the JSON:API per-resource relationships linkage map for the object.
+     *
+     * @param  array<string, array{type?: string|null, id?: string|null}>  $linkage
+     */
+    public function setLinkage(array $linkage): void
+    {
+        $this->linkage = $linkage;
+    }
+
+    /**
+     * Return the JSON:API per-resource relationships linkage map.
+     *
+     * @return array<string, array{type?: string|null, id?: string|null}>
+     */
+    public function getLinkage(): array
+    {
+        return $this->linkage;
     }
 
     /**
