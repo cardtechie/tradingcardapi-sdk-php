@@ -194,8 +194,11 @@ class Playerteam extends Model implements Taxonomy
      * in-memory Playerteam instance carrying the given uuids — it does not query
      * or write to a database.
      *
-     * @param  string  $player  The player uuid
-     * @param  string  $team  The team uuid
+     * Called from prepare() with a null on either side when only one of player
+     * or team is supplied, so both uuids are nullable.
+     *
+     * @param  string|null  $player  The player uuid, or null when only a team is given
+     * @param  string|null  $team  The team uuid, or null when only a player is given
      */
     public static function lookup($player, $team): Playerteam
     {
