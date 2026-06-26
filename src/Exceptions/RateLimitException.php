@@ -43,6 +43,7 @@ class RateLimitException extends TradingCardApiException
      * @param  \Exception|null  $previous  The previous exception
      * @param  string|null  $apiErrorCode  The API error code
      * @param  array  $apiErrors  The API errors array
+     * @param  int|null  $httpStatusCode  The HTTP status code
      * @param  array  $context  Additional context for debugging
      * @param  int|null  $rateLimit  The rate limit quota
      * @param  int|null  $rateLimitRemaining  The number of requests remaining
@@ -55,6 +56,7 @@ class RateLimitException extends TradingCardApiException
         ?\Exception $previous = null,
         ?string $apiErrorCode = null,
         array $apiErrors = [],
+        ?int $httpStatusCode = 429,
         array $context = [],
         ?int $rateLimit = null,
         ?int $rateLimitRemaining = null,
@@ -67,7 +69,7 @@ class RateLimitException extends TradingCardApiException
             $previous,
             $apiErrorCode,
             $apiErrors,
-            429,
+            $httpStatusCode,
             $context
         );
 
@@ -158,6 +160,7 @@ class RateLimitException extends TradingCardApiException
                 'title' => 'Rate Limit Exceeded',
                 'detail' => 'You have exceeded the API rate limit. Please wait before making more requests.',
             ]],
+            429,
             $context,
             $rateLimit,
             $rateLimitRemaining,

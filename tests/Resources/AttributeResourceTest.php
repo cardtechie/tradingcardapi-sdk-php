@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 beforeEach(function () {
@@ -70,29 +71,58 @@ it('can create attribute without attributes', function () {
     expect($result)->toBeInstanceOf(AttributeModel::class);
 });
 
-it('can get a list of attributes', function () {
+it('can list attributes with pagination', function () {
     $this->mockHandler->append(
         new GuzzleResponse(200, [], json_encode([
             'data' => [
-                [
-                    'type' => 'attributes',
-                    'id' => '123',
-                    'attributes' => [
-                        'name' => 'Attribute 1',
-                    ],
-                ],
-                [
-                    'type' => 'attributes',
-                    'id' => '456',
-                    'attributes' => [
-                        'name' => 'Attribute 2',
-                    ],
+                ['type' => 'attributes', 'id' => '123', 'attributes' => ['name' => 'Attribute 1']],
+                ['type' => 'attributes', 'id' => '456', 'attributes' => ['name' => 'Attribute 2']],
+            ],
+            'meta' => [
+                'pagination' => [
+                    'total' => 100,
+                    'per_page' => 50,
+                    'current_page' => 1,
                 ],
             ],
         ]))
     );
 
     $result = $this->attributeResource->list();
+
+    expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
+    expect($result->total())->toBe(100);
+    expect($result->perPage())->toBe(50);
+    expect($result->currentPage())->toBe(1);
+});
+
+it('falls back gracefully when pagination meta is missing', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                ['type' => 'attributes', 'id' => '123', 'attributes' => ['name' => 'Attribute 1']],
+                ['type' => 'attributes', 'id' => '456', 'attributes' => ['name' => 'Attribute 2']],
+            ],
+        ]))
+    );
+
+    $result = $this->attributeResource->list();
+
+    expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
+    expect($result->total())->toBe(2);
+});
+
+it('can get all attributes as a raw collection', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                ['type' => 'attributes', 'id' => '123', 'attributes' => ['name' => 'Attribute 1']],
+                ['type' => 'attributes', 'id' => '456', 'attributes' => ['name' => 'Attribute 2']],
+            ],
+        ]))
+    );
+
+    $result = $this->attributeResource->all();
 
     expect($result)->toBeInstanceOf(Collection::class);
     expect($result->count())->toBe(2);
@@ -139,4 +169,56 @@ it('can update an attribute', function () {
     $result = $this->attributeResource->update('123', $attributes);
 
     expect($result)->toBeInstanceOf(AttributeModel::class);
+});
+
+it('can create an attribute with relationships', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'attributes',
+                'id' => '123',
+                'attributes' => ['name' => 'Test Attribute'],
+                'relationships' => [
+                    'parent' => ['data' => ['type' => 'attributes', 'id' => '456']],
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->attributeResource->create(
+        ['name' => 'Test Attribute'],
+        ['parent' => ['data' => ['type' => 'attributes', 'id' => '456']]]
+    );
+
+    expect($result)->toBeInstanceOf(AttributeModel::class);
+});
+
+it('can update an attribute with relationships', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'attributes',
+                'id' => '123',
+                'attributes' => ['name' => 'Updated Attribute'],
+            ],
+        ]))
+    );
+
+    $result = $this->attributeResource->update(
+        '123',
+        ['name' => 'Updated Attribute'],
+        ['parent' => ['data' => ['type' => 'attributes', 'id' => '456']]]
+    );
+
+    expect($result)->toBeInstanceOf(AttributeModel::class);
+});
+
+it('can delete an attribute', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(204, [], '')
+    );
+
+    $result = $this->attributeResource->delete('123');
+
+    expect($result)->toBeNull();
 });

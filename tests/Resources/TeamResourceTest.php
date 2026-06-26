@@ -87,6 +87,37 @@ it('can get a list of teams with params', function () {
     expect($result->count())->toBe(1);
 });
 
+it('can get all teams as a raw collection', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                ['type' => 'teams', 'id' => '123', 'attributes' => ['name' => 'New York Yankees']],
+                ['type' => 'teams', 'id' => '456', 'attributes' => ['name' => 'Boston Red Sox']],
+            ],
+        ]))
+    );
+
+    $result = $this->teamResource->all();
+
+    expect($result)->toBeInstanceOf(Collection::class);
+    expect($result->count())->toBe(2);
+});
+
+it('keeps deprecated getList delegating to all', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                ['type' => 'teams', 'id' => '123', 'attributes' => ['name' => 'New York Yankees']],
+            ],
+        ]))
+    );
+
+    $result = $this->teamResource->getList();
+
+    expect($result)->toBeInstanceOf(Collection::class);
+    expect($result->count())->toBe(1);
+});
+
 it('can create a team', function () {
     $this->mockHandler->append(
         new GuzzleResponse(200, [], json_encode([

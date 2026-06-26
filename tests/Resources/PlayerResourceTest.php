@@ -30,6 +30,69 @@ it('can be instantiated with client', function () {
     expect($player)->toBeInstanceOf(Player::class);
 });
 
+it('can get all players as a raw collection', function () {
+    $client = m::mock(Client::class);
+
+    $tokenResponse = new GuzzleResponse(200, [], json_encode([
+        'access_token' => 'test-token',
+        'token_type' => 'Bearer',
+    ]));
+
+    $playersResponse = new GuzzleResponse(200, [], json_encode([
+        'data' => [
+            ['id' => '1', 'type' => 'players', 'attributes' => ['name' => 'Player One']],
+            ['id' => '2', 'type' => 'players', 'attributes' => ['name' => 'Player Two']],
+        ],
+    ]));
+
+    $client->shouldReceive('request')
+        ->with('POST', '/oauth/token', m::type('array'))
+        ->once()
+        ->andReturn($tokenResponse);
+
+    $client->shouldReceive('request')
+        ->with('GET', '/v1/players?', m::type('array'))
+        ->once()
+        ->andReturn($playersResponse);
+
+    $player = new Player($client);
+    $result = $player->all();
+
+    expect($result)->toBeInstanceOf(Collection::class);
+    expect($result)->toHaveCount(2);
+});
+
+it('keeps deprecated getList delegating to all', function () {
+    $client = m::mock(Client::class);
+
+    $tokenResponse = new GuzzleResponse(200, [], json_encode([
+        'access_token' => 'test-token',
+        'token_type' => 'Bearer',
+    ]));
+
+    $playersResponse = new GuzzleResponse(200, [], json_encode([
+        'data' => [
+            ['id' => '1', 'type' => 'players', 'attributes' => ['name' => 'Player One']],
+        ],
+    ]));
+
+    $client->shouldReceive('request')
+        ->with('POST', '/oauth/token', m::type('array'))
+        ->once()
+        ->andReturn($tokenResponse);
+
+    $client->shouldReceive('request')
+        ->with('GET', '/v1/players?', m::type('array'))
+        ->once()
+        ->andReturn($playersResponse);
+
+    $player = new Player($client);
+    $result = $player->getList();
+
+    expect($result)->toBeInstanceOf(Collection::class);
+    expect($result)->toHaveCount(1);
+});
+
 it('can get list of players', function () {
     $client = m::mock(Client::class);
 

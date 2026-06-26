@@ -17,7 +17,8 @@ it('stores rate limit information', function () {
         null,
         'rate_limit_exceeded',
         [],
-        [],
+        429,     // http status code
+        [],      // context
         1000,    // rate limit
         50,      // remaining
         1234567890, // reset timestamp
@@ -28,6 +29,27 @@ it('stores rate limit information', function () {
     expect($exception->getRateLimitRemaining())->toBe(50);
     expect($exception->getRateLimitReset())->toBe(1234567890);
     expect($exception->getRetryAfter())->toBe(300);
+});
+
+it('keeps positional constructor slots aligned with the base exception', function () {
+    // Slots 1-7 must match TradingCardApiException:
+    // (message, code, previous, apiErrorCode, apiErrors, httpStatusCode, context)
+    $exception = new RateLimitException(
+        'Rate limited',
+        429,
+        null,
+        'rate_limit_exceeded',
+        [['title' => 'Rate Limit Exceeded']],
+        429,
+        ['endpoint' => '/api/test'],
+    );
+
+    expect($exception->getMessage())->toBe('Rate limited');
+    expect($exception->getCode())->toBe(429);
+    expect($exception->getApiErrorCode())->toBe('rate_limit_exceeded');
+    expect($exception->getApiErrors())->toBe([['title' => 'Rate Limit Exceeded']]);
+    expect($exception->getHttpStatusCode())->toBe(429);
+    expect($exception->getContext())->toBe(['endpoint' => '/api/test']);
 });
 
 it('converts rate limit reset timestamp to DateTime', function () {
@@ -88,6 +110,7 @@ it('includes rate limit data in array conversion', function () {
         null,
         'rate_limit_exceeded',
         [],
+        429,
         ['endpoint' => '/api/test'],
         1000,
         0,

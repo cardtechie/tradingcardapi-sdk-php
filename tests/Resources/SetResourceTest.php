@@ -325,6 +325,48 @@ it('can update a set with complex attributes', function () {
     expect($result)->toBeInstanceOf(SetModel::class);
 });
 
+it('can create a set with a dedicated relationships argument', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'sets',
+                'id' => '789',
+                'attributes' => ['name' => 'Set with Relationships'],
+                'relationships' => [
+                    'genre' => ['data' => ['type' => 'genres', 'id' => '1']],
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->setResource->create(
+        ['name' => 'Set with Relationships'],
+        ['genre' => ['data' => ['type' => 'genres', 'id' => '1']]]
+    );
+
+    expect($result)->toBeInstanceOf(SetModel::class);
+});
+
+it('can update a set with a dedicated relationships argument', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'sets',
+                'id' => '123',
+                'attributes' => ['name' => 'Updated Set'],
+            ],
+        ]))
+    );
+
+    $result = $this->setResource->update(
+        '123',
+        ['name' => 'Updated Set'],
+        ['genre' => ['data' => ['type' => 'genres', 'id' => '2']]]
+    );
+
+    expect($result)->toBeInstanceOf(SetModel::class);
+});
+
 it('can get a set with complex includes and relationships', function () {
     $this->mockHandler->append(
         new GuzzleResponse(200, [], json_encode([
