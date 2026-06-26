@@ -307,6 +307,11 @@ it('can get a list of deleted genres', function () {
     $result = $this->genreResource->listDeleted();
 
     expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
+
+    $lastRequest = $this->mockHandler->getLastRequest();
+    expect($lastRequest->getUri()->getPath())->toBe('/v1/genres');
+    expect(rawurldecode($lastRequest->getUri()->getQuery()))->toContain('filter[status]=deleted');
+    expect($lastRequest->getUri()->getPath())->not->toContain('/deleted');
 });
 
 it('can get a specific deleted genre by id', function () {
@@ -333,6 +338,11 @@ it('can get a specific deleted genre by id', function () {
     expect($result->slug)->toBe('basketball');
     expect($result->description)->toBe('A deleted basketball genre');
     expect($result->deleted_at)->toBe('2024-01-15T10:30:00Z');
+
+    $lastRequest = $this->mockHandler->getLastRequest();
+    expect($lastRequest->getUri()->getPath())->toBe('/v1/genres/789');
+    expect($lastRequest->getUri()->getPath())->not->toContain('/deleted');
+    expect(rawurldecode($lastRequest->getUri()->getQuery()))->toContain('include_trashed=true');
 });
 
 it('can handle empty deleted genres list', function () {
@@ -345,4 +355,9 @@ it('can handle empty deleted genres list', function () {
     $result = $this->genreResource->listDeleted();
 
     expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
+
+    $lastRequest = $this->mockHandler->getLastRequest();
+    expect($lastRequest->getUri()->getPath())->toBe('/v1/genres');
+    expect(rawurldecode($lastRequest->getUri()->getQuery()))->toContain('filter[status]=deleted');
+    expect($lastRequest->getUri()->getPath())->not->toContain('/deleted');
 });
