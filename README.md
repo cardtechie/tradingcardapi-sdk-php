@@ -2,8 +2,8 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/cardtechie/tradingcardapi-sdk-php.svg?style=flat-square)](https://packagist.org/packages/cardtechie/tradingcardapi-sdk-php)
 [![GitHub Tests](https://img.shields.io/github/actions/workflow/status/cardtechie/tradingcardapi-sdk-php/code-quality.yml?branch=main&label=tests&style=flat-square)](https://github.com/cardtechie/tradingcardapi-sdk-php/actions?query=workflow%3Acode-quality+branch%3Amain)
-[![PHPStan](https://img.shields.io/github/actions/workflow/status/cardtechie/tradingcardapi-sdk-php/code-quality.yml?branch=main&label=phpstan&style=flat-square)](https://github.com/cardtechie/tradingcardapi-sdk-php/actions)
 [![Total Downloads](https://img.shields.io/packagist/dt/cardtechie/tradingcardapi-sdk-php.svg?style=flat-square)](https://packagist.org/packages/cardtechie/tradingcardapi-sdk-php)
+[![License: MIT](https://img.shields.io/packagist/l/cardtechie/tradingcardapi-sdk-php.svg?style=flat-square)](LICENSE.md)
 
 A modern PHP SDK for integrating with the Trading Card API. This Laravel package provides a clean, type-safe interface for accessing trading card data including cards, sets, players, teams, and more.
 
@@ -11,12 +11,12 @@ A modern PHP SDK for integrating with the Trading Card API. This Laravel package
 
 - 🔧 **Laravel Integration** - Built specifically for Laravel applications
 - 🛡️ **Type Safety** - Full PHPStan Level 4 compliance with strict typing
-- 🧪 **Well Tested** - Comprehensive test suite with 80%+ coverage
+- 🧪 **Well Tested** - Comprehensive test suite (Pest) covering the SDK's public surface
 - 📦 **Easy Installation** - Simple Composer installation and configuration
 - 🔄 **OAuth2 Authentication** - Automatic token management and renewal
 - 🚨 **Enhanced Error Handling** - Specific exception classes for different error types
 - 📖 **Rich Documentation** - Clear examples and comprehensive API coverage
-- ⚡ **High Performance** - Efficient HTTP client with connection pooling
+- ⚡ **Built on Guzzle** - HTTP transport via the battle-tested GuzzleHTTP client
 
 ## 📋 Requirements
 
@@ -595,7 +595,7 @@ This project maintains high code quality standards:
 
 - ✅ **PHPStan Level 4** - Strict static analysis
 - ✅ **PSR-12** - Code style compliance via Laravel Pint
-- ✅ **80%+ Test Coverage** - Comprehensive test suite using Pest
+- ✅ **Comprehensive Test Suite** - Extensive coverage using Pest (run `make test-coverage` for a local report)
 - ✅ **Automated CI/CD** - Quality checks on all PRs
 
 ## 📖 Documentation
@@ -607,7 +607,7 @@ This project maintains high code quality standards:
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! Open an issue or start a thread in [GitHub Discussions](https://github.com/cardtechie/tradingcardapi-sdk-php/discussions) before submitting a pull request, and follow the development workflow below. (A dedicated `CONTRIBUTING.md` is in progress.)
 
 ### Development Workflow
 
