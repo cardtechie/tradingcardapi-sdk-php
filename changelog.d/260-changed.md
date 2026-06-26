@@ -1,0 +1,1 @@
+- **[Issue #260]** Add `@property` coverage to all SDK models, convert the request trait and exception hierarchy to native typed properties, guard `json_encode` false-returns, and ratchet PHPStan to a higher level.
