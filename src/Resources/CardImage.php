@@ -96,7 +96,11 @@ class CardImage
     {
         // Prepare the file for multipart upload
         if ($file instanceof UploadedFile) {
-            $fileContents = fopen($file->getRealPath(), 'r');
+            $realPath = $file->getRealPath();
+            if ($realPath === false) {
+                throw new \InvalidArgumentException('Uploaded file does not have a readable real path');
+            }
+            $fileContents = fopen($realPath, 'r');
             $filename = $file->getClientOriginalName();
         } elseif (file_exists($file)) {
             $fileContents = fopen($file, 'r');

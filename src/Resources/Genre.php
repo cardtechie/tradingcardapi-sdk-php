@@ -126,15 +126,9 @@ class Genre
 
     public function deleted(string $id): GenreModel
     {
-        // CONFLICT: review needed — kept HEAD side; incoming side follows in comment
         $url = sprintf('/v1/genres/%s/deleted', $id);
         $response = $this->makeRequest($url);
         $formattedResponse = new Response(json_encode($response) ?: '{}');
-        // --- incoming side (theirs) ---
-        //         $url = sprintf('/v1/genres/%s', $id);
-        //         $response = $this->makeRequest($url, 'GET', ['query' => ['include_trashed' => 'true']]);
-        //         $formattedResponse = new Response(json_encode($response));
-        // --- end incoming side ---
 
         return $formattedResponse->mainObject;
     }
