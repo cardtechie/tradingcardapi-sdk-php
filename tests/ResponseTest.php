@@ -180,8 +180,11 @@ it('does not bleed meta/links across separate parses', function () {
     expect($resultB->getLinks()->next)->toBe('https://api.example.com/cards?page=2&doc=B');
 
     // And they are genuinely distinct, not aliased to the same shared object.
-    expect($resultA->getMeta()->total)->not->toBe($resultB->getMeta()->total);
-    expect($resultA->getLinks()->next)->not->toBe($resultB->getLinks()->next);
+    // Compare the meta/links objects themselves (strict identity) so the test
+    // fails if both results were ever to reference the same object instance —
+    // a scalar-only comparison would not catch aliasing.
+    expect($resultA->getMeta())->not->toBe($resultB->getMeta());
+    expect($resultA->getLinks())->not->toBe($resultB->getLinks());
 });
 
 it('attaches per-result meta/links to every element of a collection parse', function () {
