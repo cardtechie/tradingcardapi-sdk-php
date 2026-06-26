@@ -664,7 +664,14 @@ make release-notes-preview
 4. **Production Release**: Stable releases are merged to `main`
 5. **Automation**: GitHub Actions handles versioning, changelog updates, and Packagist publishing
 
-See [docs/VERSION-MANAGEMENT.md](docs/VERSION-MANAGEMENT.md) for complete release process documentation.
+### Cutting a Release
+
+Maintainers: see the **[Release Runbook](docs/RELEASING.md)** for the concrete,
+step-by-step procedure — how a release is cut, the required repository secrets,
+how to trigger a release manually via `workflow_dispatch`, how to verify the
+GitHub Release and Packagist update, and rollback notes.
+
+See [docs/VERSION-MANAGEMENT.md](docs/VERSION-MANAGEMENT.md) for the underlying versioning model.
 
 ## 📄 Changelog
 

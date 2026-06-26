@@ -1,0 +1,2 @@
+- **[Issue #233]** Add WorkflowSchema and SetTodoSchema and wire the workflow/set-todos endpoints into response validation.
+  - extractResourceType() now also resolves `/internal/<resource>` URLs, so the audit-log/workflow/set-todo schema mappings take effect for the real endpoint paths.
