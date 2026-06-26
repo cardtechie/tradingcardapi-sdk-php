@@ -59,6 +59,7 @@ class Response
         $this->parseIncluded();
         $this->objectifyRelationships();
 
+        $this->mainObject->setLinkage(self::extractLinkage($this->response->data));
         $this->mainObject->setRelationships($this->relationships);
     }
 
@@ -73,6 +74,45 @@ class Response
         $type = self::normalizeType($this->response->data->type);
         $class = '\\CardTechie\\TradingCardApiSdk\\Models\\'.$type;
         $this->mainObject = new $class($attributes);
+    }
+
+    /**
+     * Extract the JSON:API per-resource relationships linkage block from a data
+     * object into a plain map of relationship name => ['type' => ..., 'id' => ...].
+     *
+     * After tradingcardapi-api#1491 removed the flat FK attributes (e.g. genre_id)
+     * from the Set response, this linkage block is the only signal tying a resource
+     * to its included relationships, so it must be carried through to the model.
+     *
+     * @return array<string, array{type?: string|null, id?: string|null}>
+     */
+    private static function extractLinkage(object $data): array
+    {
+        $linkage = [];
+
+        if (! property_exists($data, 'relationships') || ! is_object($data->relationships)) {
+            return $linkage;
+        }
+
+        foreach ($data->relationships as $name => $relationship) {
+            if (! is_object($relationship) || ! property_exists($relationship, 'data')) {
+                continue;
+            }
+
+            $resourceIdentifier = $relationship->data;
+
+            // Skip to-many linkage (an array of identifiers) — only to-one is needed today.
+            if (! is_object($resourceIdentifier)) {
+                continue;
+            }
+
+            $linkage[$name] = [
+                'type' => $resourceIdentifier->type ?? null,
+                'id' => $resourceIdentifier->id ?? null,
+            ];
+        }
+
+        return $linkage;
     }
 
     /**
@@ -180,6 +220,7 @@ class Response
             $objects = [];
             foreach ($response->data as $data) {
                 $object = self::parseDataObject($data);
+                $object->setLinkage(self::extractLinkage($data));
                 $object->setRelationships(self::getIncluded($response));
                 $objects[] = $object;
             }
@@ -187,6 +228,7 @@ class Response
             return collect($objects);
         } else {
             $object = self::parseDataObject($response->data);
+            $object->setLinkage(self::extractLinkage($response->data));
             $object->setRelationships(self::getIncluded($response));
 
             return $object;

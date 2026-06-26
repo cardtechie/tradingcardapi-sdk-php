@@ -109,7 +109,8 @@ class Genre
 
     public function listDeleted(): LengthAwarePaginator
     {
-        $response = $this->makeRequest('/v1/genres/deleted');
+        $url = sprintf('/v1/genres?%s', http_build_query(['filter' => ['status' => 'deleted']]));
+        $response = $this->makeRequest($url);
 
         $totalPages = $response->meta->pagination->total ?? count($response->data);
         $perPage = $response->meta->pagination->per_page ?? max(count($response->data), 1);
@@ -125,9 +126,15 @@ class Genre
 
     public function deleted(string $id): GenreModel
     {
+// CONFLICT: review needed — kept HEAD side; incoming side follows in comment
         $url = sprintf('/v1/genres/%s/deleted', $id);
         $response = $this->makeRequest($url);
         $formattedResponse = new Response(json_encode($response) ?: '{}');
+// --- incoming side (theirs) ---
+//         $url = sprintf('/v1/genres/%s', $id);
+//         $response = $this->makeRequest($url, 'GET', ['query' => ['include_trashed' => 'true']]);
+//         $formattedResponse = new Response(json_encode($response));
+// --- end incoming side ---
 
         return $formattedResponse->mainObject;
     }

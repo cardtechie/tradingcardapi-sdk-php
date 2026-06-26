@@ -37,14 +37,14 @@ jobs:
           else
             VERSION=$(bash build/version.sh)
           fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           
           # Determine if this is a release version (not dev/beta/rc)
           IS_RELEASE=false
           if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             IS_RELEASE=true
           fi
-          echo "is_release=$IS_RELEASE" >> $GITHUB_OUTPUT
+          echo "is_release=$IS_RELEASE" >> "$GITHUB_OUTPUT"
           
           # Should we create a release?
           SHOULD_RELEASE=false
@@ -55,7 +55,7 @@ jobs:
           elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
             SHOULD_RELEASE=true
           fi
-          echo "should_release=$SHOULD_RELEASE" >> $GITHUB_OUTPUT
+          echo "should_release=$SHOULD_RELEASE" >> "$GITHUB_OUTPUT"
           
           echo "Generated version: $VERSION"
           echo "Is release: $IS_RELEASE"  
@@ -86,9 +86,7 @@ jobs:
           echo "Generating release notes for version: $VERSION"
           
           # Set Claude API key if provided
-          if [[ -n "${{ inputs.claude_api_key }}" ]]; then
-            export CLAUDE_API_KEY="${{ inputs.claude_api_key }}"
-          elif [[ -n "${{ secrets.CLAUDE_API_KEY }}" ]]; then
+          if [[ -n "${{ secrets.CLAUDE_API_KEY }}" ]]; then
             export CLAUDE_API_KEY="${{ secrets.CLAUDE_API_KEY }}"
           fi
           
@@ -103,7 +101,7 @@ jobs:
             echo "notes<<EOF"
             echo "$RELEASE_NOTES"
             echo "EOF"
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1
@@ -141,20 +139,22 @@ jobs:
           VERSION="${{ needs.version.outputs.version }}"
           IS_RELEASE="${{ needs.version.outputs.is_release }}"
           
-          echo "## 🚀 Release Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
-          echo "- **Type**: $([ "$IS_RELEASE" = "true" ] && echo "Stable Release" || echo "Pre-release")" >> $GITHUB_STEP_SUMMARY
-          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Tests**: ${{ needs.test.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Release**: ${{ needs.release.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📦 Installation" >> $GITHUB_STEP_SUMMARY
-          echo '```bash' >> $GITHUB_STEP_SUMMARY
-          echo "composer require cardtechie/tradingcardapi-sdk-php:^$VERSION" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🔗 **Links:**" >> $GITHUB_STEP_SUMMARY
-          echo "- [Release](https://github.com/cardtechie/tradingcardapi-sdk-php/releases/tag/$VERSION)" >> $GITHUB_STEP_SUMMARY
-          echo "- [Packagist](https://packagist.org/packages/cardtechie/tradingcardapi-sdk-php)" >> $GITHUB_STEP_SUMMARY
-          echo "- [Changelog](https://github.com/cardtechie/tradingcardapi-sdk-php/blob/main/CHANGELOG.md)" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## 🚀 Release Summary"
+            echo ""
+            echo "- **Version**: $VERSION"
+            echo "- **Type**: $([ "$IS_RELEASE" = "true" ] && echo "Stable Release" || echo "Pre-release")"
+            echo "- **Branch**: ${{ github.ref_name }}"
+            echo "- **Tests**: ${{ needs.test.result }}"
+            echo "- **Release**: ${{ needs.release.result }}"
+            echo ""
+            echo "### 📦 Installation"
+            echo '```bash'
+            echo "composer require cardtechie/tradingcardapi-sdk-php:^$VERSION"
+            echo '```'
+            echo ""
+            echo "🔗 **Links:**"
+            echo "- [Release](https://github.com/cardtechie/tradingcardapi-sdk-php/releases/tag/$VERSION)"
+            echo "- [Packagist](https://packagist.org/packages/cardtechie/tradingcardapi-sdk-php)"
+            echo "- [Changelog](https://github.com/cardtechie/tradingcardapi-sdk-php/blob/main/CHANGELOG.md)"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -250,6 +250,27 @@ trait ApiRequest
         // Remove query parameters
         $path = parse_url($url, PHP_URL_PATH) ?? $url;
 
+        // Normalize resource names (shared by the /v<n>/ and /internal/ branches)
+        $normalizedResources = [
+            'cards' => 'card',
+            'players' => 'player',
+            'teams' => 'team',
+            'sets' => 'set',
+            'genres' => 'genre',
+            'brands' => 'brand',
+            'manufacturers' => 'manufacturer',
+            'years' => 'year',
+            'attributes' => 'attribute',
+            'object-attributes' => 'object-attribute',
+            'playerteams' => 'playerteam',
+            'stats' => 'stats',
+            'card-images' => 'card-image',
+            'set-sources' => 'set-source',
+            'audit-logs' => 'audit-log',
+            'workflow' => 'workflow',
+            'set-todos' => 'set-todo',
+        ];
+
         // Match common API patterns
         if (preg_match('#/v\d+/([^/]+)#', $path, $matches)) {
             // Sub-resource paths (e.g. /v1/sets/123/workflow) are not JSON:API
@@ -260,27 +281,38 @@ trait ApiRequest
 
             $resource = $matches[1];
 
-            // Normalize resource names
-            $normalizedResources = [
-                'cards' => 'card',
-                'players' => 'player',
-                'teams' => 'team',
-                'sets' => 'set',
-                'genres' => 'genre',
-                'brands' => 'brand',
-                'manufacturers' => 'manufacturer',
-                'years' => 'year',
-                'attributes' => 'attribute',
-                'object-attributes' => 'objectattribute',
-                'playerteams' => 'playerteam',
-                'stats' => 'stats',
-                'card-images' => 'card-image',
-                'set-sources' => 'set-source',
-                'audit-logs' => 'audit-log',
-                // Endpoints without a response schema — skip validation
-                'workflow' => null,
-                'set-todos' => null,
-            ];
+            return $normalizedResources[$resource] ?? $resource;
+        }
+
+        // Internal endpoints (e.g. /internal/set-todos/{id}, /internal/audit-logs).
+        // The /v<n>/ regex never matches these, so without this branch the
+        // workflow/set-todo/audit-log schema mappings would be dead for their
+        // real URLs.
+        if (preg_match('#^/internal/([^/]+)(?:/([^/]+))?(/.+)?$#', $path, $matches)) {
+            $resource = $matches[1];
+            $second = $matches[2] ?? null;
+            // The trailing (/.+)? group only participates for paths deeper than
+            // /internal/<resource>/<segment>; preg_match omits it otherwise, so a
+            // non-empty third match means there are extra path segments.
+            $hasDeeperPath = ! empty($matches[3]);
+
+            // Anything deeper than /internal/<resource>/<segment> is a
+            // multi-segment sub-resource (e.g. /internal/workflow/sets/{id}/todos
+            // or /internal/sets/{id}/workflow) and is not a single JSON:API
+            // resource response — skip validation.
+            if ($hasDeeperPath) {
+                return null;
+            }
+
+            // The workflow namespace exposes only named sub-resource/action
+            // endpoints (actionable-sets, bulk-initialize, ...), never a single
+            // /internal/workflow/<id> resource fetch. So a second segment under
+            // workflow is always an action — skip validation. Other internal
+            // resources (set-todos, audit-logs) treat a second segment as a
+            // record id and validate the single-resource response.
+            if ($second !== null && $resource === 'workflow') {
+                return null;
+            }
 
             return $normalizedResources[$resource] ?? $resource;
         }

@@ -1,0 +1,1 @@
+- **[Issue #238]** Pass `github.head_ref` and `github.base_ref` through a step-level `env:` block in the release-validation workflow to close a script-injection vector.
