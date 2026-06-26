@@ -48,7 +48,7 @@ class Manufacturer
         }
 
         $response = $this->makeRequest('/v1/manufacturers', 'POST', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -67,7 +67,7 @@ class Manufacturer
 
         $url = sprintf('/v1/manufacturers/%s?%s', $id, http_build_query($params));
         $response = $this->makeRequest($url);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -97,7 +97,7 @@ class Manufacturer
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'pageName' => $params['pageName'],
         ];
-        $parsedResponse = Response::parse(json_encode($response));
+        $parsedResponse = Response::parse(json_encode($response) ?: '{}');
 
         return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
     }
@@ -128,7 +128,7 @@ class Manufacturer
         }
 
         $response = $this->makeRequest($url, 'PUT', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }

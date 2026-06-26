@@ -48,7 +48,7 @@ class Year
         }
 
         $response = $this->makeRequest('/v1/years', 'POST', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -67,7 +67,7 @@ class Year
 
         $url = sprintf('/v1/years/%s?%s', $id, http_build_query($params));
         $response = $this->makeRequest($url);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -98,7 +98,7 @@ class Year
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'pageName' => $params['pageName'],
         ];
-        $parsedResponse = Response::parse(json_encode($response));
+        $parsedResponse = Response::parse(json_encode($response) ?: '{}');
 
         return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
     }
@@ -129,7 +129,7 @@ class Year
         }
 
         $response = $this->makeRequest($url, 'PUT', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }

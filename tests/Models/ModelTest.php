@@ -120,6 +120,17 @@ it('converts to string with single-object relationship', function () {
     expect($decoded['genre'])->toBe(['id' => 'abc', 'name' => 'Baseball']);
 });
 
+it('returns a string when json_encode fails', function () {
+    // Invalid UTF-8 makes json_encode() return false; __toString() must still
+    // honor its declared : string return rather than emitting a TypeError.
+    $model = new Model(['name' => "\xB1\x31"]);
+
+    $result = (string) $model;
+
+    expect($result)->toBeString();
+    expect($result)->toBe('{}');
+});
+
 it('handles custom attribute accessors', function () {
     $customModel = new class(['first_name' => 'John', 'last_name' => 'Doe']) extends Model
     {

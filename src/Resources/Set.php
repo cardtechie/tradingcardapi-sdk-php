@@ -41,7 +41,7 @@ class Set
             ],
         ];
         $response = $this->makeRequest('/v1/sets', 'POST', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -61,7 +61,7 @@ class Set
 
         $url = sprintf('/v1/sets/%s?%s', $id, http_build_query($params));
         $response = $this->makeRequest($url);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -91,7 +91,7 @@ class Set
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'pageName' => $params['pageName'],
         ];
-        $parsedResponse = Response::parse(json_encode($response));
+        $parsedResponse = Response::parse(json_encode($response) ?: '{}');
 
         return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
     }
@@ -115,7 +115,7 @@ class Set
             ],
         ];
         $response = $this->makeRequest($url, 'PUT', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }

@@ -37,7 +37,7 @@ class Player
         $url = sprintf('/v1/players?%s', $query);
         $response = $this->makeRequest($url);
 
-        return Response::parse(json_encode($response));
+        return Response::parse(json_encode($response) ?: '{}');
     }
 
     /**
@@ -68,7 +68,7 @@ class Player
         }
 
         $response = $this->makeRequest('/v1/players', 'POST', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -86,7 +86,7 @@ class Player
     {
         $url = sprintf('/v1/players/%s', $id);
         $response = $this->makeRequest($url, 'GET', ['query' => $params]);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -119,7 +119,7 @@ class Player
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'pageName' => $params['pageName'],
         ];
-        $parsedResponse = Response::parse(json_encode($response));
+        $parsedResponse = Response::parse(json_encode($response) ?: '{}');
 
         return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
     }
@@ -155,7 +155,7 @@ class Player
         }
 
         $response = $this->makeRequest($url, 'PUT', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -191,7 +191,7 @@ class Player
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'pageName' => 'page',
         ];
-        $parsedResponse = Response::parse(json_encode($response));
+        $parsedResponse = Response::parse(json_encode($response) ?: '{}');
 
         return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
     }
@@ -208,7 +208,7 @@ class Player
     {
         $url = sprintf('/v1/players/%s/deleted', $id);
         $response = $this->makeRequest($url);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }

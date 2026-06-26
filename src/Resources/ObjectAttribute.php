@@ -36,7 +36,7 @@ class ObjectAttribute
         }
 
         $response = $this->makeRequest('/v1/object-attributes', 'POST', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -45,7 +45,7 @@ class ObjectAttribute
     {
         $url = sprintf('/v1/object-attributes/%s', $id);
         $response = $this->makeRequest($url, 'GET', ['query' => $params]);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -69,7 +69,7 @@ class ObjectAttribute
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'pageName' => $params['pageName'],
         ];
-        $parsedResponse = Response::parse(json_encode($response));
+        $parsedResponse = Response::parse(json_encode($response) ?: '{}');
 
         return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
     }
@@ -95,7 +95,7 @@ class ObjectAttribute
         }
 
         $response = $this->makeRequest($url, 'PUT', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }

@@ -18,66 +18,48 @@ trait ApiRequest
 {
     /**
      * The oauth token
-     *
-     * @var string
      */
-    private $token;
+    private ?string $token = null;
 
     /**
      * The client to make API requests
-     *
-     * @var Client
      */
-    private $client;
+    private Client $client;
 
     /**
      * The response validator instance
-     *
-     * @var ResponseValidator|null
      */
-    private $validator;
+    private ?ResponseValidator $validator = null;
 
     /**
      * The error response parser instance
-     *
-     * @var ErrorResponseParser|null
      */
-    private $errorParser;
+    private ?ErrorResponseParser $errorParser = null;
 
     /**
      * Authentication type ('oauth2' or 'pat')
-     *
-     * @var string
      */
-    private $authType = 'oauth2';
+    private string $authType = 'oauth2';
 
     /**
      * Personal Access Token (for PAT auth mode)
-     *
-     * @var string|null
      */
-    private $personalAccessToken;
+    private ?string $personalAccessToken = null;
 
     /**
      * OAuth2 Client ID
-     *
-     * @var string|null
      */
-    private $oauthClientId;
+    private ?string $oauthClientId = null;
 
     /**
      * OAuth2 Client Secret
-     *
-     * @var string|null
      */
-    private $oauthClientSecret;
+    private ?string $oauthClientSecret = null;
 
     /**
      * OAuth2 Scope
-     *
-     * @var string|null
      */
-    private $scope;
+    private ?string $scope = null;
 
     /**
      * Set authentication information on this resource.

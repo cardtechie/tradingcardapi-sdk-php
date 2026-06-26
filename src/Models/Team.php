@@ -9,8 +9,23 @@ use CardTechie\TradingCardApiSdk\Utils\StringHelpers;
 /**
  * Class Team
  *
- * @property string $location
- * @property string $mascot
+ * Represents a sports team in the Trading Card API.
+ *
+ * @property string $id Team UUID
+ * @property string|null $location Team location
+ * @property string|null $mascot Team mascot
+ * @property string|null $city Team city
+ * @property string|null $state Team state
+ * @property string|null $country Team country
+ * @property string|null $abbreviation Team abbreviation
+ * @property string|null $league League name
+ * @property string|null $conference Conference name
+ * @property string|null $division Division name
+ * @property string|null $logo Logo URL
+ * @property int|null $founded Year founded
+ * @property string|null $created_at Creation timestamp
+ * @property string|null $updated_at Last update timestamp
+ * @property-read string|null $name Full team name "location mascot" (computed)
  */
 class Team extends Model implements Taxonomy
 {

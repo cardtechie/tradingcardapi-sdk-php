@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CardTechie\TradingCardApiSdk\Models;
 
 use Illuminate\Support\Collection;
@@ -7,7 +9,22 @@ use Illuminate\Support\Collection;
 /**
  * Class Card
  *
- * @property string $id
+ * Represents a trading card in the Trading Card API.
+ *
+ * @property string $id Card UUID
+ * @property string|null $name Card name
+ * @property string|null $description Card description
+ * @property string|null $rarity Card rarity
+ * @property string|null $series Card series
+ * @property string|null $brand Brand name
+ * @property string|null $manufacturer Manufacturer name
+ * @property int|null $year Card year
+ * @property string|null $image Image URL
+ * @property string|null $image_thumbnail Thumbnail image URL
+ * @property string|null $created_at Creation timestamp
+ * @property string|null $updated_at Last update timestamp
+ * @property-read string $number Card number with the set prefix stripped (computed)
+ * @property-read string $full_number Card number including the set prefix (computed)
  */
 class Card extends Model
 {
