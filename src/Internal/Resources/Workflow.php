@@ -125,6 +125,7 @@ class Workflow
      * Returns a typed {@see ActionableSetsResponse} (this delegates to
      * {@see actionableSets()} with a review-status filter applied).
      *
+     * @param  string|null  $step  Optional workflow step to filter the review queue by.
      * @param  array<string, mixed>  $params
      *
      * @throws InvalidArgumentException
