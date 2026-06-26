@@ -7,7 +7,6 @@ use CardTechie\TradingCardApiSdk\DTOs\Stats\GrowthResponse;
 use CardTechie\TradingCardApiSdk\DTOs\Stats\SnapshotsResponse;
 use CardTechie\TradingCardApiSdk\DTOs\Stats\StatsResponse;
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
-use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
 
 class Stats
