@@ -92,7 +92,7 @@ class CardImage
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \InvalidArgumentException
      */
-    public function upload($file, string $cardId, string $imageType, array $attributes = []): CardImageModel
+    public function upload(UploadedFile|string $file, string $cardId, string $imageType, array $attributes = []): CardImageModel
     {
         // Prepare the file for multipart upload
         if ($file instanceof UploadedFile) {
