@@ -194,13 +194,19 @@ When running in CI/CD (GitHub Actions), the version script automatically sets:
 
 ### Composer Integration
 
-The build system automatically updates `composer.json` version field when running in CI environments:
+The build system **does not** write a `version` field into `composer.json`.
+Versions are managed exclusively through git tags; `build/version.sh` was
+deliberately changed to stop updating `composer.json` to avoid Packagist
+publishing conflicts (a hardcoded `version` field can desync the published
+package from its tags).
 
-```json
-{
-  "version": "1.2.3",
-  "...": "..."
-}
+`composer.json` must therefore have **no** `version` key — the Release
+Validation workflow (`.github/workflows/changelog-check.yml`) fails any PR to
+`main` that reintroduces one. Resolve a version at build/CI time from the
+generated value instead:
+
+```bash
+VERSION=$(bash build/version.sh)
 ```
 
 ## Manual Overrides
