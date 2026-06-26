@@ -104,13 +104,13 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
-        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ needs.version.outputs.version }}
-          release_name: ${{ needs.version.outputs.version }}
-          body: ${{ steps.release_notes.outputs.notes }}
+          name: ${{ needs.version.outputs.version }}
+          body_path: release_notes.md
           draft: false
           prerelease: ${{ needs.version.outputs.is_release != 'true' }}
 
