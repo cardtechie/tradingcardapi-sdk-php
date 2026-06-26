@@ -30,7 +30,6 @@ use Illuminate\Support\Collection;
  * @property string|null $created_at Creation timestamp
  * @property string|null $updated_at Last update timestamp
  * @property-read int $current_card_count Number of checklist cards currently loaded (computed)
-// --- incoming side (theirs) ---
 //  * @property string $number_prefix
 //  * @property bool|null $is_variation
 // --- end incoming side ---
