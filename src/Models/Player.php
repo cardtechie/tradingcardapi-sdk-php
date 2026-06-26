@@ -120,7 +120,7 @@ class Player extends Model implements Taxonomy
      */
     public static function getFromApi(array $params): object
     {
-        $player = TradingCardApiSdk::player()->getList([
+        $player = TradingCardApiSdk::player()->all([
             'full_name' => $params['player'],
         ]);
 
@@ -160,7 +160,7 @@ class Player extends Model implements Taxonomy
     {
         try {
             // Use the most likely filter parameter first
-            $aliases = TradingCardApiSdk::player()->getList(['parent_id' => $this->id]);
+            $aliases = TradingCardApiSdk::player()->all(['parent_id' => $this->id]);
 
             // Manually filter to ensure we only get actual aliases
             $validAliases = $aliases->filter(function ($player) {
@@ -188,7 +188,7 @@ class Player extends Model implements Taxonomy
     public function getTeams(): Collection
     {
         try {
-            $playerteams = TradingCardApiSdk::playerteam()->getList([
+            $playerteams = TradingCardApiSdk::playerteam()->all([
                 'player_id' => $this->id,
                 'include' => 'team',
             ]);
@@ -209,7 +209,7 @@ class Player extends Model implements Taxonomy
     public function getPlayerteams(): Collection
     {
         try {
-            return TradingCardApiSdk::playerteam()->getList([
+            return TradingCardApiSdk::playerteam()->all([
                 'player_id' => $this->id,
             ]);
         } catch (\Exception $e) {

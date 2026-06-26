@@ -75,7 +75,7 @@ class Playerteam extends Model implements Taxonomy
             'team' => $params['team'],
         ]);
 
-        $playerteam = TradingCardApiSdk::playerteam()->getList([
+        $playerteam = TradingCardApiSdk::playerteam()->all([
             'player_id' => $player->id,
             'team_id' => $team->id,
         ]);
@@ -162,7 +162,7 @@ class Playerteam extends Model implements Taxonomy
     protected static function validatePlayerExists(string $playerUuid): bool
     {
         try {
-            $players = TradingCardApiSdk::player()->getList(['id' => $playerUuid]);
+            $players = TradingCardApiSdk::player()->all(['id' => $playerUuid]);
 
             return ! $players->isEmpty();
         } catch (\Exception $e) {
@@ -179,7 +179,7 @@ class Playerteam extends Model implements Taxonomy
     protected static function validateTeamExists(string $teamUuid): bool
     {
         try {
-            $teams = TradingCardApiSdk::team()->getList(['id' => $teamUuid]);
+            $teams = TradingCardApiSdk::team()->all(['id' => $teamUuid]);
 
             return ! $teams->isEmpty();
         } catch (\Exception $e) {
