@@ -22,7 +22,10 @@ afterEach(function () {
  * satisfies the accessor's declared return type (e.g. TradingCardApi::player()
  * is typed `: Resources\Player`).
  *
- * @param  class-string  $resourceClass
+ * @param  string  $accessor  TradingCardApi accessor to stub (e.g. 'player', 'playerteam', 'card')
+ * @param  class-string  $resourceClass  Concrete Resource class the mock is typed against
+ * @param  string  $method  Resource method that should throw (e.g. 'getList')
+ * @param  Throwable  $exception  Exception the stubbed method throws
  */
 function swapResourceToThrow(string $accessor, string $resourceClass, string $method, Throwable $exception): void
 {
