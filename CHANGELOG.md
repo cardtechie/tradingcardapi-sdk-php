@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Breaking change: `TradingCardApi::workflow()` and `TradingCardApi::auditLog()` are removed; callers must switch to `$api->internal()->workflow()` and `$api->internal()->auditLog()`. Credentials must carry the `internal` OAuth scope.
 - Direct Claude to create GitHub issues via the `create_cross_repo_issues` MCP tool instead of `gh issue create` in `.claude/CLAUDE.md` (#203).
 - **[Issue #259]** Standardize resource method signatures: uniform `list()` paginator plus `all()` raw-Collection accessor (`getList()` kept as a deprecated alias), consistent `create()`/`update()` arity, missing `delete()` verbs filled in, and `RateLimitException`'s constructor realigned with its base class.
-  - Behavioral break for callers using positional `RateLimitException` constructor args or the deprecated `getList()`; both have a 0.3.0 migration path (named args / `all()`).
+  - Breaking change: callers using positional `RateLimitException` constructor args must switch to named args (0.3.0 migration path). `getList()` is deprecated — it still works and delegates to `all()`, so callers should migrate to `all()` but are not broken.
 
 ### Fixed
 
