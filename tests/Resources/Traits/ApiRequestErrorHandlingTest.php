@@ -246,6 +246,48 @@ it('handles authentication errors during token retrieval', function () {
         ->toThrow(AuthenticationException::class);
 });
 
+it('does not leak client_secret or access_token from a failed token fetch', function () {
+    // A failed /oauth/token response whose body echoes credential material.
+    // The token-fetch failure path routes through ErrorResponseParser, so its
+    // context must come back redacted.
+    $mock = new MockHandler([
+        new Response(401, ['Authorization' => 'Bearer leaked-bearer'], json_encode([
+            'error' => 'invalid_client',
+            'message' => 'Client authentication failed',
+            'client_secret' => 'leaked-client-secret',
+            'access_token' => 'leaked-access-token',
+        ])),
+    ]);
+
+    $handlerStack = HandlerStack::create($mock);
+    $client = new Client(['handler' => $handlerStack]);
+
+    // Clear cached token to force the OAuth token fetch.
+    $tokenKey = tokenCacheKey();
+    cache()->put($tokenKey, null, 0);
+
+    $apiRequest = new ApiRequestTestClass($client);
+
+    $exception = null;
+    try {
+        $apiRequest->testMakeRequest('/api/cards');
+    } catch (AuthenticationException $e) {
+        $exception = $e;
+    }
+
+    expect($exception)->toBeInstanceOf(AuthenticationException::class);
+
+    $contextJson = json_encode($exception->getContext());
+    expect($contextJson)->not->toContain('leaked-client-secret');
+    expect($contextJson)->not->toContain('leaked-access-token');
+    expect($contextJson)->not->toContain('leaked-bearer');
+
+    $arrayJson = json_encode($exception->toArray());
+    expect($arrayJson)->not->toContain('leaked-client-secret');
+    expect($arrayJson)->not->toContain('leaked-access-token');
+    expect($arrayJson)->not->toContain('leaked-bearer');
+});
+
 it('successfully makes request when no errors occur', function () {
     // Mock token response first, then success response
     $tokenResponse = ['access_token' => 'test_token_123'];

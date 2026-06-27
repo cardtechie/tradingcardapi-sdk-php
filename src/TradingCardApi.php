@@ -2,8 +2,8 @@
 
 namespace CardTechie\TradingCardApiSdk;
 
+use CardTechie\TradingCardApiSdk\Internal\InternalClient;
 use CardTechie\TradingCardApiSdk\Resources\Attribute;
-use CardTechie\TradingCardApiSdk\Resources\AuditLog;
 use CardTechie\TradingCardApiSdk\Resources\Brand;
 use CardTechie\TradingCardApiSdk\Resources\Card;
 use CardTechie\TradingCardApiSdk\Resources\CardImage;
@@ -16,7 +16,6 @@ use CardTechie\TradingCardApiSdk\Resources\Set;
 use CardTechie\TradingCardApiSdk\Resources\SetSource;
 use CardTechie\TradingCardApiSdk\Resources\Stats;
 use CardTechie\TradingCardApiSdk\Resources\Team;
-use CardTechie\TradingCardApiSdk\Resources\Workflow;
 use CardTechie\TradingCardApiSdk\Resources\Year;
 use GuzzleHttp\Client;
 
@@ -195,11 +194,23 @@ class TradingCardApi
     }
 
     /**
-     * Retrieve the audit log resource.
+     * Retrieve the internal client, which exposes workflow and audit-log
+     * resources behind `/internal/*` routes. Requires credentials with the
+     * `internal` OAuth scope.
+     *
+     * **Not part of the public API contract.** The `Internal\` namespace may
+     * change without semver guarantees.
      */
-    public function auditLog(): AuditLog
+    public function internal(): InternalClient
     {
-        return $this->createResource(AuditLog::class);
+        return new InternalClient(
+            $this->client,
+            $this->authType,
+            $this->personalAccessToken,
+            $this->clientId,
+            $this->clientSecret,
+            $this->scope
+        );
     }
 
     /**
@@ -312,13 +323,5 @@ class TradingCardApi
     public function stats(): Stats
     {
         return $this->createResource(Stats::class);
-    }
-
-    /**
-     * Retrieve the workflow resource.
-     */
-    public function workflow(): Workflow
-    {
-        return $this->createResource(Workflow::class);
     }
 }

@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+<!-- New entries go to changelog.d/<issue>-<type>.md fragments, not here. At
+release time those fragments are collated into a versioned section. That
+collation is manual today — make changelog-update does not read changelog.d/
+fragments yet. See changelog.d/README.md. -->
+
+### Added
+
+- **[Issue #200]** Add AuditLogSchema to enable response validation for audit log endpoints.
+- **[Issue #212]** Add CI guardrail to enforce SHA-pinned GitHub Actions references and pin all existing workflow actions.
+- **[Issue #210]** Add `agent_id` filter param to audit log queries.
+
+### Changed
+
+- **[Issue #244]** Repoint genre `listDeleted()` and `deleted($id)` off the deprecated v1 literal-segment routes onto the JSON:API query-parameter endpoints.
+- **[Issue #214]** Move workflow, set-todo, and audit-log resources into the `Internal\` namespace behind a new `internal()` accessor.
+  - Breaking change: `TradingCardApi::workflow()` and `TradingCardApi::auditLog()` are removed; callers must switch to `$api->internal()->workflow()` and `$api->internal()->auditLog()`. Credentials must carry the `internal` OAuth scope.
+- Direct Claude to create GitHub issues via the `create_cross_repo_issues` MCP tool instead of `gh issue create` in `.claude/CLAUDE.md` (#203).
+
+### Fixed
+
+- Unify memory assertion threshold in ValidationPerformanceTest to prevent false failures in Docker. (#201)
+
 ## [0.2.4] - 2026-04-14
 
 ### Added

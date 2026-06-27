@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
 
@@ -18,6 +18,9 @@ jobs:
         run: chmod +x build/*.sh
 
       - name: Check release requirements
+        env:
+          PR_HEAD_REF: ${{ github.head_ref }}
+          PR_BASE_BRANCH: ${{ github.base_ref }}
         run: |
           echo "🔍 Validating release requirements..."
           echo ""
@@ -25,8 +28,7 @@ jobs:
           VALIDATION_FAILED=false
           
           # Get version that would be generated for this PR's branch
-          # Use the PR head ref to get the actual branch name
-          PR_HEAD_REF="${{ github.head_ref }}"
+          # Use the PR head ref (supplied via the step-level env: block) to get the actual branch name
           if [[ -n "$PR_HEAD_REF" ]]; then
             # Use the actual branch name from the PR
             CURRENT_VERSION=$(bash build/version.sh --branch="$PR_HEAD_REF")
@@ -39,7 +41,7 @@ jobs:
           echo ""
           
           # For PRs to main, we expect a proper release version in changelog
-          PR_BASE_BRANCH="${{ github.base_ref }}"
+          # (PR_BASE_BRANCH is supplied via the step-level env: block)
           if [ "$PR_BASE_BRANCH" = "main" ]; then
             echo "🎯 PR targets main branch - release changelog validation required"
             
