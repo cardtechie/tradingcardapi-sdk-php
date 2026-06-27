@@ -2,10 +2,24 @@
 
 declare(strict_types=1);
 
+use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
 use CardTechie\TradingCardApiSdk\Models\Player;
 use CardTechie\TradingCardApiSdk\Models\Playerteam;
 use CardTechie\TradingCardApiSdk\Models\Taxonomy;
 use CardTechie\TradingCardApiSdk\Models\Team;
+use CardTechie\TradingCardApiSdk\Resources\Playerteam as PlayerteamResource;
+use CardTechie\TradingCardApiSdk\TradingCardApi;
+use Mockery as m;
+
+afterEach(function () {
+    // lookup() resolves the Playerteam resource through the facade. The tests
+    // below swap a mock TradingCardApi behind it via TradingCardApiSdk::swap();
+    // clear it so later tests re-resolve the real instance instead of inheriting
+    // this file's (now closed) mock and becoming order-dependent.
+    TradingCardApiSdk::clearResolvedInstance(TradingCardApi::class);
+
+    m::close();
+});
 
 it('can be instantiated with attributes', function () {
     $playerteam = new Playerteam(['id' => '123', 'player_id' => '456', 'team_id' => '789']);
@@ -114,12 +128,45 @@ it('prepare method throws exception for invalid team UUID', function () {
     })->toThrow(InvalidArgumentException::class);
 });
 
-it('lookup method returns new Playerteam instance', function () {
+it('lookup returns the existing association without creating one', function () {
+    $existing = new Playerteam(['id' => 'pt-1', 'player_id' => 'player-id', 'team_id' => 'team-id']);
+
+    $resource = m::mock(PlayerteamResource::class);
+    $resource->shouldReceive('all')
+        ->once()
+        ->with(['player_id' => 'player-id', 'team_id' => 'team-id'])
+        ->andReturn(collect([$existing]));
+    $resource->shouldReceive('create')->never();
+
+    $api = m::mock(TradingCardApi::class);
+    $api->shouldReceive('playerteam')->andReturn($resource);
+    TradingCardApiSdk::swap($api);
+
     $result = Playerteam::lookup('player-id', 'team-id');
 
-    expect($result)->toBeInstanceOf(Playerteam::class);
-    expect($result->player_id)->toBe('player-id');
-    expect($result->team_id)->toBe('team-id');
+    expect($result)->toBe($existing);
+});
+
+it('lookup creates the association when none exists', function () {
+    $created = new Playerteam(['id' => 'pt-2', 'player_id' => 'player-id', 'team_id' => 'team-id']);
+
+    $resource = m::mock(PlayerteamResource::class);
+    $resource->shouldReceive('all')
+        ->once()
+        ->with(['player_id' => 'player-id', 'team_id' => 'team-id'])
+        ->andReturn(collect([]));
+    $resource->shouldReceive('create')
+        ->once()
+        ->with(['player_id' => 'player-id', 'team_id' => 'team-id'])
+        ->andReturn($created);
+
+    $api = m::mock(TradingCardApi::class);
+    $api->shouldReceive('playerteam')->andReturn($resource);
+    TradingCardApiSdk::swap($api);
+
+    $result = Playerteam::lookup('player-id', 'team-id');
+
+    expect($result)->toBe($created);
 });
 
 it('returns player relationship', function () {

@@ -109,7 +109,7 @@ class Playerteam extends Model implements Taxonomy
      * Prepare the on card relationships and return the object that matches the passed in data.
      *
      * @param  array  $data
-     * @return Playerteam|null
+     * @return object|null
      */
     public static function prepare($data): ?object
     {
@@ -203,21 +203,36 @@ class Playerteam extends Model implements Taxonomy
     }
 
     /**
-     * Look up a player/team by player and team uuids.
+     * Find or create the player/team association for the given uuids.
      *
-     * The SDK has no Eloquent persistence layer, so this returns an unsaved,
-     * in-memory Playerteam instance carrying the given uuids — it does not query
-     * or write to a database.
+     * Queries existing associations via the Playerteam REST resource and returns
+     * the first match; when none exists, it creates one and returns the created
+     * model. The SDK has no Eloquent persistence layer, so this resolves against
+     * the /v1/playerteams API path — the same find-or-create pattern getFromApi()
+     * already uses.
      *
      * Called from prepare() with a null on either side when only one of player
-     * or team is supplied, so both uuids are nullable.
+     * or team is supplied, so both uuids are nullable; null query parameters are
+     * dropped from the request by http_build_query.
      *
      * @param  string|null  $player  The player uuid, or null when only a team is given
      * @param  string|null  $team  The team uuid, or null when only a player is given
      */
-    public static function lookup(?string $player, ?string $team): Playerteam
+    public static function lookup(?string $player, ?string $team): object
     {
-        return new self(['player_id' => $player, 'team_id' => $team]);
+        $playerteam = TradingCardApiSdk::playerteam()->all([
+            'player_id' => $player,
+            'team_id' => $team,
+        ]);
+
+        if ($playerteam->isEmpty()) {
+            return TradingCardApiSdk::playerteam()->create([
+                'player_id' => $player,
+                'team_id' => $team,
+            ]);
+        }
+
+        return $playerteam->first();
     }
 
     /**
