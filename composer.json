@@ -4,10 +4,19 @@
     "keywords": [
         "cardtechie",
         "laravel",
-        "tradingcardapi-sdk-php",
-        "tradingcardapi"
+        "tradingcardapi",
+        "api-client",
+        "sdk",
+        "rest",
+        "trading-cards",
+        "sports-cards"
     ],
     "homepage": "https://github.com/cardtechie/tradingcardapi-sdk-php",
+    "support": {
+        "issues": "https://github.com/cardtechie/tradingcardapi-sdk-php/issues",
+        "source": "https://github.com/cardtechie/tradingcardapi-sdk-php",
+        "docs": "https://github.com/cardtechie/tradingcardapi-sdk-php/blob/main/README.md"
+    },
     "license": "MIT",
     "authors": [
         {
@@ -40,12 +49,12 @@
             "src/helpers.php"
         ],
         "psr-4": {
-            "CardTechie\\TradingCardApiSdk\\": "src",
-            "CardTechie\\TradingCardApiSdk\\Database\\Factories\\": "database/factories"
+            "CardTechie\\TradingCardApiSdk\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
+            "CardTechie\\TradingCardApiSdk\\Database\\Factories\\": "database/factories",
             "CardTechie\\TradingCardApiSdk\\Tests\\": "tests"
         }
     },
@@ -64,6 +73,9 @@
         }
     },
     "extra": {
+        "branch-alias": {
+            "dev-develop": "0.3.x-dev"
+        },
         "laravel": {
             "providers": [
                 "CardTechie\\TradingCardApiSdk\\TradingCardApiServiceProvider"
@@ -73,6 +85,6 @@
             }
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }
