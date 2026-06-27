@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Utils\StringHelpers;
 
 it('isValidUuid returns true for valid UUIDs', function () {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Models\Brand;
 use CardTechie\TradingCardApiSdk\Models\Card;
 use CardTechie\TradingCardApiSdk\Models\Genre;

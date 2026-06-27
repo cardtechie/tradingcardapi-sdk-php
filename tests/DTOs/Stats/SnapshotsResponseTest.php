@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\DTOs\Stats\Snapshot;
 use CardTechie\TradingCardApiSdk\DTOs\Stats\SnapshotsResponse;
 

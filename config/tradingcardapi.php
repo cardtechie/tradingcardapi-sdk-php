@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -115,4 +117,55 @@ return [
     */
 
     'ignore_status' => (bool) env('TRADINGCARDAPI_IGNORE_STATUS', 0),
+
+    /*
+    |--------------------------------------------------------------------------
+    | HTTP Request Timeout
+    |--------------------------------------------------------------------------
+    |
+    | The maximum number of seconds to wait for a request to complete before
+    | timing out. Guzzle's default is no timeout, which lets a hung API block
+    | the calling PHP-FPM worker indefinitely. Set to 0 to disable.
+    */
+    'timeout' => (float) env('TRADINGCARDAPI_TIMEOUT', 10),
+
+    /*
+    |--------------------------------------------------------------------------
+    | HTTP Connect Timeout
+    |--------------------------------------------------------------------------
+    |
+    | The maximum number of seconds to wait while establishing a connection to
+    | the API before timing out. Set to 0 to disable.
+    */
+    'connect_timeout' => (float) env('TRADINGCARDAPI_CONNECT_TIMEOUT', 5),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Retry / Backoff
+    |--------------------------------------------------------------------------
+    |
+    | Opt-in automatic retry with exponential backoff for transient failures
+    | (HTTP 429, 5xx responses, and connection errors). When a 429 response
+    | carries a numeric Retry-After header, that value is honored in preference
+    | to the computed backoff delay.
+    |
+    | Disabled by default to preserve existing behavior; enable per environment.
+    */
+    'retry' => [
+        /*
+        | Enable or disable automatic retries.
+        */
+        'enabled' => (bool) env('TRADINGCARDAPI_RETRY_ENABLED', false),
+
+        /*
+        | Maximum number of retry attempts after the initial request.
+        */
+        'max_attempts' => (int) env('TRADINGCARDAPI_RETRY_MAX_ATTEMPTS', 3),
+
+        /*
+        | Base delay in milliseconds for exponential backoff. The delay for a
+        | given attempt is base_delay * 2^(attempt-1).
+        */
+        'base_delay' => (int) env('TRADINGCARDAPI_RETRY_BASE_DELAY_MS', 1000),
+    ],
 ];

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\DTOs\Set\ChecklistResponse;
 use CardTechie\TradingCardApiSdk\Models\Set as SetModel;
 use CardTechie\TradingCardApiSdk\Resources\Set;
@@ -189,26 +191,6 @@ it('can get checklist for a set', function () {
     expect($result->checklist)->toBe(['card1', 'card2', 'card3']);
     expect($result->missing)->toBe(['card4', 'card5']);
     expect($result->totalCards)->toBeNull();
-});
-
-it('can get workflow for a set', function () {
-    $this->mockHandler->append(
-        new GuzzleResponse(200, [], json_encode([
-            'workflow' => [
-                'priority' => 'high',
-                'current_step' => 'validate',
-                'todos' => [
-                    ['step' => 'discover_sources', 'status' => 'completed', 'completed_at' => '2026-01-01', 'completed_by' => 'orchestrator'],
-                    ['step' => 'validate', 'status' => 'in_progress', 'started_at' => '2026-01-02'],
-                    ['step' => 'cleanup', 'status' => 'pending'],
-                ],
-            ],
-        ]))
-    );
-
-    $result = $this->setResource->workflow('123');
-
-    expect($result)->toBeObject();
 });
 
 it('can add missing cards to a set', function () {
@@ -443,30 +425,6 @@ it('can handle large pagination in list', function () {
     expect($result->total())->toBe(5000);
     expect($result->perPage())->toBe(100);
     expect($result->currentPage())->toBe(25);
-});
-
-it('does not throw in strict_mode for workflow sub-resource endpoint', function () {
-    $this->app['config']->set('tradingcardapi.validation.enabled', true);
-    $this->app['config']->set('tradingcardapi.validation.strict_mode', true);
-
-    $this->mockHandler->append(
-        new GuzzleResponse(200, [], json_encode([
-            'workflow' => [
-                'priority' => 'high',
-                'current_step' => 'validate',
-                'todos' => [
-                    ['step' => 'discover_sources', 'status' => 'completed'],
-                    ['step' => 'validate', 'status' => 'in_progress'],
-                ],
-            ],
-        ]))
-    );
-
-    $result = $this->setResource->workflow('123');
-
-    expect($result)->toBeObject();
-    expect($result->workflow)->toBeObject();
-    expect($result->workflow->priority)->toBe('high');
 });
 
 it('does not throw in strict_mode for checklist sub-resource endpoint', function () {

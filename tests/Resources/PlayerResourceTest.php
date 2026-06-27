@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Models\Player as PlayerModel;
 use CardTechie\TradingCardApiSdk\Resources\Player;
 use GuzzleHttp\Client;

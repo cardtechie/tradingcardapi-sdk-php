@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Exceptions\ConflictException;
 
 it('creates conflict exception with default values', function () {

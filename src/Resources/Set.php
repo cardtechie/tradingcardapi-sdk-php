@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CardTechie\TradingCardApiSdk\Resources;
 
 use CardTechie\TradingCardApiSdk\DTOs\Set\ChecklistResponse;
@@ -137,26 +139,7 @@ class Set
     }
 
     /**
-     * Get the workflow for a set.
-     *
-     * Returns the raw decoded `/internal/sets/{id}/workflow` response as a
-     * deliberately-unstructured object: this sub-resource endpoint has no
-     * stable JSON:API schema, so callers read the `workflow` property tree
-     * (priority, current_step, todos) directly off the returned object.
-     *
-     * @return object The decoded workflow payload (unstructured)
-     *
-     * @throws InvalidArgumentException
-     */
-    public function workflow(string $id): object
-    {
-        $url = sprintf('/internal/sets/%s/workflow', $id);
-
-        return $this->makeRequest($url, 'GET');
-    }
-
-    /**
-     * Add the missing cards (as empty cards) to the specified set.
+     * Add the missing cards (as empty cards) to the specified set
      *
      * Returns the raw decoded acknowledgement object (`success`, `message`,
      * and any operation-specific fields the API includes); this endpoint

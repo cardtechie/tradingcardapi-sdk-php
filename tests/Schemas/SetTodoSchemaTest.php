@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Schemas\SetTodoSchema;
 use Illuminate\Support\Facades\Validator;
 
