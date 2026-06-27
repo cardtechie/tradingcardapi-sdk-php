@@ -11,6 +11,13 @@ use CardTechie\TradingCardApiSdk\TradingCardApi;
 use Mockery as m;
 
 afterEach(function () {
+    // swapResourceToThrow() calls TradingCardApiSdk::swap(), which stores the
+    // mock as the facade's resolved instance globally. Clear it so subsequent
+    // tests re-resolve the real TradingCardApi from the container instead of
+    // inheriting this file's (now closed) mock — otherwise the suite becomes
+    // order-dependent.
+    TradingCardApiSdk::clearResolvedInstance(TradingCardApi::class);
+
     m::close();
 });
 
