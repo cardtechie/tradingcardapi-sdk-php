@@ -1,0 +1,2 @@
+- **[Issue #261]** Player getters now propagate API/network exceptions instead of masking failures as empty collections, and `Model::__call` throws `BadMethodCallException` on unknown methods.
+  - Behavior change: callers of `Player::getAliases/getTeams/getPlayerteams/getCards` that previously received an empty collection on a failed request will now see the exception surface; wrap calls in try/catch if a soft-fail is required.
