@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CardTechie\TradingCardApiSdk\Resources;
 
 use CardTechie\TradingCardApiSdk\Models\Set as SetModel;
@@ -152,19 +154,6 @@ class Set
     public function checklist(string $id): object
     {
         $url = sprintf('/v1/sets/%s/checklist', $id);
-
-        return $this->makeRequest($url, 'GET');
-    }
-
-    /**
-     * Get the workflow for a set
-     *
-     *
-     * @throws InvalidArgumentException
-     */
-    public function workflow(string $id): object
-    {
-        $url = sprintf('/internal/sets/%s/workflow', $id);
 
         return $this->makeRequest($url, 'GET');
     }

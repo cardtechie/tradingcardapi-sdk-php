@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Internal\InternalClient;
 use CardTechie\TradingCardApiSdk\Internal\Resources\AuditLog;
 use CardTechie\TradingCardApiSdk\Internal\Resources\Workflow;
+use CardTechie\TradingCardApiSdk\Resources\Set;
 use CardTechie\TradingCardApiSdk\TradingCardApi;
 
 beforeEach(function () {
@@ -45,6 +48,10 @@ it('TradingCardApi no longer exposes auditLog() at the top level', function () {
     $api = new TradingCardApi;
 
     expect(method_exists($api, 'auditLog'))->toBeFalse();
+});
+
+it('public Set resource no longer exposes workflow()', function () {
+    expect(method_exists(Set::class, 'workflow'))->toBeFalse();
 });
 
 it('InternalClient passes auth info to workflow resource', function () {

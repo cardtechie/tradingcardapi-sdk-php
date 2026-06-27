@@ -1,0 +1,2 @@
+- **[Issue #248]** Add a GitHub Actions workflow that auto-syncs `develop` and `main` in both directions, pushing directly when clean and opening a PR on conflict.
+  - Requires a PAT/App token (the existing `PROJECT_TOKEN` secret) able to push to both branches and open PRs; the default `GITHUB_TOKEN` will not trigger downstream workflows.

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Models\Attribute as AttributeModel;
 use CardTechie\TradingCardApiSdk\Resources\Attribute;
 use GuzzleHttp\Client;

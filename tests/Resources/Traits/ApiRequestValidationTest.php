@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Services\ResponseValidator;
 use GuzzleHttp\Client;
@@ -59,9 +61,27 @@ it('extracts resource type from API URLs correctly', function () {
     expect($resource->testExtractResourceType('/v1/players'))->toBe('player');
     expect($resource->testExtractResourceType('/v1/sets/456/checklist'))->toBeNull();
     expect($resource->testExtractResourceType('/v1/genres'))->toBe('genre');
-    expect($resource->testExtractResourceType('/v1/object-attributes'))->toBe('objectattribute');
+    expect($resource->testExtractResourceType('/v1/object-attributes'))->toBe('object-attribute');
     expect($resource->testExtractResourceType('/v1/playerteams'))->toBe('playerteam');
     expect($resource->testExtractResourceType('/v1/stats/cards'))->toBe('stats');
+});
+
+it('extracts resource type from internal endpoint URLs correctly', function () {
+    $client = m::mock(Client::class);
+    $resource = new TestApiResource($client);
+
+    // /internal/<resource> and /internal/<resource>/<id> resolve to a type
+    expect($resource->testExtractResourceType('/internal/set-todos/123'))->toBe('set-todo');
+    expect($resource->testExtractResourceType('/internal/set-todos/todo-123'))->toBe('set-todo');
+    expect($resource->testExtractResourceType('/internal/set-todos/3f8a1c2e-0001-4abc-9def-000000000001'))->toBe('set-todo');
+    expect($resource->testExtractResourceType('/internal/audit-logs'))->toBe('audit-log');
+    expect($resource->testExtractResourceType('/internal/workflow'))->toBe('workflow');
+
+    // Multi-segment workflow sub-resources / named actions still skip validation
+    expect($resource->testExtractResourceType('/internal/workflow/actionable-sets'))->toBeNull();
+    expect($resource->testExtractResourceType('/internal/workflow/bulk-initialize'))->toBeNull();
+    expect($resource->testExtractResourceType('/internal/workflow/sets/123/todos'))->toBeNull();
+    expect($resource->testExtractResourceType('/internal/sets/123/workflow'))->toBeNull();
 });
 
 it('returns null for non-API URLs', function () {

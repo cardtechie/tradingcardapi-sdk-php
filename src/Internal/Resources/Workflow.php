@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CardTechie\TradingCardApiSdk\Internal\Resources;
 
 use CardTechie\TradingCardApiSdk\Enums\WorkflowStatus;
@@ -90,6 +92,18 @@ class Workflow
     public function getSetTodos(string $setId): object
     {
         $url = sprintf('/internal/workflow/sets/%s/todos', $setId);
+
+        return $this->makeRequest($url, 'GET');
+    }
+
+    /**
+     * Get the workflow for a set.
+     *
+     * @throws InvalidArgumentException
+     */
+    public function getForSet(string $setId): object
+    {
+        $url = sprintf('/internal/sets/%s/workflow', $setId);
 
         return $this->makeRequest($url, 'GET');
     }

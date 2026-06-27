@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Exceptions\TradingCardApiException;
 
 class TestTradingCardApiException extends TradingCardApiException {}

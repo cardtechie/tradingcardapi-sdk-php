@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Exceptions\AuthenticationException;
 use CardTechie\TradingCardApiSdk\Exceptions\ResourceNotFoundException;
 use CardTechie\TradingCardApiSdk\Exceptions\ServerException;
@@ -455,6 +457,74 @@ it('can flag a todo for review', function () {
     expect($result->data->id)->toBe('todo-123');
     expect($result->data->attributes->status)->toBe('review');
     expect($result->data->attributes->notes)->toBe('Data quality issue detected');
+});
+
+it('can get the workflow for a set', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'workflow' => [
+                'priority' => 'high',
+                'current_step' => 'validate',
+                'todos' => [
+                    ['step' => 'discover_sources', 'status' => 'completed', 'completed_at' => '2026-01-01', 'completed_by' => 'orchestrator'],
+                    ['step' => 'validate', 'status' => 'in_progress', 'started_at' => '2026-01-02'],
+                    ['step' => 'cleanup', 'status' => 'pending'],
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->workflowResource->getForSet('123');
+
+    expect($result)->toBeObject();
+    expect($result->workflow)->toBeObject();
+    expect($result->workflow->priority)->toBe('high');
+});
+
+it('uses /internal/sets workflow URL for getForSet', function () {
+    $capturedRequest = null;
+
+    $customHandler = new MockHandler([
+        new GuzzleResponse(200, [], json_encode(['workflow' => []])),
+    ]);
+
+    $middleware = Middleware::tap(function (RequestInterface $request) use (&$capturedRequest) {
+        $capturedRequest = $request;
+    });
+
+    $handlerStack = HandlerStack::create($customHandler);
+    $handlerStack->push($middleware);
+    $client = new Client(['handler' => $handlerStack]);
+    $resource = new Workflow($client);
+
+    $resource->getForSet('123');
+
+    expect((string) $capturedRequest->getUri())->toContain('/internal/sets/123/workflow');
+    expect($capturedRequest->getMethod())->toBe('GET');
+});
+
+it('does not throw in strict_mode for getForSet sub-resource endpoint', function () {
+    $this->app['config']->set('tradingcardapi.validation.enabled', true);
+    $this->app['config']->set('tradingcardapi.validation.strict_mode', true);
+
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'workflow' => [
+                'priority' => 'high',
+                'current_step' => 'validate',
+                'todos' => [
+                    ['step' => 'discover_sources', 'status' => 'completed'],
+                    ['step' => 'validate', 'status' => 'in_progress'],
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->workflowResource->getForSet('123');
+
+    expect($result)->toBeObject();
+    expect($result->workflow)->toBeObject();
+    expect($result->workflow->priority)->toBe('high');
 });
 
 it('can resolve a review with default notes', function () {

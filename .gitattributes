@@ -1,19 +1,35 @@
 # Path-based git attributes
 # https://www.kernel.org/pub/software/scm/git/docs/gitattributes.html
 
-# Ignore all test and documentation with "export-ignore".
-/.github            export-ignore
-/.gitattributes     export-ignore
-/.gitignore         export-ignore
-/phpunit.xml.dist   export-ignore
-/art                export-ignore
-/docs               export-ignore
-/tests              export-ignore
-/.editorconfig      export-ignore
-/.php_cs.dist.php   export-ignore
-/psalm.xml          export-ignore
-/psalm.xml.dist     export-ignore
-/testbench.yaml     export-ignore
-/UPGRADING.md       export-ignore
-/phpstan.neon.dist  export-ignore
+# Exclude dev, test, CI, and infra files from the `composer require` dist
+# (the tarball Packagist serves to consumers via `git archive HEAD`).
+# Runtime trees (src/, config/, database/, resources/) are intentionally NOT
+# listed here: they are loaded by the Laravel ServiceProvider / prod autoload
+# and must ship to consumers.
+
+# Tests and docs
+/phpunit.xml.dist       export-ignore
+/phpunit.xml.dist.bak   export-ignore
+/tests                  export-ignore
+/docs                   export-ignore
+
+# Static analysis and editor config
+/.editorconfig          export-ignore
+/phpstan.neon.dist      export-ignore
 /phpstan-baseline.neon  export-ignore
+
+# VCS and repo metadata
+/.github                export-ignore
+/.gitattributes         export-ignore
+/.gitignore             export-ignore
+
+# Dev tooling, CI, and infrastructure
+/.claude                 export-ignore
+/.docker                 export-ignore
+/Dockerfile              export-ignore
+/docker-compose.yaml     export-ignore
+/Makefile                export-ignore
+/.pre-commit-config.yaml export-ignore
+/build                   export-ignore
+/.packagist-trigger      export-ignore
+/composer.lock           export-ignore

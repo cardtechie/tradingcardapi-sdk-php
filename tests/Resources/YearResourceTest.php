@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Models\Year as YearModel;
 use CardTechie\TradingCardApiSdk\Resources\Year;
 use GuzzleHttp\Client;

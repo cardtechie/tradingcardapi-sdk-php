@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CardTechie\TradingCardApiSdk\Internal\Resources;
 
 use CardTechie\TradingCardApiSdk\Models\AuditLog as AuditLogModel;

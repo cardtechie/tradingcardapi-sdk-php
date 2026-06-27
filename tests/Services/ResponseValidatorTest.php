@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Services\ResponseValidator;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
@@ -101,6 +103,43 @@ it('logs validation errors when configured', function () {
     ];
 
     $validator->validate('card', $invalidData, '/v1/cards/123');
+});
+
+it('redacts credential material from the logged validation-failure payload', function () {
+    $capturedContext = null;
+
+    Log::shouldReceive('warning')
+        ->once()
+        ->with(
+            Mockery::pattern('/API response validation failed for card/'),
+            Mockery::on(function ($context) use (&$capturedContext) {
+                $capturedContext = $context;
+
+                return is_array($context);
+            })
+        );
+
+    $validator = new ResponseValidator;
+
+    $invalidData = [
+        'data' => [
+            // Missing required 'id' → validation fails and the payload is logged.
+            'type' => 'cards',
+            'attributes' => [
+                'name' => 'Test Card',
+                'access_token' => 'super-secret-token',
+                'client_secret' => 'super-secret-value',
+            ],
+        ],
+    ];
+
+    $validator->validate('card', $invalidData, '/v1/cards/123');
+
+    $encoded = json_encode($capturedContext);
+    expect($encoded)->not->toContain('super-secret-token');
+    expect($encoded)->not->toContain('super-secret-value');
+    expect($capturedContext['data']['data']['attributes']['access_token'])->toBe('[REDACTED]');
+    expect($capturedContext['data']['data']['attributes']['client_secret'])->toBe('[REDACTED]');
 });
 
 it('throws exception in strict mode', function () {

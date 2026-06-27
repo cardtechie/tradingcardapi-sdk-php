@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Models\Team as TeamModel;
 use CardTechie\TradingCardApiSdk\Resources\Team;
 use GuzzleHttp\Client;
