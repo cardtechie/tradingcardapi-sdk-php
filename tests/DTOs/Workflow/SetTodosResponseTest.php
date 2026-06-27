@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\DTOs\Workflow\SetTodo;
 use CardTechie\TradingCardApiSdk\DTOs\Workflow\SetTodosResponse;
 
