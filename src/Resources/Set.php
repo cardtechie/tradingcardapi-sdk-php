@@ -136,19 +136,6 @@ class Set
     }
 
     /**
-     * Get the workflow for a set
-     *
-     *
-     * @throws InvalidArgumentException
-     */
-    public function workflow(string $id): object
-    {
-        $url = sprintf('/internal/sets/%s/workflow', $id);
-
-        return $this->makeRequest($url, 'GET');
-    }
-
-    /**
      * Add the missing cards (as empty cards) to the specified set
      *
      *

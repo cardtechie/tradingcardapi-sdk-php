@@ -1,0 +1,2 @@
+- **[Issue #252]** Add default HTTP timeouts and an opt-in retry/backoff middleware honoring Retry-After for 429/5xx.
+  - Retry is opt-in via `TRADINGCARDAPI_RETRY_ENABLED`; default timeouts (10s request / 5s connect) now apply to all requests.

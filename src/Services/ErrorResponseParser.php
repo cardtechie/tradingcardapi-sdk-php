@@ -26,6 +26,24 @@ use Psr\Http\Message\ResponseInterface;
 class ErrorResponseParser
 {
     /**
+     * Lazily-initialised redaction helper for stripping sensitive credential
+     * material from exception context.
+     */
+    private ?Redactor $redactor = null;
+
+    /**
+     * Get the redaction helper, instantiating it on first use.
+     */
+    private function getRedactor(): Redactor
+    {
+        if ($this->redactor === null) {
+            $this->redactor = new Redactor;
+        }
+
+        return $this->redactor;
+    }
+
+    /**
      * Parse a Guzzle exception and create appropriate Trading Card API exception
      */
     public function parseGuzzleException(\Exception $exception): TradingCardApiException
@@ -85,17 +103,25 @@ class ErrorResponseParser
         $body = (string) $response->getBody();
         $responseData = $this->parseResponseBody($body);
 
-        $context = [
-            'http_status_code' => $statusCode,
-            'headers' => $headers,
-            'response_body' => $body,
-            'parsed_response' => $responseData,
-        ];
-
-        // Extract error information from response
+        // Extract error information from the raw (un-redacted) response so error
+        // codes/messages stay accurate; redaction only affects what is stored in
+        // the exception context (which integrators routinely log).
         $apiErrorCode = $responseData['error'] ?? null;
         $apiErrors = $this->extractApiErrors($responseData);
         $message = $this->extractErrorMessage($responseData, $statusCode);
+
+        // Redact sensitive credential material before it is serialized into the
+        // exception context. This covers the OAuth /oauth/token failure path,
+        // which routes through this method (see ApiRequest::retrieveToken).
+        $redactor = $this->getRedactor();
+        $redactedHeaders = $redactor->redactHeaders($headers);
+
+        $context = [
+            'http_status_code' => $statusCode,
+            'headers' => $redactedHeaders,
+            'response_body' => $redactor->redactBody($body),
+            'parsed_response' => $redactor->redact($responseData),
+        ];
 
         // Create appropriate exception based on status code
         switch ($statusCode) {
@@ -150,8 +176,11 @@ class ErrorResponseParser
                 );
 
             case 429:
+                // Rate-limit metadata (X-RateLimit-*, Retry-After) is not
+                // sensitive and survives header redaction, so the redacted map
+                // is safe to pass here.
                 return RateLimitException::fromHeaders(
-                    $headers,
+                    $redactedHeaders,
                     $message,
                     $context
                 );

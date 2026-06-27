@@ -1,0 +1,2 @@
+- **[Issue #245]** Adopt per-PR `changelog.d/` changelog fragments with a CI presence gate, ending `## [Unreleased]` merge conflicts.
+  - Routine per-PR entries now go to `changelog.d/<num>-<type>.md`; `## [Unreleased]` is collated only at release.

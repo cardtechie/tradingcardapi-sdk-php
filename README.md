@@ -45,6 +45,15 @@ TRADINGCARDAPI_URL=https://api.tradingcardapi.com
 TRADINGCARDAPI_CLIENT_ID=your_client_id
 TRADINGCARDAPI_CLIENT_SECRET=your_client_secret
 TRADINGCARDAPI_SSL_VERIFY=true
+
+# HTTP timeouts (seconds) — defaults shown; 0 disables a timeout
+TRADINGCARDAPI_TIMEOUT=10
+TRADINGCARDAPI_CONNECT_TIMEOUT=5
+
+# Opt-in retry/backoff for 429 and 5xx responses (and connection errors)
+TRADINGCARDAPI_RETRY_ENABLED=false
+TRADINGCARDAPI_RETRY_MAX_ATTEMPTS=3
+TRADINGCARDAPI_RETRY_BASE_DELAY_MS=1000
 ```
 
 ## 🎯 Quick Start
@@ -512,8 +521,43 @@ return [
     'client_id' => env('TRADINGCARDAPI_CLIENT_ID', ''),
     'client_secret' => env('TRADINGCARDAPI_CLIENT_SECRET', ''),
     'scope' => env('TRADINGCARDAPI_SCOPE', 'read:published'),
+    'timeout' => (float) env('TRADINGCARDAPI_TIMEOUT', 10),
+    'connect_timeout' => (float) env('TRADINGCARDAPI_CONNECT_TIMEOUT', 5),
+    'retry' => [
+        'enabled' => (bool) env('TRADINGCARDAPI_RETRY_ENABLED', false),
+        'max_attempts' => (int) env('TRADINGCARDAPI_RETRY_MAX_ATTEMPTS', 3),
+        'base_delay' => (int) env('TRADINGCARDAPI_RETRY_BASE_DELAY_MS', 1000),
+    ],
 ];
 ```
+
+### HTTP Timeouts
+
+By default the SDK applies a **10-second request timeout** and a **5-second
+connect timeout** to every request. Guzzle ships with no timeout at all, so
+without these a hung API would block the calling PHP-FPM worker indefinitely.
+
+| Env var | Default | Meaning |
+| --- | --- | --- |
+| `TRADINGCARDAPI_TIMEOUT` | `10` | Total seconds to wait for a response. `0` disables. |
+| `TRADINGCARDAPI_CONNECT_TIMEOUT` | `5` | Seconds to wait while establishing the connection. `0` disables. |
+
+A connect timeout makes `NetworkException::connectionTimeout` reachable — it
+could never fire previously because no timeout was ever set.
+
+### Retry / Backoff
+
+Retrying transient failures is **opt-in** (disabled by default to preserve
+existing behavior). When enabled, the SDK retries `429` and `5xx` responses
+and connection errors with exponential backoff (`base_delay * 2^(attempt-1)`
+ms). If a `429` carries a numeric `Retry-After` header, that value is honored
+in preference to the computed backoff.
+
+| Env var | Default | Meaning |
+| --- | --- | --- |
+| `TRADINGCARDAPI_RETRY_ENABLED` | `false` | Enable automatic retries. |
+| `TRADINGCARDAPI_RETRY_MAX_ATTEMPTS` | `3` | Max retries after the initial request. |
+| `TRADINGCARDAPI_RETRY_BASE_DELAY_MS` | `1000` | Base backoff delay in milliseconds. |
 
 ### OAuth Scopes
 
@@ -663,7 +707,14 @@ make release-notes-preview
 4. **Production Release**: Stable releases are merged to `main`
 5. **Automation**: GitHub Actions handles versioning, changelog updates, and Packagist publishing
 
-See [docs/VERSION-MANAGEMENT.md](docs/VERSION-MANAGEMENT.md) for complete release process documentation.
+### Cutting a Release
+
+Maintainers: see the **[Release Runbook](docs/RELEASING.md)** for the concrete,
+step-by-step procedure — how a release is cut, the required repository secrets,
+how to trigger a release manually via `workflow_dispatch`, how to verify the
+GitHub Release and Packagist update, and rollback notes.
+
+See [docs/VERSION-MANAGEMENT.md](docs/VERSION-MANAGEMENT.md) for the underlying versioning model.
 
 ## 📄 Changelog
 

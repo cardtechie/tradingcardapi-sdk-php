@@ -209,11 +209,41 @@ it('sets genre relationship when genres provided', function () {
     $genre2 = new Genre(['id' => '2', 'name' => 'Genre 2']);
     $genres = [$genre1, $genre2];
 
-    $set = new Set(['id' => '123', 'genre_id' => '1']);
+    $set = new Set(['id' => '123']);
+    $set->setLinkage(['genre' => ['type' => 'genres', 'id' => '1']]);
     $set->setRelationships(['genres' => $genres]);
 
     expect($set->genre())->toBe($genre1);
-    expect($set->getRelationship('genres'))->toBeNull();
+    expect($set->getRelationships())->not->toHaveKey('genres');
+});
+
+it('attaches only the linkage-matched genre when multiple genres are included', function () {
+    $genre1 = new Genre(['id' => '1', 'name' => 'Genre 1']);
+    $genre2 = new Genre(['id' => '2', 'name' => 'Genre 2']);
+    $genre3 = new Genre(['id' => '3', 'name' => 'Genre 3']);
+    $genres = [$genre1, $genre2, $genre3];
+
+    $set = new Set(['id' => '123']);
+    $set->setLinkage(['genre' => ['type' => 'genres', 'id' => '2']]);
+    $set->setRelationships(['genres' => $genres]);
+
+    expect($set->genre())->toBe($genre2);
+    expect($set->getRelationships())->not->toHaveKey('genres');
+});
+
+it('does not attach a genre when no linkage is present', function () {
+    $genre1 = new Genre(['id' => '1', 'name' => 'Genre 1']);
+    $genre2 = new Genre(['id' => '2', 'name' => 'Genre 2']);
+    $genres = [$genre1, $genre2];
+
+    $set = new Set(['id' => '123']);
+    $set->setRelationships(['genres' => $genres]);
+
+    // Without linkage the match no-ops: no singular genre is attached and the
+    // included genres collection is left intact (not collapsed).
+    expect($set->genre())->toBeNull();
+    expect($set->getRelationships())->toHaveKey('genres');
+    expect($set->getRelationships())->not->toHaveKey('genre');
 });
 
 it('returns sources array', function () {

@@ -20,6 +20,12 @@ class ResponseValidator
     private array $config;
 
     /**
+     * Lazily-initialised redaction helper for stripping sensitive credential
+     * material from logged payloads.
+     */
+    private ?Redactor $redactor = null;
+
+    /**
      * @var array Schema cache
      */
     private static array $schemaCache = [];
@@ -74,11 +80,15 @@ class ResponseValidator
                 }
 
                 if ($this->config['log_validation_errors']) {
+                    // Redact credential material before logging the payload —
+                    // the validated response can carry tokens/secrets that
+                    // would otherwise leak into log sinks.
+                    $redactor = $this->getRedactor();
                     Log::warning($errorMessage, [
                         'resource_type' => $resourceType,
                         'endpoint' => $endpoint,
-                        'errors' => $this->errors,
-                        'data' => $data,
+                        'errors' => $redactor->redact($this->errors),
+                        'data' => $redactor->redact($data),
                         'is_collection' => $isCollection,
                     ]);
                 }
@@ -99,6 +109,18 @@ class ResponseValidator
         }
 
         return $this->isValid;
+    }
+
+    /**
+     * Get the redaction helper, instantiating it on first use.
+     */
+    private function getRedactor(): Redactor
+    {
+        if ($this->redactor === null) {
+            $this->redactor = new Redactor;
+        }
+
+        return $this->redactor;
     }
 
     /**
