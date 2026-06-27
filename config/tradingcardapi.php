@@ -167,5 +167,14 @@ return [
         | given attempt is base_delay * 2^(attempt-1).
         */
         'base_delay' => (int) env('TRADINGCARDAPI_RETRY_BASE_DELAY_MS', 1000),
+
+        /*
+        | Whether to retry non-idempotent HTTP methods (POST, PATCH). Disabled
+        | by default: replaying a non-idempotent request after the server may
+        | have already partially processed it can duplicate side effects (e.g.
+        | a double create or a repeated OAuth token request). Only enable this
+        | when your endpoints are idempotent and you knowingly accept that risk.
+        */
+        'retry_non_idempotent' => (bool) env('TRADINGCARDAPI_RETRY_NON_IDEMPOTENT', false),
     ],
 ];

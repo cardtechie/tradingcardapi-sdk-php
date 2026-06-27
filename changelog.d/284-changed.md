@@ -1,0 +1,1 @@
+- **[Issue #284]** Restrict the opt-in retry middleware to idempotent HTTP methods by default; set `retry.retry_non_idempotent => true` to retry POST/PATCH.
