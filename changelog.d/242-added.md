@@ -1,0 +1,1 @@
+- **[Issue #242]** Add a workspace-safe `.claude/pre-pr-gate.md` declaring the repo's pre-PR test and lint gate as one-off `docker run` commands.
