@@ -384,8 +384,9 @@ The internal Workflow resource manages set workflow steps (todos) and bulk initi
 $workflow = $api->internal()->workflow();
 
 // Get sets that have actionable workflow steps
+// Returns a typed ActionableSetsResponse (->sets is an array of ActionableSet)
 $actionable = $workflow->actionableSets();
-foreach ($actionable->data as $set) {
+foreach ($actionable->sets as $set) {
     echo $set->attributes->name;
 }
 

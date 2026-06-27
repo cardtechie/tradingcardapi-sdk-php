@@ -94,12 +94,21 @@ trait ApiRequest
     }
 
     /**
-     * Makes a request to an API endpoint or webpage and returns its response
+     * Makes a request to a JSON API endpoint and returns its decoded response.
      *
-     * @param  string  $url  Url of the api or webpage
+     * This is the low-level transport primitive: it deliberately returns the
+     * raw `json_decode` result (a `stdClass` tree, or an empty `stdClass` for
+     * an empty body) without normalizing it to a Model or DTO. Resource
+     * methods are responsible for mapping this raw object onto their declared
+     * return type (a typed Model/DTO, or a documented raw object for genuinely
+     * unstructured endpoints). Callers should prefer the typed resource
+     * methods over calling `makeRequest` directly.
+     *
+     * @param  string  $url  Url of the JSON API endpoint
      * @param  string  $method  HTTP method
      * @param  array  $request  Additional parameters to include in the request
      * @param  array  $headers  HTTP headers
+     * @return object The raw decoded response (unstructured)
      *
      * @throws InvalidArgumentException
      * @throws TradingCardApiException

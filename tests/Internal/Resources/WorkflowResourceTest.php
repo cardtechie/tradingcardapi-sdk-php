@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use CardTechie\TradingCardApiSdk\DTOs\Workflow\ActionableSet;
+use CardTechie\TradingCardApiSdk\DTOs\Workflow\ActionableSetsResponse;
+use CardTechie\TradingCardApiSdk\DTOs\Workflow\SetTodo;
+use CardTechie\TradingCardApiSdk\DTOs\Workflow\SetTodosResponse;
 use CardTechie\TradingCardApiSdk\Exceptions\AuthenticationException;
 use CardTechie\TradingCardApiSdk\Exceptions\ResourceNotFoundException;
 use CardTechie\TradingCardApiSdk\Exceptions\ServerException;
@@ -60,13 +64,14 @@ it('can get actionable sets', function () {
 
     $result = $this->workflowResource->actionableSets();
 
-    expect($result)->toBeObject();
-    expect($result->data)->toBeArray();
-    expect($result->data)->toHaveCount(2);
-    expect($result->data[0]->id)->toBe('1');
-    expect($result->data[0]->attributes->name)->toBe('2024 Topps Baseball');
-    expect($result->data[1]->id)->toBe('2');
-    expect($result->data[1]->attributes->name)->toBe('2024 Panini Football');
+    expect($result)->toBeInstanceOf(ActionableSetsResponse::class);
+    expect($result->sets)->toBeArray();
+    expect($result->sets)->toHaveCount(2);
+    expect($result->sets[0])->toBeInstanceOf(ActionableSet::class);
+    expect($result->sets[0]->id)->toBe('1');
+    expect($result->sets[0]->attributes->name)->toBe('2024 Topps Baseball');
+    expect($result->sets[1]->id)->toBe('2');
+    expect($result->sets[1]->attributes->name)->toBe('2024 Panini Football');
 });
 
 it('uses /internal/workflow/actionable-sets URL', function () {
@@ -109,11 +114,11 @@ it('can get actionable sets with params', function () {
 
     $result = $this->workflowResource->actionableSets(['filter[sport]' => 'baseball']);
 
-    expect($result)->toBeObject();
-    expect($result->data)->toBeArray();
-    expect($result->data)->toHaveCount(1);
-    expect($result->data[0]->id)->toBe('3');
-    expect($result->data[0]->attributes->sport)->toBe('baseball');
+    expect($result)->toBeInstanceOf(ActionableSetsResponse::class);
+    expect($result->sets)->toBeArray();
+    expect($result->sets)->toHaveCount(1);
+    expect($result->sets[0]->id)->toBe('3');
+    expect($result->sets[0]->attributes->sport)->toBe('baseball');
 });
 
 it('can update a set todo', function () {
@@ -337,9 +342,10 @@ it('can get set todos', function () {
 
     $result = $this->workflowResource->getSetTodos('set-abc');
 
-    expect($result)->toBeObject();
+    expect($result)->toBeInstanceOf(SetTodosResponse::class);
     expect($result->todos)->toBeArray();
     expect($result->todos)->toHaveCount(1);
+    expect($result->todos[0])->toBeInstanceOf(SetTodo::class);
     expect($result->todos[0]->id)->toBe('uuid-123');
     expect($result->todos[0]->step)->toBe('discover_sources');
     expect($result->todos[0]->status)->toBe('completed');
@@ -429,10 +435,10 @@ it('can get review queue', function () {
 
     $result = $resource->getReviewQueue();
 
-    expect($result)->toBeObject();
-    expect($result->data)->toBeArray();
-    expect($result->data)->toHaveCount(1);
-    expect($result->data[0]->attributes->status)->toBe('review');
+    expect($result)->toBeInstanceOf(ActionableSetsResponse::class);
+    expect($result->sets)->toBeArray();
+    expect($result->sets)->toHaveCount(1);
+    expect($result->sets[0]->attributes->status)->toBe('review');
     expect((string) $capturedRequest->getUri())->toContain('/internal/workflow/actionable-sets');
     expect((string) $capturedRequest->getUri())->toContain('status=review');
 });

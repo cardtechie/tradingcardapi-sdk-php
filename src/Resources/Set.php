@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CardTechie\TradingCardApiSdk\Resources;
 
+use CardTechie\TradingCardApiSdk\DTOs\Set\ChecklistResponse;
 use CardTechie\TradingCardApiSdk\Models\Set as SetModel;
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
@@ -123,21 +124,28 @@ class Set
     }
 
     /**
-     * Get the checklist for a set
+     * Get the checklist for a set.
      *
+     * Returns a typed {@see ChecklistResponse} carrying the cards on the
+     * checklist, the cards still missing, and the total card count.
      *
      * @throws InvalidArgumentException
      */
-    public function checklist(string $id): object
+    public function checklist(string $id): ChecklistResponse
     {
         $url = sprintf('/v1/sets/%s/checklist', $id);
 
-        return $this->makeRequest($url, 'GET');
+        return ChecklistResponse::fromResponse($this->makeRequest($url, 'GET'));
     }
 
     /**
      * Add the missing cards (as empty cards) to the specified set
      *
+     * Returns the raw decoded acknowledgement object (`success`, `message`,
+     * and any operation-specific fields the API includes); this endpoint
+     * returns an unstructured ack rather than a typed resource.
+     *
+     * @return object The decoded acknowledgement payload (unstructured)
      *
      * @throws InvalidArgumentException
      */
@@ -149,8 +157,13 @@ class Set
     }
 
     /**
-     * Add the checklist to the set
+     * Add the checklist to the set.
      *
+     * Returns the raw decoded acknowledgement object (`success`, `message`,
+     * and any operation-specific fields the API includes); this endpoint
+     * returns an unstructured ack rather than a typed resource.
+     *
+     * @return object The decoded acknowledgement payload (unstructured)
      *
      * @throws InvalidArgumentException
      */
