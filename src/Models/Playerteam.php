@@ -109,7 +109,6 @@ class Playerteam extends Model implements Taxonomy
      * Prepare the on card relationships and return the object that matches the passed in data.
      *
      * @param  array  $data
-     * @return object|null
      */
     public static function prepare($data): ?object
     {
