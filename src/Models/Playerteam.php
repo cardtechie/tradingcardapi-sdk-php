@@ -205,33 +205,18 @@ class Playerteam extends Model implements Taxonomy
     /**
      * Look up a player/team by player and team uuids.
      *
-     * @param  string  $player  The player uuid
-     * @param  string  $team  The team uuid
+     * The SDK has no Eloquent persistence layer, so this returns an unsaved,
+     * in-memory Playerteam instance carrying the given uuids — it does not query
+     * or write to a database.
+     *
+     * Called from prepare() with a null on either side when only one of player
+     * or team is supplied, so both uuids are nullable.
+     *
+     * @param  string|null  $player  The player uuid, or null when only a team is given
+     * @param  string|null  $team  The team uuid, or null when only a player is given
      */
-    public static function lookup($player, $team): Playerteam
+    public static function lookup(?string $player, ?string $team): Playerteam
     {
-        // TODO: Implement database lookup when Eloquent integration is added
-        // This method currently uses undefined Eloquent methods
-        /*
-        $results = Playerteam::where([
-            ['player_id', '=', $player],
-            ['team_id', '=', $team],
-        ])->get();
-
-        if ($results->isEmpty()) {
-            $playerteam = new Playerteam([
-                'player_id' => $player,
-                'team_id' => $team,
-            ]);
-            $playerteam->save();
-
-            return $playerteam;
-        }
-
-        return $results->first();
-        */
-
-        // For now, return a new instance
         return new self(['player_id' => $player, 'team_id' => $team]);
     }
 

@@ -144,3 +144,17 @@ it('handles custom attribute accessors', function () {
 
     expect($customModel->full_name)->toBe('John Doe');
 });
+
+it('throws BadMethodCallException for an unknown method', function () {
+    $model = new Model(['id' => '123']);
+
+    expect(fn () => $model->nonExistentMethod())
+        ->toThrow(BadMethodCallException::class, 'Call to undefined method '.Model::class.'::nonExistentMethod()');
+});
+
+it('reports the concrete subclass in the undefined-method message', function () {
+    $subclass = new class extends Model {};
+
+    expect(fn () => $subclass->team())
+        ->toThrow(BadMethodCallException::class, get_class($subclass).'::team()');
+});
