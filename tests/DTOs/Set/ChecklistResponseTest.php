@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\DTOs\Set\ChecklistResponse;
 
 it('can create ChecklistResponse from a response object', function () {

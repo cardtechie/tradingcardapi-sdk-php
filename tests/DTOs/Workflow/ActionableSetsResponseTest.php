@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\DTOs\Workflow\ActionableSet;
 use CardTechie\TradingCardApiSdk\DTOs\Workflow\ActionableSetsResponse;
 
