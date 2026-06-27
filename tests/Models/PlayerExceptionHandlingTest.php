@@ -41,7 +41,7 @@ function swapResourceToThrow(string $accessor, string $resourceClass, string $me
 }
 
 it('getAliases propagates exceptions instead of returning an empty collection', function () {
-    swapResourceToThrow('player', PlayerResource::class, 'getList', new RuntimeException('network down'));
+    swapResourceToThrow('player', PlayerResource::class, 'all', new RuntimeException('network down'));
 
     $player = new Player(['id' => 'player-1']);
 
@@ -50,7 +50,7 @@ it('getAliases propagates exceptions instead of returning an empty collection', 
 });
 
 it('getTeams propagates exceptions instead of returning an empty collection', function () {
-    swapResourceToThrow('playerteam', PlayerteamResource::class, 'getList', new RuntimeException('network down'));
+    swapResourceToThrow('playerteam', PlayerteamResource::class, 'all', new RuntimeException('network down'));
 
     $player = new Player(['id' => 'player-1']);
 
@@ -59,7 +59,7 @@ it('getTeams propagates exceptions instead of returning an empty collection', fu
 });
 
 it('getPlayerteams propagates exceptions instead of returning an empty collection', function () {
-    swapResourceToThrow('playerteam', PlayerteamResource::class, 'getList', new RuntimeException('network down'));
+    swapResourceToThrow('playerteam', PlayerteamResource::class, 'all', new RuntimeException('network down'));
 
     $player = new Player(['id' => 'player-1']);
 

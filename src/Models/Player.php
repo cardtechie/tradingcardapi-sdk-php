@@ -173,14 +173,8 @@ class Player extends Model implements Taxonomy
      */
     public function getAliases(): Collection
     {
-        // CONFLICT: review needed — kept HEAD side; incoming side follows in comment
         // Use the most likely filter parameter first
-        $aliases = TradingCardApiSdk::player()->getList(['parent_id' => $this->id]);
-        // --- incoming side (theirs) ---
-        //         try {
-        //             // Use the most likely filter parameter first
-        //             $aliases = TradingCardApiSdk::player()->all(['parent_id' => $this->id]);
-        // --- end incoming side ---
+        $aliases = TradingCardApiSdk::player()->all(['parent_id' => $this->id]);
 
         // Manually filter to ensure we only get actual aliases
         return $aliases->filter(function ($player) {
@@ -197,18 +191,10 @@ class Player extends Model implements Taxonomy
      */
     public function getTeams(): Collection
     {
-        // CONFLICT: review needed — kept HEAD side; incoming side follows in comment
-        $playerteams = TradingCardApiSdk::playerteam()->getList([
+        $playerteams = TradingCardApiSdk::playerteam()->all([
             'player_id' => $this->id,
             'include' => 'team',
         ]);
-        // --- incoming side (theirs) ---
-        //         try {
-        //             $playerteams = TradingCardApiSdk::playerteam()->all([
-        //                 'player_id' => $this->id,
-        //                 'include' => 'team',
-        //             ]);
-        // --- end incoming side ---
 
         return $playerteams->map(function ($playerteam) {
             return $playerteam->team();
@@ -222,19 +208,9 @@ class Player extends Model implements Taxonomy
      */
     public function getPlayerteams(): Collection
     {
-        // CONFLICT: review needed — kept HEAD side; incoming side follows in comment
-        return TradingCardApiSdk::playerteam()->getList([
+        return TradingCardApiSdk::playerteam()->all([
             'player_id' => $this->id,
         ]);
-        // --- incoming side (theirs) ---
-        //         try {
-        //             return TradingCardApiSdk::playerteam()->all([
-        //                 'player_id' => $this->id,
-        //             ]);
-        //         } catch (\Exception $e) {
-        //             return collect();
-        //         }
-        // --- end incoming side ---
     }
 
     /**
