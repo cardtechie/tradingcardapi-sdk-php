@@ -95,6 +95,18 @@ class Workflow
     }
 
     /**
+     * Get the workflow for a set.
+     *
+     * @throws InvalidArgumentException
+     */
+    public function getForSet(string $setId): object
+    {
+        $url = sprintf('/internal/sets/%s/workflow', $setId);
+
+        return $this->makeRequest($url, 'GET');
+    }
+
+    /**
      * Get all sets currently blocked for human review,
      * optionally filtered by workflow step.
      *

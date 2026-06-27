@@ -1,0 +1,2 @@
+- **[Issue #255]** Move the per-set workflow read off the public `Set` resource onto `Internal\Resources\Workflow::getForSet()`, completing the public/internal separation.
+  - Breaking change: `Set::workflow($id)` is removed; callers must switch to `$api->internal()->workflow()->getForSet($id)` with `internal`-scoped credentials.
