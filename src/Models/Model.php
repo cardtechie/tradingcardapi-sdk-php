@@ -163,10 +163,8 @@ class Model
 
     /**
      * Magic method to get attribute values from the attributes array.
-     *
-     * @return mixed|null
      */
-    public function __get($name)
+    public function __get(string $name): mixed
     {
         $method = 'get'.Str::studly($name).'Attribute';
         if (method_exists($this, $method)) {
@@ -224,6 +222,6 @@ class Model
             }
         }
 
-        return json_encode($output);
+        return json_encode($output) ?: '{}';
     }
 }

@@ -54,7 +54,7 @@ class CardImage
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'pageName' => $params['pageName'],
         ];
-        $parsedResponse = Response::parse(json_encode($response));
+        $parsedResponse = Response::parse(json_encode($response) ?: '{}');
 
         return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
     }
@@ -76,7 +76,7 @@ class CardImage
 
         $url = sprintf('/v1/card-images/%s?%s', $id, http_build_query($params));
         $response = $this->makeRequest($url);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -92,13 +92,17 @@ class CardImage
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \InvalidArgumentException
      */
-    public function upload($file, string $cardId, string $imageType, array $attributes = []): CardImageModel
+    public function upload(UploadedFile|string $file, string $cardId, string $imageType, array $attributes = []): CardImageModel
     {
         // Prepare the file for multipart upload
         if ($file instanceof UploadedFile) {
-            $fileContents = fopen($file->getRealPath(), 'r');
+            $realPath = $file->getRealPath();
+            if ($realPath === false) {
+                throw new \InvalidArgumentException('Uploaded file does not have a readable real path');
+            }
+            $fileContents = fopen($realPath, 'r');
             $filename = $file->getClientOriginalName();
-        } elseif (is_string($file) && file_exists($file)) {
+        } elseif (file_exists($file)) {
             $fileContents = fopen($file, 'r');
             $filename = basename($file);
         } else {
@@ -132,7 +136,7 @@ class CardImage
 
         try {
             $response = $this->makeRequest('/v1/card-images', 'POST', $request);
-            $formattedResponse = new Response(json_encode($response));
+            $formattedResponse = new Response(json_encode($response) ?: '{}');
 
             return $formattedResponse->mainObject;
         } finally {
@@ -164,7 +168,7 @@ class CardImage
         ];
 
         $response = $this->makeRequest($url, 'PATCH', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }

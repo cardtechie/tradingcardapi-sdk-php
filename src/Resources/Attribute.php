@@ -55,7 +55,7 @@ class Attribute
         }
 
         $response = $this->makeRequest('/v1/attributes', 'POST', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -107,7 +107,7 @@ class Attribute
         $url = sprintf('/v1/attributes?%s', $query);
         $response = $this->makeRequest($url);
 
-        return Response::parse(json_encode($response));
+        return Response::parse(json_encode($response) ?: '{}');
     }
 
     /**
@@ -119,7 +119,7 @@ class Attribute
     {
         $url = sprintf('/v1/attributes/%s', $id);
         $response = $this->makeRequest($url);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -155,7 +155,7 @@ class Attribute
         }
 
         $response = $this->makeRequest($url, 'PUT', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
