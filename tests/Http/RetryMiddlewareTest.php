@@ -127,6 +127,20 @@ it('does not retry a non-idempotent POST by default', function () {
     expect($mock->count())->toBe(1);
 });
 
+it('does not retry a non-idempotent PATCH by default', function () {
+    $mock = new MockHandler([
+        new GuzzleResponse(503, [], 'unavailable'),
+        new GuzzleResponse(200, [], 'ok'),
+    ]);
+    $client = makeRetryClient($mock);
+
+    $response = $client->request('PATCH', '/', ['http_errors' => false]);
+
+    expect($response->getStatusCode())->toBe(503);
+    // The second queued response is untouched => the PATCH was not retried.
+    expect($mock->count())->toBe(1);
+});
+
 it('still retries an idempotent GET by default', function () {
     $mock = new MockHandler([
         new GuzzleResponse(503, [], 'unavailable'),

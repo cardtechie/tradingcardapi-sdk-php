@@ -44,7 +44,10 @@ class RetryMiddleware
     {
         $maxAttempts = (int) ($config['max_attempts'] ?? 3);
         $baseDelay = (int) ($config['base_delay'] ?? 1000);
-        $retryNonIdempotent = (bool) ($config['retry_non_idempotent'] ?? false);
+        // Normalize with FILTER_VALIDATE_BOOLEAN rather than a plain (bool)
+        // cast: a direct config array could carry a string like 'false', which
+        // (bool) would treat as true and silently enable non-idempotent retries.
+        $retryNonIdempotent = filter_var($config['retry_non_idempotent'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         return Middleware::retry(
             self::decider($maxAttempts, $retryNonIdempotent),
