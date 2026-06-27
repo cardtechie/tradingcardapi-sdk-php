@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Schemas\AuditLogSchema;
 use Illuminate\Support\Facades\Validator;
 

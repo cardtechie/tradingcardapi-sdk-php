@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CardTechie\TradingCardApiSdk\Resources\Traits;
 
 use CardTechie\TradingCardApiSdk\Exceptions\AuthenticationException;

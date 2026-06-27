@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Exceptions\ResourceNotFoundException;
 
 it('creates resource not found exception with default values', function () {

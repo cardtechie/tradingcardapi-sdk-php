@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Schemas\BaseSchema;
 
 // Create a concrete test implementation of BaseSchema

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Exceptions\AuthenticationException;
 use CardTechie\TradingCardApiSdk\Exceptions\AuthorizationException;
 use CardTechie\TradingCardApiSdk\Exceptions\CardNotFoundException;

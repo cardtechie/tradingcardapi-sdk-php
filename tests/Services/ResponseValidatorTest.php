@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Services\ResponseValidator;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
