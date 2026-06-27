@@ -17,42 +17,79 @@ use Psr\Http\Message\ResponseInterface;
  * honored in preference to the computed backoff delay. This lets the SDK
  * respect server-directed rate limiting instead of every integrator having
  * to hand-roll 429 handling.
+ *
+ * By default only idempotent HTTP methods (GET, HEAD, PUT, DELETE, OPTIONS,
+ * TRACE) are retried. Retrying a non-idempotent request (POST, PATCH) after
+ * the server may have already partially processed it can duplicate side
+ * effects, so non-idempotent methods are never retried unless the integrator
+ * opts in via the `retry_non_idempotent` config flag.
  */
 class RetryMiddleware
 {
     /**
+     * HTTP methods that are safe to retry: a retried request has the same
+     * effect on the server as a single request, so replaying it after a
+     * transient failure cannot duplicate side effects.
+     *
+     * @var array<int, string>
+     */
+    private const IDEMPOTENT_METHODS = ['GET', 'HEAD', 'PUT', 'DELETE', 'OPTIONS', 'TRACE'];
+
+    /**
      * Build the retry middleware from the resolved `retry` config block.
      *
-     * @param  array<string, mixed>  $config  Keys: max_attempts (int), base_delay (int, ms)
+     * @param  array<string, mixed>  $config  Keys: max_attempts (int), base_delay (int, ms), retry_non_idempotent (bool)
      */
     public static function make(array $config): callable
     {
         $maxAttempts = (int) ($config['max_attempts'] ?? 3);
         $baseDelay = (int) ($config['base_delay'] ?? 1000);
+        $retryNonIdempotent = (bool) ($config['retry_non_idempotent'] ?? false);
 
         return Middleware::retry(
-            self::decider($maxAttempts),
+            self::decider($maxAttempts, $retryNonIdempotent),
             self::delay($baseDelay),
         );
+    }
+
+    /**
+     * Whether the request uses an idempotent HTTP method (case-insensitive),
+     * i.e. one that is safe to replay after a transient failure.
+     */
+    private static function isIdempotent(RequestInterface $request): bool
+    {
+        return in_array(strtoupper($request->getMethod()), self::IDEMPOTENT_METHODS, true);
     }
 
     /**
      * The retry decider: retry while we have attempts left AND the failure is
      * transient (a connection error, a 429, or a 5xx response).
      *
+     * Non-idempotent requests (e.g. POST, PATCH) are never retried unless
+     * `$retryNonIdempotent` is true, because replaying them after a partially
+     * processed request can duplicate side effects. This gate is applied
+     * before the transient-failure branches, so it covers every failure class.
+     *
      * @return callable(int, RequestInterface, ?ResponseInterface, ?\Throwable): bool
      */
-    private static function decider(int $maxAttempts): callable
+    private static function decider(int $maxAttempts, bool $retryNonIdempotent): callable
     {
         return function (
             int $retries,
             RequestInterface $request,
             ?ResponseInterface $response = null,
             ?\Throwable $exception = null
-        ) use ($maxAttempts): bool {
+        ) use ($maxAttempts, $retryNonIdempotent): bool {
             // `$retries` is the count of retries already performed (0 on the
             // first decision). Stop once we have used our budget.
             if ($retries >= $maxAttempts) {
+                return false;
+            }
+
+            // Never retry a non-idempotent request unless explicitly opted in.
+            // Checked before the transient-failure branches so it applies to
+            // connection errors, 429s, and 5xx responses alike.
+            if (! $retryNonIdempotent && ! self::isIdempotent($request)) {
                 return false;
             }
 
