@@ -214,7 +214,10 @@ it('sets genre relationship when genres provided', function () {
     $set->setRelationships(['genres' => $genres]);
 
     expect($set->genre())->toBe($genre1);
+    // genre() collapses the plural `genres` relationship into the singular
+    // `genre` key and removes `genres`, so it should no longer be present.
     expect($set->getRelationships())->not->toHaveKey('genres');
+    expect($set->getRelationships())->toHaveKey('genre');
 });
 
 it('attaches only the linkage-matched genre when multiple genres are included', function () {

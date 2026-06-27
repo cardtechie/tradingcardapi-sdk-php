@@ -13,31 +13,27 @@ class TradingCardApiException extends Exception
 {
     /**
      * The API error code
-     *
-     * @var string|null
      */
-    protected $apiErrorCode;
+    protected ?string $apiErrorCode = null;
 
     /**
      * The API errors array
      *
-     * @var array
+     * @var array<int|string, mixed>
      */
-    protected $apiErrors = [];
+    protected array $apiErrors = [];
 
     /**
      * The HTTP status code
-     *
-     * @var int|null
      */
-    protected $httpStatusCode;
+    protected ?int $httpStatusCode = null;
 
     /**
      * Additional context for debugging
      *
-     * @var array
+     * @var array<string, mixed>
      */
-    protected $context = [];
+    protected array $context = [];
 
     /**
      * Constructor

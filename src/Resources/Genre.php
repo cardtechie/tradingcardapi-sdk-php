@@ -38,7 +38,7 @@ class Genre
         }
 
         $response = $this->makeRequest('/v1/genres', 'POST', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -47,7 +47,7 @@ class Genre
     {
         $url = sprintf('/v1/genres/%s', $id);
         $response = $this->makeRequest($url, 'GET', ['query' => $params]);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -72,7 +72,7 @@ class Genre
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'pageName' => $params['pageName'],
         ];
-        $parsedResponse = Response::parse(json_encode($response));
+        $parsedResponse = Response::parse(json_encode($response) ?: '{}');
 
         return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
     }
@@ -98,7 +98,7 @@ class Genre
         }
 
         $response = $this->makeRequest($url, 'PUT', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -121,7 +121,7 @@ class Genre
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'pageName' => 'page',
         ];
-        $parsedResponse = Response::parse(json_encode($response));
+        $parsedResponse = Response::parse(json_encode($response) ?: '{}');
 
         return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
     }
@@ -130,7 +130,7 @@ class Genre
     {
         $url = sprintf('/v1/genres/%s', $id);
         $response = $this->makeRequest($url, 'GET', ['query' => ['include_trashed' => 'true']]);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }

@@ -122,6 +122,17 @@ it('converts to string with single-object relationship', function () {
     expect($decoded['genre'])->toBe(['id' => 'abc', 'name' => 'Baseball']);
 });
 
+it('returns a string when json_encode fails', function () {
+    // Invalid UTF-8 makes json_encode() return false; __toString() must still
+    // honor its declared : string return rather than emitting a TypeError.
+    $model = new Model(['name' => "\xB1\x31"]);
+
+    $result = (string) $model;
+
+    expect($result)->toBeString();
+    expect($result)->toBe('{}');
+});
+
 it('handles custom attribute accessors', function () {
     $customModel = new class(['first_name' => 'John', 'last_name' => 'Doe']) extends Model
     {
@@ -132,4 +143,18 @@ it('handles custom attribute accessors', function () {
     };
 
     expect($customModel->full_name)->toBe('John Doe');
+});
+
+it('throws BadMethodCallException for an unknown method', function () {
+    $model = new Model(['id' => '123']);
+
+    expect(fn () => $model->nonExistentMethod())
+        ->toThrow(BadMethodCallException::class, 'Call to undefined method '.Model::class.'::nonExistentMethod()');
+});
+
+it('reports the concrete subclass in the undefined-method message', function () {
+    $subclass = new class extends Model {};
+
+    expect(fn () => $subclass->team())
+        ->toThrow(BadMethodCallException::class, get_class($subclass).'::team()');
 });

@@ -12,10 +12,23 @@ use Illuminate\Support\Collection;
 /**
  * Class Player
  *
- * @property string|null $id
- * @property string|null $first_name
- * @property string|null $last_name
- * @property string|null $parent_id
+ * Represents a player in the Trading Card API.
+ *
+ * @property string|null $id Player UUID
+ * @property string|null $first_name Player first name
+ * @property string|null $last_name Player last name
+ * @property string|null $parent_id Parent player UUID (if this player is an alias)
+ * @property string|null $birthdate Player birthdate
+ * @property string|null $nationality Player nationality
+ * @property string|null $height Player height
+ * @property string|null $weight Player weight
+ * @property string|null $position Player position
+ * @property string|null $team Team name
+ * @property int|null $jersey_number Jersey number
+ * @property string|null $created_at Creation timestamp
+ * @property string|null $updated_at Last update timestamp
+ * @property-read string|null $full_name Player full name (computed)
+ * @property-read string $last_name_first Player name in "Last, First" format (computed)
  */
 class Player extends Model implements Taxonomy
 {
@@ -160,26 +173,15 @@ class Player extends Model implements Taxonomy
      */
     public function getAliases(): Collection
     {
-        try {
-            // Use the most likely filter parameter first
-            $aliases = TradingCardApiSdk::player()->all(['parent_id' => $this->id]);
+        // Use the most likely filter parameter first
+        $aliases = TradingCardApiSdk::player()->all(['parent_id' => $this->id]);
 
-            // Manually filter to ensure we only get actual aliases
-            $validAliases = $aliases->filter(function ($player) {
-                return isset($player->parent_id) &&
-                       ! empty($player->parent_id) &&
-                       $player->parent_id === $this->id;
-            });
-
-            return $validAliases;
-
-        } catch (\Exception $e) {
-            \Log::error('Failed to get aliases: '.$e->getMessage(), [
-                'player_id' => $this->id,
-            ]);
-
-            return collect();
-        }
+        // Manually filter to ensure we only get actual aliases
+        return $aliases->filter(function ($player) {
+            return isset($player->parent_id) &&
+                   ! empty($player->parent_id) &&
+                   $player->parent_id === $this->id;
+        });
     }
 
     /**
@@ -189,18 +191,14 @@ class Player extends Model implements Taxonomy
      */
     public function getTeams(): Collection
     {
-        try {
-            $playerteams = TradingCardApiSdk::playerteam()->all([
-                'player_id' => $this->id,
-                'include' => 'team',
-            ]);
+        $playerteams = TradingCardApiSdk::playerteam()->all([
+            'player_id' => $this->id,
+            'include' => 'team',
+        ]);
 
-            return $playerteams->map(function ($playerteam) {
-                return $playerteam->team();
-            })->filter()->values();
-        } catch (\Exception $e) {
-            return collect();
-        }
+        return $playerteams->map(function ($playerteam) {
+            return $playerteam->team();
+        })->filter()->values();
     }
 
     /**
@@ -210,13 +208,9 @@ class Player extends Model implements Taxonomy
      */
     public function getPlayerteams(): Collection
     {
-        try {
-            return TradingCardApiSdk::playerteam()->all([
-                'player_id' => $this->id,
-            ]);
-        } catch (\Exception $e) {
-            return collect();
-        }
+        return TradingCardApiSdk::playerteam()->all([
+            'player_id' => $this->id,
+        ]);
     }
 
     /**
@@ -226,21 +220,13 @@ class Player extends Model implements Taxonomy
      */
     public function getCards(): Collection
     {
-        try {
-            // Query cards that feature this player through OnCard relationships
-            $cards = TradingCardApiSdk::card()->list([
-                'player_id' => $this->id,
-                'limit' => 1000, // Get all cards for this player
-            ]);
+        // Query cards that feature this player through OnCard relationships
+        $cards = TradingCardApiSdk::card()->list([
+            'player_id' => $this->id,
+            'limit' => 1000, // Get all cards for this player
+        ]);
 
-            return $cards->getCollection();
-        } catch (\Exception $e) {
-            \Log::error('Failed to get cards for player: '.$e->getMessage(), [
-                'player_id' => $this->id,
-            ]);
-
-            return collect();
-        }
+        return $cards->getCollection();
     }
 
     /**

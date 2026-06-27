@@ -8,6 +8,19 @@ use Illuminate\Support\Collection;
 
 /**
  * Class Year
+ *
+ * Represents a card year in the Trading Card API.
+ *
+ * @property string $id Year UUID
+ * @property string|null $name Year name
+ * @property int|null $year Numeric year
+ * @property string|null $description Year description
+ * @property string|null $parent_year Parent year UUID (if this is a variant)
+ * @property int|null $card_count Number of cards in this year
+ * @property int|null $set_count Number of sets in this year
+ * @property bool|null $is_active Whether the year is active
+ * @property string|null $created_at Creation timestamp
+ * @property string|null $updated_at Last update timestamp
  */
 class Year extends Model
 {
