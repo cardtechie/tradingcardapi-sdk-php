@@ -215,7 +215,7 @@ class Playerteam extends Model implements Taxonomy
      * @param  string|null  $player  The player uuid, or null when only a team is given
      * @param  string|null  $team  The team uuid, or null when only a player is given
      */
-    public static function lookup($player, $team): Playerteam
+    public static function lookup(?string $player, ?string $team): Playerteam
     {
         return new self(['player_id' => $player, 'team_id' => $team]);
     }

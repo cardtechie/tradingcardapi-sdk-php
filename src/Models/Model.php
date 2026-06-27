@@ -192,13 +192,11 @@ class Model
      * `$player->team()` (when `team()` lives on Playerteam, not Player) returned
      * null instead of failing. Throw so unknown method calls surface loudly.
      *
-     * @return never
-     *
      * @throws \BadMethodCallException Always, for any undefined method.
      *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
      */
-    public function __call($methodName, $arguments)
+    public function __call(string $methodName, array $arguments): never
     {
         throw new \BadMethodCallException(
             sprintf('Call to undefined method %s::%s()', static::class, $methodName)
