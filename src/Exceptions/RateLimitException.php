@@ -11,31 +11,23 @@ class RateLimitException extends TradingCardApiException
 {
     /**
      * The rate limit quota
-     *
-     * @var int|null
      */
-    protected $rateLimit;
+    protected ?int $rateLimit = null;
 
     /**
      * The number of requests remaining
-     *
-     * @var int|null
      */
-    protected $rateLimitRemaining;
+    protected ?int $rateLimitRemaining = null;
 
     /**
      * The timestamp when the rate limit resets
-     *
-     * @var int|null
      */
-    protected $rateLimitReset;
+    protected ?int $rateLimitReset = null;
 
     /**
      * The number of seconds to wait before retrying
-     *
-     * @var int|null
      */
-    protected $retryAfter;
+    protected ?int $retryAfter = null;
 
     /**
      * Constructor

@@ -12,10 +12,23 @@ use Illuminate\Support\Collection;
 /**
  * Class Player
  *
- * @property string|null $id
- * @property string|null $first_name
- * @property string|null $last_name
- * @property string|null $parent_id
+ * Represents a player in the Trading Card API.
+ *
+ * @property string|null $id Player UUID
+ * @property string|null $first_name Player first name
+ * @property string|null $last_name Player last name
+ * @property string|null $parent_id Parent player UUID (if this player is an alias)
+ * @property string|null $birthdate Player birthdate
+ * @property string|null $nationality Player nationality
+ * @property string|null $height Player height
+ * @property string|null $weight Player weight
+ * @property string|null $position Player position
+ * @property string|null $team Team name
+ * @property int|null $jersey_number Jersey number
+ * @property string|null $created_at Creation timestamp
+ * @property string|null $updated_at Last update timestamp
+ * @property-read string|null $full_name Player full name (computed)
+ * @property-read string $last_name_first Player name in "Last, First" format (computed)
  */
 class Player extends Model implements Taxonomy
 {
