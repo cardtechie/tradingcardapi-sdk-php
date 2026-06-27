@@ -23,7 +23,7 @@ class StatsResponse
 
     public static function fromResponse(object $response): self
     {
-        $attributes = $response->data?->attributes ?? (object) [];
+        $attributes = $response->data->attributes ?? (object) [];
 
         $stats = [];
         foreach ($attributes->stats ?? [] as $item) {

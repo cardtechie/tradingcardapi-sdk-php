@@ -1,0 +1,1 @@
+- **[Issue #258]** Normalize resource responses into typed DTOs so results are predictable and self-documenting.
