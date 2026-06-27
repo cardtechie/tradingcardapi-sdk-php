@@ -28,18 +28,32 @@ class Player
     }
 
     /**
-     * Retrieve a list of players
+     * Retrieve a raw collection of players
      *
+     * @param  array  $params  Query parameters
+     * @return Collection The players collection
      *
      * @throws InvalidArgumentException
      */
-    public function getList(array $params = []): Collection
+    public function all(array $params = []): Collection
     {
         $query = http_build_query($params);
         $url = sprintf('/v1/players?%s', $query);
         $response = $this->makeRequest($url);
 
         return Response::parse(json_encode($response));
+    }
+
+    /**
+     * Retrieve a list of players
+     *
+     * @deprecated use all()
+     *
+     * @throws InvalidArgumentException
+     */
+    public function getList(array $params = []): Collection
+    {
+        return $this->all($params);
     }
 
     /**

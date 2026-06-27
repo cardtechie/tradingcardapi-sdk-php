@@ -30,19 +30,30 @@ class Set
     /**
      * Create the set with the passed in attributes
      *
+     * @param  array  $attributes  Set attributes
+     * @param  array  $relationships  Set relationships
+     * @return SetModel The created set
      *
      * @throws InvalidArgumentException
      */
-    public function create(array $attributes): SetModel
+    public function create(array $attributes = [], array $relationships = []): SetModel
     {
         $request = [
             'json' => [
                 'data' => [
                     'type' => 'sets',
-                    'attributes' => $attributes,
                 ],
             ],
         ];
+
+        if (count($attributes)) {
+            $request['json']['data']['attributes'] = $attributes;
+        }
+
+        if (count($relationships)) {
+            $request['json']['data']['relationships'] = $relationships;
+        }
+
         $response = $this->makeRequest('/v1/sets', 'POST', $request);
         $formattedResponse = new Response(json_encode($response));
 
@@ -102,10 +113,14 @@ class Set
     /**
      * Update the set
      *
+     * @param  string  $id  Set ID
+     * @param  array  $attributes  Set attributes to update
+     * @param  array  $relationships  Set relationships to update
+     * @return SetModel The updated set
      *
      * @throws InvalidArgumentException
      */
-    public function update(string $id, array $attributes): SetModel
+    public function update(string $id, array $attributes = [], array $relationships = []): SetModel
     {
         $url = sprintf('/v1/sets/%s', $id);
         $request = [
@@ -113,10 +128,18 @@ class Set
                 'data' => [
                     'type' => 'sets',
                     'id' => $id,
-                    'attributes' => $attributes,
                 ],
             ],
         ];
+
+        if (count($attributes)) {
+            $request['json']['data']['attributes'] = $attributes;
+        }
+
+        if (count($relationships)) {
+            $request['json']['data']['relationships'] = $relationships;
+        }
+
         $response = $this->makeRequest($url, 'PUT', $request);
         $formattedResponse = new Response(json_encode($response));
 

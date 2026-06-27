@@ -101,7 +101,7 @@ class Team extends Model implements Taxonomy
      */
     public static function getFromApi(array $params): object
     {
-        $teams = TradingCardApiSdk::team()->getList([
+        $teams = TradingCardApiSdk::team()->all([
             'name' => $params['team'],
             'limit' => 50,
         ]);

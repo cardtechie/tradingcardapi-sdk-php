@@ -28,18 +28,32 @@ class Team
     }
 
     /**
-     * Retrieve a list of teams
+     * Retrieve a raw collection of teams
      *
+     * @param  array  $params  Query parameters
+     * @return Collection The teams collection
      *
      * @throws InvalidArgumentException
      */
-    public function getList(array $params = []): Collection
+    public function all(array $params = []): Collection
     {
         $query = http_build_query($params);
         $url = sprintf('/v1/teams?%s', $query);
         $response = $this->makeRequest($url);
 
         return Response::parse(json_encode($response));
+    }
+
+    /**
+     * Retrieve a list of teams
+     *
+     * @deprecated use all()
+     *
+     * @throws InvalidArgumentException
+     */
+    public function getList(array $params = []): Collection
+    {
+        return $this->all($params);
     }
 
     /**
