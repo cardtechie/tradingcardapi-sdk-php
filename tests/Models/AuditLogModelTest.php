@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Models\AuditLog;
 use CardTechie\TradingCardApiSdk\Models\Model;
 

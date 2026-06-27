@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Enums\WorkflowStep;
 
 it('has the correct step values', function () {

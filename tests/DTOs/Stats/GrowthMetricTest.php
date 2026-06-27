@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\DTOs\Stats\GrowthMetric;
 
 it('can create GrowthMetric from object with all properties', function () {

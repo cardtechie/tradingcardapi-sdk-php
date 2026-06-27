@@ -1,0 +1,1 @@
+- **[Issue #256]** Declare `strict_types=1` across the SDK and enforce it via a committed `pint.json` `declare_strict_types` rule.

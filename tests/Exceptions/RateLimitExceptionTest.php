@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Exceptions\RateLimitException;
 
 it('creates rate limit exception with default values', function () {

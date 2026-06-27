@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Models\CardImage as CardImageModel;
 use CardTechie\TradingCardApiSdk\Resources\CardImage;
 use GuzzleHttp\Client;

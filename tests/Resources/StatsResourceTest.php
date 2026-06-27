@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\DTOs\Stats\CountsResponse;
 use CardTechie\TradingCardApiSdk\DTOs\Stats\EntityCount;
 use CardTechie\TradingCardApiSdk\DTOs\Stats\GrowthMetric;
