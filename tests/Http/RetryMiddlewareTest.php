@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Http\RetryMiddleware;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ConnectException;
