@@ -1,0 +1,1 @@
+- **[Issue #263]** Correct overstated README badges and marketing claims, and add missing community-health files (Code of Conduct, Support, PR template, CODEOWNERS, issue forms).
