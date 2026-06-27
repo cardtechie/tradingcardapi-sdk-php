@@ -126,8 +126,8 @@ class Genre
 
     public function deleted(string $id): GenreModel
     {
-        $url = sprintf('/v1/genres/%s/deleted', $id);
-        $response = $this->makeRequest($url);
+        $url = sprintf('/v1/genres/%s', $id);
+        $response = $this->makeRequest($url, 'GET', ['query' => ['include_trashed' => 'true']]);
         $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
