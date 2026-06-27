@@ -1,0 +1,2 @@
+- **[Issue #259]** Standardize resource method signatures: uniform `list()` paginator plus `all()` raw-Collection accessor (`getList()` kept as a deprecated alias), consistent `create()`/`update()` arity, missing `delete()` verbs filled in, and `RateLimitException`'s constructor realigned with its base class.
+  - Breaking change: callers using positional `RateLimitException` constructor args must switch to named args (0.3.0 migration path). `getList()` is deprecated — it still works and delegates to `all()`, so callers should migrate to `all()` but are not broken.

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Exceptions\PlayerNotFoundException;
 use CardTechie\TradingCardApiSdk\Exceptions\ResourceNotFoundException;
 

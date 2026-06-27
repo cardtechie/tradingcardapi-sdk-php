@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CardTechie\TradingCardApiSdk\Resources;
 
 use CardTechie\TradingCardApiSdk\Models\Brand as BrandModel;
@@ -48,7 +50,7 @@ class Brand
         }
 
         $response = $this->makeRequest('/v1/brands', 'POST', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -67,7 +69,7 @@ class Brand
 
         $url = sprintf('/v1/brands/%s?%s', $id, http_build_query($params));
         $response = $this->makeRequest($url);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -97,7 +99,7 @@ class Brand
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'pageName' => $params['pageName'],
         ];
-        $parsedResponse = Response::parse(json_encode($response));
+        $parsedResponse = Response::parse(json_encode($response) ?: '{}');
 
         return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
     }
@@ -128,7 +130,7 @@ class Brand
         }
 
         $response = $this->makeRequest($url, 'PUT', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }

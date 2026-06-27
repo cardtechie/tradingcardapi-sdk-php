@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Models\Set;
 use CardTechie\TradingCardApiSdk\Models\Year;
 use Illuminate\Support\Collection;

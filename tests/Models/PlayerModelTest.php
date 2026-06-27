@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Models\Player;
 use CardTechie\TradingCardApiSdk\Models\Taxonomy;
 

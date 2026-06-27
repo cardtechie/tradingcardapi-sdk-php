@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CardTechie\TradingCardApiSdk\Resources;
 
 use CardTechie\TradingCardApiSdk\Models\Team as TeamModel;
@@ -26,18 +28,32 @@ class Team
     }
 
     /**
-     * Retrieve a list of teams
+     * Retrieve a raw collection of teams
      *
+     * @param  array  $params  Query parameters
+     * @return Collection The teams collection
      *
      * @throws InvalidArgumentException
      */
-    public function getList(array $params = []): Collection
+    public function all(array $params = []): Collection
     {
         $query = http_build_query($params);
         $url = sprintf('/v1/teams?%s', $query);
         $response = $this->makeRequest($url);
 
-        return Response::parse(json_encode($response));
+        return Response::parse(json_encode($response) ?: '{}');
+    }
+
+    /**
+     * Retrieve a list of teams
+     *
+     * @deprecated use all()
+     *
+     * @throws InvalidArgumentException
+     */
+    public function getList(array $params = []): Collection
+    {
+        return $this->all($params);
     }
 
     /**
@@ -68,7 +84,7 @@ class Team
         }
 
         $response = $this->makeRequest('/v1/teams', 'POST', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -86,7 +102,7 @@ class Team
     {
         $url = sprintf('/v1/teams/%s', $id);
         $response = $this->makeRequest($url, 'GET', ['query' => $params]);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -119,7 +135,7 @@ class Team
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'pageName' => $params['pageName'],
         ];
-        $parsedResponse = Response::parse(json_encode($response));
+        $parsedResponse = Response::parse(json_encode($response) ?: '{}');
 
         return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
     }
@@ -155,7 +171,7 @@ class Team
         }
 
         $response = $this->makeRequest($url, 'PUT', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -191,7 +207,7 @@ class Team
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'pageName' => 'page',
         ];
-        $parsedResponse = Response::parse(json_encode($response));
+        $parsedResponse = Response::parse(json_encode($response) ?: '{}');
 
         return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
     }
@@ -208,7 +224,7 @@ class Team
     {
         $url = sprintf('/v1/teams/%s/deleted', $id);
         $response = $this->makeRequest($url);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }

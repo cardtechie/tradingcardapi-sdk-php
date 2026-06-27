@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Models\Team as TeamModel;
 use CardTechie\TradingCardApiSdk\Resources\Team;
 use GuzzleHttp\Client;
@@ -82,6 +84,37 @@ it('can get a list of teams with params', function () {
 
     $params = ['name' => 'Yankees', 'limit' => 10];
     $result = $this->teamResource->getList($params);
+
+    expect($result)->toBeInstanceOf(Collection::class);
+    expect($result->count())->toBe(1);
+});
+
+it('can get all teams as a raw collection', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                ['type' => 'teams', 'id' => '123', 'attributes' => ['name' => 'New York Yankees']],
+                ['type' => 'teams', 'id' => '456', 'attributes' => ['name' => 'Boston Red Sox']],
+            ],
+        ]))
+    );
+
+    $result = $this->teamResource->all();
+
+    expect($result)->toBeInstanceOf(Collection::class);
+    expect($result->count())->toBe(2);
+});
+
+it('keeps deprecated getList delegating to all', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                ['type' => 'teams', 'id' => '123', 'attributes' => ['name' => 'New York Yankees']],
+            ],
+        ]))
+    );
+
+    $result = $this->teamResource->getList();
 
     expect($result)->toBeInstanceOf(Collection::class);
     expect($result->count())->toBe(1);

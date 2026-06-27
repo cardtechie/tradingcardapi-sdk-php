@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CardTechie\TradingCardApiSdk\Models;
 
 use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
@@ -9,6 +11,19 @@ use Illuminate\Support\Collection;
 
 /**
  * Class Playerteam
+ *
+ * Represents a player-on-team association in the Trading Card API.
+ *
+ * @property string $id Player/team UUID
+ * @property string|null $player_id Related player UUID
+ * @property string|null $team_id Related team UUID
+ * @property string|null $position Player position
+ * @property int|null $jersey_number Jersey number
+ * @property string|null $start_date Association start date
+ * @property string|null $end_date Association end date
+ * @property bool|null $is_active Whether the association is active
+ * @property string|null $created_at Creation timestamp
+ * @property string|null $updated_at Last update timestamp
  */
 class Playerteam extends Model implements Taxonomy
 {
@@ -75,7 +90,7 @@ class Playerteam extends Model implements Taxonomy
             'team' => $params['team'],
         ]);
 
-        $playerteam = TradingCardApiSdk::playerteam()->getList([
+        $playerteam = TradingCardApiSdk::playerteam()->all([
             'player_id' => $player->id,
             'team_id' => $team->id,
         ]);
@@ -162,7 +177,7 @@ class Playerteam extends Model implements Taxonomy
     protected static function validatePlayerExists(string $playerUuid): bool
     {
         try {
-            $players = TradingCardApiSdk::player()->getList(['id' => $playerUuid]);
+            $players = TradingCardApiSdk::player()->all(['id' => $playerUuid]);
 
             return ! $players->isEmpty();
         } catch (\Exception $e) {
@@ -179,7 +194,7 @@ class Playerteam extends Model implements Taxonomy
     protected static function validateTeamExists(string $teamUuid): bool
     {
         try {
-            $teams = TradingCardApiSdk::team()->getList(['id' => $teamUuid]);
+            $teams = TradingCardApiSdk::team()->all(['id' => $teamUuid]);
 
             return ! $teams->isEmpty();
         } catch (\Exception $e) {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CardTechie\TradingCardApiSdk\Models;
 
 use Illuminate\Support\Collection;
@@ -7,8 +9,28 @@ use Illuminate\Support\Collection;
 /**
  * Class Set
  *
- * @property string $number_prefix
- * @property bool|null $is_variation
+ * Represents a trading card set in the Trading Card API.
+ *
+ * @property string $id Set UUID
+ * @property string|null $name Set name
+ * @property string|null $description Set description
+ * @property string|null $number_prefix Card-number prefix for this set
+ * @property string|null $prefix Card-number prefix (API attribute alias)
+ * @property string|null $genre_id Related genre UUID
+ * @property string|null $parent_set_id Parent set UUID (if this is a subset)
+ * @property string|null $brand Brand name
+ * @property string|null $manufacturer Manufacturer name
+ * @property string|null $series Set series
+ * @property int|null $year Set year
+ * @property string|null $release_date Release date
+ * @property string|null $image Image URL
+ * @property string|null $image_thumbnail Thumbnail image URL
+ * @property int|null $card_count Number of cards in the set
+ * @property bool|null $is_subset Whether the set is a subset
+ * @property bool|null $is_variation Whether the set is a variation
+ * @property string|null $created_at Creation timestamp
+ * @property string|null $updated_at Last update timestamp
+ * @property-read int $current_card_count Number of checklist cards currently loaded (computed)
  */
 class Set extends Model
 {

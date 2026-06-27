@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CardTechie\TradingCardApiSdk\Resources;
 
+use CardTechie\TradingCardApiSdk\DTOs\Set\ChecklistResponse;
 use CardTechie\TradingCardApiSdk\Models\Set as SetModel;
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
@@ -27,21 +30,32 @@ class Set
     /**
      * Create the set with the passed in attributes
      *
+     * @param  array  $attributes  Set attributes
+     * @param  array  $relationships  Set relationships
+     * @return SetModel The created set
      *
      * @throws InvalidArgumentException
      */
-    public function create(array $attributes): SetModel
+    public function create(array $attributes = [], array $relationships = []): SetModel
     {
         $request = [
             'json' => [
                 'data' => [
                     'type' => 'sets',
-                    'attributes' => $attributes,
                 ],
             ],
         ];
+
+        if (count($attributes)) {
+            $request['json']['data']['attributes'] = $attributes;
+        }
+
+        if (count($relationships)) {
+            $request['json']['data']['relationships'] = $relationships;
+        }
+
         $response = $this->makeRequest('/v1/sets', 'POST', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -61,7 +75,7 @@ class Set
 
         $url = sprintf('/v1/sets/%s?%s', $id, http_build_query($params));
         $response = $this->makeRequest($url);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
@@ -91,7 +105,7 @@ class Set
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'pageName' => $params['pageName'],
         ];
-        $parsedResponse = Response::parse(json_encode($response));
+        $parsedResponse = Response::parse(json_encode($response) ?: '{}');
 
         return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
     }
@@ -99,10 +113,14 @@ class Set
     /**
      * Update the set
      *
+     * @param  string  $id  Set ID
+     * @param  array  $attributes  Set attributes to update
+     * @param  array  $relationships  Set relationships to update
+     * @return SetModel The updated set
      *
      * @throws InvalidArgumentException
      */
-    public function update(string $id, array $attributes): SetModel
+    public function update(string $id, array $attributes = [], array $relationships = []): SetModel
     {
         $url = sprintf('/v1/sets/%s', $id);
         $request = [
@@ -110,45 +128,47 @@ class Set
                 'data' => [
                     'type' => 'sets',
                     'id' => $id,
-                    'attributes' => $attributes,
                 ],
             ],
         ];
+
+        if (count($attributes)) {
+            $request['json']['data']['attributes'] = $attributes;
+        }
+
+        if (count($relationships)) {
+            $request['json']['data']['relationships'] = $relationships;
+        }
+
         $response = $this->makeRequest($url, 'PUT', $request);
-        $formattedResponse = new Response(json_encode($response));
+        $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
     }
 
     /**
-     * Get the checklist for a set
+     * Get the checklist for a set.
      *
+     * Returns a typed {@see ChecklistResponse} carrying the cards on the
+     * checklist, the cards still missing, and the total card count.
      *
      * @throws InvalidArgumentException
      */
-    public function checklist(string $id): object
+    public function checklist(string $id): ChecklistResponse
     {
         $url = sprintf('/v1/sets/%s/checklist', $id);
 
-        return $this->makeRequest($url, 'GET');
-    }
-
-    /**
-     * Get the workflow for a set
-     *
-     *
-     * @throws InvalidArgumentException
-     */
-    public function workflow(string $id): object
-    {
-        $url = sprintf('/internal/sets/%s/workflow', $id);
-
-        return $this->makeRequest($url, 'GET');
+        return ChecklistResponse::fromResponse($this->makeRequest($url, 'GET'));
     }
 
     /**
      * Add the missing cards (as empty cards) to the specified set
      *
+     * Returns the raw decoded acknowledgement object (`success`, `message`,
+     * and any operation-specific fields the API includes); this endpoint
+     * returns an unstructured ack rather than a typed resource.
+     *
+     * @return object The decoded acknowledgement payload (unstructured)
      *
      * @throws InvalidArgumentException
      */
@@ -160,8 +180,13 @@ class Set
     }
 
     /**
-     * Add the checklist to the set
+     * Add the checklist to the set.
      *
+     * Returns the raw decoded acknowledgement object (`success`, `message`,
+     * and any operation-specific fields the API includes); this endpoint
+     * returns an unstructured ack rather than a typed resource.
+     *
+     * @return object The decoded acknowledgement payload (unstructured)
      *
      * @throws InvalidArgumentException
      */

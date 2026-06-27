@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CardTechie\TradingCardApiSdk\Resources\Traits;
 
 use CardTechie\TradingCardApiSdk\Exceptions\AuthenticationException;
@@ -18,66 +20,48 @@ trait ApiRequest
 {
     /**
      * The oauth token
-     *
-     * @var string
      */
-    private $token;
+    private ?string $token = null;
 
     /**
      * The client to make API requests
-     *
-     * @var Client
      */
-    private $client;
+    private Client $client;
 
     /**
      * The response validator instance
-     *
-     * @var ResponseValidator|null
      */
-    private $validator;
+    private ?ResponseValidator $validator = null;
 
     /**
      * The error response parser instance
-     *
-     * @var ErrorResponseParser|null
      */
-    private $errorParser;
+    private ?ErrorResponseParser $errorParser = null;
 
     /**
      * Authentication type ('oauth2' or 'pat')
-     *
-     * @var string
      */
-    private $authType = 'oauth2';
+    private string $authType = 'oauth2';
 
     /**
      * Personal Access Token (for PAT auth mode)
-     *
-     * @var string|null
      */
-    private $personalAccessToken;
+    private ?string $personalAccessToken = null;
 
     /**
      * OAuth2 Client ID
-     *
-     * @var string|null
      */
-    private $oauthClientId;
+    private ?string $oauthClientId = null;
 
     /**
      * OAuth2 Client Secret
-     *
-     * @var string|null
      */
-    private $oauthClientSecret;
+    private ?string $oauthClientSecret = null;
 
     /**
      * OAuth2 Scope
-     *
-     * @var string|null
      */
-    private $scope;
+    private ?string $scope = null;
 
     /**
      * Set authentication information on this resource.
@@ -92,12 +76,21 @@ trait ApiRequest
     }
 
     /**
-     * Makes a request to an API endpoint or webpage and returns its response
+     * Makes a request to a JSON API endpoint and returns its decoded response.
      *
-     * @param  string  $url  Url of the api or webpage
+     * This is the low-level transport primitive: it deliberately returns the
+     * raw `json_decode` result (a `stdClass` tree, or an empty `stdClass` for
+     * an empty body) without normalizing it to a Model or DTO. Resource
+     * methods are responsible for mapping this raw object onto their declared
+     * return type (a typed Model/DTO, or a documented raw object for genuinely
+     * unstructured endpoints). Callers should prefer the typed resource
+     * methods over calling `makeRequest` directly.
+     *
+     * @param  string  $url  Url of the JSON API endpoint
      * @param  string  $method  HTTP method
      * @param  array  $request  Additional parameters to include in the request
      * @param  array  $headers  HTTP headers
+     * @return object The raw decoded response (unstructured)
      *
      * @throws InvalidArgumentException
      * @throws TradingCardApiException

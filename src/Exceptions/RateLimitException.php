@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CardTechie\TradingCardApiSdk\Exceptions;
 
 /**
@@ -9,31 +11,23 @@ class RateLimitException extends TradingCardApiException
 {
     /**
      * The rate limit quota
-     *
-     * @var int|null
      */
-    protected $rateLimit;
+    protected ?int $rateLimit = null;
 
     /**
      * The number of requests remaining
-     *
-     * @var int|null
      */
-    protected $rateLimitRemaining;
+    protected ?int $rateLimitRemaining = null;
 
     /**
      * The timestamp when the rate limit resets
-     *
-     * @var int|null
      */
-    protected $rateLimitReset;
+    protected ?int $rateLimitReset = null;
 
     /**
      * The number of seconds to wait before retrying
-     *
-     * @var int|null
      */
-    protected $retryAfter;
+    protected ?int $retryAfter = null;
 
     /**
      * Constructor
@@ -43,6 +37,7 @@ class RateLimitException extends TradingCardApiException
      * @param  \Exception|null  $previous  The previous exception
      * @param  string|null  $apiErrorCode  The API error code
      * @param  array  $apiErrors  The API errors array
+     * @param  int|null  $httpStatusCode  The HTTP status code
      * @param  array  $context  Additional context for debugging
      * @param  int|null  $rateLimit  The rate limit quota
      * @param  int|null  $rateLimitRemaining  The number of requests remaining
@@ -55,6 +50,7 @@ class RateLimitException extends TradingCardApiException
         ?\Exception $previous = null,
         ?string $apiErrorCode = null,
         array $apiErrors = [],
+        ?int $httpStatusCode = 429,
         array $context = [],
         ?int $rateLimit = null,
         ?int $rateLimitRemaining = null,
@@ -67,7 +63,7 @@ class RateLimitException extends TradingCardApiException
             $previous,
             $apiErrorCode,
             $apiErrors,
-            429,
+            $httpStatusCode,
             $context
         );
 
@@ -158,6 +154,7 @@ class RateLimitException extends TradingCardApiException
                 'title' => 'Rate Limit Exceeded',
                 'detail' => 'You have exceeded the API rate limit. Please wait before making more requests.',
             ]],
+            429,
             $context,
             $rateLimit,
             $rateLimitRemaining,

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Models\AuditLog as AuditLogModel;
 use CardTechie\TradingCardApiSdk\Models\Card;
 use CardTechie\TradingCardApiSdk\Models\Player;
@@ -202,6 +204,64 @@ it('handles empty meta and links gracefully', function () {
 
     expect($meta)->toBeInstanceOf(stdClass::class);
     expect($links)->toBeInstanceOf(stdClass::class);
+});
+
+it('does not bleed meta/links across separate parses', function () {
+    $jsonA = json_encode([
+        'data' => [
+            'id' => '1',
+            'type' => 'cards',
+            'attributes' => ['name' => 'Card A'],
+        ],
+        'meta' => ['total' => 100],
+        'links' => ['next' => 'https://api.example.com/cards?page=2&doc=A'],
+    ]);
+
+    $jsonB = json_encode([
+        'data' => [
+            'id' => '2',
+            'type' => 'cards',
+            'attributes' => ['name' => 'Card B'],
+        ],
+        'meta' => ['total' => 7],
+        'links' => ['next' => 'https://api.example.com/cards?page=2&doc=B'],
+    ]);
+
+    $resultA = Response::parse($jsonA);
+    $resultB = Response::parse($jsonB);
+
+    // Each parse result carries its own meta/links — the later parse of B must
+    // not clobber the meta/links already captured on A's result.
+    expect($resultA->getMeta()->total)->toBe(100);
+    expect($resultA->getLinks()->next)->toBe('https://api.example.com/cards?page=2&doc=A');
+
+    expect($resultB->getMeta()->total)->toBe(7);
+    expect($resultB->getLinks()->next)->toBe('https://api.example.com/cards?page=2&doc=B');
+
+    // And they are genuinely distinct, not aliased to the same shared object.
+    // Compare the meta/links objects themselves (strict identity) so the test
+    // fails if both results were ever to reference the same object instance —
+    // a scalar-only comparison would not catch aliasing.
+    expect($resultA->getMeta())->not->toBe($resultB->getMeta());
+    expect($resultA->getLinks())->not->toBe($resultB->getLinks());
+});
+
+it('attaches per-result meta/links to every element of a collection parse', function () {
+    $json = json_encode([
+        'data' => [
+            ['id' => '1', 'type' => 'cards', 'attributes' => ['name' => 'Card 1']],
+            ['id' => '2', 'type' => 'cards', 'attributes' => ['name' => 'Card 2']],
+        ],
+        'meta' => ['total' => 2],
+        'links' => ['next' => 'https://api.example.com/cards?page=2'],
+    ]);
+
+    $result = Response::parse($json);
+
+    $result->each(function ($model) {
+        expect($model->getMeta()->total)->toBe(2);
+        expect($model->getLinks()->next)->toBe('https://api.example.com/cards?page=2');
+    });
 });
 
 it('handles special type mappings in included', function () {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
 use CardTechie\TradingCardApiSdk\TradingCardApi;
 use Illuminate\Support\Facades\Facade;

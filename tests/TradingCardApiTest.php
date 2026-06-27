@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Internal\InternalClient;
 use CardTechie\TradingCardApiSdk\Resources\Attribute;
 use CardTechie\TradingCardApiSdk\Resources\Brand;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use CardTechie\TradingCardApiSdk\Models\Model;
 
 it('can be instantiated with attributes', function () {
@@ -118,6 +120,17 @@ it('converts to string with single-object relationship', function () {
     expect($decoded)->toHaveKey('id', '123');
     expect($decoded)->toHaveKey('genre');
     expect($decoded['genre'])->toBe(['id' => 'abc', 'name' => 'Baseball']);
+});
+
+it('returns a string when json_encode fails', function () {
+    // Invalid UTF-8 makes json_encode() return false; __toString() must still
+    // honor its declared : string return rather than emitting a TypeError.
+    $model = new Model(['name' => "\xB1\x31"]);
+
+    $result = (string) $model;
+
+    expect($result)->toBeString();
+    expect($result)->toBe('{}');
 });
 
 it('handles custom attribute accessors', function () {

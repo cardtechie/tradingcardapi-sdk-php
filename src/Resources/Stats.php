@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CardTechie\TradingCardApiSdk\Resources;
 
 use CardTechie\TradingCardApiSdk\DTOs\Stats\CountsResponse;
 use CardTechie\TradingCardApiSdk\DTOs\Stats\GrowthResponse;
 use CardTechie\TradingCardApiSdk\DTOs\Stats\SnapshotsResponse;
+use CardTechie\TradingCardApiSdk\DTOs\Stats\StatsResponse;
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
-use CardTechie\TradingCardApiSdk\Response;
 use GuzzleHttp\Client;
 
 class Stats
@@ -18,13 +20,17 @@ class Stats
         $this->client = $client;
     }
 
-    public function get(string $type): \stdClass
+    /**
+     * Get the time-series stats for a single model type.
+     *
+     * @param  string  $type  The model type (e.g. cards, sets, players)
+     */
+    public function get(string $type): StatsResponse
     {
         $url = sprintf('/v1/stats/%s', $type);
         $response = $this->makeRequest($url);
 
-        // Stats response doesn't have an ID field, so we handle it directly
-        return $response->data->attributes;
+        return StatsResponse::fromResponse($response);
     }
 
     /**

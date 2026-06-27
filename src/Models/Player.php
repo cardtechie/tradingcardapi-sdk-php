@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CardTechie\TradingCardApiSdk\Models;
 
 use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
@@ -10,10 +12,23 @@ use Illuminate\Support\Collection;
 /**
  * Class Player
  *
- * @property string|null $id
- * @property string|null $first_name
- * @property string|null $last_name
- * @property string|null $parent_id
+ * Represents a player in the Trading Card API.
+ *
+ * @property string|null $id Player UUID
+ * @property string|null $first_name Player first name
+ * @property string|null $last_name Player last name
+ * @property string|null $parent_id Parent player UUID (if this player is an alias)
+ * @property string|null $birthdate Player birthdate
+ * @property string|null $nationality Player nationality
+ * @property string|null $height Player height
+ * @property string|null $weight Player weight
+ * @property string|null $position Player position
+ * @property string|null $team Team name
+ * @property int|null $jersey_number Jersey number
+ * @property string|null $created_at Creation timestamp
+ * @property string|null $updated_at Last update timestamp
+ * @property-read string|null $full_name Player full name (computed)
+ * @property-read string $last_name_first Player name in "Last, First" format (computed)
  */
 class Player extends Model implements Taxonomy
 {
@@ -120,7 +135,7 @@ class Player extends Model implements Taxonomy
      */
     public static function getFromApi(array $params): object
     {
-        $player = TradingCardApiSdk::player()->getList([
+        $player = TradingCardApiSdk::player()->all([
             'full_name' => $params['player'],
         ]);
 
@@ -158,8 +173,14 @@ class Player extends Model implements Taxonomy
      */
     public function getAliases(): Collection
     {
+// CONFLICT: review needed — kept HEAD side; incoming side follows in comment
         // Use the most likely filter parameter first
         $aliases = TradingCardApiSdk::player()->getList(['parent_id' => $this->id]);
+// --- incoming side (theirs) ---
+//         try {
+//             // Use the most likely filter parameter first
+//             $aliases = TradingCardApiSdk::player()->all(['parent_id' => $this->id]);
+// --- end incoming side ---
 
         // Manually filter to ensure we only get actual aliases
         return $aliases->filter(function ($player) {
@@ -176,10 +197,18 @@ class Player extends Model implements Taxonomy
      */
     public function getTeams(): Collection
     {
+// CONFLICT: review needed — kept HEAD side; incoming side follows in comment
         $playerteams = TradingCardApiSdk::playerteam()->getList([
             'player_id' => $this->id,
             'include' => 'team',
         ]);
+// --- incoming side (theirs) ---
+//         try {
+//             $playerteams = TradingCardApiSdk::playerteam()->all([
+//                 'player_id' => $this->id,
+//                 'include' => 'team',
+//             ]);
+// --- end incoming side ---
 
         return $playerteams->map(function ($playerteam) {
             return $playerteam->team();
@@ -193,9 +222,19 @@ class Player extends Model implements Taxonomy
      */
     public function getPlayerteams(): Collection
     {
+// CONFLICT: review needed — kept HEAD side; incoming side follows in comment
         return TradingCardApiSdk::playerteam()->getList([
             'player_id' => $this->id,
         ]);
+// --- incoming side (theirs) ---
+//         try {
+//             return TradingCardApiSdk::playerteam()->all([
+//                 'player_id' => $this->id,
+//             ]);
+//         } catch (\Exception $e) {
+//             return collect();
+//         }
+// --- end incoming side ---
     }
 
     /**

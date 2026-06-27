@@ -1,5 +1,8 @@
 <?php
 
+declare(strict_types=1);
+
+use CardTechie\TradingCardApiSdk\DTOs\Set\ChecklistResponse;
 use CardTechie\TradingCardApiSdk\Models\Set as SetModel;
 use CardTechie\TradingCardApiSdk\Resources\Set;
 use GuzzleHttp\Client;
@@ -184,27 +187,10 @@ it('can get checklist for a set', function () {
 
     $result = $this->setResource->checklist('123');
 
-    expect($result)->toBeObject();
-});
-
-it('can get workflow for a set', function () {
-    $this->mockHandler->append(
-        new GuzzleResponse(200, [], json_encode([
-            'workflow' => [
-                'priority' => 'high',
-                'current_step' => 'validate',
-                'todos' => [
-                    ['step' => 'discover_sources', 'status' => 'completed', 'completed_at' => '2026-01-01', 'completed_by' => 'orchestrator'],
-                    ['step' => 'validate', 'status' => 'in_progress', 'started_at' => '2026-01-02'],
-                    ['step' => 'cleanup', 'status' => 'pending'],
-                ],
-            ],
-        ]))
-    );
-
-    $result = $this->setResource->workflow('123');
-
-    expect($result)->toBeObject();
+    expect($result)->toBeInstanceOf(ChecklistResponse::class);
+    expect($result->checklist)->toBe(['card1', 'card2', 'card3']);
+    expect($result->missing)->toBe(['card4', 'card5']);
+    expect($result->totalCards)->toBeNull();
 });
 
 it('can add missing cards to a set', function () {
@@ -325,6 +311,48 @@ it('can update a set with complex attributes', function () {
     expect($result)->toBeInstanceOf(SetModel::class);
 });
 
+it('can create a set with a dedicated relationships argument', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'sets',
+                'id' => '789',
+                'attributes' => ['name' => 'Set with Relationships'],
+                'relationships' => [
+                    'genre' => ['data' => ['type' => 'genres', 'id' => '1']],
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->setResource->create(
+        ['name' => 'Set with Relationships'],
+        ['genre' => ['data' => ['type' => 'genres', 'id' => '1']]]
+    );
+
+    expect($result)->toBeInstanceOf(SetModel::class);
+});
+
+it('can update a set with a dedicated relationships argument', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'sets',
+                'id' => '123',
+                'attributes' => ['name' => 'Updated Set'],
+            ],
+        ]))
+    );
+
+    $result = $this->setResource->update(
+        '123',
+        ['name' => 'Updated Set'],
+        ['genre' => ['data' => ['type' => 'genres', 'id' => '2']]]
+    );
+
+    expect($result)->toBeInstanceOf(SetModel::class);
+});
+
 it('can get a set with complex includes and relationships', function () {
     $this->mockHandler->append(
         new GuzzleResponse(200, [], json_encode([
@@ -406,7 +434,10 @@ it('can get checklist with empty results', function () {
 
     $result = $this->setResource->checklist('123');
 
-    expect($result)->toBeObject();
+    expect($result)->toBeInstanceOf(ChecklistResponse::class);
+    expect($result->checklist)->toBe([]);
+    expect($result->missing)->toBe([]);
+    expect($result->totalCards)->toBe(0);
 });
 
 it('can handle large pagination in list', function () {
@@ -438,30 +469,6 @@ it('can handle large pagination in list', function () {
     expect($result->currentPage())->toBe(25);
 });
 
-it('does not throw in strict_mode for workflow sub-resource endpoint', function () {
-    $this->app['config']->set('tradingcardapi.validation.enabled', true);
-    $this->app['config']->set('tradingcardapi.validation.strict_mode', true);
-
-    $this->mockHandler->append(
-        new GuzzleResponse(200, [], json_encode([
-            'workflow' => [
-                'priority' => 'high',
-                'current_step' => 'validate',
-                'todos' => [
-                    ['step' => 'discover_sources', 'status' => 'completed'],
-                    ['step' => 'validate', 'status' => 'in_progress'],
-                ],
-            ],
-        ]))
-    );
-
-    $result = $this->setResource->workflow('123');
-
-    expect($result)->toBeObject();
-    expect($result->workflow)->toBeObject();
-    expect($result->workflow->priority)->toBe('high');
-});
-
 it('does not throw in strict_mode for checklist sub-resource endpoint', function () {
     $this->app['config']->set('tradingcardapi.validation.enabled', true);
     $this->app['config']->set('tradingcardapi.validation.strict_mode', true);
@@ -477,7 +484,9 @@ it('does not throw in strict_mode for checklist sub-resource endpoint', function
 
     $result = $this->setResource->checklist('123');
 
-    expect($result)->toBeObject();
+    expect($result)->toBeInstanceOf(ChecklistResponse::class);
+    expect($result->checklist)->toBe(['card1', 'card2']);
+    expect($result->missing)->toBe(['card3']);
 });
 
 it('can add checklist with complex request structure', function () {
