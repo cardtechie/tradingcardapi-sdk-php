@@ -659,7 +659,7 @@ The 0.3.0 Resource-layer standardization introduces two consumer-visible changes
 
 ## 🤝 Contributing
 
-We welcome contributions! Open an issue or start a thread in [GitHub Discussions](https://github.com/cardtechie/tradingcardapi-sdk-php/discussions) before submitting a pull request, and follow the development workflow below. (A dedicated `CONTRIBUTING.md` is in progress.)
+We welcome contributions! Open an issue or start a thread in [GitHub Discussions](https://github.com/cardtechie/tradingcardapi-sdk-php/discussions) before submitting a pull request. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contributor guide — development setup, coding standards, testing requirements, the changelog-fragment and pull-request process, and issue reporting.
 
 ### Development Workflow
 
