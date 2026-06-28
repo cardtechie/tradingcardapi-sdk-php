@@ -1,0 +1,1 @@
+- **[Issue #154]** Document the `serial` property on the `Set` model docblock for IDE autocomplete.
