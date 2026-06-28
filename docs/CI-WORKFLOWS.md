@@ -10,7 +10,7 @@ weakening any quality gate.
 | Workflow | File | Runs on `push: main`? | What it does |
 | --- | --- | --- | --- |
 | Build and Release | `build-release.yml` | Yes | Generates the version, runs the reusable test matrix (`uses: ./.github/workflows/run-tests.yml`), and — for release versions — creates the GitHub release and updates Packagist. |
-| Code Quality | `code-quality.yml` | Yes | PHPStan static analysis, Laravel Pint code-style check, and a Pest run with coverage (`--min=80`). |
+| Code Quality | `code-quality.yml` | Yes | PHPStan static analysis, Laravel Pint code-style check, a Pest run with coverage (`--min=80`), and a markdownlint markdown-style check. |
 | Enforce SHA-Pinned Actions | `action-pins.yml` | Yes | Fails if any `uses:` reference is not pinned to a full 40-char commit SHA. |
 | Run Tests | `run-tests.yml` | **No (changed)** | Standalone test matrix. Now triggers only on `push: develop`, all `pull_request` events, and `workflow_call`. |
 
@@ -77,6 +77,13 @@ None of the optimizations weaken a quality gate:
   release workflow's reusable `test` job).
 - PHPStan, Laravel Pint, and coverage (`--min=80`) in `code-quality.yml` are
   unchanged.
+- A `markdown-lint` job in `code-quality.yml` runs
+  [markdownlint](https://github.com/igorshubovych/markdownlint-cli) over all
+  tracked `*.md` files (ignoring `vendor`, `node_modules`, and `changelog.d`)
+  using the root [`.markdownlint.jsonc`](../.markdownlint.jsonc) ruleset, which
+  is aligned with the parent `tradingcardapi-api` repo. Run it locally with
+  `make lint-md` (or `make fix-md` to auto-fix). Its `actions/setup-node` and
+  `actions/checkout` steps are SHA-pinned to satisfy `action-pins.yml`.
 - `action-pins.yml` still enforces SHA-pinned actions; the new `actions/cache`
   reference is pinned to a full 40-char SHA.
 - Changelog-fragment and release validation are unchanged.

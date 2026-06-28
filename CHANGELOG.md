@@ -172,6 +172,7 @@ fragments yet. See changelog.d/README.md. -->
 ## [0.1.10] - 2025-10-30
 
 ### Added
+
 - **OAuth Scope Configuration Support** - Configurable OAuth scopes for fine-grained API access control
   - Added `scope` configuration option to `config/tradingcardapi.php`
   - Default scope: `read:published` for backwards compatibility
@@ -180,12 +181,14 @@ fragments yet. See changelog.d/README.md. -->
   - Updated `ApiRequest::retrieveToken()` to request configured scopes instead of empty string
 
 ### Enhanced
+
 - **OAuth Token Authentication** - Modified OAuth token request to use configured scopes
   - Changed `src/Resources/Traits/ApiRequest.php:120` from hardcoded empty scope to configurable scope
   - Enables write operations, delete operations, and access to draft/archived content
   - Unblocks admin applications requiring elevated permissions
 
 ### Documentation
+
 - Added OAuth Scopes section to README.md with comprehensive examples
 - Documented all available scopes and their purposes
 - Provided configuration examples for different use cases (read-only, admin, content management)
@@ -193,6 +196,7 @@ fragments yet. See changelog.d/README.md. -->
 ## [0.1.9] - 2025-09-28
 
 ### Added
+
 - **Complete Year Parent/Child Relationship Support** - Full hierarchical year functionality
   - `Year::parent()` method for retrieving parent year relationship
   - `Year::children()` method for retrieving child year relationships
@@ -203,6 +207,7 @@ fragments yet. See changelog.d/README.md. -->
   - `Year::listChildren($parentId)` resource method for filtering child years
 
 ### Enhanced
+
 - **YearSchema Field Mapping** - Resolved field mapping inconsistencies for admin integration
   - Added `name` field validation to support database schema requirements
   - Added `parent_year` field validation for relationship functionality
@@ -210,6 +215,7 @@ fragments yet. See changelog.d/README.md. -->
   - Maintained backward compatibility with existing `year` and `description` fields
 
 ### Fixed
+
 - **Year Resource Pagination Crash** - Added defensive handling for missing meta property
   - Fixed division by zero error when API response lacks pagination metadata
   - Added fallback pagination values using request params and response data
@@ -221,32 +227,38 @@ fragments yet. See changelog.d/README.md. -->
 ## [0.1.8] - 2025-09-28
 
 ### Fixed
+
 - Manufacturer resource pagination crash when API response missing meta property
 - Added defensive handling for missing pagination metadata in Manufacturer::list() method
 - Added collection validation rules for Manufacturer schema to support array responses
 - Fixed ManufacturerSchema validation failing on collection endpoints
 
 ### Added
+
 - ManufacturerSchema::getCollectionRules() method for proper collection response validation
 - Enhanced defensive pagination handling with multi-level isset() checks
 
 ## [0.1.7] - 2025-09-28
 
 ### Fixed
+
 - Brand resource pagination crash when API response missing meta property
 - Added defensive handling for missing pagination metadata in Brand::list() method
 
 ## [0.1.6] - 2025-09-27
 
 ### Added
+
 - Complete Team resource CRUD operations (get, update, delete, list, listDeleted, deleted)
 
 ### Fixed
+
 - API pagination handling when meta property is missing
 
 ## [0.1.5] - 2025-09-27
 
 ### Added
+
 - Enhanced create() method for Team resource with relationship support
 
 ## [0.1.4] - 2025-09-27

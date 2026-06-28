@@ -1,4 +1,4 @@
-.PHONY: help test test-coverage analyse format install up down shell status build ensure-running
+.PHONY: help test test-coverage analyse format install up down shell status build ensure-running lint-md fix-md
 
 # Default target
 help: ## Show this help message
@@ -67,6 +67,13 @@ phpstan: ## Run PHPStan directly
 pint: ## Run Laravel Pint directly
 	@make ensure-running
 	docker compose exec dev vendor/bin/pint
+
+# Markdown linting (runs on the host via npx; mirrors the markdown-lint CI job)
+lint-md: ## Check markdown style (what CI runs)
+	npx --yes markdownlint-cli '**/*.md' --ignore '**/node_modules/**' --ignore vendor --ignore 'changelog.d/**'
+
+fix-md: ## Auto-fix markdown style violations where possible
+	npx --yes markdownlint-cli '**/*.md' --ignore '**/node_modules/**' --ignore vendor --ignore 'changelog.d/**' --fix
 
 # Quality assurance tasks
 check: ## Run all quality checks (tests + analysis + format check)

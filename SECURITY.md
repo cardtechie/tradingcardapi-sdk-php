@@ -56,10 +56,10 @@ updates. The current supported line is **`0.2.x`** — always use its latest
 patch release. Older minor lines do not receive security fixes — please
 upgrade to the latest release to stay supported.
 
-| Version | Supported          |
-| ------- | ------------------ |
+| Version | Supported |
+| --- | --- |
 | 0.2.x (latest) | :white_check_mark: |
-| < 0.2.0 | :x:                |
+| < 0.2.0 | :x: |
 
 The SDK requires PHP `^8.2`. Security updates are published to
 [Packagist](https://packagist.org/packages/cardtechie/tradingcardapi-sdk-php)

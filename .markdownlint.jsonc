@@ -1,0 +1,18 @@
+{
+  // Markdownlint ruleset for tradingcardapi-sdk-php.
+  // Aligned with the parent tradingcardapi-api repo's build/md-lint-config.json
+  // so markdown style is consistent across the API and its SDK.
+  //
+  // - default: true        -> enable the full default rule set as the baseline.
+  // - MD013: false         -> disable line-length; prose/tables wrap naturally
+  //                           and a hard column cap is the noisiest rule.
+  // - MD024 siblings_only  -> allow duplicate headings under different parents
+  //                           (e.g. repeated "Added"/"Changed" sections in
+  //                           CHANGELOG.md) while still flagging true dup
+  //                           headings within the same section.
+  "default": true,
+  "MD013": false,
+  "MD024": {
+    "siblings_only": true
+  }
+}
