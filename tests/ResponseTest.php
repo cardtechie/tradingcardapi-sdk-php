@@ -149,6 +149,57 @@ it('static parse method handles single object', function () {
     expect($result->name)->toBe('Test Card');
 });
 
+it('attaches top-level meta/links to the main object via the constructor path', function () {
+    // Regression for #289: the non-static `new Response($json)` constructor path
+    // never attached top-level meta/links to $this->mainObject, so single-object
+    // responses parsed through the instance API silently dropped them. The main
+    // object's getMeta()/getLinks() must now reflect the top-level meta/links,
+    // matching the static parse() path.
+    $json = json_encode([
+        'data' => [
+            'id' => '123',
+            'type' => 'cards',
+            'attributes' => ['name' => 'Test Card'],
+        ],
+        'meta' => [
+            'total' => 100,
+            'per_page' => 10,
+        ],
+        'links' => [
+            'next' => 'https://api.example.com/cards?page=2',
+            'prev' => null,
+        ],
+    ]);
+
+    $response = new Response($json);
+
+    expect($response->mainObject->getMeta()->total)->toBe(100);
+    expect($response->mainObject->getMeta()->per_page)->toBe(10);
+    expect($response->mainObject->getLinks()->next)->toBe('https://api.example.com/cards?page=2');
+    expect($response->mainObject->getLinks()->prev)->toBeNull();
+});
+
+it('defaults main object meta/links to empty stdClass when absent (constructor path)', function () {
+    // When the response carries no top-level meta/links, the constructor path
+    // must leave the main object's meta/links as empty stdClass — the same
+    // empty-object behavior the parseMeta()/parseLinks() helpers guarantee for
+    // the static parse() path.
+    $json = json_encode([
+        'data' => [
+            'id' => '123',
+            'type' => 'cards',
+            'attributes' => ['name' => 'Test Card'],
+        ],
+    ]);
+
+    $response = new Response($json);
+
+    expect($response->mainObject->getMeta())->toBeInstanceOf(stdClass::class);
+    expect($response->mainObject->getLinks())->toBeInstanceOf(stdClass::class);
+    expect((array) $response->mainObject->getMeta())->toBe([]);
+    expect((array) $response->mainObject->getLinks())->toBe([]);
+});
+
 it('handles meta data correctly', function () {
     $json = json_encode([
         'data' => [
