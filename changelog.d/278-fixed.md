@@ -1,0 +1,1 @@
+- **[Issue #278]** Validate empty JSON:API collection responses instead of rejecting them.
