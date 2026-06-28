@@ -1,0 +1,1 @@
+- **[Issue #277]** Implement `Playerteam::lookup()` as find-or-create against the `/v1/playerteams` API resource.
