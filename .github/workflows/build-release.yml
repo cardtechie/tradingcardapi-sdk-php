@@ -5,6 +5,12 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# Serialize release runs on a given ref but NEVER cancel one in progress —
+# a release must run to completion (version, tests, GitHub release, Packagist).
+concurrency:
+  group: build-release-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   issues: read
