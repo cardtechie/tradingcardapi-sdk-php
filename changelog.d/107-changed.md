@@ -1,0 +1,2 @@
+- **[Issue #107]** De-duplicate the post-merge test matrix on `main`, add Composer caching, and cancel superseded CI runs.
+  - The release workflow's reusable test job is now the sole post-merge test run on `main`; `run-tests.yml` no longer triggers on `push: main`.

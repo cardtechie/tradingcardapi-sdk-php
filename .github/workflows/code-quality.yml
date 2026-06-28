@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main, develop]
 
+# Cancel superseded runs on the same ref so a new push stops the previous
+# in-flight PHPStan/Pint/coverage jobs early.
+concurrency:
+  group: code-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   phpstan:
     name: PHPStan Static Analysis
