@@ -19,6 +19,12 @@ it('can be instantiated with attributes', function () {
     expect($set->number_prefix)->toBe('TS');
 });
 
+it('exposes the serial property', function () {
+    $set = new Set(['id' => '123', 'serial' => 10]);
+
+    expect($set->serial)->toBe(10);
+});
+
 it('returns genre relationship', function () {
     $genre = new Genre(['id' => '1', 'name' => 'Test Genre']);
     $set = new Set(['id' => '123']);

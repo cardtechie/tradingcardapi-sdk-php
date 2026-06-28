@@ -28,6 +28,7 @@ use Illuminate\Support\Collection;
  * @property int|null $card_count Number of cards in the set
  * @property bool|null $is_subset Whether the set is a subset
  * @property bool|null $is_variation Whether the set is a variation
+ * @property int|null $serial Serial-number suffix for the set (e.g. /10, 1/1)
  * @property string|null $created_at Creation timestamp
  * @property string|null $updated_at Last update timestamp
  * @property-read int $current_card_count Number of checklist cards currently loaded (computed)
