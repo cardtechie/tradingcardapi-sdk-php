@@ -67,7 +67,7 @@ use CardTechie\TradingCardApiSdk\Facades\TradingCardApiSdk;
 $card = TradingCardApiSdk::card()->get('card-id');
 
 // Search for cards
-$cards = TradingCardApiSdk::card()->getList(['name' => 'Pikachu']);
+$cards = TradingCardApiSdk::card()->list(['name' => 'Pikachu']);
 
 // Get player information
 $player = TradingCardApiSdk::player()->get('player-id');
@@ -75,8 +75,8 @@ $player = TradingCardApiSdk::player()->get('player-id');
 // Get paginated list of players
 $players = TradingCardApiSdk::player()->list(['limit' => 25, 'page' => 1]);
 
-// Search for players
-$players = TradingCardApiSdk::player()->getList(['full_name' => 'Michael Jordan']);
+// Search for players (returns Collection)
+$players = TradingCardApiSdk::player()->all(['full_name' => 'Michael Jordan']);
 ```
 
 ### Using the Helper Function
@@ -130,7 +130,7 @@ try {
 use CardTechie\TradingCardApiSdk\TradingCardApi;
 
 $api = new TradingCardApi();
-$genres = $api->genre()->getList();
+$genres = $api->genre()->list();
 ```
 
 ## 👥 Working with Players
@@ -172,13 +172,13 @@ $players = TradingCardApiSdk::player()->list([
 ]);
 
 // Search for players (returns Collection)
-$players = TradingCardApiSdk::player()->getList([
+$players = TradingCardApiSdk::player()->all([
     'full_name' => 'Michael Jordan',
     'parent_id' => null  // Only parent players, not aliases
 ]);
 
 // Find players by partial name
-$players = TradingCardApiSdk::player()->getList([
+$players = TradingCardApiSdk::player()->all([
     'first_name' => 'Michael'
 ]);
 ```
@@ -261,8 +261,8 @@ The SDK provides access to the following Trading Card API resources:
 |----------|-------------|---------|
 | **Cards** | Individual trading cards | `get()`, `create()`, `update()`, `delete()` |
 | **Sets** | Card sets and collections | `get()`, `list()`, `create()`, `update()`, `delete()`, `checklist($id)`, `workflow($id)`, `addMissingCards($id)`, `addChecklist($request, $id)` |
-| **Players** | Player information | `get()`, `list()`, `getList()`, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |
-| **Teams** | Team data | `get()`, `getList()`, `create()` |
+| **Players** | Player information | `get()`, `list()`, `all()`, `getList()` _(deprecated — use `all()`)_, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |
+| **Teams** | Team data | `get()`, `list()`, `all()`, `getList()` _(deprecated — use `all()`)_, `create()` |
 | **Genres** | Card categories/types | `get()`, `list()`, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |
 | **Brands** | Trading card brands | `get()`, `list()`, `create()`, `update()`, `delete()` |
 | **Manufacturers** | Trading card manufacturers | `get()`, `list()`, `create()`, `update()`, `delete()` |
@@ -270,7 +270,7 @@ The SDK provides access to the following Trading Card API resources:
 | **ObjectAttributes** | Object attributes | `get()`, `list()`, `create()`, `update()`, `delete()` |
 | **SetSources** | Set data sources | `get()`, `list()`, `create()`, `update()`, `delete()`, `forSet($setId)` |
 | **Stats** | Entity statistics and analytics | `get($type)`, `getCounts()`, `getSnapshots()`, `getGrowth()` |
-| **Attributes** | Card attributes | `get()`, `getList()` |
+| **Attributes** | Card attributes | `get()`, `list()`, `all()` |
 | **CardImages** | Card image upload and management | `list()`, `get($id)`, `upload($file, $cardId, $imageType)`, `update($id, $attributes)`, `delete($id)`, `getDownloadUrl($id, $size)` |
 | **Internal\Workflow** _(internal only)_ | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($todoId, $attributes)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)`, `getReviewQueue($step?, $params?)`, `flagForReview($todoId, $reason)`, `resolveReview($todoId, $notes?)` |
 | **Internal\AuditLog** _(internal only)_ | Audit log tracking and creation | `getAuditLogs($params?)`, `createAuditEvent($attributes?)` |
@@ -649,6 +649,13 @@ This project maintains high code quality standards:
 - **[Response Validation](docs/VALIDATION.md)** - Response validation and schema handling  
 - **[Version Management](docs/VERSION-MANAGEMENT.md)** - Release process and versioning
 - **[Trading Card API Documentation](https://docs.tradingcardapi.com)** - Complete API reference
+
+### Upgrade Notes (0.3.0)
+
+The 0.3.0 Resource-layer standardization introduces two consumer-visible changes:
+
+- **`getList()` is deprecated in favor of `all()`** on the `Player`, `Team`, and `Playerteam` resources. `getList()` still works (it delegates to `all()` with identical behavior) but is marked `@deprecated`, so static analysis (e.g. PHPStan `method.deprecated`) will flag remaining call sites. Migrate `->getList(...)` to `->all(...)`.
+- **`RateLimitException::__construct` positional slots were realigned** with the base `TradingCardApiException`: `$httpStatusCode` (default `429`) is now positional slot 6 and `$context` slot 7. Construct `RateLimitException` with **named arguments** to be safe against the slot change — see the [Error Handling Guide](docs/ERROR-HANDLING.md#ratelimitexception-429).
 
 ## 🤝 Contributing
 
