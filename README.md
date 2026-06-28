@@ -262,7 +262,7 @@ The SDK provides access to the following Trading Card API resources:
 | **Cards** | Individual trading cards | `get()`, `create()`, `update()`, `delete()` |
 | **Sets** | Card sets and collections | `get()`, `list()`, `create()`, `update()`, `delete()`, `checklist($id)`, `workflow($id)`, `addMissingCards($id)`, `addChecklist($request, $id)` |
 | **Players** | Player information | `get()`, `list()`, `all()`, `getList()` _(deprecated — use `all()`)_, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |
-| **Teams** | Team data | `get()`, `list()`, `all()`, `getList()` _(deprecated — use `all()`)_, `create()` |
+| **Teams** | Team data | `get()`, `list()`, `all()`, `getList()` _(deprecated — use `all()`)_, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |
 | **Genres** | Card categories/types | `get()`, `list()`, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |
 | **Brands** | Trading card brands | `get()`, `list()`, `create()`, `update()`, `delete()` |
 | **Manufacturers** | Trading card manufacturers | `get()`, `list()`, `create()`, `update()`, `delete()` |
@@ -270,7 +270,7 @@ The SDK provides access to the following Trading Card API resources:
 | **ObjectAttributes** | Object attributes | `get()`, `list()`, `create()`, `update()`, `delete()` |
 | **SetSources** | Set data sources | `get()`, `list()`, `create()`, `update()`, `delete()`, `forSet($setId)` |
 | **Stats** | Entity statistics and analytics | `get($type)`, `getCounts()`, `getSnapshots()`, `getGrowth()` |
-| **Attributes** | Card attributes | `get()`, `list()`, `all()` |
+| **Attributes** | Card attributes | `get()`, `list()`, `all()`, `create()`, `update()`, `delete()` |
 | **CardImages** | Card image upload and management | `list()`, `get($id)`, `upload($file, $cardId, $imageType)`, `update($id, $attributes)`, `delete($id)`, `getDownloadUrl($id, $size)` |
 | **Internal\Workflow** _(internal only)_ | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($todoId, $attributes)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)`, `getReviewQueue($step?, $params?)`, `flagForReview($todoId, $reason)`, `resolveReview($todoId, $notes?)` |
 | **Internal\AuditLog** _(internal only)_ | Audit log tracking and creation | `getAuditLogs($params?)`, `createAuditEvent($attributes?)` |
