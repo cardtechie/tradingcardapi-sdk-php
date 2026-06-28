@@ -88,13 +88,13 @@ jobs:
           if [[ "$ref" == "$INTEGRATION_BRANCH" ]]; then
             source="$INTEGRATION_BRANCH"
             target="$STABLE_BRANCH"
-            pr_branch="auto/sync-develop-to-main"
-            title="Sync develop into main"
+            pr_branch="auto/sync-${source}-to-${target}"
+            title="Sync ${source} into ${target}"
           elif [[ "$ref" == "$STABLE_BRANCH" ]]; then
             source="$STABLE_BRANCH"
             target="$INTEGRATION_BRANCH"
-            pr_branch="auto/sync-main-to-develop"
-            title="Sync main into develop"
+            pr_branch="auto/sync-${source}-to-${target}"
+            title="Sync ${source} into ${target}"
           else
             echo "Push ref '$ref' is neither '$INTEGRATION_BRANCH' nor '$STABLE_BRANCH' — nothing to sync."
             echo "skip=true" >> "$GITHUB_OUTPUT"

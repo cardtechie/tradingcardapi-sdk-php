@@ -1,0 +1,1 @@
+- **[Issue #280]** Derive the sync workflow's conflict-PR branch name and title from the resolved source/target branches so the workflow stays copyable verbatim across repos with differing stable-branch names.
