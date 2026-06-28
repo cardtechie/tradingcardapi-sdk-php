@@ -57,6 +57,11 @@ jobs:
   coverage:
     name: Test Coverage Report
     runs-on: ubuntu-latest
+    # Run coverage on every pull request and on develop pushes, but skip it on
+    # main pushes: the suite already ran on the PR, so re-running it a third
+    # time on the post-merge main push is redundant work that lengthens CI
+    # without strengthening the gate (PR review and develop keep it). (#307)
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/develop'
 
     steps:
       - name: Checkout code
