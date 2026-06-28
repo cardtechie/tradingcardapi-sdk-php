@@ -210,15 +210,20 @@ class Playerteam extends Model implements Taxonomy
      * the /v1/playerteams API path — the same find-or-create pattern getFromApi()
      * already uses.
      *
-     * Called from prepare() with a null on either side when only one of player
-     * or team is supplied, so both uuids are nullable; null query parameters are
-     * dropped from the request by http_build_query.
+     * prepare() passes a null on either side when only one of player or team is
+     * supplied. A complete association needs both, so partial input short-circuits
+     * to an unsaved local instance rather than querying with a single filter
+     * (which would match an unrelated association) or creating one with a null uuid.
      *
      * @param  string|null  $player  The player uuid, or null when only a team is given
      * @param  string|null  $team  The team uuid, or null when only a player is given
      */
     public static function lookup(?string $player, ?string $team): object
     {
+        if ($player === null || $team === null) {
+            return new self(['player_id' => $player, 'team_id' => $team]);
+        }
+
         $playerteam = TradingCardApiSdk::playerteam()->all([
             'player_id' => $player,
             'team_id' => $team,

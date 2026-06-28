@@ -169,6 +169,38 @@ it('lookup creates the association when none exists', function () {
     expect($result)->toBe($created);
 });
 
+it('lookup returns a local instance without touching the API when the team uuid is null', function () {
+    $resource = m::mock(PlayerteamResource::class);
+    $resource->shouldReceive('all')->never();
+    $resource->shouldReceive('create')->never();
+
+    $api = m::mock(TradingCardApi::class);
+    $api->shouldReceive('playerteam')->andReturn($resource);
+    TradingCardApiSdk::swap($api);
+
+    $result = Playerteam::lookup('player-id', null);
+
+    expect($result)->toBeInstanceOf(Playerteam::class);
+    expect($result->player_id)->toBe('player-id');
+    expect($result->team_id)->toBeNull();
+});
+
+it('lookup returns a local instance without touching the API when the player uuid is null', function () {
+    $resource = m::mock(PlayerteamResource::class);
+    $resource->shouldReceive('all')->never();
+    $resource->shouldReceive('create')->never();
+
+    $api = m::mock(TradingCardApi::class);
+    $api->shouldReceive('playerteam')->andReturn($resource);
+    TradingCardApiSdk::swap($api);
+
+    $result = Playerteam::lookup(null, 'team-id');
+
+    expect($result)->toBeInstanceOf(Playerteam::class);
+    expect($result->player_id)->toBeNull();
+    expect($result->team_id)->toBe('team-id');
+});
+
 it('returns player relationship', function () {
     $player = new Player(['id' => '1', 'name' => 'Test Player']);
     $playerteam = new Playerteam(['id' => '123']);
