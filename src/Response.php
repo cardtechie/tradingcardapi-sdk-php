@@ -63,6 +63,15 @@ class Response
 
         $this->mainObject->setLinkage(self::extractLinkage($this->response->data));
         $this->mainObject->setRelationships($this->relationships);
+
+        // Attach top-level meta/links to the main object, mirroring what the
+        // static parse() path does for per-result models (#289). Reuse the same
+        // pure helpers so behavior is identical across both entrypoints — an
+        // empty stdClass when the key is absent. Mirroring parse(), meta/links
+        // are attached to the top-level main object only, not to included
+        // relationship models, keeping the two parsing entrypoints symmetric.
+        $this->mainObject->setMeta(self::parseMeta($this->response));
+        $this->mainObject->setLinks(self::parseLinks($this->response));
     }
 
     /**
