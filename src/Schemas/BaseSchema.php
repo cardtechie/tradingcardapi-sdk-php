@@ -33,7 +33,7 @@ abstract class BaseSchema
     protected function getJsonApiCollectionRules(): array
     {
         return [
-            'data' => 'required|array',
+            'data' => 'present|array',
             'data.*.id' => 'sometimes|required|string',
             'data.*.type' => 'sometimes|required|string',
             'data.*.attributes' => 'sometimes|required|array',
