@@ -133,7 +133,9 @@ The project follows a git-flow-style branching model:
 - Create a **feature branch** off `develop`.
 - Feature branches merge into `develop` (beta releases are cut from here).
 - `release/*` branches stabilize a release.
-- `main` holds production releases.
+- `main` is the production branch; stable releases are tagged from it.
+- **Hotfix branches** (`hotfix/*`) branch off `main` for urgent production bug
+  fixes and merge back into it.
 
 Versions are **tag-managed** — there is intentionally **no `version` field in
 `composer.json`**. Do not add one. See
