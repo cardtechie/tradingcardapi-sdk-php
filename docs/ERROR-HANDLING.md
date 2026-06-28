@@ -235,6 +235,31 @@ $rateLimitException = RateLimitException::fromHeaders([
 ], 'Custom rate limit message');
 ```
 
+> **Upgrade note (0.3.0): `RateLimitException` constructor slot realignment.**
+> The `RateLimitException::__construct` positional slots were realigned with the
+> base `TradingCardApiException`: `$httpStatusCode` (default `429`) is now
+> positional slot 6 and `$context` is slot 7 — previously `$context` sat in slot
+> 6. Code that constructs `RateLimitException` with positional arguments in the
+> old order will pass `$context` into the `$httpStatusCode` slot. Prefer **named
+> arguments** to be immune to the change, or insert the `$httpStatusCode` value
+> before `$context`:
+>
+> ```php
+> // Recommended: named arguments
+> throw new RateLimitException(
+>     message: 'Rate limit exceeded',
+>     context: ['endpoint' => '/v1/cards'],
+>     rateLimit: 1000,
+>     retryAfter: 300,
+> );
+>
+> // Or, with positional args, supply $httpStatusCode (slot 6) before $context (slot 7)
+> throw new RateLimitException('Rate limit exceeded', 429, null, null, [], 429, ['endpoint' => '/v1/cards']);
+> ```
+>
+> `fromHeaders()` (shown above) is unaffected and remains the preferred
+> construction path when you have the response headers.
+
 ### ServerException (5xx)
 
 Thrown when server errors occur (status codes 500-599).
