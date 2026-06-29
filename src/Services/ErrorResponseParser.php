@@ -213,7 +213,7 @@ class ErrorResponseParser
     /**
      * Parse response body to extract structured data
      *
-     * @return array<string, mixed>
+     * @return array<int|string, mixed>
      */
     private function parseResponseBody(string $body): array
     {

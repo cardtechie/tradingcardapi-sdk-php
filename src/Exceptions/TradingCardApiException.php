@@ -74,7 +74,7 @@ class TradingCardApiException extends Exception
     /**
      * Get the API errors array
      *
-     * @return array<string, mixed>
+     * @return array<int|string, mixed>
      */
     public function getApiErrors(): array
     {
