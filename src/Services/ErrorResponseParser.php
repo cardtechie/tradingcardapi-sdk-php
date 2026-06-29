@@ -212,6 +212,8 @@ class ErrorResponseParser
 
     /**
      * Parse response body to extract structured data
+     *
+     * @return array<int|string, mixed>
      */
     private function parseResponseBody(string $body): array
     {
@@ -229,6 +231,9 @@ class ErrorResponseParser
 
     /**
      * Extract API errors from response data
+     *
+     * @param  array<string, mixed>  $responseData
+     * @return array<int, array<string, mixed>>
      */
     private function extractApiErrors(array $responseData): array
     {
@@ -258,7 +263,10 @@ class ErrorResponseParser
                 return $errors;
             } else {
                 // JSON:API format (indexed array of error objects)
-                return $responseData['errors'];
+                /** @var array<int, array<string, mixed>> $jsonApiErrors */
+                $jsonApiErrors = $responseData['errors'];
+
+                return $jsonApiErrors;
             }
         }
 
@@ -280,6 +288,8 @@ class ErrorResponseParser
 
     /**
      * Extract error message from response data
+     *
+     * @param  array<string, mixed>  $responseData
      */
     private function extractErrorMessage(array $responseData, int $statusCode): string
     {
@@ -320,6 +330,9 @@ class ErrorResponseParser
 
     /**
      * Parse headers from Guzzle format to flat array
+     *
+     * @param  array<string, mixed>  $headers
+     * @return array<string, mixed>
      */
     private function parseHeaders(array $headers): array
     {
@@ -333,6 +346,8 @@ class ErrorResponseParser
 
     /**
      * Create exception for specific resource not found
+     *
+     * @param  array<string, mixed>  $context
      */
     public function createResourceNotFoundException(string $resourceType, string $resourceId, array $context = []): ResourceNotFoundException
     {

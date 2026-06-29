@@ -29,6 +29,9 @@ class Year
     /**
      * Create a year with the passed in attributes
      *
+     * @param  array<string, mixed>  $attributes  Year attributes
+     * @param  array<string, mixed>  $relationships  Year relationships
+     *
      * @throws InvalidArgumentException
      */
     public function create(array $attributes = [], array $relationships = []): YearModel
@@ -58,6 +61,8 @@ class Year
     /**
      * Retrieve a year by ID
      *
+     * @param  array<string, mixed>  $params  Query parameters
+     *
      * @throws InvalidArgumentException
      */
     public function get(string $id, array $params = []): YearModel
@@ -76,6 +81,9 @@ class Year
 
     /**
      * Retrieve a list of years
+     *
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return LengthAwarePaginator<int, mixed>
      *
      * @throws InvalidArgumentException
      */
@@ -107,6 +115,9 @@ class Year
 
     /**
      * Update a year
+     *
+     * @param  array<string, mixed>  $attributes  Year attributes to update
+     * @param  array<string, mixed>  $relationships  Year relationships to update
      *
      * @throws InvalidArgumentException
      */
@@ -150,6 +161,9 @@ class Year
     /**
      * Retrieve parent years (years without a parent_year)
      *
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return LengthAwarePaginator<int, mixed>
+     *
      * @throws InvalidArgumentException
      */
     public function listParents(array $params = []): LengthAwarePaginator
@@ -168,6 +182,9 @@ class Year
 
     /**
      * Retrieve child years for a specific parent year
+     *
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return LengthAwarePaginator<int, mixed>
      *
      * @throws InvalidArgumentException
      */

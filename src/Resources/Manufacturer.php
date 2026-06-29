@@ -29,6 +29,9 @@ class Manufacturer
     /**
      * Create a manufacturer with the passed in attributes
      *
+     * @param  array<string, mixed>  $attributes  Manufacturer attributes
+     * @param  array<string, mixed>  $relationships  Manufacturer relationships
+     *
      * @throws InvalidArgumentException
      */
     public function create(array $attributes = [], array $relationships = []): ManufacturerModel
@@ -58,6 +61,8 @@ class Manufacturer
     /**
      * Retrieve a manufacturer by ID
      *
+     * @param  array<string, mixed>  $params  Query parameters
+     *
      * @throws InvalidArgumentException
      */
     public function get(string $id, array $params = []): ManufacturerModel
@@ -76,6 +81,9 @@ class Manufacturer
 
     /**
      * Retrieve a list of manufacturers
+     *
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return LengthAwarePaginator<int, mixed>
      *
      * @throws InvalidArgumentException
      */
@@ -106,6 +114,9 @@ class Manufacturer
 
     /**
      * Update a manufacturer
+     *
+     * @param  array<string, mixed>  $attributes  Manufacturer attributes to update
+     * @param  array<string, mixed>  $relationships  Manufacturer relationships to update
      *
      * @throws InvalidArgumentException
      */

@@ -12,8 +12,14 @@ use stdClass;
  */
 class Model
 {
+    /**
+     * @var array<string, mixed>
+     */
     public array $attributes = [];
 
+    /**
+     * @var array<string, mixed>
+     */
     public array $relationships = [];
 
     /**
@@ -44,6 +50,8 @@ class Model
 
     /**
      * Model constructor.
+     *
+     * @param  array<string, mixed>  $attributes
      */
     public function __construct(array $attributes = [])
     {
@@ -54,6 +62,8 @@ class Model
 
     /**
      * Set the relationships for the object
+     *
+     * @param  array<string, mixed>  $relationships
      */
     public function setRelationships(array $relationships): void
     {
@@ -62,6 +72,8 @@ class Model
 
     /**
      * Return the array of relationships
+     *
+     * @return array<string, mixed>
      */
     public function getRelationships(): array
     {
@@ -179,6 +191,8 @@ class Model
 
     /**
      * Magic method to see if the class variable exists.
+     *
+     * @param  string  $name
      */
     public function __isset($name): bool
     {
@@ -191,6 +205,8 @@ class Model
      * Previously this was a silent no-op that returned null, so a typo like
      * `$player->team()` (when `team()` lives on Playerteam, not Player) returned
      * null instead of failing. Throw so unknown method calls surface loudly.
+     *
+     * @param  array<int, mixed>  $arguments
      *
      * @throws \BadMethodCallException Always, for any undefined method.
      *

@@ -11,6 +11,8 @@ class CardSchema extends BaseSchema
 {
     /**
      * Get validation rules for Card responses
+     *
+     * @return array<string, mixed>
      */
     public function getRules(): array
     {
@@ -23,6 +25,8 @@ class CardSchema extends BaseSchema
 
     /**
      * Get Card-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getCardSpecificRules(): array
     {
@@ -45,6 +49,8 @@ class CardSchema extends BaseSchema
 
     /**
      * Get validation rules for Card collection responses
+     *
+     * @return array<string, mixed>
      */
     public function getCollectionRules(): array
     {
@@ -57,6 +63,8 @@ class CardSchema extends BaseSchema
 
     /**
      * Get Card collection-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getCardCollectionSpecificRules(): array
     {

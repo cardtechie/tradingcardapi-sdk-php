@@ -16,8 +16,8 @@ class AuthenticationException extends TradingCardApiException
      * @param  int  $code  The exception code
      * @param  \Exception|null  $previous  The previous exception
      * @param  string|null  $apiErrorCode  The API error code
-     * @param  array  $apiErrors  The API errors array
-     * @param  array  $context  Additional context for debugging
+     * @param  array<int, array<string, mixed>>  $apiErrors  The API errors array
+     * @param  array<string, mixed>  $context  Additional context for debugging
      */
     public function __construct(
         string $message = 'Authentication failed',

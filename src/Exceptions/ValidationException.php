@@ -16,8 +16,8 @@ class ValidationException extends TradingCardApiException
      * @param  int  $code  The exception code
      * @param  \Exception|null  $previous  The previous exception
      * @param  string|null  $apiErrorCode  The API error code
-     * @param  array  $apiErrors  The API errors array
-     * @param  array  $context  Additional context for debugging
+     * @param  array<int, array<string, mixed>>  $apiErrors  The API errors array
+     * @param  array<string, mixed>  $context  Additional context for debugging
      */
     public function __construct(
         string $message = 'Validation failed',
@@ -40,6 +40,8 @@ class ValidationException extends TradingCardApiException
 
     /**
      * Get validation errors by field
+     *
+     * @return array<string, mixed>
      */
     public function getValidationErrors(): array
     {
@@ -69,6 +71,8 @@ class ValidationException extends TradingCardApiException
 
     /**
      * Get validation errors for a specific field
+     *
+     * @return array<string, mixed>
      */
     public function getFieldErrors(string $field): array
     {

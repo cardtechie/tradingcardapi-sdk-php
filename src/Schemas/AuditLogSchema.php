@@ -11,6 +11,8 @@ class AuditLogSchema extends BaseSchema
 {
     /**
      * Get validation rules for a single AuditLog response
+     *
+     * @return array<string, mixed>
      */
     public function getRules(): array
     {
@@ -23,6 +25,8 @@ class AuditLogSchema extends BaseSchema
 
     /**
      * Get AuditLog-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getAuditLogSpecificRules(): array
     {
@@ -42,6 +46,8 @@ class AuditLogSchema extends BaseSchema
 
     /**
      * Get validation rules for AuditLog collection responses
+     *
+     * @return array<string, mixed>
      */
     public function getCollectionRules(): array
     {
@@ -54,6 +60,8 @@ class AuditLogSchema extends BaseSchema
 
     /**
      * Get AuditLog collection-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getAuditLogCollectionSpecificRules(): array
     {

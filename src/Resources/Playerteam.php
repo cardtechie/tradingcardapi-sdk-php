@@ -30,8 +30,8 @@ class Playerteam
     /**
      * Retrieve a raw collection of playerteams by player and/or team id
      *
-     * @param  array  $params  Query parameters
-     * @return Collection The playerteams collection
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return Collection<int, mixed> The playerteams collection
      *
      * @throws InvalidArgumentException
      */
@@ -49,6 +49,9 @@ class Playerteam
      *
      * @deprecated use all()
      *
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return Collection<int, mixed>
+     *
      * @throws InvalidArgumentException
      */
     public function getList(array $params = []): Collection
@@ -59,8 +62,8 @@ class Playerteam
     /**
      * List playerteams with pagination
      *
-     * @param  array  $params  Query parameters (limit, page, sort, filters, etc.)
-     * @return LengthAwarePaginator Paginated playerteam results
+     * @param  array<string, mixed>  $params  Query parameters (limit, page, sort, filters, etc.)
+     * @return LengthAwarePaginator<int, mixed> Paginated playerteam results
      *
      * @throws InvalidArgumentException
      */
@@ -92,8 +95,8 @@ class Playerteam
     /**
      * Create a playerteam
      *
-     * @param  array  $attributes  Playerteam attributes
-     * @param  array  $relationships  Playerteam relationships
+     * @param  array<string, mixed>  $attributes  Playerteam attributes
+     * @param  array<string, mixed>  $relationships  Playerteam relationships
      * @return PlayerteamModel The created playerteam
      *
      * @throws InvalidArgumentException
@@ -126,7 +129,7 @@ class Playerteam
      * Retrieve a playerteam by ID
      *
      * @param  string  $id  Playerteam ID
-     * @param  array  $params  Additional parameters (e.g., include relationships)
+     * @param  array<string, mixed>  $params  Additional parameters (e.g., include relationships)
      * @return PlayerteamModel The playerteam
      *
      * @throws InvalidArgumentException
@@ -144,8 +147,8 @@ class Playerteam
      * Update a playerteam
      *
      * @param  string  $id  Playerteam ID
-     * @param  array  $attributes  Playerteam attributes to update
-     * @param  array  $relationships  Playerteam relationships to update
+     * @param  array<string, mixed>  $attributes  Playerteam attributes to update
+     * @param  array<string, mixed>  $relationships  Playerteam relationships to update
      * @return PlayerteamModel The updated playerteam
      *
      * @throws InvalidArgumentException

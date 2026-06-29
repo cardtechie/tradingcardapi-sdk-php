@@ -36,7 +36,10 @@ class ObjectAttribute extends Model
         $relationships = $this->getRelationships();
 
         if (array_key_exists('cards', $relationships)) {
-            return collect($relationships['cards']);
+            /** @var iterable<int, Card> $items */
+            $items = $relationships['cards'];
+
+            return collect($items);
         }
 
         return collect([]);

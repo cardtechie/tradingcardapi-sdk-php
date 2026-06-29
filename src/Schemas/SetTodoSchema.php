@@ -11,6 +11,8 @@ class SetTodoSchema extends BaseSchema
 {
     /**
      * Get validation rules for a single SetTodo response
+     *
+     * @return array<string, mixed>
      */
     public function getRules(): array
     {
@@ -27,6 +29,8 @@ class SetTodoSchema extends BaseSchema
      * Status/step values originate from the WorkflowStatus/WorkflowStep enums,
      * but the rules are kept as string|nullable rather than a hard in: list so
      * validation does not reject forward-compatible API values.
+     *
+     * @return array<string, mixed>
      */
     private function getSetTodoSpecificRules(): array
     {
@@ -43,6 +47,8 @@ class SetTodoSchema extends BaseSchema
 
     /**
      * Get validation rules for SetTodo collection responses
+     *
+     * @return array<string, mixed>
      */
     public function getCollectionRules(): array
     {
@@ -55,6 +61,8 @@ class SetTodoSchema extends BaseSchema
 
     /**
      * Get SetTodo collection-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getSetTodoCollectionSpecificRules(): array
     {

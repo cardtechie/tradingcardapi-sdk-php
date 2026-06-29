@@ -32,7 +32,10 @@ class Manufacturer extends Model
     public function sets(): Collection
     {
         if (array_key_exists('sets', $this->relationships)) {
-            return collect($this->relationships['sets']);
+            /** @var iterable<int, Set> $items */
+            $items = $this->relationships['sets'];
+
+            return collect($items);
         }
 
         return collect([]);

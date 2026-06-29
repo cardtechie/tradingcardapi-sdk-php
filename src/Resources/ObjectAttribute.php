@@ -19,6 +19,10 @@ class ObjectAttribute
         $this->client = $client;
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes  Object attribute attributes
+     * @param  array<string, mixed>  $relationships  Object attribute relationships
+     */
     public function create(array $attributes = [], array $relationships = []): ObjectAttributeModel
     {
         $request = [
@@ -43,6 +47,9 @@ class ObjectAttribute
         return $formattedResponse->mainObject;
     }
 
+    /**
+     * @param  array<string, mixed>  $params  Query parameters
+     */
     public function get(string $id, array $params = []): ObjectAttributeModel
     {
         $url = sprintf('/v1/object-attributes/%s', $id);
@@ -52,6 +59,10 @@ class ObjectAttribute
         return $formattedResponse->mainObject;
     }
 
+    /**
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return LengthAwarePaginator<int, mixed>
+     */
     public function list(array $params = []): LengthAwarePaginator
     {
         $defaultParams = [
@@ -76,6 +87,10 @@ class ObjectAttribute
         return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes  Object attribute attributes to update
+     * @param  array<string, mixed>  $relationships  Object attribute relationships to update
+     */
     public function update(string $id, array $attributes = [], array $relationships = []): ObjectAttributeModel
     {
         $url = sprintf('/v1/object-attributes/%s', $id);

@@ -30,8 +30,8 @@ class Attribute
     /**
      * Create the attribute with the passed in attributes
      *
-     * @param  array  $attributes  Attribute attributes
-     * @param  array  $relationships  Attribute relationships
+     * @param  array<string, mixed>  $attributes  Attribute attributes
+     * @param  array<string, mixed>  $relationships  Attribute relationships
      * @return AttributeModel The created attribute
      *
      * @throws InvalidArgumentException
@@ -63,8 +63,8 @@ class Attribute
     /**
      * List attributes with pagination
      *
-     * @param  array  $params  Query parameters (limit, page, sort, filters, etc.)
-     * @return LengthAwarePaginator Paginated attribute results
+     * @param  array<string, mixed>  $params  Query parameters (limit, page, sort, filters, etc.)
+     * @return LengthAwarePaginator<int, mixed> Paginated attribute results
      *
      * @throws InvalidArgumentException
      */
@@ -96,8 +96,8 @@ class Attribute
     /**
      * Return a raw collection of attributes.
      *
-     * @param  array  $params  Query parameters
-     * @return Collection The attributes collection
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return Collection<int, mixed> The attributes collection
      *
      * @throws InvalidArgumentException
      */
@@ -128,8 +128,8 @@ class Attribute
      * Update the attribute
      *
      * @param  string  $id  Attribute ID
-     * @param  array  $attributes  Attribute attributes to update
-     * @param  array  $relationships  Attribute relationships to update
+     * @param  array<string, mixed>  $attributes  Attribute attributes to update
+     * @param  array<string, mixed>  $relationships  Attribute relationships to update
      * @return AttributeModel The updated attribute
      *
      * @throws InvalidArgumentException

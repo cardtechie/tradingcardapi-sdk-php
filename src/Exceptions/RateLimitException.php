@@ -36,9 +36,9 @@ class RateLimitException extends TradingCardApiException
      * @param  int  $code  The exception code
      * @param  \Exception|null  $previous  The previous exception
      * @param  string|null  $apiErrorCode  The API error code
-     * @param  array  $apiErrors  The API errors array
+     * @param  array<int, array<string, mixed>>  $apiErrors  The API errors array
      * @param  int|null  $httpStatusCode  The HTTP status code
-     * @param  array  $context  Additional context for debugging
+     * @param  array<string, mixed>  $context  Additional context for debugging
      * @param  int|null  $rateLimit  The rate limit quota
      * @param  int|null  $rateLimitRemaining  The number of requests remaining
      * @param  int|null  $rateLimitReset  The timestamp when the rate limit resets
@@ -165,6 +165,8 @@ class RateLimitException extends TradingCardApiException
 
     /**
      * Convert exception to array including rate limit data
+     *
+     * @return array<string, mixed>
      */
     public function toArray(): array
     {

@@ -31,7 +31,8 @@ class CardImage
     /**
      * Retrieve a list of card images
      *
-     * @param  array  $params  Query parameters (filter, include, page, limit, etc.)
+     * @param  array<string, mixed>  $params  Query parameters (filter, include, page, limit, etc.)
+     * @return LengthAwarePaginator<int, mixed>
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -63,7 +64,7 @@ class CardImage
      * Retrieve a card image by ID
      *
      * @param  string  $id  Card image UUID
-     * @param  array  $params  Query parameters (include, etc.)
+     * @param  array<string, mixed>  $params  Query parameters (include, etc.)
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -87,7 +88,7 @@ class CardImage
      * @param  UploadedFile|string  $file  File to upload (UploadedFile or file path)
      * @param  string  $cardId  Card UUID
      * @param  string  $imageType  Image type (front|back)
-     * @param  array  $attributes  Additional attributes
+     * @param  array<string, mixed>  $attributes  Additional attributes
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \InvalidArgumentException
@@ -150,7 +151,7 @@ class CardImage
      * Update card image metadata
      *
      * @param  string  $id  Card image UUID
-     * @param  array  $attributes  Attributes to update
+     * @param  array<string, mixed>  $attributes  Attributes to update
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */

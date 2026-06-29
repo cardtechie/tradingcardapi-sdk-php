@@ -19,6 +19,10 @@ class Genre
         $this->client = $client;
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes  Genre attributes
+     * @param  array<string, mixed>  $relationships  Genre relationships
+     */
     public function create(array $attributes = [], array $relationships = []): GenreModel
     {
         $request = [
@@ -43,6 +47,9 @@ class Genre
         return $formattedResponse->mainObject;
     }
 
+    /**
+     * @param  array<string, mixed>  $params  Query parameters
+     */
     public function get(string $id, array $params = []): GenreModel
     {
         $url = sprintf('/v1/genres/%s', $id);
@@ -52,6 +59,10 @@ class Genre
         return $formattedResponse->mainObject;
     }
 
+    /**
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return LengthAwarePaginator<int, mixed>
+     */
     public function list(array $params = []): LengthAwarePaginator
     {
         $defaultParams = [
@@ -77,6 +88,10 @@ class Genre
         return new LengthAwarePaginator($parsedResponse, $totalPages, $perPage, $page, $options);
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes  Genre attributes to update
+     * @param  array<string, mixed>  $relationships  Genre relationships to update
+     */
     public function update(string $id, array $attributes = [], array $relationships = []): GenreModel
     {
         $url = sprintf('/v1/genres/%s', $id);
@@ -109,6 +124,9 @@ class Genre
         $this->makeRequest($url, 'DELETE');
     }
 
+    /**
+     * @return LengthAwarePaginator<int, mixed>
+     */
     public function listDeleted(): LengthAwarePaginator
     {
         $url = sprintf('/v1/genres?%s', http_build_query(['filter' => ['status' => 'deleted']]));

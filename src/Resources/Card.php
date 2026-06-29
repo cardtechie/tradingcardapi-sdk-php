@@ -29,6 +29,8 @@ class Card
     /**
      * Create the card with the passed in attributes
      *
+     * @param  array<string, mixed>  $attributes  Card attributes
+     * @param  array<string, mixed>  $relationships  Card relationships
      *
      * @throws InvalidArgumentException
      */
@@ -59,6 +61,7 @@ class Card
     /**
      * Retrieve a card by ID
      *
+     * @param  array<string, mixed>  $params  Query parameters
      *
      * @throws InvalidArgumentException
      */
@@ -79,6 +82,8 @@ class Card
     /**
      * List cards with pagination
      *
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return LengthAwarePaginator<int, mixed>
      *
      * @throws InvalidArgumentException
      */
@@ -109,6 +114,8 @@ class Card
     /**
      * Update the card
      *
+     * @param  array<string, mixed>  $attributes  Card attributes to update
+     * @param  array<string, mixed>  $relationships  Card relationships to update
      *
      * @throws InvalidArgumentException
      */
