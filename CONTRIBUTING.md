@@ -89,6 +89,25 @@ pre-existing findings). New code must not introduce new analysis errors.
 make analyse
 ```
 
+### Markdown style (markdownlint)
+
+Markdown files are style-checked with
+[markdownlint](https://github.com/igorshubovych/markdownlint-cli). The ruleset in
+[`.markdownlint.jsonc`](.markdownlint.jsonc) is aligned with the parent
+`tradingcardapi-api` repo (it disables `MD013` line-length and sets `MD024` to
+`siblings_only`). The CI `markdown-lint` job in
+[`code-quality.yml`](.github/workflows/code-quality.yml) runs the same check on
+every push and PR, so markdown must lint clean before a PR can merge.
+
+```bash
+make lint-md  # check markdown style (what CI runs)
+make fix-md   # auto-fix the mechanical violations
+```
+
+Both targets run `markdownlint-cli` on the host via `npx` (no container needed);
+they cover all tracked `*.md` files except `vendor/`, `node_modules/`, and the
+`changelog.d/` fragments.
+
 ### Conventions
 
 - **Strict types** — every PHP file declares `declare(strict_types=1);`
@@ -197,8 +216,8 @@ Fragments are collated into `CHANGELOG.md` at release time, not per PR.
   [`CODEOWNERS`](CODEOWNERS).
 - CI must be green before a PR can merge. The automated quality gates include
   the tests (`run-tests.yml`), code-quality checks (`code-quality.yml`, covering
-  Pint and PHPStan), and the changelog-fragment presence check
-  (`changelog-fragment-check.yml`).
+  Pint, PHPStan, and the `markdown-lint` markdown-style gate), and the
+  changelog-fragment presence check (`changelog-fragment-check.yml`).
 - Address review feedback by pushing additional commits to the same branch;
   reviewers will re-review and resolve threads as they are handled.
 

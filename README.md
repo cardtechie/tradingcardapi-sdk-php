@@ -258,7 +258,7 @@ echo $player->parent_id;         // UUID of parent player (if alias)
 The SDK provides access to the following Trading Card API resources:
 
 | Resource | Description | Methods |
-|----------|-------------|---------|
+| --- | --- | --- |
 | **Cards** | Individual trading cards | `get()`, `create()`, `update()`, `delete()` |
 | **Sets** | Card sets and collections | `get()`, `list()`, `create()`, `update()`, `delete()`, `checklist($id)`, `workflow($id)`, `addMissingCards($id)`, `addChecklist($request, $id)` |
 | **Players** | Player information | `get()`, `list()`, `all()`, `getList()` _(deprecated — use `all()`)_, `create()`, `update()`, `delete()`, `listDeleted()`, `deleted($id)` |
@@ -573,16 +573,19 @@ Configure the OAuth scopes to request when authenticating. Available scopes:
 #### Examples
 
 **Read-only access to published content:**
+
 ```env
 TRADINGCARDAPI_SCOPE="read:published"
 ```
 
 **Admin access with full permissions:**
+
 ```env
 TRADINGCARDAPI_SCOPE="read:all-status write delete"
 ```
 
 **Content management (no delete):**
+
 ```env
 TRADINGCARDAPI_SCOPE="read:draft write"
 ```
@@ -739,6 +742,4 @@ This project is licensed under the MIT License. See [LICENSE.md](LICENSE.md) for
 
 ---
 
-<p align="center">
-Made with ❤️ by <a href="https://github.com/cardtechie">CardTechie</a>
-</p>
+Made with ❤️ by [CardTechie](https://github.com/cardtechie)

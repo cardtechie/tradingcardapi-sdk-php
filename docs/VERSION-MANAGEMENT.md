@@ -38,7 +38,7 @@ The SDK follows [Semantic Versioning 2.0.0](https://semver.org/):
 ### Branch-Based Versioning
 
 | Branch Type | Version Pattern | Example | Purpose |
-|-------------|-----------------|---------|---------|
+| --- | --- | --- | --- |
 | `main`/`master` | `X.Y.Z` or `X.Y.Z+1` | `1.2.3` | Production releases |
 | `develop` | `X.Y+1.0.beta-N` | `1.3.0.beta-12` | Pre-release testing |
 | `release/X.Y.Z` | `X.Y.Z.rc-N` | `1.3.0.rc-2` | Release candidates |
@@ -52,6 +52,7 @@ The SDK follows [Semantic Versioning 2.0.0](https://semver.org/):
 Generates version numbers based on current branch and git history.
 
 **Usage:**
+
 ```bash
 # Current branch version
 ./build/version.sh
@@ -63,6 +64,7 @@ Generates version numbers based on current branch and git history.
 ```
 
 **Features:**
+
 - Handles repositories with no tags (development mode)
 - Parses existing semantic version tags
 - Counts commits since last tag
@@ -73,6 +75,7 @@ Generates version numbers based on current branch and git history.
 Updates CHANGELOG.md with new version entries following Keep a Changelog format.
 
 **Usage:**
+
 ```bash
 # Update for current version
 ./build/update-changelog.sh $(./build/version.sh)
@@ -82,6 +85,7 @@ Updates CHANGELOG.md with new version entries following Keep a Changelog format.
 ```
 
 **Features:**
+
 - Automatic commit categorization (Added, Changed, Fixed, etc.)
 - Merge detection and filtering
 - Markdown formatting compliance
@@ -92,6 +96,7 @@ Updates CHANGELOG.md with new version entries following Keep a Changelog format.
 Creates comprehensive GitHub release notes with AI-powered summaries.
 
 **Usage:**
+
 ```bash
 # Generate notes for current version
 ./build/generate-release-notes.sh $(./build/version.sh)
@@ -101,6 +106,7 @@ Creates comprehensive GitHub release notes with AI-powered summaries.
 ```
 
 **Features:**
+
 - Claude API integration for intelligent summaries (optional)
 - GitHub issue/PR integration
 - Categorized change sections
@@ -112,6 +118,7 @@ Creates comprehensive GitHub release notes with AI-powered summaries.
 ### Development Workflow
 
 1. **Feature Development**
+
    ```bash
    git checkout -b feature/new-endpoint
    # Development work...
@@ -125,6 +132,7 @@ Creates comprehensive GitHub release notes with AI-powered summaries.
    that section caused.
 
 3. **Merge to Develop**
+
    ```bash
    git checkout develop
    git merge feature/new-endpoint
@@ -142,18 +150,21 @@ tooling ships, the release operator collates the accumulated fragments into
 ### Release Process
 
 1. **Create Release Branch**
+
    ```bash
    git checkout -b release/1.3.0
    make version  # Shows: 1.3.0.rc-1
    ```
 
 2. **Prepare Release**
+
    ```bash
    make changelog-update
    make release-notes-preview
    ```
 
 3. **Merge to Main**
+
    ```bash
    git checkout main
    git merge release/1.3.0
@@ -163,12 +174,14 @@ tooling ships, the release operator collates the accumulated fragments into
 ### Hotfix Process
 
 1. **Create Hotfix Branch**
+
    ```bash
    git checkout -b hotfix/security-fix
    make version  # Shows: 1.2.4-security-fix.1
    ```
 
 2. **Apply Fix and Release**
+
    ```bash
    make changelog-update
    git checkout main
@@ -273,11 +286,13 @@ gh auth login
 ### No Git Tags
 
 If the repository has no tags, the system defaults to development versioning:
+
 - Pattern: `0.1.0-dev.N` where N is the commit count
 
 ### Version Parsing Errors
 
 The system expects semantic version tags. Ensure tags follow the pattern:
+
 - `1.2.3` or `v1.2.3` for releases
 - `1.2.3.beta-4` for pre-releases
 

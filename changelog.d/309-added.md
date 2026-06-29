@@ -1,0 +1,1 @@
+- **[Issue #309]** Add a markdown linting gate to CI with a shared `.markdownlint.jsonc` config and `make lint-md` / `make fix-md` helpers.
