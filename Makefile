@@ -70,10 +70,10 @@ pint: ## Run Laravel Pint directly
 
 # Markdown linting (runs on the host via npx; mirrors the markdown-lint CI job)
 lint-md: ## Check markdown style (what CI runs)
-	npx --yes markdownlint-cli '**/*.md' --ignore '**/node_modules/**' --ignore vendor --ignore 'changelog.d/**'
+	npx --yes markdownlint-cli@0.49.0 '**/*.md' --ignore '**/node_modules/**' --ignore vendor --ignore 'changelog.d/**'
 
 fix-md: ## Auto-fix markdown style violations where possible
-	npx --yes markdownlint-cli '**/*.md' --ignore '**/node_modules/**' --ignore vendor --ignore 'changelog.d/**' --fix
+	npx --yes markdownlint-cli@0.49.0 '**/*.md' --ignore '**/node_modules/**' --ignore vendor --ignore 'changelog.d/**' --fix
 
 # Quality assurance tasks
 check: ## Run all quality checks (tests + analysis + format check)
