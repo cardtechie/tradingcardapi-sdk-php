@@ -13,10 +13,12 @@ use Illuminate\Validation\ValidationException;
  */
 class ResponseValidator
 {
+    /** @var array<string, mixed> */
     private array $errors = [];
 
     private bool $isValid = true;
 
+    /** @var array<string, mixed> */
     private array $config;
 
     /**
@@ -26,7 +28,7 @@ class ResponseValidator
     private ?Redactor $redactor = null;
 
     /**
-     * @var array Schema cache
+     * @var array<string, mixed> Schema cache
      */
     private static array $schemaCache = [];
 
@@ -43,7 +45,7 @@ class ResponseValidator
      * Validate API response against expected schema
      *
      * @param  string  $resourceType  The resource type (e.g., 'card', 'player')
-     * @param  array  $data  The response data
+     * @param  array<string, mixed>  $data  The response data
      * @param  string  $endpoint  The API endpoint for context
      */
     public function validate(string $resourceType, array $data, string $endpoint = ''): bool
@@ -125,6 +127,8 @@ class ResponseValidator
 
     /**
      * Get validation errors
+     *
+     * @return array<string, mixed>
      */
     public function getErrors(): array
     {
@@ -141,6 +145,8 @@ class ResponseValidator
 
     /**
      * Get schema for a resource type
+     *
+     * @return array<string, mixed>
      */
     private function getSchema(string $resourceType, bool $isCollection = false): array
     {
@@ -213,6 +219,8 @@ class ResponseValidator
 
     /**
      * Detect if the response is a collection (array) or single object
+     *
+     * @param  array<string, mixed>  $data
      */
     private function isCollectionResponse(array $data): bool
     {

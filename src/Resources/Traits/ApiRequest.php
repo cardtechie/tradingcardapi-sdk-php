@@ -88,8 +88,8 @@ trait ApiRequest
      *
      * @param  string  $url  Url of the JSON API endpoint
      * @param  string  $method  HTTP method
-     * @param  array  $request  Additional parameters to include in the request
-     * @param  array  $headers  HTTP headers
+     * @param  array<string, mixed>  $request  Additional parameters to include in the request
+     * @param  array<string, mixed>  $headers  HTTP headers
      * @return object The raw decoded response (unstructured)
      *
      * @throws InvalidArgumentException
@@ -218,7 +218,7 @@ trait ApiRequest
      *
      * @param  string  $url  Url of the api or webpage
      * @param  string  $method  HTTP method
-     * @param  array  $request  The request
+     * @param  array<string, mixed>  $request  The request
      */
     private function doRequest(string $url, string $method = 'GET', array $request = []): ResponseInterface
     {
@@ -237,7 +237,7 @@ trait ApiRequest
      * Validate API response against expected schema
      *
      * @param  string  $url  The API endpoint URL
-     * @param  array  $data  The response data
+     * @param  array<string, mixed>  $data  The response data
      */
     private function validateResponse(string $url, array $data): void
     {

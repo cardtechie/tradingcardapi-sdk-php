@@ -11,6 +11,8 @@ class YearSchema extends BaseSchema
 {
     /**
      * Get validation rules for Year responses
+     *
+     * @return array<string, mixed>
      */
     public function getRules(): array
     {
@@ -23,6 +25,8 @@ class YearSchema extends BaseSchema
 
     /**
      * Get Year-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getYearSpecificRules(): array
     {
@@ -42,6 +46,8 @@ class YearSchema extends BaseSchema
 
     /**
      * Get collection-specific validation rules for Year responses
+     *
+     * @return array<string, mixed>
      */
     public function getCollectionRules(): array
     {

@@ -11,6 +11,8 @@ class AttributeSchema extends BaseSchema
 {
     /**
      * Get validation rules for Attribute responses
+     *
+     * @return array<string, mixed>
      */
     public function getRules(): array
     {
@@ -23,6 +25,8 @@ class AttributeSchema extends BaseSchema
 
     /**
      * Get Attribute-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getAttributeSpecificRules(): array
     {
@@ -42,6 +46,8 @@ class AttributeSchema extends BaseSchema
 
     /**
      * Get validation rules for Attribute collection responses
+     *
+     * @return array<string, mixed>
      */
     public function getCollectionRules(): array
     {
@@ -54,6 +60,8 @@ class AttributeSchema extends BaseSchema
 
     /**
      * Get Attribute collection-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getAttributeCollectionSpecificRules(): array
     {

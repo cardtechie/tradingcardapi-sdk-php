@@ -15,6 +15,8 @@ class WorkflowSchema extends BaseSchema
 {
     /**
      * Get validation rules for a single Workflow response
+     *
+     * @return array<string, mixed>
      */
     public function getRules(): array
     {
@@ -32,6 +34,8 @@ class WorkflowSchema extends BaseSchema
      * other JSON:API schema in this namespace (e.g. SetTodoSchema). Both the
      * plural and singular forms are accepted so the rule does not reject a
      * server that emits either spelling.
+     *
+     * @return array<string, mixed>
      */
     private function getWorkflowSpecificRules(): array
     {
@@ -42,6 +46,8 @@ class WorkflowSchema extends BaseSchema
 
     /**
      * Get validation rules for Workflow collection responses
+     *
+     * @return array<string, mixed>
      */
     public function getCollectionRules(): array
     {
@@ -54,6 +60,8 @@ class WorkflowSchema extends BaseSchema
 
     /**
      * Get Workflow collection-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getWorkflowCollectionSpecificRules(): array
     {

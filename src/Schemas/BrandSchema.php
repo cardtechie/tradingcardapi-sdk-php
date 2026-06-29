@@ -11,6 +11,8 @@ class BrandSchema extends BaseSchema
 {
     /**
      * Get validation rules for Brand responses
+     *
+     * @return array<string, mixed>
      */
     public function getRules(): array
     {
@@ -23,6 +25,8 @@ class BrandSchema extends BaseSchema
 
     /**
      * Get Brand-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getBrandSpecificRules(): array
     {
@@ -43,6 +47,8 @@ class BrandSchema extends BaseSchema
 
     /**
      * Get validation rules for Brand collection responses
+     *
+     * @return array<string, mixed>
      */
     public function getCollectionRules(): array
     {
@@ -55,6 +61,8 @@ class BrandSchema extends BaseSchema
 
     /**
      * Get Brand collection-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getBrandCollectionSpecificRules(): array
     {

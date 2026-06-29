@@ -36,6 +36,8 @@ class Player extends Model implements Taxonomy
 
     /**
      * Return the onCardable configuration array for this model.
+     *
+     * @return array<string, mixed>
      */
     public function onCardable(): array
     {
@@ -100,6 +102,8 @@ class Player extends Model implements Taxonomy
 
     /**
      * Build the taxonomy object
+     *
+     * @param  array<string, mixed>  $data
      */
     public static function build(object $taxonomy, array $data): object
     {
@@ -132,6 +136,8 @@ class Player extends Model implements Taxonomy
 
     /**
      * Get the object from the API
+     *
+     * @param  array<string, mixed>  $params
      */
     public static function getFromApi(array $params): object
     {
@@ -169,7 +175,7 @@ class Player extends Model implements Taxonomy
     /**
      * Get all aliases (child players) of this player
      *
-     * @return Collection Collection of Player models that are aliases of this player
+     * @return Collection<int, Player> Collection of Player models that are aliases of this player
      */
     public function getAliases(): Collection
     {
@@ -177,17 +183,20 @@ class Player extends Model implements Taxonomy
         $aliases = TradingCardApiSdk::player()->all(['parent_id' => $this->id]);
 
         // Manually filter to ensure we only get actual aliases
-        return $aliases->filter(function ($player) {
+        /** @var Collection<int, Player> $aliasPlayers */
+        $aliasPlayers = $aliases->filter(function ($player) {
             return isset($player->parent_id) &&
                    ! empty($player->parent_id) &&
                    $player->parent_id === $this->id;
         });
+
+        return $aliasPlayers;
     }
 
     /**
      * Get all teams this player has been associated with
      *
-     * @return Collection Collection of Team models
+     * @return Collection<int, Team> Collection of Team models
      */
     public function getTeams(): Collection
     {
@@ -204,7 +213,7 @@ class Player extends Model implements Taxonomy
     /**
      * Get all playerteam relationships for this player
      *
-     * @return Collection Collection of Playerteam models
+     * @return Collection<int, Playerteam> Collection of Playerteam models
      */
     public function getPlayerteams(): Collection
     {
@@ -216,7 +225,7 @@ class Player extends Model implements Taxonomy
     /**
      * Get all cards featuring this player
      *
-     * @return Collection Collection of Card models
+     * @return Collection<int, Card> Collection of Card models
      */
     public function getCards(): Collection
     {

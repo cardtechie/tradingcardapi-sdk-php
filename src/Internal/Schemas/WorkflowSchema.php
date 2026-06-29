@@ -13,6 +13,8 @@ class WorkflowSchema extends BaseSchema
 {
     /**
      * Get validation rules for a single Workflow response
+     *
+     * @return array<string, mixed>
      */
     public function getRules(): array
     {
@@ -24,6 +26,8 @@ class WorkflowSchema extends BaseSchema
 
     /**
      * Get validation rules for Workflow collection responses (e.g. actionable-sets)
+     *
+     * @return array<string, mixed>
      */
     public function getCollectionRules(): array
     {

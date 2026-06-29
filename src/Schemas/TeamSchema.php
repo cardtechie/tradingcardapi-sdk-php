@@ -11,6 +11,8 @@ class TeamSchema extends BaseSchema
 {
     /**
      * Get validation rules for Team responses
+     *
+     * @return array<string, mixed>
      */
     public function getRules(): array
     {
@@ -23,6 +25,8 @@ class TeamSchema extends BaseSchema
 
     /**
      * Get Team-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getTeamSpecificRules(): array
     {
@@ -47,6 +51,8 @@ class TeamSchema extends BaseSchema
 
     /**
      * Get validation rules for Team collection responses
+     *
+     * @return array<string, mixed>
      */
     public function getCollectionRules(): array
     {
@@ -59,6 +65,8 @@ class TeamSchema extends BaseSchema
 
     /**
      * Get Team collection-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getTeamCollectionSpecificRules(): array
     {

@@ -30,8 +30,8 @@ class Team
     /**
      * Retrieve a raw collection of teams
      *
-     * @param  array  $params  Query parameters
-     * @return Collection The teams collection
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return Collection<int, mixed> The teams collection
      *
      * @throws InvalidArgumentException
      */
@@ -49,6 +49,9 @@ class Team
      *
      * @deprecated use all()
      *
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return Collection<int, mixed>
+     *
      * @throws InvalidArgumentException
      */
     public function getList(array $params = []): Collection
@@ -59,8 +62,8 @@ class Team
     /**
      * Create a team
      *
-     * @param  array  $attributes  Team attributes
-     * @param  array  $relationships  Team relationships
+     * @param  array<string, mixed>  $attributes  Team attributes
+     * @param  array<string, mixed>  $relationships  Team relationships
      * @return TeamModel The created team
      *
      * @throws InvalidArgumentException
@@ -93,7 +96,7 @@ class Team
      * Retrieve a team by ID
      *
      * @param  string  $id  Team ID
-     * @param  array  $params  Additional parameters (e.g., include relationships)
+     * @param  array<string, mixed>  $params  Additional parameters (e.g., include relationships)
      * @return TeamModel The team
      *
      * @throws InvalidArgumentException
@@ -110,8 +113,8 @@ class Team
     /**
      * List teams with pagination
      *
-     * @param  array  $params  Query parameters (limit, page, sort, filters, etc.)
-     * @return LengthAwarePaginator Paginated team results
+     * @param  array<string, mixed>  $params  Query parameters (limit, page, sort, filters, etc.)
+     * @return LengthAwarePaginator<int, mixed> Paginated team results
      *
      * @throws InvalidArgumentException
      */
@@ -144,8 +147,8 @@ class Team
      * Update a team
      *
      * @param  string  $id  Team ID
-     * @param  array  $attributes  Team attributes to update
-     * @param  array  $relationships  Team relationships to update
+     * @param  array<string, mixed>  $attributes  Team attributes to update
+     * @param  array<string, mixed>  $relationships  Team relationships to update
      * @return TeamModel The updated team
      *
      * @throws InvalidArgumentException
@@ -192,7 +195,7 @@ class Team
     /**
      * List deleted teams
      *
-     * @return LengthAwarePaginator Paginated deleted team results
+     * @return LengthAwarePaginator<int, mixed> Paginated deleted team results
      *
      * @throws InvalidArgumentException
      */

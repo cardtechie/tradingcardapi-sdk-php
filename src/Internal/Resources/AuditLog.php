@@ -30,6 +30,7 @@ class AuditLog
      * Retrieve a paginated list of audit logs with optional filters
      *
      * @param  array<string, mixed>  $params  Filter parameters: auditable_type, auditable_id, agent_id, event_type, start_date, end_date, per_page, page
+     * @return LengthAwarePaginator<int, mixed>
      *
      * @throws InvalidArgumentException
      */

@@ -11,6 +11,8 @@ class SetSchema extends BaseSchema
 {
     /**
      * Get validation rules for Set responses
+     *
+     * @return array<string, mixed>
      */
     public function getRules(): array
     {
@@ -23,6 +25,8 @@ class SetSchema extends BaseSchema
 
     /**
      * Get Set-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getSetSpecificRules(): array
     {
@@ -49,6 +53,8 @@ class SetSchema extends BaseSchema
 
     /**
      * Get validation rules for Set collection responses
+     *
+     * @return array<string, mixed>
      */
     public function getCollectionRules(): array
     {
@@ -61,6 +67,8 @@ class SetSchema extends BaseSchema
 
     /**
      * Get Set collection-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getSetCollectionSpecificRules(): array
     {

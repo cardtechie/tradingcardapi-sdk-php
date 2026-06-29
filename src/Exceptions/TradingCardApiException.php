@@ -42,9 +42,9 @@ class TradingCardApiException extends Exception
      * @param  int  $code  The exception code
      * @param  Exception|null  $previous  The previous exception
      * @param  string|null  $apiErrorCode  The API error code
-     * @param  array  $apiErrors  The API errors array
+     * @param  array<int, array<string, mixed>>  $apiErrors  The API errors array
      * @param  int|null  $httpStatusCode  The HTTP status code
-     * @param  array  $context  Additional context for debugging
+     * @param  array<string, mixed>  $context  Additional context for debugging
      */
     public function __construct(
         string $message = '',
@@ -73,6 +73,8 @@ class TradingCardApiException extends Exception
 
     /**
      * Get the API errors array
+     *
+     * @return array<string, mixed>
      */
     public function getApiErrors(): array
     {
@@ -89,6 +91,8 @@ class TradingCardApiException extends Exception
 
     /**
      * Get the context for debugging
+     *
+     * @return array<string, mixed>
      */
     public function getContext(): array
     {
@@ -125,6 +129,8 @@ class TradingCardApiException extends Exception
 
     /**
      * Convert exception to array for logging/serialization
+     *
+     * @return array<string, mixed>
      */
     public function toArray(): array
     {

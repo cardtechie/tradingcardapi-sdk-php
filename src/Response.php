@@ -42,8 +42,10 @@ class Response
 
     private object $response;
 
+    /** @var mixed The main model instance, dynamically built from the response's resource type; Resources narrow it to their concrete model via their own return hints. */
     public $mainObject;
 
+    /** @var array<string, mixed> */
     public $relationships;
 
     private static object $meta;
@@ -286,6 +288,8 @@ class Response
 
     /**
      * Get the included objects as an array
+     *
+     * @return array<string, mixed>
      */
     private static function getIncluded(object $data): array
     {
@@ -317,6 +321,8 @@ class Response
      * Returns an empty stdClass when the response has no top-level `meta` key,
      * preserving the historic empty-object behavior. Pure helper — it does not
      * write any shared static state, so the caller owns the returned object.
+     *
+     * @param  mixed  $data
      */
     private static function parseMeta($data): stdClass
     {
@@ -333,6 +339,8 @@ class Response
      * Returns an empty stdClass when the response has no top-level `links` key,
      * preserving the historic empty-object behavior. Pure helper — it does not
      * write any shared static state, so the caller owns the returned object.
+     *
+     * @param  mixed  $data
      */
     private static function parseLinks($data): stdClass
     {

@@ -35,6 +35,8 @@ class Team extends Model implements Taxonomy
 
     /**
      * Return the onCardable configuration array for this model.
+     *
+     * @return array<string, mixed>
      */
     public function onCardable(): array
     {
@@ -81,6 +83,8 @@ class Team extends Model implements Taxonomy
 
     /**
      * Build the taxonomy object
+     *
+     * @param  array<string, mixed>  $data
      */
     public static function build(object $taxonomy, array $data): object
     {
@@ -113,6 +117,8 @@ class Team extends Model implements Taxonomy
 
     /**
      * Get the object from the API
+     *
+     * @param  array<string, mixed>  $params
      */
     public static function getFromApi(array $params): object
     {

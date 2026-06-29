@@ -30,8 +30,8 @@ class Set
     /**
      * Create the set with the passed in attributes
      *
-     * @param  array  $attributes  Set attributes
-     * @param  array  $relationships  Set relationships
+     * @param  array<string, mixed>  $attributes  Set attributes
+     * @param  array<string, mixed>  $relationships  Set relationships
      * @return SetModel The created set
      *
      * @throws InvalidArgumentException
@@ -63,6 +63,7 @@ class Set
     /**
      * Retrieve a set by ID
      *
+     * @param  array<string, mixed>  $params  Query parameters
      *
      * @throws InvalidArgumentException
      */
@@ -83,6 +84,8 @@ class Set
     /**
      * Retrieve a list of sets
      *
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return LengthAwarePaginator<int, mixed>
      *
      * @throws InvalidArgumentException
      */
@@ -114,8 +117,8 @@ class Set
      * Update the set
      *
      * @param  string  $id  Set ID
-     * @param  array  $attributes  Set attributes to update
-     * @param  array  $relationships  Set relationships to update
+     * @param  array<string, mixed>  $attributes  Set attributes to update
+     * @param  array<string, mixed>  $relationships  Set relationships to update
      * @return SetModel The updated set
      *
      * @throws InvalidArgumentException
@@ -186,6 +189,7 @@ class Set
      * and any operation-specific fields the API includes); this endpoint
      * returns an unstructured ack rather than a typed resource.
      *
+     * @param  array<string, mixed>  $request  Checklist request payload
      * @return object The decoded acknowledgement payload (unstructured)
      *
      * @throws InvalidArgumentException
