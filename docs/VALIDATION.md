@@ -231,6 +231,7 @@ Based on performance tests:
 ### Optimization Tips
 
 1. **Disable in Production**: For high-performance production environments:
+
    ```php
    'validation' => [
        'enabled' => false,
@@ -238,6 +239,7 @@ Based on performance tests:
    ```
 
 2. **Enable Schema Caching**: Improves performance for repeated validations:
+
    ```php
    'validation' => [
        'cache_schemas' => true,
@@ -245,6 +247,7 @@ Based on performance tests:
    ```
 
 3. **Disable Logging**: Reduce I/O overhead in production:
+
    ```php
    'validation' => [
        'log_validation_errors' => false,
@@ -315,24 +318,30 @@ if ($this->config['log_validation_errors']) {
 ### Common Issues
 
 1. **Schema Not Found**
-   ```
+
+   ```text
    WARNING: No schema defined for resource type: customresource
    ```
+
    - Create a schema class for the resource type
    - Or disable validation for specific endpoints
 
 2. **Validation Too Strict**
-   ```
+
+   ```text
    The data.attributes.field must be an integer.
    ```
+
    - Check if API response format has changed
    - Update schema rules if necessary
    - Use lenient mode during API transitions
 
 3. **Performance Issues**
-   ```
+
+   ```text
    Validation taking too long
    ```
+
    - Enable schema caching
    - Disable validation for large collections
    - Consider async validation for bulk operations
@@ -366,16 +375,19 @@ LOG_LEVEL=debug
 The validation system is backward compatible and enabled by default. To maintain existing behavior:
 
 1. **Disable validation**:
+
    ```php
    'validation' => ['enabled' => false]
    ```
 
 2. **Use lenient mode** (default):
+
    ```php
    'validation' => ['strict_mode' => false]
    ```
 
 3. **Monitor logs** for validation warnings:
+
    ```bash
    tail -f /path/to/laravel.log | grep "API response validation"
    ```

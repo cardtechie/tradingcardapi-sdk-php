@@ -6,7 +6,7 @@ The Trading Card API SDK provides comprehensive error handling with specific exc
 
 All SDK exceptions extend from `TradingCardApiException`, which provides common properties and methods for error handling.
 
-```
+```text
 TradingCardApiException
 ├── AuthenticationException (401)
 ├── AuthorizationException (403)
