@@ -1,0 +1,1 @@
+- **[Issue #307]** Scope the code-quality coverage job to pull requests and develop pushes so it no longer re-runs on main merges.
