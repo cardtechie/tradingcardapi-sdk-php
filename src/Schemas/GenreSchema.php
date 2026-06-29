@@ -11,6 +11,8 @@ class GenreSchema extends BaseSchema
 {
     /**
      * Get validation rules for Genre responses
+     *
+     * @return array<string, mixed>
      */
     public function getRules(): array
     {
@@ -23,6 +25,8 @@ class GenreSchema extends BaseSchema
 
     /**
      * Get Genre-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getGenreSpecificRules(): array
     {
@@ -41,6 +45,8 @@ class GenreSchema extends BaseSchema
 
     /**
      * Get validation rules for Genre collection responses
+     *
+     * @return array<string, mixed>
      */
     public function getCollectionRules(): array
     {
@@ -53,6 +59,8 @@ class GenreSchema extends BaseSchema
 
     /**
      * Get Genre collection-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getGenreCollectionSpecificRules(): array
     {

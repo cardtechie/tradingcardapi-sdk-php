@@ -31,6 +31,9 @@ class SetSource
     /**
      * Create a set source with the passed in attributes
      *
+     * @param  array<string, mixed>  $attributes  Set source attributes
+     * @param  array<string, mixed>  $relationships  Set source relationships
+     *
      * @throws InvalidArgumentException
      */
     public function create(array $attributes = [], array $relationships = []): SetSourceModel
@@ -60,6 +63,8 @@ class SetSource
     /**
      * Retrieve a set source by ID
      *
+     * @param  array<string, mixed>  $params  Query parameters
+     *
      * @throws InvalidArgumentException
      */
     public function get(string $id, array $params = []): SetSourceModel
@@ -78,6 +83,9 @@ class SetSource
 
     /**
      * Retrieve a list of set sources
+     *
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return LengthAwarePaginator<int, mixed>
      *
      * @throws InvalidArgumentException
      */
@@ -108,6 +116,9 @@ class SetSource
 
     /**
      * Update a set source
+     *
+     * @param  array<string, mixed>  $attributes  Set source attributes to update
+     * @param  array<string, mixed>  $relationships  Set source relationships to update
      *
      * @throws InvalidArgumentException
      */
@@ -150,6 +161,9 @@ class SetSource
 
     /**
      * Get all sources for a specific set
+     *
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return LengthAwarePaginator<int, mixed>
      *
      * @throws InvalidArgumentException
      */

@@ -11,11 +11,15 @@ abstract class BaseSchema
 {
     /**
      * Get validation rules for this schema
+     *
+     * @return array<string, mixed>
      */
     abstract public function getRules(): array;
 
     /**
      * Get common JSON:API structure rules
+     *
+     * @return array<string, mixed>
      */
     protected function getJsonApiRules(): array
     {
@@ -29,6 +33,8 @@ abstract class BaseSchema
 
     /**
      * Get common JSON:API collection structure rules
+     *
+     * @return array<string, mixed>
      */
     protected function getJsonApiCollectionRules(): array
     {
@@ -42,6 +48,8 @@ abstract class BaseSchema
 
     /**
      * Get optional meta and links rules
+     *
+     * @return array<string, mixed>
      */
     protected function getMetaLinksRules(): array
     {
@@ -57,6 +65,8 @@ abstract class BaseSchema
 
     /**
      * Get rules for simple object responses (non-JSON:API)
+     *
+     * @return array<string, mixed>
      */
     protected function getSimpleObjectRules(): array
     {
@@ -67,6 +77,8 @@ abstract class BaseSchema
 
     /**
      * Get rules for collection responses (non-JSON:API)
+     *
+     * @return array<string, mixed>
      */
     protected function getSimpleCollectionRules(): array
     {
@@ -78,6 +90,9 @@ abstract class BaseSchema
 
     /**
      * Merge multiple rule arrays
+     *
+     * @param  array<string, mixed>  ...$ruleArrays
+     * @return array<string, mixed>
      */
     protected function mergeRules(array ...$ruleArrays): array
     {

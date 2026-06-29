@@ -59,7 +59,10 @@ class Card extends Model
     public function oncard(): Collection
     {
         if (array_key_exists('oncard', $this->relationships)) {
-            return collect($this->relationships['oncard']);
+            /** @var iterable<int, mixed> $items */
+            $items = $this->relationships['oncard'];
+
+            return collect($items);
         }
 
         return collect([]);
@@ -81,7 +84,10 @@ class Card extends Model
     public function extraAttributes(): Collection
     {
         if (array_key_exists('attributes', $this->relationships)) {
-            return collect($this->relationships['attributes']);
+            /** @var iterable<int, mixed> $items */
+            $items = $this->relationships['attributes'];
+
+            return collect($items);
         }
 
         return collect([]);
@@ -111,7 +117,10 @@ class Card extends Model
     public function images(): Collection
     {
         if (array_key_exists('card-images', $this->relationships)) {
-            return collect($this->relationships['card-images']);
+            /** @var iterable<int, CardImage> $items */
+            $items = $this->relationships['card-images'];
+
+            return collect($items);
         }
 
         return collect([]);
@@ -145,6 +154,8 @@ class Card extends Model
 
     /**
      * Override the parent class implementation to correctly place all relationships.
+     *
+     * @param  array<string, mixed>  $relationships
      */
     public function setRelationships(array $relationships): void
     {

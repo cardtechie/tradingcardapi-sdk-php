@@ -83,7 +83,10 @@ class Set extends Model
     public function sources(): Collection
     {
         if (array_key_exists('set-sources', $this->relationships)) {
-            return collect($this->relationships['set-sources']);
+            /** @var iterable<int, SetSource> $items */
+            $items = $this->relationships['set-sources'];
+
+            return collect($items);
         }
 
         return collect([]);
@@ -132,7 +135,10 @@ class Set extends Model
     public function subsets(): Collection
     {
         if (array_key_exists('subsets', $this->relationships)) {
-            return collect($this->relationships['subsets']);
+            /** @var iterable<int, Set> $items */
+            $items = $this->relationships['subsets'];
+
+            return collect($items);
         }
 
         return collect([]);
@@ -154,7 +160,10 @@ class Set extends Model
     public function checklist(): Collection
     {
         if (array_key_exists('checklist', $this->relationships)) {
-            return collect($this->relationships['checklist']);
+            /** @var iterable<int, Card> $items */
+            $items = $this->relationships['checklist'];
+
+            return collect($items);
         }
 
         return collect([]);
@@ -214,6 +223,8 @@ class Set extends Model
 
     /**
      * Set the relationships for the object
+     *
+     * @param  array<string, mixed>  $relationships
      */
     // This is needed when we get the set list from the API
     public function setRelationships(array $relationships): void

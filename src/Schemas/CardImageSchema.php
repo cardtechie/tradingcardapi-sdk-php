@@ -11,6 +11,8 @@ class CardImageSchema extends BaseSchema
 {
     /**
      * Get validation rules for CardImage responses
+     *
+     * @return array<string, mixed>
      */
     public function getRules(): array
     {
@@ -23,6 +25,8 @@ class CardImageSchema extends BaseSchema
 
     /**
      * Get CardImage-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getCardImageSpecificRules(): array
     {
@@ -45,6 +49,8 @@ class CardImageSchema extends BaseSchema
 
     /**
      * Get validation rules for CardImage collection responses
+     *
+     * @return array<string, mixed>
      */
     public function getCollectionRules(): array
     {
@@ -57,6 +63,8 @@ class CardImageSchema extends BaseSchema
 
     /**
      * Get CardImage collection-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getCardImageCollectionSpecificRules(): array
     {

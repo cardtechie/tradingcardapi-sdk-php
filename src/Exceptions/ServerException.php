@@ -16,9 +16,9 @@ class ServerException extends TradingCardApiException
      * @param  int  $code  The exception code
      * @param  \Exception|null  $previous  The previous exception
      * @param  string|null  $apiErrorCode  The API error code
-     * @param  array  $apiErrors  The API errors array
+     * @param  array<int, array<string, mixed>>  $apiErrors  The API errors array
      * @param  int|null  $httpStatusCode  The HTTP status code
-     * @param  array  $context  Additional context for debugging
+     * @param  array<string, mixed>  $context  Additional context for debugging
      */
     public function __construct(
         string $message = 'Internal server error',

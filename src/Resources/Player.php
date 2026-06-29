@@ -30,8 +30,8 @@ class Player
     /**
      * Retrieve a raw collection of players
      *
-     * @param  array  $params  Query parameters
-     * @return Collection The players collection
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return Collection<int, mixed> The players collection
      *
      * @throws InvalidArgumentException
      */
@@ -49,6 +49,9 @@ class Player
      *
      * @deprecated use all()
      *
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return Collection<int, mixed>
+     *
      * @throws InvalidArgumentException
      */
     public function getList(array $params = []): Collection
@@ -59,8 +62,8 @@ class Player
     /**
      * Create a player
      *
-     * @param  array  $attributes  Player attributes
-     * @param  array  $relationships  Player relationships
+     * @param  array<string, mixed>  $attributes  Player attributes
+     * @param  array<string, mixed>  $relationships  Player relationships
      * @return PlayerModel The created player
      *
      * @throws InvalidArgumentException
@@ -93,7 +96,7 @@ class Player
      * Retrieve a player by ID
      *
      * @param  string  $id  Player ID
-     * @param  array  $params  Additional parameters (e.g., include relationships)
+     * @param  array<string, mixed>  $params  Additional parameters (e.g., include relationships)
      * @return PlayerModel The player
      *
      * @throws InvalidArgumentException
@@ -110,8 +113,8 @@ class Player
     /**
      * List players with pagination
      *
-     * @param  array  $params  Query parameters (limit, page, sort, filters, etc.)
-     * @return LengthAwarePaginator Paginated player results
+     * @param  array<string, mixed>  $params  Query parameters (limit, page, sort, filters, etc.)
+     * @return LengthAwarePaginator<int, mixed> Paginated player results
      *
      * @throws InvalidArgumentException
      */
@@ -144,8 +147,8 @@ class Player
      * Update a player
      *
      * @param  string  $id  Player ID
-     * @param  array  $attributes  Player attributes to update
-     * @param  array  $relationships  Player relationships to update
+     * @param  array<string, mixed>  $attributes  Player attributes to update
+     * @param  array<string, mixed>  $relationships  Player relationships to update
      * @return PlayerModel The updated player
      *
      * @throws InvalidArgumentException
@@ -192,7 +195,7 @@ class Player
     /**
      * List deleted players
      *
-     * @return LengthAwarePaginator Paginated deleted player results
+     * @return LengthAwarePaginator<int, mixed> Paginated deleted player results
      *
      * @throws InvalidArgumentException
      */

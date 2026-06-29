@@ -29,6 +29,9 @@ class Brand
     /**
      * Create a brand with the passed in attributes
      *
+     * @param  array<string, mixed>  $attributes  Brand attributes
+     * @param  array<string, mixed>  $relationships  Brand relationships
+     *
      * @throws InvalidArgumentException
      */
     public function create(array $attributes = [], array $relationships = []): BrandModel
@@ -58,6 +61,8 @@ class Brand
     /**
      * Retrieve a brand by ID
      *
+     * @param  array<string, mixed>  $params  Query parameters
+     *
      * @throws InvalidArgumentException
      */
     public function get(string $id, array $params = []): BrandModel
@@ -76,6 +81,9 @@ class Brand
 
     /**
      * Retrieve a list of brands
+     *
+     * @param  array<string, mixed>  $params  Query parameters
+     * @return LengthAwarePaginator<int, mixed>
      *
      * @throws InvalidArgumentException
      */
@@ -106,6 +114,9 @@ class Brand
 
     /**
      * Update a brand
+     *
+     * @param  array<string, mixed>  $attributes  Brand attributes to update
+     * @param  array<string, mixed>  $relationships  Brand relationships to update
      *
      * @throws InvalidArgumentException
      */

@@ -15,7 +15,7 @@ use Carbon\Carbon;
  * @property string $card_id Related card UUID
  * @property string $image_type Image type (front|back)
  * @property string $storage_path Storage path for the image
- * @property array $variants Thumbnail variant metadata
+ * @property array<string, mixed> $variants Thumbnail variant metadata
  * @property string $storage_disk Storage disk identifier
  * @property int $file_size File size in bytes
  * @property string $mime_type MIME type of the image
@@ -111,7 +111,7 @@ class CardImage extends Model
     /**
      * Get variants as array (handles object conversion).
      *
-     * @return array<string, array>
+     * @return array<string, array<string, mixed>>
      */
     private function getVariantsAsArray(): array
     {
@@ -130,7 +130,7 @@ class CardImage extends Model
     /**
      * Get the variants attribute as array.
      *
-     * @return array<string, array>|null
+     * @return array<string, array<string, mixed>>|null
      */
     public function getVariantsAttribute(): ?array
     {

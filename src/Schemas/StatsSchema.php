@@ -12,6 +12,8 @@ class StatsSchema extends BaseSchema
     /**
      * Get validation rules for Stats responses
      * Note: Stats responses typically don't follow JSON:API format
+     *
+     * @return array<string, mixed>
      */
     public function getRules(): array
     {
@@ -35,6 +37,8 @@ class StatsSchema extends BaseSchema
 
     /**
      * Get validation rules for specific resource type stats
+     *
+     * @return array<string, mixed>
      */
     public function getResourceStatsRules(string $resourceType): array
     {

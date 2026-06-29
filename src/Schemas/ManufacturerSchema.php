@@ -11,6 +11,8 @@ class ManufacturerSchema extends BaseSchema
 {
     /**
      * Get validation rules for Manufacturer responses
+     *
+     * @return array<string, mixed>
      */
     public function getRules(): array
     {
@@ -23,6 +25,8 @@ class ManufacturerSchema extends BaseSchema
 
     /**
      * Get validation rules for Manufacturer collection responses
+     *
+     * @return array<string, mixed>
      */
     public function getCollectionRules(): array
     {
@@ -35,6 +39,8 @@ class ManufacturerSchema extends BaseSchema
 
     /**
      * Get Manufacturer-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getManufacturerSpecificRules(): array
     {
@@ -54,6 +60,8 @@ class ManufacturerSchema extends BaseSchema
 
     /**
      * Get Manufacturer-specific validation rules for collections
+     *
+     * @return array<string, mixed>
      */
     private function getManufacturerCollectionSpecificRules(): array
     {

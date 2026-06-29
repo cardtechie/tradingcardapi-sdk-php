@@ -11,6 +11,8 @@ class ObjectAttributeSchema extends BaseSchema
 {
     /**
      * Get validation rules for ObjectAttribute responses
+     *
+     * @return array<string, mixed>
      */
     public function getRules(): array
     {
@@ -23,6 +25,8 @@ class ObjectAttributeSchema extends BaseSchema
 
     /**
      * Get ObjectAttribute-specific validation rules
+     *
+     * @return array<string, mixed>
      */
     private function getObjectAttributeSpecificRules(): array
     {
