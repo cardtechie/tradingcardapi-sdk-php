@@ -200,6 +200,79 @@ it('defaults main object meta/links to empty stdClass when absent (constructor p
     expect((array) $response->mainObject->getLinks())->toBe([]);
 });
 
+it('does not attach top-level meta/links to included models (constructor path)', function () {
+    // Decision for #303: top-level JSON:API meta/links are document-scoped and
+    // attach to the main parsed object only. Included relationship models must
+    // return an empty stdClass from getMeta()/getLinks(), even when the response
+    // carries top-level meta/links — copying document-scoped links onto an
+    // included resource would falsely advertise links describing the main
+    // collection.
+    $json = json_encode([
+        'data' => [
+            'id' => '123',
+            'type' => 'cards',
+            'attributes' => ['name' => 'Test Card'],
+        ],
+        'included' => [
+            [
+                'id' => '456',
+                'type' => 'players',
+                'attributes' => ['name' => 'Test Player'],
+            ],
+        ],
+        'meta' => ['total' => 100, 'per_page' => 10],
+        'links' => ['next' => 'https://api.example.com/cards?page=2', 'prev' => null],
+    ]);
+
+    $response = new Response($json);
+
+    // The main object reflects the top-level meta/links...
+    expect($response->mainObject->getMeta()->total)->toBe(100);
+    expect($response->mainObject->getLinks()->next)->toBe('https://api.example.com/cards?page=2');
+
+    // ...while the included model carries neither.
+    $includedPlayer = $response->relationships['players'][0];
+    expect($includedPlayer->getMeta())->toBeInstanceOf(stdClass::class);
+    expect($includedPlayer->getLinks())->toBeInstanceOf(stdClass::class);
+    expect((array) $includedPlayer->getMeta())->toBe([]);
+    expect((array) $includedPlayer->getLinks())->toBe([]);
+});
+
+it('does not attach top-level meta/links to included models (static parse path)', function () {
+    // Same #303 contract, exercised through the static parse() entrypoint so the
+    // two paths stay symmetric: included models get an empty stdClass for
+    // meta/links while the main object carries the top-level document meta/links.
+    $json = json_encode([
+        'data' => [
+            'id' => '123',
+            'type' => 'cards',
+            'attributes' => ['name' => 'Test Card'],
+        ],
+        'included' => [
+            [
+                'id' => '456',
+                'type' => 'players',
+                'attributes' => ['name' => 'Test Player'],
+            ],
+        ],
+        'meta' => ['total' => 100, 'per_page' => 10],
+        'links' => ['next' => 'https://api.example.com/cards?page=2', 'prev' => null],
+    ]);
+
+    $object = Response::parse($json);
+
+    // The main parsed object reflects the top-level meta/links...
+    expect($object->getMeta()->total)->toBe(100);
+    expect($object->getLinks()->next)->toBe('https://api.example.com/cards?page=2');
+
+    // ...while the included model carries neither.
+    $includedPlayer = $object->getRelationships()['players'][0];
+    expect($includedPlayer->getMeta())->toBeInstanceOf(stdClass::class);
+    expect($includedPlayer->getLinks())->toBeInstanceOf(stdClass::class);
+    expect((array) $includedPlayer->getMeta())->toBe([]);
+    expect((array) $includedPlayer->getLinks())->toBe([]);
+});
+
 it('handles meta data correctly', function () {
     $json = json_encode([
         'data' => [

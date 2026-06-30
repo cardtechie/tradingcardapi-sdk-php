@@ -133,6 +133,30 @@ $api = new TradingCardApi();
 $genres = $api->genre()->list();
 ```
 
+### Meta and links
+
+Top-level JSON:API `meta` and `links` are **document-scoped** — they describe the
+whole response (pagination totals, `self`/`next`/`prev` links). The SDK attaches
+them to the **main parsed object only**, and you read them with `getMeta()` /
+`getLinks()`:
+
+```php
+$cards = TradingCardApi::card()->list();
+
+$cards->getMeta()->total;        // e.g. 1500
+$cards->getLinks()->next;        // e.g. https://api.example.com/cards?page=2
+```
+
+Included relationship models do **not** carry the top-level meta/links — calling
+`getMeta()` / `getLinks()` on an included model returns an empty `stdClass` by
+design. Document-scoped links describe the main collection, so copying them onto
+an included resource (e.g. a sideloaded `Player`) would be misleading.
+
+```php
+$player = $cards->getRelationships()['players'][0];
+(array) $player->getMeta();       // []  — empty by design
+```
+
 ## 👥 Working with Players
 
 The Player resource provides comprehensive CRUD operations and relationship management:

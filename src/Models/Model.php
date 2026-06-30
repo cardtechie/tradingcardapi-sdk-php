@@ -94,6 +94,11 @@ class Model
      * This is the cross-parse-safe way to read a parse's meta — unlike the
      * static Response::getMeta(), it reflects this specific result and cannot
      * be clobbered by another parse.
+     *
+     * On an included relationship model this returns an empty stdClass by
+     * design: top-level JSON:API meta is document-scoped (it describes the whole
+     * response — pagination, totals, etc.) and is attached to the main parsed
+     * object only, never to included models. See #303.
      */
     public function getMeta(): object
     {
@@ -114,6 +119,11 @@ class Model
      * This is the cross-parse-safe way to read a parse's links — unlike the
      * static Response::getLinks(), it reflects this specific result and cannot
      * be clobbered by another parse.
+     *
+     * On an included relationship model this returns an empty stdClass by
+     * design: top-level JSON:API links are document-scoped (self/next/prev
+     * describe the whole response) and are attached to the main parsed object
+     * only, never to included models. See #303.
      */
     public function getLinks(): object
     {
