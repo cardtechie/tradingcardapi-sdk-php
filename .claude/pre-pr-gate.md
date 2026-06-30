@@ -36,8 +36,9 @@ The image bakes a root-owned `COMPOSER_HOME=/composer` and runs composer as root
 (`COMPOSER_ALLOW_SUPERUSER=1`), so the mapped host UID — which has no passwd
 entry, leaving `HOME` defaulting to the unwritable `/` — cannot write composer's
 cache/config under `/composer`. The `-e HOME=/tmp -e COMPOSER_HOME=/tmp/composer`
-overrides redirect both to writable tmpfs paths, keeping composer/Pest/Pint
-runnable as the mapped user. `composer.json`'s `config.allow-plugins` already
+overrides redirect both to writable paths inside the container (`/tmp` is
+world-writable in the image; these are ordinary container-filesystem paths, not
+a `--tmpfs` mount), keeping composer/Pest/Pint runnable as the mapped user. `composer.json`'s `config.allow-plugins` already
 pre-authorizes the Pest/PHPStan plugins, so running non-root does not trigger an
 interactive plugin prompt. The `docker build` line is unchanged — image layers
 are not bind-mounted, so root ownership inside the image is irrelevant.
