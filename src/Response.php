@@ -287,7 +287,13 @@ class Response
     }
 
     /**
-     * Get the included objects as an array
+     * Get the included objects as an array.
+     *
+     * Included relationship models intentionally do not receive the top-level
+     * meta/links: those are JSON:API document-scoped (they describe the whole
+     * response — pagination, totals, self/next/prev) and would be misleading on
+     * an included resource. They are attached to the main parsed object only,
+     * keeping this static path symmetric with the constructor path. See #303.
      *
      * @return array<string, mixed>
      */
