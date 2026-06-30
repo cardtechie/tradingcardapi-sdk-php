@@ -1,0 +1,1 @@
+- **[Issue #293]** Document that the `windows-latest` CI test leg was verified passing with the broad extension setup, resolving the #263 follow-up.
