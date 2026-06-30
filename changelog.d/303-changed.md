@@ -1,0 +1,1 @@
+- **[Issue #303]** Document that top-level meta/links describe the whole response and attach to the main parsed object only; included relationship models intentionally do not carry them.
