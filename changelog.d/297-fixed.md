@@ -1,0 +1,1 @@
+- **[Issue #297]** Run the pre-PR gate's docker commands as the host user with writable HOME/COMPOSER_HOME so they no longer leave root-owned vendor/ in the bind-mounted workspace.
