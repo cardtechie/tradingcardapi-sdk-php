@@ -52,12 +52,21 @@ commits_since_tag=$(git rev-list --count "${latest_tag}..HEAD" 2>/dev/null || ec
 # Generate version based on branch
 case "$branch" in
     main|master)
-        # Main branch: increment patch for next release
+        # Main branch: derive the intended release version from CHANGELOG.md.
+        # The patch-only increment used previously cannot tell a patch release
+        # from a minor/major one, so a 0.2.0 release once emitted 0.1.19 (#186).
+        # Read the newest versioned section from CHANGELOG.md; the ^## \[[0-9]
+        # anchor skips the leading "## [Unreleased]" heading.
+        changelog_version=$(grep -m1 '^## \[[0-9]' CHANGELOG.md 2>/dev/null | sed 's/## \[\([^]]*\)\].*/\1/')
         if [[ "$commits_since_tag" -eq 0 ]]; then
-            # Exact tag match
+            # Exact tag match - emit the tag itself
             version="$major.$minor.$patch"
+        elif [[ -n "$changelog_version" && "$changelog_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            # Commits after the tag (release being prepared) - use the version
+            # documented in CHANGELOG.md so minor/major bumps tag correctly
+            version="$changelog_version"
         else
-            # Commits after tag - next patch version
+            # Fallback: CHANGELOG missing or unparseable - next patch version
             version="$major.$minor.$((patch + 1))"
         fi
         ;;
