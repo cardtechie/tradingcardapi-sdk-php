@@ -1,0 +1,1 @@
+- **[Issue #155]** Document that set names now include a hobby-convention serial suffix (`/X`, `1/1`) and how to read the raw `serial` value versus the formatted `name`.
