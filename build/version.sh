@@ -56,17 +56,32 @@ case "$branch" in
         # The patch-only increment used previously cannot tell a patch release
         # from a minor/major one, so a 0.2.0 release once emitted 0.1.19 (#186).
         # Read the newest versioned section from CHANGELOG.md; the ^## \[[0-9]
-        # anchor skips the leading "## [Unreleased]" heading.
-        changelog_version=$(grep -m1 '^## \[[0-9]' CHANGELOG.md 2>/dev/null | sed 's/## \[\([^]]*\)\].*/\1/')
+        # anchor skips the leading "## [Unreleased]" heading. Resolve the file
+        # via the git top-level so the read works regardless of the current
+        # working directory (every other step here uses cwd-agnostic git).
+        repo_root=$(git rev-parse --show-toplevel 2>/dev/null || echo ".")
+        changelog_version=$(grep -m1 '^## \[[0-9]' "$repo_root/CHANGELOG.md" 2>/dev/null | sed 's/## \[\([^]]*\)\].*/\1/')
+        # Only trust the CHANGELOG version when it is strictly newer than the
+        # latest tag. If it is equal to or behind the tag (fragments not yet
+        # collated), using it would re-emit a released version or regress it and
+        # cause a duplicate/invalid tag - fall back to a patch bump instead.
+        changelog_is_newer=""
+        if [[ "$changelog_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            newest=$(printf '%s\n%s\n' "$major.$minor.$patch" "$changelog_version" | sort -V | tail -n1)
+            if [[ "$newest" == "$changelog_version" && "$changelog_version" != "$major.$minor.$patch" ]]; then
+                changelog_is_newer="yes"
+            fi
+        fi
         if [[ "$commits_since_tag" -eq 0 ]]; then
             # Exact tag match - emit the tag itself
             version="$major.$minor.$patch"
-        elif [[ -n "$changelog_version" && "$changelog_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        elif [[ -n "$changelog_is_newer" ]]; then
             # Commits after the tag (release being prepared) - use the version
             # documented in CHANGELOG.md so minor/major bumps tag correctly
             version="$changelog_version"
         else
-            # Fallback: CHANGELOG missing or unparseable - next patch version
+            # Fallback: CHANGELOG missing/unparseable, or not ahead of the latest
+            # tag - next patch version
             version="$major.$minor.$((patch + 1))"
         fi
         ;;
