@@ -696,7 +696,7 @@ This project maintains high code quality standards:
 
 ### Upgrade Notes (0.3.0)
 
-The 0.3.0 Resource-layer standardization introduces two consumer-visible changes:
+The 0.3.0 Resource-layer standardization introduces three consumer-visible changes:
 
 - **`getList()` is deprecated in favor of `all()`** on the `Player`, `Team`, and `Playerteam` resources. `getList()` still works (it delegates to `all()` with identical behavior) but is marked `@deprecated`, so static analysis (e.g. PHPStan `method.deprecated`) will flag remaining call sites. Migrate `->getList(...)` to `->all(...)`.
 - **`RateLimitException::__construct` positional slots were realigned** with the base `TradingCardApiException`: `$httpStatusCode` (default `429`) is now positional slot 6 and `$context` slot 7. Construct `RateLimitException` with **named arguments** to be safe against the slot change — see the [Error Handling Guide](docs/ERROR-HANDLING.md#ratelimitexception-429).
