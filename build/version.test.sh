@@ -19,7 +19,13 @@
 # Run locally with `bash build/version.test.sh` or `make test-version`.
 # Exits non-zero if any assertion fails.
 
-set -uo pipefail
+# Fail fast on any unexpected command failure: this is a regression guard, so a
+# broken setup command (mktemp, git init/tag/commit) must abort rather than run
+# assertions against a half-built repo and emit a misleading result. Note bash's
+# errexit is not inherited by command substitutions unless inherit_errexit is set
+# (bash 4.4+), and this harness must stay runnable under macOS's bash 3.2 — so the
+# one setup helper that runs inside $( ) (new_repo) fails fast explicitly below.
+set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 VERSION_SH="$SCRIPT_DIR/version.sh"
@@ -37,14 +43,19 @@ cleanup() { rm -rf "$TMP_ROOT"; }
 trap cleanup EXIT
 
 # Create a fresh, isolated git repo and print its path.
+# Runs inside a command substitution ($(new_repo)), where errexit is NOT in
+# effect (no inherit_errexit under bash 3.2), so chain the setup explicitly and
+# return non-zero on any failure. The non-zero return propagates out of the
+# command substitution and trips the caller's `set -e`, aborting the harness
+# instead of yielding a path to a half-initialised repo.
 new_repo() {
     local dir
-    dir=$(mktemp -d "$TMP_ROOT/repo.XXXXXX")
-    git -C "$dir" init -q
-    git -C "$dir" config user.email "test@example.com"
-    git -C "$dir" config user.name "version.sh test"
-    git -C "$dir" config commit.gpgsign false
-    git -C "$dir" config tag.gpgsign false
+    dir=$(mktemp -d "$TMP_ROOT/repo.XXXXXX") &&
+    git -C "$dir" init -q &&
+    git -C "$dir" config user.email "test@example.com" &&
+    git -C "$dir" config user.name "version.sh test" &&
+    git -C "$dir" config commit.gpgsign false &&
+    git -C "$dir" config tag.gpgsign false || return 1
     printf '%s' "$dir"
 }
 
@@ -166,7 +177,10 @@ assert_eq "no tags -> 0.1.0-dev.<count>" "0.1.0-dev.1" "$(run_version "$repo" --
 repo=$(new_repo)
 commit "$repo"; tag "$repo" 0.2.0; commit "$repo"
 assert_eq "unknown branch -> dev.N" "0.2.0-dev.1" "$(run_version "$repo" --branch=weird)"
-( cd "$repo" && bash "$VERSION_SH" --branch=weird >/dev/null 2>&1 ); rc=$?
+# Capture the exit code deliberately; the `|| rc=$?` keeps a non-zero exit from
+# tripping `set -e` here, since asserting on that code is the whole point.
+rc=0
+( cd "$repo" && bash "$VERSION_SH" --branch=weird >/dev/null 2>&1 ) || rc=$?
 assert_eq "unknown branch still exits 0" "0" "$rc"
 
 # --- summary -----------------------------------------------------------------
