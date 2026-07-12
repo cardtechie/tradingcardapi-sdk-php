@@ -35,6 +35,19 @@ if [[ ! -f "$VERSION_SH" ]]; then
     exit 2
 fi
 
+# version.sh's main-branch path compares the CHANGELOG version against the latest
+# tag with `sort -V` (version sort). Current macOS and GNU coreutils both support
+# it, but an older/pure-BSD `sort` does not — there it would silently mis-order
+# versions and make the main-branch cases fail with a confusing, unrelated-looking
+# assertion diff. Preflight it here so an unsupported `sort` fails fast with a
+# clear message instead.
+if ! printf '0.1.0\n0.2.0\n' | sort -V >/dev/null 2>&1; then
+    echo "ERROR: 'sort -V' (version sort) is not supported by this environment's sort;" >&2
+    echo "       version.sh's main-branch version comparison requires it." >&2
+    echo "       Install GNU coreutils (e.g. 'brew install coreutils' and use gsort) or run on a platform whose sort supports -V." >&2
+    exit 2
+fi
+
 PASS=0
 FAIL=0
 
@@ -175,13 +188,13 @@ assert_eq "develop with 2 commits -> beta-2" "0.3.0.beta-2" "$(run_version "$rep
 repo=$(new_repo)
 commit "$repo"; tag "$repo" 0.1.0
 assert_eq "release branch, no RC tags -> rc-1" \
-    "0.2.0.rc-1" "$(run_version "$repo" --branch=release/183-phpsdk-0.2.0)"
+    "0.2.0.rc-1" "$(run_version "$repo" --branch=release/0.2.0)"
 
 # --- release/*: existing rc-1 -> rc-2 ----------------------------------------
 repo=$(new_repo)
 commit "$repo"; tag "$repo" 0.2.0.rc-1
 assert_eq "release branch, existing rc-1 -> rc-2" \
-    "0.2.0.rc-2" "$(run_version "$repo" --branch=release/183-phpsdk-0.2.0)"
+    "0.2.0.rc-2" "$(run_version "$repo" --branch=release/0.2.0)"
 
 # --- hotfix/*: patch bump with hotfix suffix ---------------------------------
 repo=$(new_repo)
