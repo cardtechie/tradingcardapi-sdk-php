@@ -75,3 +75,17 @@ jobs:
 
       - name: Execute tests
         run: vendor/bin/pest
+
+  version-script:
+    # The build/version.sh version-derivation logic (branch matrix + the
+    # CHANGELOG-read/patch-fallback paths added in #186) has no PHP, so it is
+    # guarded by a standalone bash harness rather than the Pest matrix above.
+    # Runs once on ubuntu-latest — no PHP/composer needed, just git + bash.
+    name: version.sh regression
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Run version.sh regression harness
+        run: bash build/version.test.sh

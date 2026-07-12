@@ -1,4 +1,4 @@
-.PHONY: help test test-coverage analyse format install up down shell status build ensure-running lint-md fix-md
+.PHONY: help test test-version test-coverage analyse format install up down shell status build ensure-running lint-md fix-md
 
 # Default target
 help: ## Show this help message
@@ -42,6 +42,9 @@ install: ## Install composer dependencies
 test: ## Run all tests using Pest
 	@make ensure-running
 	docker compose exec dev composer test
+
+test-version: ## Run the build/version.sh regression harness (host bash, no Docker)
+	@bash build/version.test.sh
 
 test-coverage: ## Run tests with coverage report
 	@make ensure-running
