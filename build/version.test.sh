@@ -80,10 +80,24 @@ write_changelog() {
     } > "$dir/CHANGELOG.md"
 }
 
-# Run version.sh inside the repo, returning only stdout (stderr suppressed so
-# warnings/parse notices do not pollute the asserted value).
+# Run version.sh inside the repo, returning only stdout. stderr is captured and
+# suppressed on success (so warnings/parse notices do not pollute the asserted
+# value), but surfaced to the harness's own stderr when version.sh exits
+# non-zero, so a regression that makes the script fail is diagnosable instead of
+# silently yielding an empty/parse-failed value that fails an assertion with no
+# clue why.
 run_version() {
-    ( cd "$1" && bash "$VERSION_SH" "$2" 2>/dev/null )
+    local err="$TMP_ROOT/run_version.stderr"
+    local out rc=0
+    out=$( cd "$1" && bash "$VERSION_SH" "$2" 2>"$err" ) || rc=$?
+    if (( rc != 0 )); then
+        printf 'run_version: version.sh exited %d for [%s] in %s; stderr follows:\n' \
+            "$rc" "$2" "$1" >&2
+        cat "$err" >&2
+    fi
+    rm -f "$err"
+    printf '%s' "$out"
+    return "$rc"
 }
 
 assert_eq() {
@@ -95,6 +109,19 @@ assert_eq() {
         FAIL=$((FAIL + 1))
         printf 'FAIL - %s\n         expected: [%s]\n         actual:   [%s]\n' \
             "$label" "$expected" "$actual"
+    fi
+}
+
+# Assert that $3 (haystack) contains $2 (needle) as a substring.
+assert_contains() {
+    local label="$1" needle="$2" haystack="$3"
+    if [[ "$haystack" == *"$needle"* ]]; then
+        PASS=$((PASS + 1))
+        printf 'ok   - %s\n' "$label"
+    else
+        FAIL=$((FAIL + 1))
+        printf 'FAIL - %s\n         expected substring: [%s]\n         actual:   [%s]\n' \
+            "$label" "$needle" "$haystack"
     fi
 }
 
@@ -177,11 +204,17 @@ assert_eq "no tags -> 0.1.0-dev.<count>" "0.1.0-dev.1" "$(run_version "$repo" --
 repo=$(new_repo)
 commit "$repo"; tag "$repo" 0.2.0; commit "$repo"
 assert_eq "unknown branch -> dev.N" "0.2.0-dev.1" "$(run_version "$repo" --branch=weird)"
-# Capture the exit code deliberately; the `|| rc=$?` keeps a non-zero exit from
-# tripping `set -e` here, since asserting on that code is the whole point.
+# Capture the exit code AND stderr deliberately; the `|| rc=$?` keeps a non-zero
+# exit from tripping `set -e` here, since asserting on that code is the whole
+# point. `2>&1 >/dev/null` routes stderr into the command substitution while
+# discarding stdout, so weird_stderr holds only the warning stream.
 rc=0
-( cd "$repo" && bash "$VERSION_SH" --branch=weird >/dev/null 2>&1 ) || rc=$?
+weird_stderr=$( cd "$repo" && bash "$VERSION_SH" --branch=weird 2>&1 >/dev/null ) || rc=$?
 assert_eq "unknown branch still exits 0" "0" "$rc"
+# The case claims to validate a stderr warning; actually assert it is emitted so
+# a regression that drops the warning is caught rather than silently passing.
+assert_contains "unknown branch warns on stderr" \
+    "WARNING: Unsupported branch type 'weird'" "$weird_stderr"
 
 # --- summary -----------------------------------------------------------------
 echo ""
