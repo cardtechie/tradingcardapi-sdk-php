@@ -142,80 +142,95 @@ assert_contains() {
     fi
 }
 
+# Run version.sh for a repo+flag and assert BOTH the emitted version and a clean
+# (zero) exit. The bare `"$(run_version ...)"`-as-argument form used previously
+# discarded run_version's exit code (command substitution's status is not checked
+# by `set -e` when the result is an argument), so a regression that made
+# version.sh exit non-zero while still printing the right version would pass
+# silently. Capturing rc via `|| rc=$?` keeps that non-zero exit from tripping
+# `set -e` here so we can assert on it — the whole point.
+assert_version() {
+    local label="$1" expected="$2" repo="$3" flag="$4"
+    local actual rc=0
+    actual=$(run_version "$repo" "$flag") || rc=$?
+    assert_eq "$label" "$expected" "$actual"
+    assert_eq "$label (exit 0)" "0" "$rc"
+}
+
 # --- main: CHANGELOG-read (minor/major bump) ---------------------------------
 # Commit after tag 0.2.0 with a newer CHANGELOG top section -> read 0.3.0.
 repo=$(new_repo)
 commit "$repo"; tag "$repo" 0.2.0; commit "$repo"
 write_changelog "$repo" 0.3.0
-assert_eq "main reads newer CHANGELOG version" "0.3.0" "$(run_version "$repo" --branch=main)"
+assert_version "main reads newer CHANGELOG version" "0.3.0" "$repo" --branch=main
 
 # --- main: patch fallback, missing CHANGELOG ---------------------------------
 repo=$(new_repo)
 commit "$repo"; tag "$repo" 0.2.0; commit "$repo"
-assert_eq "main patch-fallback on missing CHANGELOG" "0.2.1" "$(run_version "$repo" --branch=main)"
+assert_version "main patch-fallback on missing CHANGELOG" "0.2.1" "$repo" --branch=main
 
 # --- main: patch fallback, unparseable CHANGELOG (Unreleased only) -----------
 repo=$(new_repo)
 commit "$repo"; tag "$repo" 0.2.0; commit "$repo"
 write_changelog "$repo"
-assert_eq "main patch-fallback on unparseable CHANGELOG" "0.2.1" "$(run_version "$repo" --branch=main)"
+assert_version "main patch-fallback on unparseable CHANGELOG" "0.2.1" "$repo" --branch=main
 
 # --- main: patch fallback, CHANGELOG not newer than tag ----------------------
 # CHANGELOG top equals the tag -> strictly-newer guard rejects it -> patch bump.
 repo=$(new_repo)
 commit "$repo"; tag "$repo" 0.2.0; commit "$repo"
 write_changelog "$repo" 0.2.0
-assert_eq "main patch-fallback when CHANGELOG equals tag" "0.2.1" "$(run_version "$repo" --branch=main)"
+assert_version "main patch-fallback when CHANGELOG equals tag" "0.2.1" "$repo" --branch=main
 
 # --- main: exact tag emits the tag itself ------------------------------------
 repo=$(new_repo)
 commit "$repo"; tag "$repo" 0.2.0
 write_changelog "$repo" 0.3.0
-assert_eq "main on exact tag emits the tag" "0.2.0" "$(run_version "$repo" --branch=main)"
+assert_version "main on exact tag emits the tag" "0.2.0" "$repo" --branch=main
 
 # --- main: --main alias behaves like --branch=main ---------------------------
 repo=$(new_repo)
 commit "$repo"; tag "$repo" 0.2.0
-assert_eq "--main alias resolves to main branch" "0.2.0" "$(run_version "$repo" --main)"
+assert_version "--main alias resolves to main branch" "0.2.0" "$repo" --main
 
 # --- develop: exact tag -> next minor beta-1 ---------------------------------
 repo=$(new_repo)
 commit "$repo"; tag "$repo" 0.2.0
-assert_eq "develop on exact tag -> beta-1" "0.3.0.beta-1" "$(run_version "$repo" --branch=develop)"
+assert_version "develop on exact tag -> beta-1" "0.3.0.beta-1" "$repo" --branch=develop
 
 # --- develop: N commits since tag -> beta-N ----------------------------------
 repo=$(new_repo)
 commit "$repo"; tag "$repo" 0.2.0; commit "$repo"; commit "$repo"
-assert_eq "develop with 2 commits -> beta-2" "0.3.0.beta-2" "$(run_version "$repo" --branch=develop)"
+assert_version "develop with 2 commits -> beta-2" "0.3.0.beta-2" "$repo" --branch=develop
 
 # --- release/*: no existing RC tags -> rc-1 ----------------------------------
 repo=$(new_repo)
 commit "$repo"; tag "$repo" 0.1.0
-assert_eq "release branch, no RC tags -> rc-1" \
-    "0.2.0.rc-1" "$(run_version "$repo" --branch=release/0.2.0)"
+assert_version "release branch, no RC tags -> rc-1" \
+    "0.2.0.rc-1" "$repo" --branch=release/0.2.0
 
 # --- release/*: existing rc-1 -> rc-2 ----------------------------------------
 repo=$(new_repo)
 commit "$repo"; tag "$repo" 0.2.0.rc-1
-assert_eq "release branch, existing rc-1 -> rc-2" \
-    "0.2.0.rc-2" "$(run_version "$repo" --branch=release/0.2.0)"
+assert_version "release branch, existing rc-1 -> rc-2" \
+    "0.2.0.rc-2" "$repo" --branch=release/0.2.0
 
 # --- hotfix/*: patch bump with hotfix suffix ---------------------------------
 repo=$(new_repo)
 commit "$repo"; tag "$repo" 0.2.0; commit "$repo"
-assert_eq "hotfix branch -> patch + hotfix suffix" \
-    "0.2.1-hotfix.foo.1" "$(run_version "$repo" --branch=hotfix/foo)"
+assert_version "hotfix branch -> patch + hotfix suffix" \
+    "0.2.1-hotfix.foo.1" "$repo" --branch=hotfix/foo
 
 # --- feature/*: alpha with commit count --------------------------------------
 repo=$(new_repo)
 commit "$repo"; tag "$repo" 0.2.0; commit "$repo"
-assert_eq "feature branch -> alpha.N" \
-    "0.2.0-alpha.1" "$(run_version "$repo" --branch=feature/bar)"
+assert_version "feature branch -> alpha.N" \
+    "0.2.0-alpha.1" "$repo" --branch=feature/bar
 
 # --- no tags: dev version with commit count ----------------------------------
 repo=$(new_repo)
 commit "$repo"
-assert_eq "no tags -> 0.1.0-dev.<count>" "0.1.0-dev.1" "$(run_version "$repo" --branch=main)"
+assert_version "no tags -> 0.1.0-dev.<count>" "0.1.0-dev.1" "$repo" --branch=main
 
 # --- unknown branch type: dev version + stderr warning, exit 0 ---------------
 repo=$(new_repo)
