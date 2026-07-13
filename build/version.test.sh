@@ -44,7 +44,11 @@ fi
 if ! printf '0.1.0\n0.2.0\n' | sort -V >/dev/null 2>&1; then
     echo "ERROR: 'sort -V' (version sort) is not supported by this environment's sort;" >&2
     echo "       version.sh's main-branch version comparison requires it." >&2
-    echo "       Install GNU coreutils (e.g. 'brew install coreutils' and use gsort) or run on a platform whose sort supports -V." >&2
+    echo "       This harness and version.sh call 'sort -V' directly, so GNU sort must be" >&2
+    echo "       the 'sort' found on PATH. On macOS: 'brew install coreutils' installs GNU" >&2
+    echo "       sort as 'gsort' — that alone does NOT help; put its gnubin dir first on PATH" >&2
+    echo "       (e.g. PATH=\"\$(brew --prefix coreutils)/libexec/gnubin:\$PATH\") so plain" >&2
+    echo "       'sort' resolves to GNU sort. Otherwise run on a platform whose 'sort' supports -V." >&2
     exit 2
 fi
 
