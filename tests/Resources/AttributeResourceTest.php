@@ -169,6 +169,7 @@ it('can update an attribute', function () {
     ];
 
     $result = $this->attributeResource->update('123', $attributes);
+    expect($this->mockHandler->getLastRequest()->getMethod())->toBe('PATCH');
 
     expect($result)->toBeInstanceOf(AttributeModel::class);
 });

@@ -171,6 +171,7 @@ it('can update a set', function () {
     ];
 
     $result = $this->setResource->update('123', $attributes);
+    expect($this->mockHandler->getLastRequest()->getMethod())->toBe('PATCH');
 
     expect($result)->toBeInstanceOf(SetModel::class);
 });

@@ -223,6 +223,7 @@ it('can update a manufacturer', function () {
     ];
 
     $result = $this->manufacturerResource->update('123', $attributes);
+    expect($this->mockHandler->getLastRequest()->getMethod())->toBe('PATCH');
 
     expect($result)->toBeInstanceOf(ManufacturerModel::class);
 });

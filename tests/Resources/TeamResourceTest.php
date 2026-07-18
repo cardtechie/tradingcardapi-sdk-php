@@ -300,6 +300,7 @@ it('can update a team', function () {
     ];
 
     $result = $this->teamResource->update('123', $attributes);
+    expect($this->mockHandler->getLastRequest()->getMethod())->toBe('PATCH');
 
     expect($result)->toBeInstanceOf(TeamModel::class);
     expect($result->id)->toBe('123');
