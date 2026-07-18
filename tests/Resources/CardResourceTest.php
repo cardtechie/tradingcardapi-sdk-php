@@ -132,7 +132,7 @@ it('can update a card', function () {
         ->andReturn($tokenResponse);
 
     $client->shouldReceive('request')
-        ->with('PUT', '/v1/cards/123', m::type('array'))
+        ->with('PATCH', '/v1/cards/123', m::type('array'))
         ->once()
         ->andReturn($cardResponse);
 

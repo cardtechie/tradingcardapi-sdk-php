@@ -223,6 +223,7 @@ it('can update a year', function () {
     ];
 
     $result = $this->yearResource->update('123', $attributes);
+    expect($this->mockHandler->getLastRequest()->getMethod())->toBe('PATCH');
 
     expect($result)->toBeInstanceOf(YearModel::class);
 });

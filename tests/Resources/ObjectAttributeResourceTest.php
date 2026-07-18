@@ -229,6 +229,7 @@ it('can update an object attribute', function () {
     ];
 
     $result = $this->objectAttributeResource->update('123', $attributes);
+    expect($this->mockHandler->getLastRequest()->getMethod())->toBe('PATCH');
 
     expect($result)->toBeInstanceOf(ObjectAttributeModel::class);
 });

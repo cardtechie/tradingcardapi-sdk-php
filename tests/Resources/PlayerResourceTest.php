@@ -302,7 +302,7 @@ it('can update a player', function () {
         ->andReturn($tokenResponse);
 
     $client->shouldReceive('request')
-        ->with('PUT', '/v1/players/123', m::type('array'))
+        ->with('PATCH', '/v1/players/123', m::type('array'))
         ->once()
         ->andReturn($playerResponse);
 
