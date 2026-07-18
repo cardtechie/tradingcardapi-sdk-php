@@ -95,7 +95,20 @@ jobs:
           # origin/main; a branch carrying manual commits is not. Only refresh when
           # the branch is absent or is such an ancestor; otherwise leave it untouched
           # for the human to finish (the existing-PR reuse below still fires).
-          git fetch origin "$SYNC_BRANCH" 2>/dev/null || true
+          # Fetch the sync branch so the ancestry guard below sees its real tip.
+          # Tolerate ONLY the "branch doesn't exist on origin yet" case; let real
+          # fetch failures (auth/network) fail the run rather than silently
+          # misclassifying an existing sync branch as absent and dropping into the
+          # force-update path below (which could clobber in-progress resolution).
+          if ! fetch_err=$(git fetch origin "$SYNC_BRANCH" 2>&1); then
+            if printf '%s\n' "$fetch_err" | grep -qi "couldn't find remote ref"; then
+              echo "Sync branch $SYNC_BRANCH does not exist on origin yet; will create it below."
+            else
+              printf '%s\n' "$fetch_err" >&2
+              echo "Unexpected error fetching $SYNC_BRANCH (not a missing-branch case); failing the run for diagnosis." >&2
+              exit 1
+            fi
+          fi
           if git rev-parse --verify --quiet "origin/$SYNC_BRANCH" >/dev/null \
              && ! git merge-base --is-ancestor "origin/$SYNC_BRANCH" origin/main; then
             echo "Sync branch $SYNC_BRANCH has commits beyond main (manual conflict resolution in progress); leaving it untouched to avoid clobbering that work."
