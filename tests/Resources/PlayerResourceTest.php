@@ -377,7 +377,10 @@ it('can list deleted players', function () {
         ->andReturn($tokenResponse);
 
     $client->shouldReceive('request')
-        ->with('GET', '/v1/players/deleted', m::type('array'))
+        ->with('GET', m::on(function ($url) {
+            return parse_url($url, PHP_URL_PATH) === '/v1/players'
+                && str_contains(rawurldecode($url), 'filter[status]=deleted');
+        }), m::type('array'))
         ->once()
         ->andReturn($deletedPlayersResponse);
 
@@ -415,7 +418,9 @@ it('can get a deleted player by id', function () {
         ->andReturn($tokenResponse);
 
     $client->shouldReceive('request')
-        ->with('GET', '/v1/players/123/deleted', m::type('array'))
+        ->with('GET', '/v1/players/123', m::on(function ($options) {
+            return ($options['query']['include_trashed'] ?? null) === 'true';
+        }))
         ->once()
         ->andReturn($deletedPlayerResponse);
 
