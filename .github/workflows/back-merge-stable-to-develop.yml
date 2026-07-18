@@ -122,29 +122,15 @@ jobs:
             exit 0
           fi
 
-          # Label skip-changelog: the sync PR carries no changelog.d/ fragment,
-          # and the changelog-fragment check is bypassed by that label. Ensure the
-          # label exists first (create-if-missing) — otherwise gh pr create errors
-          # out on an unknown label and no conflict PR is opened.
-          gh label create skip-changelog \
-            --description "Skip the changelog-fragment check" \
-            --color ededed 2>/dev/null || true
-
-          # Open the conflict PR. The label create/apply is best-effort: if the PAT
-          # lacks label permissions the label stays absent and the labeled create
-          # fails, so fall back to creating the PR without --label. Getting the PR
-          # opened (so the human can resolve the conflicts) matters more than the
-          # changelog-fragment bypass, which a maintainer can re-add by hand.
-          if ! gh pr create \
+          # Open the conflict PR. The changelog-fragment check
+          # (.github/workflows/changelog-fragment-check.yml) is keyed on changed
+          # paths, not PR labels: it exempts PRs that touch no src/ or tests/
+          # files and otherwise requires a changelog.d/<num>-<type>.md fragment.
+          # There is no label-based bypass, so we create the PR without one and
+          # call out the fragment requirement in the body for whoever resolves
+          # the conflicts.
+          gh pr create \
             --base develop \
             --head "$SYNC_BRANCH" \
             --title "Sync main into develop" \
-            --label skip-changelog \
-            --body "Automated back-merge of \`main\` into \`develop\` could not be applied cleanly; resolve the conflicts here."; then
-            echo "Labeled PR create failed (skip-changelog label likely absent); retrying without --label."
-            gh pr create \
-              --base develop \
-              --head "$SYNC_BRANCH" \
-              --title "Sync main into develop" \
-              --body "Automated back-merge of \`main\` into \`develop\` could not be applied cleanly; resolve the conflicts here."
-          fi
+            --body "Automated back-merge of \`main\` into \`develop\` could not be applied cleanly; resolve the conflicts here. If the resolution touches \`src/\` or \`tests/\`, the changelog-fragment check requires a \`changelog.d/<num>-<type>.md\` fragment before this PR can merge."
