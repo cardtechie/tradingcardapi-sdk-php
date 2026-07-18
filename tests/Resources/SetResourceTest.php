@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use CardTechie\TradingCardApiSdk\DTOs\Set\ChecklistResponse;
+use CardTechie\TradingCardApiSdk\DTOs\Set\ChecklistV2Response;
 use CardTechie\TradingCardApiSdk\Models\Set as SetModel;
 use CardTechie\TradingCardApiSdk\Resources\Set;
 use GuzzleHttp\Client;
@@ -191,6 +192,96 @@ it('can get checklist for a set', function () {
     expect($result->checklist)->toBe(['card1', 'card2', 'card3']);
     expect($result->missing)->toBe(['card4', 'card5']);
     expect($result->totalCards)->toBeNull();
+});
+
+it('requests the bare v1 checklist path for a no-arg call', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => ['checklist' => [], 'missing' => []],
+        ]))
+    );
+
+    $this->setResource->checklist('123');
+
+    $uri = $this->mockHandler->getLastRequest()->getUri();
+    expect($uri->getPath())->toBe('/v1/sets/123/checklist');
+    expect($uri->getQuery())->toBe('');
+});
+
+it('forwards page, per_page and format params on the v1 checklist request', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => ['checklist' => [], 'missing' => []],
+        ]))
+    );
+
+    $this->setResource->checklist('123', [
+        'page' => 2,
+        'per_page' => 100,
+        'format' => 'compact',
+    ]);
+
+    $query = $this->mockHandler->getLastRequest()->getUri()->getQuery();
+    expect($query)->toContain('page=2');
+    expect($query)->toContain('per_page=100');
+    expect($query)->toContain('format=compact');
+});
+
+it('requests the v2 checklist path with include and pagination params', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                ['type' => 'cards', 'id' => '1'],
+            ],
+            'included' => [
+                ['type' => 'sets', 'id' => '123'],
+            ],
+            'meta' => [
+                'pagination' => [
+                    'current_page' => 1,
+                    'per_page' => 50,
+                    'total' => 1,
+                    'total_pages' => 1,
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->setResource->checklistV2('123', [
+        'include' => 'set,oncard,attributes',
+        'per_page' => 50,
+        'page' => 1,
+    ]);
+
+    $uri = $this->mockHandler->getLastRequest()->getUri();
+    expect($uri->getPath())->toBe('/v2/sets/123/checklist');
+    $query = $uri->getQuery();
+    expect($query)->toContain('include=set');
+    expect($query)->toContain('oncard');
+    expect($query)->toContain('attributes');
+    expect($query)->toContain('per_page=50');
+    expect($query)->toContain('page=1');
+
+    expect($result)->toBeInstanceOf(ChecklistV2Response::class);
+    expect($result->cards)->toHaveCount(1);
+    expect($result->set)->not->toBeNull();
+    expect($result->perPage)->toBe(50);
+});
+
+it('requests the bare v2 checklist path for a no-arg call', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [],
+            'included' => [],
+        ]))
+    );
+
+    $result = $this->setResource->checklistV2('123');
+
+    $uri = $this->mockHandler->getLastRequest()->getUri();
+    expect($uri->getPath())->toBe('/v2/sets/123/checklist');
+    expect($uri->getQuery())->toBe('');
+    expect($result)->toBeInstanceOf(ChecklistV2Response::class);
 });
 
 it('can add missing cards to a set', function () {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CardTechie\TradingCardApiSdk\Resources;
 
 use CardTechie\TradingCardApiSdk\DTOs\Set\ChecklistResponse;
+use CardTechie\TradingCardApiSdk\DTOs\Set\ChecklistV2Response;
 use CardTechie\TradingCardApiSdk\Models\Set as SetModel;
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Response;
@@ -150,18 +151,72 @@ class Set
     }
 
     /**
-     * Get the checklist for a set.
+     * Get the checklist for a set (V1 endpoint).
      *
      * Returns a typed {@see ChecklistResponse} carrying the cards on the
      * checklist, the cards still missing, and the total card count.
      *
+     * Optional query parameters are passed through verbatim to
+     * `GET /v1/sets/{id}/checklist`:
+     *  - `page` — 1-indexed page number.
+     *  - `per_page` — page size (max 100). Note the API param is `per_page`,
+     *    not `limit`; the sets-list endpoint uses `limit`, but this checklist
+     *    endpoint does not.
+     *  - `format` — `full` (default) or `compact`.
+     *
+     * A no-argument call is backward compatible: it hits the identical bare
+     * `/v1/sets/{id}/checklist` URL as before. The V1 endpoint does not
+     * support `include`; use {@see checklistV2()} for `include` support.
+     *
+     * @param  array<string, mixed>  $params  Query parameters (page, per_page, format)
+     *
      * @throws InvalidArgumentException
      */
-    public function checklist(string $id): ChecklistResponse
+    public function checklist(string $id, array $params = []): ChecklistResponse
     {
         $url = sprintf('/v1/sets/%s/checklist', $id);
 
+        if (count($params)) {
+            $url .= '?'.http_build_query($params);
+        }
+
         return ChecklistResponse::fromResponse($this->makeRequest($url, 'GET'));
+    }
+
+    /**
+     * Get the checklist for a set (V2 endpoint).
+     *
+     * Returns a typed {@see ChecklistV2Response}. Unlike the V1 endpoint, V2
+     * returns the cards as JSON:API primary data with the set (and any other
+     * requested relationships) in `included`, plus `meta.pagination` when
+     * `per_page` is supplied.
+     *
+     * Optional query parameters are passed through verbatim to
+     * `GET /v2/sets/{id}/checklist`:
+     *  - `page` — 1-indexed page number.
+     *  - `per_page` — page size (max 100). Passing it enables pagination and
+     *    populates the `meta.pagination` block.
+     *  - `format` — `full` (default) or `compact`.
+     *  - `include` — comma-separated relationships to embed in `included`;
+     *    one or more of `set,oncard,attributes` (defaults to `set`). `include`
+     *    is V2-only.
+     *
+     * The V2 checklist route is subscription-gated: an unsubscribed caller
+     * receives HTTP 402 (surfaced as a thrown exception).
+     *
+     * @param  array<string, mixed>  $params  Query parameters (page, per_page, format, include)
+     *
+     * @throws InvalidArgumentException
+     */
+    public function checklistV2(string $id, array $params = []): ChecklistV2Response
+    {
+        $url = sprintf('/v2/sets/%s/checklist', $id);
+
+        if (count($params)) {
+            $url .= '?'.http_build_query($params);
+        }
+
+        return ChecklistV2Response::fromResponse($this->makeRequest($url, 'GET'));
     }
 
     /**
