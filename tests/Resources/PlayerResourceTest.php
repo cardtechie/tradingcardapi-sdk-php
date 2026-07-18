@@ -419,7 +419,8 @@ it('can get a deleted player by id', function () {
 
     $client->shouldReceive('request')
         ->with('GET', '/v1/players/123', m::on(function ($options) {
-            return ($options['query']['include_trashed'] ?? null) === 'true';
+            return is_array($options)
+                && ($options['query']['include_trashed'] ?? null) === 'true';
         }))
         ->once()
         ->andReturn($deletedPlayerResponse);
