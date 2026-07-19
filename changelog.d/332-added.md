@@ -1,2 +1,0 @@
-- **[Issue #332]** Add `page`/`per_page`/`format` passthrough to `Set::checklist()` and a new `Set::checklistV2()` method (with a `ChecklistV2Response` DTO) exposing the richer V2 checklist endpoint with `include` support.
-  - The pagination size param is `per_page` (max 100), not `limit`; `include` and the cards-as-primary-data envelope are V2-only, and V2 returns HTTP 402 for unsubscribed callers.

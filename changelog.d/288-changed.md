@@ -1,1 +1,0 @@
-- **[Issue #288]** Type the SDK's array generics and ratchet PHPStan from level 5 to level 6.

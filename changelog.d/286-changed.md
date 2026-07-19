@@ -1,1 +1,0 @@
-- **[Issue #286]** Migrate the SDK's README examples from the deprecated `getList()` to `all()` and document the `RateLimitException` constructor slot realignment for downstream consumers.

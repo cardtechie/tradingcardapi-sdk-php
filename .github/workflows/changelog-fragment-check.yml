@@ -1,8 +1,11 @@
 name: Changelog Fragment Check
 
+# Escape hatch: add the `skip-changelog` label to opt a PR out of this gate
+# (e.g. release/collation PRs that remove fragments rather than adding one).
 on:
   pull_request:
     branches: [main, develop]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 
 permissions:
   contents: read
@@ -12,12 +15,19 @@ jobs:
     name: Check for changelog fragment
     runs-on: ubuntu-latest
     steps:
+      - name: Skip when 'skip-changelog' label is present
+        if: contains(github.event.pull_request.labels.*.name, 'skip-changelog')
+        run: |
+          echo "::notice::'skip-changelog' label present — skipping the changelog-fragment gate."
+
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changelog') }}
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
       - name: Verify PR adds a changelog.d fragment
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changelog') }}
         shell: bash
         run: |
           set -euo pipefail

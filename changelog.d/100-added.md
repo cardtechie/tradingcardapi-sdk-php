@@ -1,1 +1,0 @@
-- **[Issue #100]** Add a maintainer release runbook (`docs/RELEASING.md`) and verify the build-release / Packagist automation end-to-end.

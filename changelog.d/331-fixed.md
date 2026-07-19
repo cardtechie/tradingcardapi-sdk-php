@@ -1,1 +1,0 @@
-- **[Issue #331]** Switch every resource's `update()` from PUT to PATCH so updates stop returning HTTP 405.

@@ -1,1 +1,0 @@
-- **[Issue #325]** Add an automated regression test harness for `build/version.sh` version derivation.

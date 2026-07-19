@@ -1,1 +1,0 @@
-- **[Issue #94]** Add a `SECURITY.md` security policy documenting private vulnerability reporting, response and disclosure timelines, and the supported-versions policy.
