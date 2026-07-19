@@ -1,2 +1,0 @@
-- **[Issue #329]** Add a one-way workflow that back-merges `main` into `develop`, opening a PR on conflict.
-  - Replaces the bidirectional `sync-develop-and-stable` workflow — `develop` → `main` promotion is no longer automated and returns to the manual release/PR process.

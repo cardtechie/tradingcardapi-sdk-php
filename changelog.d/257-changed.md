@@ -1,1 +1,0 @@
-- **[Issue #257]** Tighten composer.json packaging metadata: move factory autoload to dev-only, set minimum-stability to stable, add a support block, strengthen keywords, and add a dev-develop branch-alias.

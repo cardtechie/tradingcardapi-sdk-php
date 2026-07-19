@@ -1,2 +1,0 @@
-- **[Issue #186]** Derive the `main`-branch release version in `build/version.sh` from the latest `CHANGELOG.md` section instead of always incrementing the patch, so minor/major releases tag correctly.
-  - Falls back to the prior patch-increment behavior when the CHANGELOG cannot be parsed.

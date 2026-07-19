@@ -1,1 +1,0 @@
-- **[Issue #333]** Repoint Team and Player `listDeleted()`/`deleted()` off the non-existent `/deleted` routes onto `?filter[status]=deleted` and `?include_trashed=true`, fixing 404s.

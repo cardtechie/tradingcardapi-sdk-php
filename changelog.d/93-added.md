@@ -1,1 +1,0 @@
-- **[Issue #93]** Add a root CONTRIBUTING.md covering setup, coding standards, testing, and the PR and changelog-fragment process.
