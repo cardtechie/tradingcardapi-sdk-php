@@ -229,6 +229,7 @@ it('can update a genre', function () {
     ];
 
     $result = $this->genreResource->update('123', $attributes);
+    expect($this->mockHandler->getLastRequest()->getMethod())->toBe('PATCH');
 
     expect($result)->toBeInstanceOf(GenreModel::class);
 });

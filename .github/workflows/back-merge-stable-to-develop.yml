@@ -1,0 +1,149 @@
+name: Back-merge stable into develop
+
+# Keep the integration branch (develop) from losing a fix that lands on the
+# stable branch (main). On every push to main, back-merge main into develop:
+# push develop directly when the merge is clean, open a PR when it conflicts.
+#
+# The sync is asymmetric on purpose: develop -> main promotion is a deliberate
+# release step and is NOT automated here.
+
+on:
+  push:
+    branches: [main]
+
+# All git and gh operations use the PROJECT_TOKEN PAT (checkout token + GH_TOKEN),
+# so the default GITHUB_TOKEN needs no permissions. Drop them to minimize blast
+# radius, matching the PROJECT_TOKEN pattern in assign-sprint.yml.
+permissions: {}
+
+concurrency:
+  # Serialize back-merges so two rapid pushes to main cannot interleave a
+  # half-applied merge. Do not cancel an in-flight run mid-merge.
+  group: back-merge-main-to-develop
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          # Full history for both branches so the merge/ancestor checks work.
+          fetch-depth: 0
+          # PAT (not GITHUB_TOKEN) so the direct push to develop triggers
+          # downstream workflows and a conflict PR runs the repo's checks.
+          token: ${{ secrets.PROJECT_TOKEN }}
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Back-merge main into develop
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          git fetch origin main develop
+
+          # Idempotency: if develop already contains main, there is nothing to do.
+          if git merge-base --is-ancestor origin/main origin/develop; then
+            echo "develop already contains main; nothing to back-merge."
+            exit 0
+          fi
+
+          # Work on a local develop tracking origin/develop.
+          git checkout -B develop origin/develop
+
+          # Trial-merge main into develop. --no-ff keeps an explicit merge commit.
+          if git merge --no-ff --no-edit origin/main; then
+            echo "Clean merge; pushing develop."
+            if git push origin develop; then
+              exit 0
+            fi
+            # The push can fail even after a clean merge: develop may have advanced
+            # between the fetch and the push, or direct pushes to develop may be
+            # blocked by branch protection. Don't die here under set -e — fall
+            # through to the PR-based sync path so develop still gets updated.
+            echo "Direct push to develop failed; falling back to a sync PR."
+          else
+            # Conflict: never force-merge or auto-resolve. Fall through to open a
+            # PR for manual resolution instead.
+            echo "Merge conflict; opening a PR for manual resolution."
+          fi
+
+          # Best-effort: on the conflict path an abort restores a clean tree; if the
+          # merge failed before creating a merge state (or we arrived here from the
+          # clean-merge push-failure fallback, where there is no merge to abort), the
+          # abort errors. Tolerate that under set -e so the workflow still publishes
+          # the sync branch and opens/reuses the PR.
+          git merge --abort || true
+
+          SYNC_BRANCH="auto/sync-main-to-develop"
+
+          # Point the sync branch at main's tip and publish it for resolution.
+          # Do this BEFORE the existing-PR check so that when a sync PR is already
+          # open, the force-push refreshes its branch to main's newest commits
+          # in place (rather than leaving a stale PR that misses later pushes).
+          #
+          # But guard the refresh: if someone has started resolving conflicts on the
+          # sync PR, their resolution commits live on $SYNC_BRANCH and are NOT
+          # reachable from main, so an unconditional force-push to main's tip would
+          # silently discard that in-progress work. A plain, unresolved sync branch
+          # is just an (older) pointer into main's history and so is an ancestor of
+          # origin/main; a branch carrying manual commits is not. Only refresh when
+          # the branch is absent or is such an ancestor; otherwise leave it untouched
+          # for the human to finish (the existing-PR reuse below still fires).
+          # Fetch the sync branch so the ancestry guard below sees its real tip.
+          # Tolerate ONLY the "branch doesn't exist on origin yet" case; let real
+          # fetch failures (auth/network) fail the run rather than silently
+          # misclassifying an existing sync branch as absent and dropping into the
+          # force-update path below (which could clobber in-progress resolution).
+          if ! fetch_err=$(git fetch origin "$SYNC_BRANCH" 2>&1); then
+            if printf '%s\n' "$fetch_err" | grep -qi "couldn't find remote ref"; then
+              echo "Sync branch $SYNC_BRANCH does not exist on origin yet; will create it below."
+            else
+              printf '%s\n' "$fetch_err" >&2
+              echo "Unexpected error fetching $SYNC_BRANCH (not a missing-branch case); failing the run for diagnosis." >&2
+              exit 1
+            fi
+          fi
+          if git rev-parse --verify --quiet "origin/$SYNC_BRANCH" >/dev/null \
+             && ! git merge-base --is-ancestor "origin/$SYNC_BRANCH" origin/main; then
+            echo "Sync branch $SYNC_BRANCH has commits beyond main (manual conflict resolution in progress); leaving it untouched to avoid clobbering that work."
+          else
+            git branch -f "$SYNC_BRANCH" origin/main
+            # Use --force-with-lease (keyed off the origin/$SYNC_BRANCH we fetched
+            # above) rather than a bare --force: if a human pushes resolution commits
+            # into the small window between the ancestry check and this push, the
+            # lease is stale and the push is rejected instead of clobbering their
+            # work. Tolerate that rejection — fall through to the existing-PR reuse
+            # path below rather than terminating under set -euo pipefail.
+            git push --force-with-lease origin "$SYNC_BRANCH" \
+              || echo "force-with-lease push of $SYNC_BRANCH was rejected (someone pushed in the meantime); leaving the branch untouched and falling through to existing-PR reuse."
+          fi
+
+          # Idempotency: reuse an already-open sync PR rather than opening another.
+          # Its branch was just refreshed above, so no second PR is needed.
+          # Filter by base too: a PR from $SYNC_BRANCH targeting some other base
+          # must not be mistaken for the develop sync PR. Select a single number
+          # (.[0]) so the log line is deterministic even if multiple match.
+          EXISTING=$(gh pr list --head "$SYNC_BRANCH" --base develop --state open --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            echo "An open PR for $SYNC_BRANCH already exists (#$EXISTING); reusing it without opening another (its branch may or may not have been refreshed above)."
+            exit 0
+          fi
+
+          # Open the conflict PR. The changelog-fragment check
+          # (.github/workflows/changelog-fragment-check.yml) is keyed on changed
+          # paths, not PR labels: it exempts PRs that touch no src/ or tests/
+          # files and otherwise requires a changelog.d/<num>-<type>.md fragment.
+          # There is no label-based bypass, so we create the PR without one and
+          # call out the fragment requirement in the body for whoever resolves
+          # the conflicts.
+          gh pr create \
+            --base develop \
+            --head "$SYNC_BRANCH" \
+            --title "Sync main into develop" \
+            --body "Automated back-merge of \`main\` into \`develop\` could not be applied cleanly; resolve the conflicts here. If the resolution touches \`src/\` or \`tests/\`, the changelog-fragment check requires a \`changelog.d/<num>-<type>.md\` fragment before this PR can merge."

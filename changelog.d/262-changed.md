@@ -1,1 +1,0 @@
-- **[Issue #262]** Harden release CI: migrate off the archived `actions/create-release` action, run the PHP×Laravel test matrix on `develop` PRs, and restrict dependabot auto-merge to semver-patch updates.

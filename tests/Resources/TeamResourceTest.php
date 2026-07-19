@@ -300,6 +300,7 @@ it('can update a team', function () {
     ];
 
     $result = $this->teamResource->update('123', $attributes);
+    expect($this->mockHandler->getLastRequest()->getMethod())->toBe('PATCH');
 
     expect($result)->toBeInstanceOf(TeamModel::class);
     expect($result->id)->toBe('123');
@@ -388,6 +389,11 @@ it('can list deleted teams', function () {
 
     expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
     expect($result->total())->toBe(10);
+
+    $lastRequest = $this->mockHandler->getLastRequest();
+    expect($lastRequest->getUri()->getPath())->toBe('/v1/teams');
+    expect(rawurldecode($lastRequest->getUri()->getQuery()))->toContain('filter[status]=deleted');
+    expect($lastRequest->getUri()->getPath())->not->toContain('/deleted');
 });
 
 it('can handle empty deleted teams list', function () {
@@ -401,6 +407,11 @@ it('can handle empty deleted teams list', function () {
 
     expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
     expect($result->total())->toBe(0);
+
+    $lastRequest = $this->mockHandler->getLastRequest();
+    expect($lastRequest->getUri()->getPath())->toBe('/v1/teams');
+    expect(rawurldecode($lastRequest->getUri()->getQuery()))->toContain('filter[status]=deleted');
+    expect($lastRequest->getUri()->getPath())->not->toContain('/deleted');
 });
 
 it('can get a specific deleted team by id', function () {
@@ -422,4 +433,9 @@ it('can get a specific deleted team by id', function () {
 
     expect($result)->toBeInstanceOf(TeamModel::class);
     expect($result->id)->toBe('123');
+
+    $lastRequest = $this->mockHandler->getLastRequest();
+    expect($lastRequest->getUri()->getPath())->toBe('/v1/teams/123');
+    expect($lastRequest->getUri()->getPath())->not->toContain('/deleted');
+    expect(rawurldecode($lastRequest->getUri()->getQuery()))->toContain('include_trashed=true');
 });

@@ -299,6 +299,23 @@ The SDK provides access to the following Trading Card API resources:
 | **Internal\Workflow** _(internal only)_ | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($todoId, $attributes)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)`, `getReviewQueue($step?, $params?)`, `flagForReview($todoId, $reason)`, `resolveReview($todoId, $notes?)` |
 | **Internal\AuditLog** _(internal only)_ | Audit log tracking and creation | `getAuditLogs($params?)`, `createAuditEvent($attributes?)` |
 
+### Set Names and Serial Suffixes
+
+Set `name` values returned by the API now include a print-run suffix using hobby convention: `/X` for numbered sets (e.g. "Black Foil /10") and `1/1` for superfractors (`serial = 1`). The raw print run is available separately on the `int|null $serial` attribute, so you can read the formatted name and the numeric serial independently.
+
+```php
+$set = tradingcardapi()->set()->get('set-id');
+
+echo $set->name;   // "2023 Topps Chrome Black Refractor /99"
+echo $set->serial; // 99
+```
+
+Worked examples of the different serial formats:
+
+- `serial = 99` → name ends with "… /99" (e.g. "Black Refractor /99")
+- `serial = 1` → name ends with "… 1/1" (superfractor, e.g. "Superfractor 1/1")
+- `serial = null` → base name with no suffix (e.g. "Base")
+
 ### Stats Resource
 
 The Stats resource provides analytics and tracking capabilities for entity counts:
@@ -679,10 +696,11 @@ This project maintains high code quality standards:
 
 ### Upgrade Notes (0.3.0)
 
-The 0.3.0 Resource-layer standardization introduces two consumer-visible changes:
+The 0.3.0 Resource-layer standardization introduces three consumer-visible changes:
 
 - **`getList()` is deprecated in favor of `all()`** on the `Player`, `Team`, and `Playerteam` resources. `getList()` still works (it delegates to `all()` with identical behavior) but is marked `@deprecated`, so static analysis (e.g. PHPStan `method.deprecated`) will flag remaining call sites. Migrate `->getList(...)` to `->all(...)`.
 - **`RateLimitException::__construct` positional slots were realigned** with the base `TradingCardApiException`: `$httpStatusCode` (default `429`) is now positional slot 6 and `$context` slot 7. Construct `RateLimitException` with **named arguments** to be safe against the slot change — see the [Error Handling Guide](docs/ERROR-HANDLING.md#ratelimitexception-429).
+- **Set names now carry a print-run serial suffix** (`/X` for numbered sets, `1/1` for superfractors). The formatted `name` includes the suffix and the raw print run is available on the `serial` attribute — see [Set Names and Serial Suffixes](#set-names-and-serial-suffixes).
 
 ## 🤝 Contributing
 

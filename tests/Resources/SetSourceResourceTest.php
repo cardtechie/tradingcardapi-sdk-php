@@ -240,6 +240,7 @@ it('can update a set source', function () {
     ];
 
     $result = $this->setSourceResource->update('123', $attributes);
+    expect($this->mockHandler->getLastRequest()->getMethod())->toBe('PATCH');
 
     expect($result)->toBeInstanceOf(SetSourceModel::class);
 });

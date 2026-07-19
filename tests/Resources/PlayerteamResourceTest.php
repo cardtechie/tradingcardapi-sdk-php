@@ -232,6 +232,7 @@ it('can update a playerteam', function () {
     );
 
     $result = $this->playerteamResource->update('123', ['team_id' => '999']);
+    expect($this->mockHandler->getLastRequest()->getMethod())->toBe('PATCH');
 
     expect($result)->toBeInstanceOf(PlayerteamModel::class);
     expect($result->id)->toBe('123');

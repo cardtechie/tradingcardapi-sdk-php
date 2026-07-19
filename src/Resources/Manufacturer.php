@@ -140,7 +140,7 @@ class Manufacturer
             $request['json']['data']['relationships'] = $relationships;
         }
 
-        $response = $this->makeRequest($url, 'PUT', $request);
+        $response = $this->makeRequest($url, 'PATCH', $request);
         $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;

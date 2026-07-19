@@ -1,2 +1,0 @@
-- **[Issue #258]** Normalize resource responses into typed DTOs so results are predictable and self-documenting.
-  - Breaking change: code reading raw object properties off these responses must switch to the DTO accessors.

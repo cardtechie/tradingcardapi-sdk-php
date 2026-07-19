@@ -1,1 +1,0 @@
-- **[Issue #289]** Attach top-level meta/links to the main object in the non-static `Response` constructor path so `$model->getMeta()/getLinks()` is consistent across both parsing entrypoints.

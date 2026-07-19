@@ -173,7 +173,7 @@ class Team
             $request['json']['data']['relationships'] = $relationships;
         }
 
-        $response = $this->makeRequest($url, 'PUT', $request);
+        $response = $this->makeRequest($url, 'PATCH', $request);
         $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;
@@ -201,7 +201,8 @@ class Team
      */
     public function listDeleted(): LengthAwarePaginator
     {
-        $response = $this->makeRequest('/v1/teams/deleted');
+        $url = sprintf('/v1/teams?%s', http_build_query(['filter' => ['status' => 'deleted']]));
+        $response = $this->makeRequest($url);
 
         $totalPages = $response->meta->pagination->total ?? count($response->data);
         $perPage = $response->meta->pagination->per_page ?? max(count($response->data), 1);
@@ -225,8 +226,8 @@ class Team
      */
     public function deleted(string $id): TeamModel
     {
-        $url = sprintf('/v1/teams/%s/deleted', $id);
-        $response = $this->makeRequest($url);
+        $url = sprintf('/v1/teams/%s', $id);
+        $response = $this->makeRequest($url, 'GET', ['query' => ['include_trashed' => 'true']]);
         $formattedResponse = new Response(json_encode($response) ?: '{}');
 
         return $formattedResponse->mainObject;

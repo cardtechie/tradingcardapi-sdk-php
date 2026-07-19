@@ -21,14 +21,36 @@ This is an SDK package (Testbench-bootstrapped), not an app: there is no
 therefore **omits** the `--env-file` flag the canonical app recipe uses —
 passing a non-existent env file would hard-fail the gate.
 
+## Why `--user` + writable HOME/COMPOSER_HOME
+
+Each `docker run` runs as the invoking host user via
+`--user "$(id -u):$(id -g)"` so that the `vendor/` directory and any other
+files composer/Pest/Pint write into the bind-mounted `$WS` workspace are owned
+by the host user, not root. Without this the container's default root user
+writes a root-owned `vendor/` into the workspace clone, which on a Linux runner
+blocks the non-root runner from cleaning up or resetting that workspace between
+dispatches. (On macOS Docker Desktop remaps ownership to the host user, so the
+defect is Linux-runner-specific — but the flags are harmless there.)
+
+The image bakes a root-owned `COMPOSER_HOME=/composer` and runs composer as root
+(`COMPOSER_ALLOW_SUPERUSER=1`), so the mapped host UID — which has no passwd
+entry, leaving `HOME` defaulting to the unwritable `/` — cannot write composer's
+cache/config under `/composer`. The `-e HOME=/tmp -e COMPOSER_HOME=/tmp/composer`
+overrides redirect both to writable paths inside the container (`/tmp` is
+world-writable in the image; these are ordinary container-filesystem paths, not
+a `--tmpfs` mount), keeping composer/Pest/Pint runnable as the mapped user. `composer.json`'s `config.allow-plugins` already
+pre-authorizes the Pest/PHPStan plugins, so running non-root does not trigger an
+interactive plugin prompt. The `docker build` line is unchanged — image layers
+are not bind-mounted, so root ownership inside the image is irrelevant.
+
 ## The gate
 
 ```bash
 WS="$(pwd)"
 docker build -t tradingcardapi-sdk-php:gate .
-docker run --rm -v "$WS":/var/www/app:cached -w /var/www/app tradingcardapi-sdk-php:gate composer install --no-interaction --prefer-dist
-docker run --rm -v "$WS":/var/www/app:cached -w /var/www/app tradingcardapi-sdk-php:gate ./vendor/bin/pest
-docker run --rm -v "$WS":/var/www/app:cached -w /var/www/app tradingcardapi-sdk-php:gate ./vendor/bin/pint --test
+docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -e COMPOSER_HOME=/tmp/composer -v "$WS":/var/www/app:cached -w /var/www/app tradingcardapi-sdk-php:gate composer install --no-interaction --prefer-dist
+docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -e COMPOSER_HOME=/tmp/composer -v "$WS":/var/www/app:cached -w /var/www/app tradingcardapi-sdk-php:gate ./vendor/bin/pest
+docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -e COMPOSER_HOME=/tmp/composer -v "$WS":/var/www/app:cached -w /var/www/app tradingcardapi-sdk-php:gate ./vendor/bin/pint --test
 ```
 
 ## Guardrails

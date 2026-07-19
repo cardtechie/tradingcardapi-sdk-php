@@ -174,3 +174,15 @@ When creating releases, follow these rules to prevent Packagist publishing issue
    - Standard practice by major packages (Laravel, Guzzle, Spatie) is to omit version field
 
 **Reference**: [Packagist troubleshooting guide](https://blog.packagist.com/tagged-a-new-release-for-composer-and-it-wont-show-up-on-packagist/)
+
+### Release Branch Naming Convention
+
+Release branches **must** be named `release/X.Y.Z` — pure semver after the slash
+(e.g. `release/0.3.0`). Do **not** prefix the version with an issue number or
+slug (e.g. `release/183-phpsdk-0.2.0`).
+
+`build/version.sh`'s `release/*` case extracts a *trailing* semver, so a name
+like `release/183-phpsdk-0.2.0` still happens to resolve to `0.2.0` today — but
+the bare `release/X.Y.Z` form is the unambiguous, safe standard and is required
+going forward, since any deviation risks the version script mis-parsing the
+intended release version.

@@ -1,1 +1,0 @@
-- **[Issue #237]** Quote redirect targets, drop the undefined `inputs.claude_api_key` branch, and consolidate step-summary writes in the build-release workflow to clear shellcheck/actionlint findings.

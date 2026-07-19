@@ -12,23 +12,216 @@ release time those fragments are collated into a versioned section. That
 collation is manual today — make changelog-update does not read changelog.d/
 fragments yet. See changelog.d/README.md. -->
 
+## [0.3.0] - 2026-07-18
+
 ### Added
 
-- **[Issue #200]** Add AuditLogSchema to enable response validation for audit log endpoints.
-- **[Issue #212]** Add CI guardrail to enforce SHA-pinned GitHub Actions references and pin all existing workflow actions.
-- **[Issue #210]** Add `agent_id` filter param to audit log queries.
+- **[Issue #155]** Set names now include a hobby-convention serial suffix (`/X`, `1/1`); documented how to read the raw `serial` value versus the formatted `name`.
+- **[Issue #325]** Add an automated regression test harness for `build/version.sh` version derivation.
+- **[Issue #329]** Add a one-way workflow that back-merges `main` into `develop`, opening a PR on conflict. Replaces the bidirectional sync; `develop` → `main` promotion returns to the manual release/PR process.
+- **[Issue #332]** Add `page`/`per_page`/`format` passthrough to `Set::checklist()` and a new `Set::checklistV2()` method (with a `ChecklistV2Response` DTO) exposing the richer V2 checklist endpoint with `include` support.
 
 ### Changed
 
-- **[Issue #244]** Repoint genre `listDeleted()` and `deleted($id)` off the deprecated v1 literal-segment routes onto the JSON:API query-parameter endpoints.
-- **[Issue #214]** Move workflow, set-todo, and audit-log resources into the `Internal\` namespace behind a new `internal()` accessor.
-  - Breaking change: `TradingCardApi::workflow()` and `TradingCardApi::auditLog()` are removed; callers must switch to `$api->internal()->workflow()` and `$api->internal()->auditLog()`. Credentials must carry the `internal` OAuth scope.
-- Direct Claude to create GitHub issues via the `create_cross_repo_issues` MCP tool instead of `gh issue create` in `.claude/CLAUDE.md` (#203).
-- **[Issue #254]** Complete `.gitattributes` export-ignore so `composer require` ships only runtime assets, not dev/CI/infra files.
+- **[Issue #293]** Verify the `windows-latest` CI test leg passes with the broad extension setup.
 
 ### Fixed
 
-- Unify memory assertion threshold in ValidationPerformanceTest to prevent false failures in Docker. (#201)
+- **[Issue #186]** Derive the `main`-branch release version in `build/version.sh` from the latest `CHANGELOG.md` section instead of always incrementing the patch, so minor/major releases tag correctly (falls back to patch-increment when the CHANGELOG cannot be parsed).
+- **[Issue #297]** Run the pre-PR gate's docker commands as the host user with writable `HOME`/`COMPOSER_HOME` so they no longer leave root-owned `vendor/` in the bind-mounted workspace.
+- **[Issue #331]** Switch every resource's `update()` from PUT to PATCH so updates stop returning HTTP 405.
+- **[Issue #333]** Repoint Team and Player `listDeleted()`/`deleted()` off the non-existent `/deleted` routes onto `?filter[status]=deleted` and `?include_trashed=true`, fixing 404s.
+
+## [0.2.26] - 2026-06-30
+
+### Changed
+
+- **[Issue #303]** Document that top-level meta/links describe the whole response and attach to the main parsed object only; included relationship models intentionally do not carry them.
+
+## [0.2.25] - 2026-06-29
+
+### Changed
+
+- **[Issue #288]** Type the SDK's array generics and ratchet PHPStan from level 5 to level 6.
+- Bump `guzzlehttp/guzzle` from 7.12.1 to 7.12.3.
+- Bump `shivammathur/setup-php` from 2.37.1 to 2.37.2.
+
+## [0.2.24] - 2026-06-29
+
+### Added
+
+- **[Issue #309]** Add a markdown-linting gate to CI with a shared `.markdownlint.jsonc` config and `make lint-md` / `make fix-md` helpers.
+
+## [0.2.23] - 2026-06-29
+
+### Changed
+
+- **[Issue #307]** Scope the code-quality coverage job to pull requests and develop pushes so it no longer re-runs on main merges.
+
+## [0.2.22] - 2026-06-28
+
+### Fixed
+
+- **[Issue #289]** Attach top-level meta/links to the main object in the non-static `Response` constructor path so `getMeta()`/`getLinks()` is consistent across both parsing entrypoints.
+
+## [0.2.21] - 2026-06-28
+
+### Security
+
+- **[Issue #94]** Add a `SECURITY.md` policy documenting private vulnerability reporting, response and disclosure timelines, and the supported-versions policy.
+
+## [0.2.20] - 2026-06-28
+
+### Added
+
+- **[Issue #93]** Add a root `CONTRIBUTING.md` covering setup, coding standards, testing, and the PR and changelog-fragment process.
+
+## [0.2.19] - 2026-06-28
+
+### Changed
+
+- **[Issue #280]** Derive the sync workflow's conflict-PR branch name and title from the resolved source/target branches for cross-repo portability.
+
+## [0.2.18] - 2026-06-28
+
+### Added
+
+- **[Issue #154]** Document the `serial` property on the `Set` model docblock for IDE autocomplete.
+
+## [0.2.17] - 2026-06-28
+
+### Changed
+
+- **[Issue #107]** De-duplicate the post-merge test matrix on `main`, add Composer caching, and cancel superseded CI runs.
+
+## [0.2.16] - 2026-06-28
+
+### Changed
+
+- **[Issue #286]** Migrate README examples from the deprecated `getList()` to `all()` and document the `RateLimitException` constructor realignment.
+
+## [0.2.15] - 2026-06-28
+
+### Added
+
+- **[Issue #277]** Implement `Playerteam::lookup()` as find-or-create against the `/v1/playerteams` API resource.
+
+### Fixed
+
+- **[Issue #278]** Validate empty JSON:API collection responses instead of rejecting them.
+
+## [0.2.14] - 2026-06-27
+
+### Changed
+
+- **[Issue #284]** Restrict the opt-in retry middleware to idempotent HTTP methods by default (set `retry.retry_non_idempotent => true` to retry POST/PATCH).
+
+## [0.2.13] - 2026-06-27
+
+### Added
+
+- **[Issue #242]** Add a workspace-safe `.claude/pre-pr-gate.md` declaring the repo's pre-PR test and lint gate as one-off `docker run` commands.
+
+### Changed
+
+- **[Issue #263]** Correct overstated README badges and marketing claims, and add missing community-health files (Code of Conduct, Support, PR template, CODEOWNERS, issue forms).
+
+## [0.2.12] - 2026-06-27
+
+### ⚠️ Breaking Changes
+
+- **[Issue #258]** Resource responses are now normalized into typed DTOs; code reading raw object properties off these responses must switch to the DTO accessors.
+- **[Issue #259]** `RateLimitException`'s constructor was realigned with its base class; callers using positional constructor args must switch to named args.
+
+### Changed
+
+- **[Issue #257]** Tighten `composer.json` packaging metadata (dev-only factory autoload, stable minimum-stability, support block, keywords, dev-develop branch alias).
+- **[Issue #258]** Normalize resource responses into predictable, self-documenting typed DTOs. (See Breaking Changes.)
+- **[Issue #259]** Standardize resource method signatures: a uniform `list()` paginator plus an `all()` raw-Collection accessor, consistent `create()`/`update()` arity, and filled-in `delete()` verbs. (See Breaking Changes and Deprecated.)
+- **[Issue #260]** Add `@property` coverage to all models, convert the request trait and exception hierarchy to native typed properties, and guard `json_encode` false-returns.
+- **[Issue #262]** Harden release CI: migrate off the archived `actions/create-release`, run the PHP×Laravel matrix on `develop` PRs, and restrict dependabot auto-merge to semver-patch updates.
+
+### Deprecated
+
+- **[Issue #259]** `getList()` is deprecated in favor of `all()`; it still works and delegates to `all()`, so migrate at your convenience — callers are not broken.
+
+### Fixed
+
+- **[Issue #261]** Player getters now propagate API/network exceptions instead of masking failures as empty collections, and `Model::__call` throws `BadMethodCallException` on unknown methods. Callers that relied on an empty collection on failure should wrap calls in try/catch.
+
+## [0.2.11] - 2026-06-27
+
+### Changed
+
+- **[Issue #256]** Declare `strict_types=1` across the SDK and enforce it via a committed `pint.json` rule.
+
+## [0.2.10] - 2026-06-27
+
+### ⚠️ Breaking Changes
+
+- **[Issue #255]** `Set::workflow($id)` is removed; use `$api->internal()->workflow()->getForSet($id)` with `internal`-scoped credentials.
+
+### Changed
+
+- **[Issue #255]** Move the per-set workflow read onto `Internal\Resources\Workflow::getForSet()`, completing the public/internal separation.
+
+## [0.2.9] - 2026-06-27
+
+### Changed
+
+- **[Issue #254]** Complete `.gitattributes` export-ignore so `composer require` ships only runtime assets, not dev/CI/infra files.
+
+## [0.2.8] - 2026-06-27
+
+### Fixed
+
+- **[Issue #253]** Fix `Response` meta/links bleeding across separate parses by attaching them to each parsed result instead of shared static state.
+
+## [0.2.7] - 2026-06-27
+
+### Added
+
+- **[Issue #252]** Add default HTTP timeouts and an opt-in retry/backoff middleware honoring `Retry-After` for 429/5xx (enable via `TRADINGCARDAPI_RETRY_ENABLED`).
+
+## [0.2.6] - 2026-06-27
+
+### ⚠️ Breaking Changes
+
+- **[Issue #214]** `TradingCardApi::workflow()` and `TradingCardApi::auditLog()` are removed; use `$api->internal()->workflow()` and `$api->internal()->auditLog()`. Credentials must carry the `internal` OAuth scope.
+
+### Added
+
+- **[Issue #100]** Add a maintainer release runbook (`docs/RELEASING.md`) and verify the build-release / Packagist automation end-to-end.
+- **[Issue #200]** Add `AuditLogSchema` to enable response validation for audit log endpoints.
+- **[Issue #210]** Add an `agent_id` filter param to audit log queries.
+- **[Issue #212]** Add a CI guardrail enforcing SHA-pinned GitHub Actions references, and pin all existing workflow actions.
+- **[Issue #233]** Add `WorkflowSchema` and `SetTodoSchema` and wire the workflow/set-todos endpoints into response validation.
+- **[Issue #245]** Adopt per-PR `changelog.d/` changelog fragments with a CI presence gate, ending `## [Unreleased]` merge conflicts.
+- **[Issue #248]** Add a GitHub Actions workflow that auto-syncs `develop` and `main`. (Superseded in 0.3.0 by #329.)
+
+### Changed
+
+- **[Issue #203]** Direct Claude to create GitHub issues via the `create_cross_repo_issues` MCP tool instead of `gh issue create`.
+- **[Issue #214]** Move workflow, set-todo, and audit-log resources into the `Internal\` namespace behind a new `internal()` accessor. (See Breaking Changes.)
+- **[Issue #244]** Repoint genre `listDeleted()` and `deleted($id)` off the deprecated v1 literal-segment routes onto the JSON:API query-parameter endpoints.
+
+### Fixed
+
+- **[Issue #201]** Unify the memory assertion threshold in `ValidationPerformanceTest` to prevent false failures in Docker.
+- **[Issue #237]** Quote redirect targets, drop the undefined `inputs.claude_api_key` branch, and consolidate step-summary writes in the build-release workflow to clear shellcheck/actionlint findings.
+- **[Issue #246]** Resolve the Set genre relationship via the JSON:API include linkage instead of the removed flat `genre_id` attribute, so `Set::genre()` works again.
+
+### Security
+
+- **[Issue #238]** Pass `github.head_ref`/`github.base_ref` through a step-level `env:` block in the release-validation workflow to close a script-injection vector.
+- **[Issue #251]** Redact Authorization headers, OAuth `client_secret`, and `access_token` from exception context and logs, and stop serializing raw auth response bodies.
+
+## [0.2.5] - 2026-04-14
+
+### Changed
+
+- Bump `actions/github-script` from 7 to 9 (#197).
+- Bump `dependabot/fetch-metadata` from 2 to 3 (#196).
 
 ## [0.2.4] - 2026-04-14
 
@@ -362,7 +555,32 @@ fragments yet. See changelog.d/README.md. -->
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.2...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.0...HEAD
+[0.3.0]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.26...0.3.0
+[0.2.26]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.25...0.2.26
+[0.2.25]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.24...0.2.25
+[0.2.24]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.23...0.2.24
+[0.2.23]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.22...0.2.23
+[0.2.22]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.21...0.2.22
+[0.2.21]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.20...0.2.21
+[0.2.20]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.19...0.2.20
+[0.2.19]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.18...0.2.19
+[0.2.18]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.17...0.2.18
+[0.2.17]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.16...0.2.17
+[0.2.16]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.15...0.2.16
+[0.2.15]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.14...0.2.15
+[0.2.14]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.13...0.2.14
+[0.2.13]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.12...0.2.13
+[0.2.12]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.11...0.2.12
+[0.2.11]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.10...0.2.11
+[0.2.10]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.9...0.2.10
+[0.2.9]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.8...0.2.9
+[0.2.8]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.7...0.2.8
+[0.2.7]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.6...0.2.7
+[0.2.6]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.5...0.2.6
+[0.2.5]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.4...0.2.5
+[0.2.4]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.3...0.2.4
+[0.2.3]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.2...0.2.3
 [0.2.2]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.1...0.2.2
 [0.2.1]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.1.18...0.2.0
