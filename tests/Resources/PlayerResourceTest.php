@@ -273,6 +273,9 @@ it('can list players with pagination', function () {
     expect($result->total())->toBe(100);
     expect($result->perPage())->toBe(50);
     expect($result->currentPage())->toBe(1);
+    // The paginator-only `pageName` option is stripped before the URL is built,
+    // so its default has to survive on the paginator rather than in $params.
+    expect($result->getPageName())->toBe('page');
 });
 
 it('keeps a caller-supplied pageName out of the request URL but still hands it to the paginator', function () {
@@ -331,6 +334,53 @@ it('keeps a caller-supplied pageName out of the request URL but still hands it t
     // silently regress into dropping the option altogether.
     expect($result)->toBeInstanceOf(LengthAwarePaginator::class);
     expect($result->getPageName())->toBe('sets_page');
+});
+
+it('falls back to the default page name when a non-string pageName is supplied', function () {
+    $client = m::mock(Client::class);
+
+    $tokenResponse = new GuzzleResponse(200, [], json_encode([
+        'access_token' => 'test-token',
+        'token_type' => 'Bearer',
+    ]));
+
+    $playersResponse = new GuzzleResponse(200, [], json_encode([
+        'data' => [
+            [
+                'id' => '1',
+                'type' => 'players',
+                'attributes' => [
+                    'first_name' => 'Player',
+                    'last_name' => 'One',
+                ],
+            ],
+        ],
+        'meta' => [
+            'pagination' => [
+                'total' => 1,
+                'per_page' => 50,
+                'current_page' => 1,
+            ],
+        ],
+    ]));
+
+    $client->shouldReceive('request')
+        ->with('POST', '/oauth/token', m::type('array'))
+        ->once()
+        ->andReturn($tokenResponse);
+
+    $client->shouldReceive('request')
+        ->with('GET', '/v1/players?limit=50&page=1', m::type('array'))
+        ->once()
+        ->andReturn($playersResponse);
+
+    $player = new Player($client);
+    // A non-string value cannot be a valid paginator page name; it is dropped
+    // from the URL like any other pageName and the default is used instead of
+    // handing the paginator a bad type.
+    $result = $player->list(['pageName' => 123]);
+
+    expect($result->getPageName())->toBe('page');
 });
 
 it('can update a player', function () {
