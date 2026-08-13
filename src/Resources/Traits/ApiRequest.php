@@ -76,6 +76,28 @@ trait ApiRequest
     }
 
     /**
+     * Pop the paginator-only `pageName` option out of a query-parameter array.
+     *
+     * `pageName` is a Laravel `LengthAwarePaginator` option, not an API filter.
+     * Leaving it in `$params` means `http_build_query()` sends it to the API as
+     * a query parameter on every list request, polluting outbound URLs, cache
+     * keys and logs. Resource `list()` methods call this immediately after
+     * merging their defaults — before building the URL — and pass the returned
+     * value straight into the paginator options.
+     *
+     * @param  array<string, mixed>  $params  Query parameters; the `pageName` key is removed in place
+     * @param  string  $default  Page name to use when the caller supplied none
+     * @return string The page name to hand to the paginator
+     */
+    protected function extractPageName(array &$params, string $default = 'page'): string
+    {
+        $pageName = $params['pageName'] ?? $default;
+        unset($params['pageName']);
+
+        return is_string($pageName) ? $pageName : $default;
+    }
+
+    /**
      * Makes a request to a JSON API endpoint and returns its decoded response.
      *
      * This is the low-level transport primitive: it deliberately returns the
