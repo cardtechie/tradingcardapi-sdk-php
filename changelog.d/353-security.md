@@ -1,0 +1,2 @@
+- **[Issue #353]** Refresh `composer.lock` to guzzlehttp/guzzle 7.15.5 and league/commonmark 2.10.0, clearing all 8 open Dependabot alerts.
+  - Lock-only change; published consumers resolve against `composer.json` constraints and are unaffected.
