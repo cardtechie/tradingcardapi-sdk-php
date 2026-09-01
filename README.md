@@ -294,6 +294,7 @@ The SDK provides access to the following Trading Card API resources:
 | **ObjectAttributes** | Object attributes | `get()`, `list()`, `create()`, `update()`, `delete()` |
 | **SetSources** | Set data sources | `get()`, `list()`, `create()`, `update()`, `delete()`, `forSet($setId)` |
 | **Stats** | Entity statistics and analytics | `get($type)`, `getCounts()`, `getSnapshots()`, `getGrowth()` |
+| **Usage** | The calling credential's own rate-limit window | `get()` |
 | **Attributes** | Card attributes | `get()`, `list()`, `all()`, `create()`, `update()`, `delete()` |
 | **CardImages** | Card image upload and management | `list()`, `get($id)`, `upload($file, $cardId, $imageType)`, `update($id, $attributes)`, `delete($id)`, `getDownloadUrl($id, $size)` |
 | **Internal\Workflow** _(internal only)_ | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($todoId, $attributes)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)`, `getReviewQueue($step?, $params?)`, `flagForReview($todoId, $reason)`, `resolveReview($todoId, $notes?)` |
@@ -358,6 +359,32 @@ foreach ($snapshots->snapshots as $snapshot) {
     echo $snapshot->total;       // Total at that point
 }
 ```
+
+### Usage Resource
+
+The Usage resource answers "how much of my quota is left?" without waiting to be
+rate limited. It reads `GET /v1/user/usage`, which is scoped to the credential
+making the request — you always get your own window, never anyone else's — and
+the read is not metered against the bucket it reports on.
+
+```php
+$usage = $api->usage()->get();
+
+echo $usage->limit;     // 1000  — requests allowed in the current window
+echo $usage->remaining; // 742   — requests still available
+echo $usage->used();    // 258   — derived: limit - remaining, clamped at 0
+echo $usage->resetsAt;  // "2026-06-27T00:00:00+00:00" — when the window rolls over
+```
+
+> **Availability.** This endpoint is still gated to interactive portal sessions
+> until [cardtechie/tradingcardapi-api#2342](https://github.com/cardtechie/tradingcardapi-api/issues/2342)
+> ships. Until then an opaque `tc_` API key calling `$api->usage()->get()`
+> receives a 401, which the SDK surfaces as an `AuthenticationException`.
+
+This is the *proactive* counterpart to the reactive
+`RateLimitException::getRetryAfter()` shown in [Error Handling](#error-handling):
+poll `usage()` to stay under your limit, and catch `RateLimitException` for the
+cases where you cross it anyway.
 
 ### SetSource Resource
 

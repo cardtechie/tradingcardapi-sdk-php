@@ -19,6 +19,7 @@ use CardTechie\TradingCardApiSdk\Resources\Set;
 use CardTechie\TradingCardApiSdk\Resources\SetSource;
 use CardTechie\TradingCardApiSdk\Resources\Stats;
 use CardTechie\TradingCardApiSdk\Resources\Team;
+use CardTechie\TradingCardApiSdk\Resources\Usage;
 use CardTechie\TradingCardApiSdk\Resources\Year;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
@@ -351,5 +352,14 @@ class TradingCardApi
     public function stats(): Stats
     {
         return $this->createResource(Stats::class);
+    }
+
+    /**
+     * Retrieve the usage resource, which reports the calling credential's own
+     * rate-limit window.
+     */
+    public function usage(): Usage
+    {
+        return $this->createResource(Usage::class);
     }
 }

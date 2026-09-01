@@ -304,6 +304,18 @@ trait ApiRequest
             'set-todos' => 'set-todo',
         ];
 
+        // `/v<n>/user/usage` is the caller's own rate-limit window. The generic
+        // `/v<n>/` branch below would resolve it to `user` (the sub-resource
+        // guard needs three segments after `/v<n>/` and this path has two), and
+        // `user` has no schema class, so every call would log "No schema defined
+        // for resource type: user". Map it explicitly here rather than adding
+        // `'user' => 'usage'` to $normalizedResources: that key matches the
+        // FIRST path segment, so it would wrongly claim `/v1/user/subscription`
+        // and every other `/v1/user/*` endpoint too.
+        if (preg_match('#^/v\d+/user/usage$#', $path)) {
+            return 'usage';
+        }
+
         // Match common API patterns
         if (preg_match('#/v\d+/([^/]+)#', $path, $matches)) {
             // Sub-resource paths (e.g. /v1/sets/123/workflow) are not JSON:API
