@@ -64,6 +64,15 @@ it('extracts resource type from API URLs correctly', function () {
     expect($resource->testExtractResourceType('/v1/object-attributes'))->toBe('object-attribute');
     expect($resource->testExtractResourceType('/v1/playerteams'))->toBe('playerteam');
     expect($resource->testExtractResourceType('/v1/stats/cards'))->toBe('stats');
+
+    // `/v1/user/usage` maps to the `usage` schema, not `user`.
+    expect($resource->testExtractResourceType('/v1/user/usage'))->toBe('usage');
+    expect($resource->testExtractResourceType('/v1/user/usage?foo=bar'))->toBe('usage');
+
+    // The mapping is exact: sibling `/v1/user/*` endpoints must NOT be claimed
+    // by the usage schema.
+    expect($resource->testExtractResourceType('/v1/user/subscription'))->not->toBe('usage');
+    expect($resource->testExtractResourceType('/v1/user/api-key'))->not->toBe('usage');
 });
 
 it('extracts resource type from internal endpoint URLs correctly', function () {
