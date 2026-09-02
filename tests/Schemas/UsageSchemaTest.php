@@ -63,3 +63,26 @@ it('rejects a usage response missing its rate-limit attributes', function () {
     expect($validator->errors()->keys())->toContain('data.attributes.remaining');
     expect($validator->errors()->keys())->toContain('data.attributes.resets_at');
 });
+
+it('rejects a document whose data.type is not usage', function () {
+    // Every other schema in this package pins `data.type` to its own resource
+    // type, which is what catches a mismapped endpoint (a response routed to
+    // the wrong schema) rather than silently validating it.
+    $schema = new UsageSchema;
+
+    $wrongType = [
+        'data' => [
+            'type' => 'card',
+            'attributes' => [
+                'limit' => 1000,
+                'remaining' => 742,
+                'resets_at' => '2026-06-27T00:00:00+00:00',
+            ],
+        ],
+    ];
+
+    $validator = Validator::make($wrongType, $schema->getRules());
+
+    expect($validator->fails())->toBeTrue();
+    expect($validator->errors()->keys())->toContain('data.type');
+});

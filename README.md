@@ -381,7 +381,7 @@ echo $usage->resetsAt;  // "2026-06-27T00:00:00+00:00" — when the window rolls
 > ships. Until then an opaque `tc_` API key calling `$api->usage()->get()`
 > receives a 401, which the SDK surfaces as an `AuthenticationException`.
 
-This is the *proactive* counterpart to the reactive
+This is the _proactive_ counterpart to the reactive
 `RateLimitException::getRetryAfter()` shown in [Error Handling](#error-handling):
 poll `usage()` to stay under your limit, and catch `RateLimitException` for the
 cases where you cross it anyway.

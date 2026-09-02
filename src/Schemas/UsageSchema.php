@@ -17,6 +17,11 @@ class UsageSchema extends BaseSchema
      * rules declare `data.id` as `required`, which would log a spurious
      * validation warning on every real response.
      *
+     * `data.type` is constrained to the literal `usage` — the only value the
+     * API's `UsageController` emits — matching how every other schema here
+     * pins its own resource type. A mismapped endpoint or an unexpected
+     * payload then surfaces as a validation warning instead of passing.
+     *
      * @return array<string, mixed>
      */
     public function getRules(): array
@@ -24,7 +29,7 @@ class UsageSchema extends BaseSchema
         return [
             'data' => 'required|array',
             'data.id' => 'sometimes|string',
-            'data.type' => 'required|string',
+            'data.type' => 'required|string|in:usage',
             'data.attributes' => 'required|array',
             'data.attributes.limit' => 'required|integer',
             'data.attributes.remaining' => 'required|integer',

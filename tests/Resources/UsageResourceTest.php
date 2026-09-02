@@ -77,6 +77,13 @@ it('requests the usage endpoint', function () {
 });
 
 it('falls back to an empty resets_at when the attribute is missing', function () {
+    // This payload deliberately violates UsageSchema (no `resets_at`) so the
+    // DTO's defaulting can be exercised. Response validation is switched off
+    // for this case so the test asserts only the fallback, without the
+    // schema warning it would otherwise log (or the exception it would raise
+    // under `strict_mode`).
+    $this->app['config']->set('tradingcardapi.validation.enabled', false);
+
     $this->mockHandler->append(
         new GuzzleResponse(200, [], json_encode([
             'data' => [
