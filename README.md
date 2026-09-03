@@ -386,6 +386,57 @@ This is the _proactive_ counterpart to the reactive
 poll `usage()` to stay under your limit, and catch `RateLimitException` for the
 cases where you cross it anyway.
 
+### Rate-limit headers
+
+Where `usage()` above is a *proactive* poll of a dedicated endpoint, the API also
+attaches the caller's current window to the `X-RateLimit-*` headers of ordinary
+responses. The SDK captures those headers as they go by, so you can read your
+quota off a request you were making anyway — no extra round trip:
+
+```php
+$api->card()->list(['limit' => 25]);
+
+$status = $api->rateLimit();
+
+if ($status !== null) {
+    echo $status->limit;               // 1000 — requests allowed in the window
+    echo $status->remaining;           // 999  — requests still available
+    echo $status->used();              // 1    — derived: limit - remaining, clamped at 0
+    echo $status->resetAt;             // 1790000000 — Unix timestamp
+    echo $status->secondsUntilReset(); // seconds left in the window, clamped at 0
+    $status->resetAtDateTime();        // \DateTimeImmutable
+}
+```
+
+`rateLimit()` reports the most recent response seen by **any** resource created
+from that client. If you keep a reference to one resource, its own
+`getRateLimit()` returns the same reading:
+
+```php
+$cards = $api->card();
+$cards->list();
+$status = $cards->getRateLimit();
+```
+
+Two things to know before you rely on it:
+
+- **`$status` is nullable.** The API does not guarantee the headers on every
+  response — its throttle middleware omits them under some limiter
+  configurations — and none have been seen before your first call. A response
+  that arrives without them leaves the previous reading in place rather than
+  clearing it, so a `null` means "nothing observed yet", not "quota exhausted".
+  Whether every successful response carries the trio depends on the API version
+  you are talking to, so treat the value as advisory and always null-check.
+- **`resetAt` is a Unix timestamp**, deliberately unlike
+  `UsageResponse::$resetsAt` from the section above, which is an ISO-8601
+  string. The two types report the same window in the two formats their
+  respective sources use; `RateLimitStatus` mirrors the header, `UsageResponse`
+  mirrors the endpoint document. Use `resetAtDateTime()` when you want a
+  comparable object.
+
+The reading is also updated on the 429 path, so a caught `RateLimitException`
+and a subsequent `$api->rateLimit()` agree.
+
 ### SetSource Resource
 
 The SetSource resource manages data sources for trading card sets (checklists, metadata, images):
