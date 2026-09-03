@@ -1,0 +1,2 @@
+- **[Issue #358]** Derive the Release Validation gate's expected version from `build/version.sh --branch=main` instead of the PR head ref, so `hotfix/*` and `develop` PRs to `main` are satisfiable by collating changelog fragments.
+  - The changelog-section check now applies only to release-shaped head refs (`release/*`, `develop`, `hotfix/*`); Dependabot and feature PRs to `main` are skipped explicitly, preserving today's behaviour.
