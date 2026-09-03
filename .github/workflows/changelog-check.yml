@@ -27,37 +27,61 @@ jobs:
           
           VALIDATION_FAILED=false
           
-          # Get version that would be generated for this PR's branch
-          # Use the PR head ref (supplied via the step-level env: block) to get the actual branch name
+          # Informational only: the build identifier this PR's head ref would
+          # produce. It is NOT the version the release will tag - branch build
+          # identifiers (alpha/beta/rc/hotfix suffixes) never get tagged.
+          # (PR_HEAD_REF is supplied via the step-level env: block.)
           if [[ -n "$PR_HEAD_REF" ]]; then
-            # Use the actual branch name from the PR
-            CURRENT_VERSION=$(bash build/version.sh --branch="$PR_HEAD_REF")
+            BRANCH_VERSION=$(bash build/version.sh --branch="$PR_HEAD_REF")
           else
-            # Fallback to current branch detection
-            CURRENT_VERSION=$(bash build/version.sh)
+            BRANCH_VERSION=$(bash build/version.sh)
           fi
           
-          echo "Generated version for this branch: $CURRENT_VERSION"
+          echo "Branch build identifier for this head ref: $BRANCH_VERSION"
           echo ""
           
           # For PRs to main, we expect a proper release version in changelog
           # (PR_BASE_BRANCH is supplied via the step-level env: block)
+          RELEASE_VERSION=""
           if [ "$PR_BASE_BRANCH" = "main" ]; then
             echo "🎯 PR targets main branch - release changelog validation required"
             
-            # Extract the base semantic version (remove RC/hotfix suffixes like .rc-N or -hotfix.xxx)
-            RELEASE_VERSION=$(echo "$CURRENT_VERSION" | sed 's/[.-]rc[.-][0-9]*$//' | sed 's/-.*$//')
+            # Derive the expected release version exactly the way the release
+            # itself does: build-release.yml runs version.sh on main after the
+            # merge and tags whatever it emits. Deriving it from the head ref
+            # instead only ever round-tripped for release/* branches, which made
+            # develop/* and hotfix/* PRs to main unsatisfiable and feature/* and
+            # dependabot/* PRs pass vacuously (#358). actions/checkout above uses
+            # fetch-depth: 0, so tags are present for this derivation.
+            RELEASE_VERSION=$(bash build/version.sh --branch=main)
             echo "Expected release version: $RELEASE_VERSION"
             
-            # Check that CHANGELOG.md has section for this release version
-            if grep -q "^## \[$RELEASE_VERSION\]" CHANGELOG.md; then
-              echo "✅ Version section [$RELEASE_VERSION] found in CHANGELOG.md"
-            else
-              echo "❌ No version section [$RELEASE_VERSION] found in CHANGELOG.md"
-              echo "   PRs to main must have a changelog section for the release version"
-              echo "   Add a section like: ## [$RELEASE_VERSION] - $(date +%Y-%m-%d)"
-              VALIDATION_FAILED=true
-            fi
+            # Only release-shaped head refs are expected to carry the collated
+            # release section. Feature/bugfix/dependabot PRs to main pass
+            # vacuously today; skipping them explicitly preserves that behaviour
+            # (notably dependabot-auto-merge.yml) rather than newly failing them.
+            # Tightening the gate to cover them is tracked separately (#340).
+            case "$PR_HEAD_REF" in
+              release/*|develop|hotfix/*)
+                # Check that CHANGELOG.md has section for this release version
+                if grep -q "^## \[$RELEASE_VERSION\]" CHANGELOG.md; then
+                  echo "✅ Version section [$RELEASE_VERSION] found in CHANGELOG.md"
+                else
+                  echo "❌ No version section [$RELEASE_VERSION] found in CHANGELOG.md"
+                  echo "   CHANGELOG.md has not been advanced past the latest release tag."
+                  echo "   A release-shaped PR to main IS the release, so it must carry the"
+                  echo "   collated section: fold the pending changelog.d/ fragments into a new"
+                  echo "   '## [$RELEASE_VERSION] - $(date +%Y-%m-%d)' section and delete the"
+                  echo "   fragments you consumed. See changelog.d/README.md."
+                  echo "   Do not hand-add an empty section just to satisfy this check."
+                  VALIDATION_FAILED=true
+                fi
+                ;;
+              *)
+                echo "ℹ️  Head ref '$PR_HEAD_REF' is not release-shaped (release/*, develop, hotfix/*)"
+                echo "   - skipping the CHANGELOG release-section check."
+                ;;
+            esac
           else
             echo "ℹ️  PR targets $PR_BASE_BRANCH branch - no release validation needed"
           fi
@@ -76,8 +100,11 @@ jobs:
             echo ""
             echo "📝 To fix validation issues:"
             echo "1. Ensure no 'version' field exists in composer.json"
-            echo "2. Add version section to CHANGELOG.md for: $RELEASE_VERSION"
-            echo "3. All PRs to main branch must have a release version section"
+            if [ -n "$RELEASE_VERSION" ]; then
+              echo "2. Collate the pending changelog.d/ fragments into a"
+              echo "   '## [$RELEASE_VERSION]' section in CHANGELOG.md (see changelog.d/README.md)"
+              echo "3. Release-shaped PRs to main (release/*, develop, hotfix/*) must carry that section"
+            fi
             echo ""
             echo "📚 See .claude/CLAUDE.md for complete release process documentation"
           fi

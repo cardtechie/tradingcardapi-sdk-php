@@ -45,6 +45,12 @@ The SDK follows [Semantic Versioning 2.0.0](https://semver.org/):
 | `hotfix/*` | `X.Y.Z+1-hotfix.name.N` | `1.2.4-security-fix.3` | Critical fixes |
 | `feature/*` | `X.Y.Z-alpha.N` | `1.2.3-alpha.5` | Feature development |
 
+> **Only the `main` row is ever tagged.** Every other pattern in this table is a
+> *branch build identifier* — a label for CI artifacts and diagnostics. In
+> particular a `hotfix/*` string like `1.2.4-hotfix.securityfix.3` is never the
+> released version; when the hotfix merges to `main`, `build-release.yml` runs
+> `build/version.sh --branch=main` and tags whatever the `main` case emits.
+
 ## Build Scripts
 
 ### `build/version.sh`
@@ -180,13 +186,35 @@ tooling ships, the release operator collates the accumulated fragments into
    make version  # Shows: 1.2.4-security-fix.1
    ```
 
-2. **Apply Fix and Release**
+2. **Collate the changelog for the release**
+
+   A `hotfix/* -> main` PR *is* a release, so it must carry the collated
+   `CHANGELOG.md` section — this is the one place where folding `changelog.d/`
+   fragments into `CHANGELOG.md` belongs in a PR. Determine the version the
+   release will tag, then fold the pending fragments into a new section and
+   delete the ones you consumed:
 
    ```bash
-   make changelog-update
+   bash build/version.sh --branch=main   # e.g. 1.2.4 - the version that gets tagged
+   # Add "## [1.2.4] - YYYY-MM-DD" below "## [Unreleased]" and move each
+   # changelog.d/<issue>-<type>.md line under its Added/Changed/Fixed/... heading,
+   # then: git rm changelog.d/<the fragments you collated>
+   ```
+
+   **Release Validation** (`.github/workflows/changelog-check.yml`) checks for
+   exactly this section on `release/*`, `develop`, and `hotfix/*` head refs; other
+   head refs skip the check. See [`changelog.d/README.md`](../changelog.d/README.md)
+   and [RELEASING.md](RELEASING.md).
+
+3. **Merge to Main**
+
+   ```bash
    git checkout main
    git merge hotfix/security-fix
    ```
+
+   The push to `main` triggers **Build and Release**, which tags the version
+   from the `main` case — not the `hotfix/*` build identifier.
 
 ## Makefile Commands
 
