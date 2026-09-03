@@ -359,6 +359,16 @@ trait ApiRequest
                 return null;
             }
 
+            // The canonical paths that replaced the deprecated `/internal/workflow/*`
+            // aliases sit at the top level, so the `workflow` skip above no longer
+            // covers them. Neither serves a JSON:API resource-object response —
+            // actionable-sets serves flat dashboard rows and the job endpoints serve
+            // an async ack — so they have no `*Schema` class and would otherwise log
+            // "No schema defined for resource type: ..." on every call.
+            if (in_array($resource, ['actionable-sets', 'todo-initialization-jobs'], true)) {
+                return null;
+            }
+
             return $normalizedResources[$resource] ?? $resource;
         }
 
