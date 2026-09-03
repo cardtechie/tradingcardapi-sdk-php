@@ -719,6 +719,7 @@ This project maintains high code quality standards:
 - **[Error Handling Guide](docs/ERROR-HANDLING.md)** - Comprehensive guide to exception handling
 - **[Response Validation](docs/VALIDATION.md)** - Response validation and schema handling  
 - **[Version Management](docs/VERSION-MANAGEMENT.md)** - Release process and versioning
+- **[Dependency Scope Reference](docs/DEPENDENCIES.md)** - Why `laravel/framework` is runtime-scoped in `composer.lock` and how to triage Dependabot advisories
 - **[Trading Card API Documentation](https://docs.tradingcardapi.com)** - Complete API reference
 
 ### Upgrade Notes (0.3.0)

@@ -65,6 +65,13 @@ The SDK requires PHP `^8.2`. Security updates are published to
 [Packagist](https://packagist.org/packages/cardtechie/tradingcardapi-sdk-php)
 and tagged in this repository.
 
+> **Triaging advisories against this repository.** Before treating a Dependabot
+> advisory marked `scope: runtime` as consumer-facing, consult
+> [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md). `laravel/framework` is
+> legitimately runtime-scoped in this repository's `composer.lock`, so its
+> transitive packages are reported as runtime even though no consumer of the SDK
+> installs them.
+
 ## Scope
 
 This policy covers the `cardtechie/tradingcardapi-sdk-php` package only. It does
