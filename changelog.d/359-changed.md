@@ -1,0 +1,2 @@
+- **[Issue #359]** Document why `laravel/framework` is runtime-scoped in `composer.lock` and why Dependabot's `scope: runtime` on its transitive packages is a reporting artifact.
+  - Documentation only; `composer.json` and `composer.lock` are unchanged, and no relocation is possible from this repository.
