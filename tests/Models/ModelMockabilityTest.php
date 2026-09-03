@@ -2,7 +2,24 @@
 
 declare(strict_types=1);
 
+use CardTechie\TradingCardApiSdk\Models\Attribute;
+use CardTechie\TradingCardApiSdk\Models\AuditLog;
+use CardTechie\TradingCardApiSdk\Models\Brand;
+use CardTechie\TradingCardApiSdk\Models\Card;
+use CardTechie\TradingCardApiSdk\Models\CardImage;
+use CardTechie\TradingCardApiSdk\Models\Genre;
+use CardTechie\TradingCardApiSdk\Models\Manufacturer;
 use CardTechie\TradingCardApiSdk\Models\Model;
+use CardTechie\TradingCardApiSdk\Models\ObjectAttribute;
+use CardTechie\TradingCardApiSdk\Models\Oncard;
+use CardTechie\TradingCardApiSdk\Models\Player;
+use CardTechie\TradingCardApiSdk\Models\Playerteam;
+use CardTechie\TradingCardApiSdk\Models\Set;
+use CardTechie\TradingCardApiSdk\Models\SetSource;
+use CardTechie\TradingCardApiSdk\Models\Taxonomy;
+use CardTechie\TradingCardApiSdk\Models\Team;
+use CardTechie\TradingCardApiSdk\Models\Year;
+use Mockery\MockInterface;
 
 /**
  * Regression coverage for issue #351.
@@ -26,25 +43,25 @@ it('never declares a native never return type on Model::__call()', function () {
 it('can be mocked by Mockery', function (string $class) {
     $mock = Mockery::mock($class);
 
-    expect($mock)->toBeInstanceOf(Mockery\MockInterface::class);
+    expect($mock)->toBeInstanceOf(MockInterface::class);
 })->with([
-    CardTechie\TradingCardApiSdk\Models\Attribute::class,
-    CardTechie\TradingCardApiSdk\Models\AuditLog::class,
-    CardTechie\TradingCardApiSdk\Models\Brand::class,
-    CardTechie\TradingCardApiSdk\Models\Card::class,
-    CardTechie\TradingCardApiSdk\Models\CardImage::class,
-    CardTechie\TradingCardApiSdk\Models\Genre::class,
-    CardTechie\TradingCardApiSdk\Models\Manufacturer::class,
-    CardTechie\TradingCardApiSdk\Models\Model::class,
-    CardTechie\TradingCardApiSdk\Models\ObjectAttribute::class,
-    CardTechie\TradingCardApiSdk\Models\Oncard::class,
-    CardTechie\TradingCardApiSdk\Models\Player::class,
-    CardTechie\TradingCardApiSdk\Models\Playerteam::class,
-    CardTechie\TradingCardApiSdk\Models\Set::class,
-    CardTechie\TradingCardApiSdk\Models\SetSource::class,
-    CardTechie\TradingCardApiSdk\Models\Taxonomy::class,
-    CardTechie\TradingCardApiSdk\Models\Team::class,
-    CardTechie\TradingCardApiSdk\Models\Year::class,
+    Attribute::class,
+    AuditLog::class,
+    Brand::class,
+    Card::class,
+    CardImage::class,
+    Genre::class,
+    Manufacturer::class,
+    Model::class,
+    ObjectAttribute::class,
+    Oncard::class,
+    Player::class,
+    Playerteam::class,
+    Set::class,
+    SetSource::class,
+    Taxonomy::class,
+    Team::class,
+    Year::class,
 ]);
 
 it('still throws BadMethodCallException on a real instance after the type change', function () {
