@@ -71,7 +71,7 @@ trait ApiRequest
      *
      * Injected by the client that created this resource so every resource of
      * one client shares a single reading. Left null until injected or lazily
-     * created — see {@see rateLimitTracker()}.
+     * created by this trait's `rateLimitTracker()` accessor below.
      */
     private ?RateLimitTracker $rateLimitTracker = null;
 

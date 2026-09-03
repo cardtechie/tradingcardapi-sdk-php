@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace CardTechie\TradingCardApiSdk\DTOs\Usage;
 
+use CardTechie\TradingCardApiSdk\Exceptions\RateLimitException;
+
 /**
  * The caller's rate-limit window as reported by the `X-RateLimit-*` response
  * headers that ride along on every API response.
@@ -85,7 +87,7 @@ class RateLimitStatus
     /**
      * Seconds remaining until the window resets, clamped at zero for a
      * timestamp that has already passed. Matches the semantics of
-     * {@see \CardTechie\TradingCardApiSdk\Exceptions\RateLimitException::getSecondsUntilReset()}.
+     * {@see RateLimitException::getSecondsUntilReset()}.
      */
     public function secondsUntilReset(): int
     {
