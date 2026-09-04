@@ -216,13 +216,21 @@ class Model
      * `$player->team()` (when `team()` lives on Playerteam, not Player) returned
      * null instead of failing. Throw so unknown method calls surface loudly.
      *
+     * The `never` return type is intentionally expressed as a `@return never`
+     * docblock rather than a native return type. A native `never` on a public
+     * magic method makes the class unmockable: Mockery's generated override
+     * completes normally, which PHP treats as a hard fatal rather than a
+     * catchable error, aborting the entire test process. See issue #351 — do
+     * not re-add `: never` here as a tidy-up.
+     *
      * @param  array<int, mixed>  $arguments
+     * @return never
      *
      * @throws \BadMethodCallException Always, for any undefined method.
      *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
      */
-    public function __call(string $methodName, array $arguments): never
+    public function __call(string $methodName, array $arguments)
     {
         throw new \BadMethodCallException(
             sprintf('Call to undefined method %s::%s()', static::class, $methodName)
