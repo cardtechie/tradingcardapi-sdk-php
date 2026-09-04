@@ -388,7 +388,7 @@ cases where you cross it anyway.
 
 ### Rate-limit headers
 
-Where `usage()` above is a *proactive* poll of a dedicated endpoint, the API also
+Where `usage()` above is a _proactive_ poll of a dedicated endpoint, the API also
 attaches the caller's current window to the `X-RateLimit-*` headers of ordinary
 responses. The SDK captures those headers as they go by, so you can read your
 quota off a request you were making anyway — no extra round trip:

@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 use CardTechie\TradingCardApiSdk\DTOs\Usage\RateLimitStatus;
 use CardTechie\TradingCardApiSdk\Exceptions\RateLimitException;
+use CardTechie\TradingCardApiSdk\Exceptions\TradingCardApiException;
 use CardTechie\TradingCardApiSdk\Resources\Traits\ApiRequest;
 use CardTechie\TradingCardApiSdk\Services\RateLimitTracker;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Request as GuzzleRequest;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
 
 /**
@@ -122,6 +125,85 @@ it('still records the window when the request throws a RateLimitException', func
     expect($status->limit)->toBe(60);
     expect($status->remaining)->toBe(0);
     expect($status->resetAt)->toBe(1790000000);
+});
+
+it('records the window from a non-429 error response', function () {
+    // The trio rides on every response the throttle middleware passes, not
+    // just the 429 RateLimitException models. A 500 that reports the window
+    // must update the reading like any other response.
+    $this->mockHandler->append(new GuzzleResponse(500, [
+        'X-RateLimit-Limit' => '1000',
+        'X-RateLimit-Remaining' => '412',
+        'X-RateLimit-Reset' => '1790000000',
+    ], json_encode(['message' => 'Server Error'])));
+
+    expect(fn () => $this->resource->call('/v1/cards'))
+        ->toThrow(TradingCardApiException::class);
+
+    $status = $this->resource->getRateLimit();
+
+    expect($status)->toBeInstanceOf(RateLimitStatus::class);
+    expect($status->limit)->toBe(1000);
+    expect($status->remaining)->toBe(412);
+    expect($status->resetAt)->toBe(1790000000);
+});
+
+it('records the window from a 401 error response', function () {
+    $this->mockHandler->append(new GuzzleResponse(401, [
+        'X-RateLimit-Limit' => '60',
+        'X-RateLimit-Remaining' => '58',
+        'X-RateLimit-Reset' => '1790000000',
+    ], json_encode(['message' => 'Unauthenticated'])));
+
+    expect(fn () => $this->resource->call('/v1/cards'))
+        ->toThrow(TradingCardApiException::class);
+
+    expect($this->resource->getRateLimit()->remaining)->toBe(58);
+});
+
+it('reads the trio case-insensitively off an error response', function () {
+    // Capture goes through RateLimitStatus::fromHeaders() for every status, so
+    // lower-cased headers off the wire are read the same as canonical casing —
+    // it no longer depends on an exception subclass parsing them itself.
+    $this->mockHandler->append(new GuzzleResponse(403, [
+        'x-ratelimit-limit' => '1000',
+        'x-ratelimit-remaining' => '77',
+        'x-ratelimit-reset' => '1790000000',
+    ], json_encode(['message' => 'Forbidden'])));
+
+    expect(fn () => $this->resource->call('/v1/cards'))
+        ->toThrow(TradingCardApiException::class);
+
+    expect($this->resource->getRateLimit()->remaining)->toBe(77);
+});
+
+it('keeps the prior reading when an error response omits the headers', function () {
+    $this->mockHandler->append(new GuzzleResponse(200, [
+        'X-RateLimit-Limit' => '1000',
+        'X-RateLimit-Remaining' => '640',
+        'X-RateLimit-Reset' => '1790000000',
+    ], json_encode(['data' => []])));
+    $this->mockHandler->append(new GuzzleResponse(500, [], json_encode(['message' => 'Server Error'])));
+
+    $this->resource->call('/v1/cards');
+    expect(fn () => $this->resource->call('/v1/cards'))
+        ->toThrow(TradingCardApiException::class);
+
+    expect($this->resource->getRateLimit()->remaining)->toBe(640);
+});
+
+it('leaves the reading null when the request never reached a response', function () {
+    // A ConnectException carries no response, so there are no headers to read
+    // and nothing to record.
+    $this->mockHandler->append(new ConnectException(
+        'Connection refused',
+        new GuzzleRequest('GET', '/v1/cards')
+    ));
+
+    expect(fn () => $this->resource->call('/v1/cards'))
+        ->toThrow(TradingCardApiException::class);
+
+    expect($this->resource->getRateLimit())->toBeNull();
 });
 
 it('does not capture headers from the /oauth/token exchange', function () {

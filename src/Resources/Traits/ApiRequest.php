@@ -6,12 +6,12 @@ namespace CardTechie\TradingCardApiSdk\Resources\Traits;
 
 use CardTechie\TradingCardApiSdk\DTOs\Usage\RateLimitStatus;
 use CardTechie\TradingCardApiSdk\Exceptions\AuthenticationException;
-use CardTechie\TradingCardApiSdk\Exceptions\RateLimitException;
 use CardTechie\TradingCardApiSdk\Exceptions\TradingCardApiException;
 use CardTechie\TradingCardApiSdk\Services\ErrorResponseParser;
 use CardTechie\TradingCardApiSdk\Services\RateLimitTracker;
 use CardTechie\TradingCardApiSdk\Services\ResponseValidator;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use stdClass;
@@ -198,25 +198,26 @@ trait ApiRequest
             if (! $this->errorParser) {
                 $this->errorParser = new ErrorResponseParser;
             }
-            $parsed = $this->errorParser->parseGuzzleException($exception);
 
-            // A 429 is precisely the moment a caller most wants an accurate
-            // reading, and throwing here bypasses the success-path capture
-            // below. The exception has already parsed the same header trio, so
-            // record from its accessors rather than re-parsing the response.
-            if ($parsed instanceof RateLimitException) {
-                $limit = $parsed->getRateLimit();
-                $remaining = $parsed->getRateLimitRemaining();
-                $resetAt = $parsed->getRateLimitReset();
-
-                if ($limit !== null && $remaining !== null && $resetAt !== null) {
-                    $this->rateLimitTracker()->record(
-                        new RateLimitStatus($limit, $remaining, $resetAt)
-                    );
-                }
+            // Capture straight off the failed response, *before* parsing picks
+            // an exception subclass. The API's throttle middleware attaches the
+            // same `X-RateLimit-*` trio to every response it passes, so a 401,
+            // 403 or 5xx reports the caller's window just as truthfully as a
+            // 200 does — and throwing here would otherwise skip the
+            // success-path capture below, leaving a stale reading behind. An
+            // error is also precisely when a caller most wants to know where
+            // they stand. Reading the headers here rather than off
+            // RateLimitException's accessors keeps every status on the one
+            // case-insensitive lookup in RateLimitStatus::fromHeaders(), so
+            // capture no longer depends on a single exception subclass having
+            // parsed the trio itself.
+            if ($exception instanceof RequestException && $exception->hasResponse()) {
+                $this->rateLimitTracker()->recordFromHeaders(
+                    $exception->getResponse()->getHeaders()
+                );
             }
 
-            throw $parsed;
+            throw $this->errorParser->parseGuzzleException($exception);
         }
 
         // Capture the passive rate-limit state that rides on every API
