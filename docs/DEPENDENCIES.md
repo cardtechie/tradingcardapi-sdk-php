@@ -2,9 +2,10 @@
 
 This document explains why `laravel/framework` appears in the **runtime**
 `packages` array of this repository's `composer.lock`, why that placement makes
-Dependabot report some advisories with `scope: runtime` even though no consumer
-of this SDK ever installs the affected package, and why neither a full
-`composer update` nor an edit to `composer.json` can change it.
+Dependabot report some advisories with `scope: runtime` even though installing
+this SDK never adds the affected package to a consumer's dependency tree, and
+why neither a full `composer update` nor an edit to `composer.json` can change
+it.
 
 It exists because the question has already been raised twice during dependency
 sweeps ([#353](https://github.com/cardtechie/tradingcardapi-sdk-php/issues/353),
@@ -145,10 +146,13 @@ its `composer.json`, never against this repository's lock file:
   `illuminate/contracts` package, which pulls in no framework and no
   `league/commonmark`.
 
-Neither ever installs `league/commonmark`, `symfony/console`, or any other
-framework-transitive package on the SDK's behalf. The runtime blast radius that
-this repository's lock file appears to describe is a property of the SDK's own
-development environment, not of any consumer's install.
+Installing the SDK therefore adds no framework-transitive package —
+`league/commonmark`, `symfony/console`, or any other — to a consumer's
+dependency tree. A Laravel application does install those packages, but it
+installs them through its own `laravel/framework` requirement, exactly as it
+would without this SDK. The runtime blast radius that this repository's lock
+file appears to describe is a property of the SDK's own development
+environment, not something the SDK adds to any consumer's install.
 
 ## Triaging Dependabot advisories
 

@@ -69,8 +69,8 @@ and tagged in this repository.
 > advisory marked `scope: runtime` as consumer-facing, consult
 > [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md). `laravel/framework` is
 > legitimately runtime-scoped in this repository's `composer.lock`, so its
-> transitive packages are reported as runtime even though no consumer of the SDK
-> installs them.
+> transitive packages are reported as runtime even though installing the SDK
+> never adds them to a consumer's install.
 
 ## Scope
 
