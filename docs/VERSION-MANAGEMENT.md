@@ -183,7 +183,7 @@ tooling ships, the release operator collates the accumulated fragments into
 
    ```bash
    git checkout -b hotfix/security-fix
-   make version  # Shows: 1.2.4-security-fix.1
+   make version  # Shows: 1.2.4-hotfix.securityfix.1
    ```
 
 2. **Collate the changelog for the release**

@@ -50,11 +50,16 @@ jobs:
             # itself does: build-release.yml runs version.sh on main after the
             # merge and tags whatever it emits. Deriving it from the head ref
             # instead only ever round-tripped for release/* branches, which made
-            # develop/* and hotfix/* PRs to main unsatisfiable and feature/* and
+            # develop and hotfix/* PRs to main unsatisfiable and feature/* and
             # dependabot/* PRs pass vacuously (#358). actions/checkout above uses
             # fetch-depth: 0, so tags are present for this derivation.
             RELEASE_VERSION=$(bash build/version.sh --branch=main)
             echo "Expected release version: $RELEASE_VERSION"
+
+            # Escape BRE metacharacters before interpolating the version into the
+            # heading grep below. Unescaped, the '.' in e.g. '0.3.1' matches any
+            # character, so the check could pass on an unrelated heading.
+            RELEASE_VERSION_RE=$(printf '%s' "$RELEASE_VERSION" | sed 's/[].[*^$\\]/\\&/g')
             
             # Only release-shaped head refs are expected to carry the collated
             # release section. Feature/bugfix/dependabot PRs to main pass
@@ -64,7 +69,7 @@ jobs:
             case "$PR_HEAD_REF" in
               release/*|develop|hotfix/*)
                 # Check that CHANGELOG.md has section for this release version
-                if grep -q "^## \[$RELEASE_VERSION\]" CHANGELOG.md; then
+                if grep -q "^## \[$RELEASE_VERSION_RE\]" CHANGELOG.md; then
                   echo "✅ Version section [$RELEASE_VERSION] found in CHANGELOG.md"
                 else
                   echo "❌ No version section [$RELEASE_VERSION] found in CHANGELOG.md"
