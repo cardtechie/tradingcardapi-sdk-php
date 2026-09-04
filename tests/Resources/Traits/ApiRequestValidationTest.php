@@ -93,6 +93,22 @@ it('extracts resource type from internal endpoint URLs correctly', function () {
     expect($resource->testExtractResourceType('/internal/sets/123/workflow'))->toBeNull();
 });
 
+it('skips validation for the canonical internal workflow endpoints', function () {
+    $client = m::mock(Client::class);
+    $resource = new TestApiResource($client);
+
+    // The canonical paths that replaced the deprecated /internal/workflow/*
+    // aliases are not JSON:API resource-object responses and have no schema.
+    expect($resource->testExtractResourceType('/internal/actionable-sets'))->toBeNull();
+    expect($resource->testExtractResourceType('/internal/actionable-sets?status=review'))->toBeNull();
+    expect($resource->testExtractResourceType('/internal/todo-initialization-jobs'))->toBeNull();
+    expect($resource->testExtractResourceType('/internal/todo-initialization-jobs/job-abc'))->toBeNull();
+
+    // The canonical set-scoped todo routes are multi-segment sub-resources.
+    expect($resource->testExtractResourceType('/internal/sets/123/todos'))->toBeNull();
+    expect($resource->testExtractResourceType('/internal/sets/123/todos/todo-1'))->toBeNull();
+});
+
 it('returns null for non-API URLs', function () {
     $client = m::mock(Client::class);
     $resource = new TestApiResource($client);
