@@ -117,16 +117,25 @@ class RateLimitStatus
                 return null;
             }
 
-            // The X-RateLimit-* contract is integer counts and a Unix
-            // timestamp, so only an integer string is a reading. Anything else
-            // is "no reading", not zero: casting would surface remaining=0,
-            // indistinguishable from a genuinely exhausted quota. is_numeric()
-            // is too loose here — it accepts "1e3" and "1000.5", which (int)
-            // then truncates to 1 and 1000. Surrounding whitespace is tolerated,
-            // since a padded value is still a real reading.
+            // The X-RateLimit-* contract is non-negative integer counts and a
+            // Unix timestamp, so only a non-negative integer is a reading.
+            // Anything else is "no reading", not zero: casting would surface
+            // remaining=0, indistinguishable from a genuinely exhausted quota.
+            //
+            // is_numeric() would be too loose — it accepts "1e3" and "1000.5",
+            // which (int) then mangles to 1 and 1000. A negative is rejected for
+            // the same reason: it cannot describe a count or an epoch, and
+            // letting one through would make used() report nonsense.
+            //
+            // Surrounding whitespace is tolerated: a padded value is still a
+            // real reading.
             $value = is_string($value) ? trim($value) : $value;
 
-            if (! is_int($value) && preg_match('/^-?\d+$/', (string) $value) !== 1) {
+            if (is_int($value)) {
+                return $value >= 0 ? $value : null;
+            }
+
+            if (preg_match('/^\d+$/', (string) $value) !== 1) {
                 return null;
             }
 

@@ -138,6 +138,20 @@ it('returns null for numeric-but-not-integer header values', function () {
     }
 });
 
+it('returns null for negative header values', function () {
+    // Counts and a Unix timestamp cannot be negative; letting one through
+    // would make used() report nonsense.
+    foreach (['-1', -5] as $negative) {
+        $status = RateLimitStatus::fromHeaders([
+            'X-RateLimit-Limit' => ['1000'],
+            'X-RateLimit-Remaining' => [$negative],
+            'X-RateLimit-Reset' => ['1790000000'],
+        ]);
+
+        expect($status)->toBeNull();
+    }
+});
+
 it('accepts an integer header supplied as a native int', function () {
     $status = RateLimitStatus::fromHeaders([
         'X-RateLimit-Limit' => 1000,
