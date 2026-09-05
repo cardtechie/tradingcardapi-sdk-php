@@ -111,3 +111,27 @@ it('returns null when a header carries an empty value', function () {
 
     expect($status)->toBeNull();
 });
+
+it('returns null when a header carries a non-numeric value', function () {
+    // (int) 'unlimited' is 0, which would report an exhausted quota off a
+    // value the server never meant as a number.
+    $status = RateLimitStatus::fromHeaders([
+        'X-RateLimit-Limit' => ['1000'],
+        'X-RateLimit-Remaining' => ['unlimited'],
+        'X-RateLimit-Reset' => ['1790000000'],
+    ]);
+
+    expect($status)->toBeNull();
+});
+
+it('tolerates surrounding whitespace on an otherwise numeric header', function () {
+    $status = RateLimitStatus::fromHeaders([
+        'X-RateLimit-Limit' => [' 1000 '],
+        'X-RateLimit-Remaining' => ["742\t"],
+        'X-RateLimit-Reset' => ['1790000000'],
+    ]);
+
+    expect($status)->not->toBeNull();
+    expect($status->limit)->toBe(1000);
+    expect($status->remaining)->toBe(742);
+});

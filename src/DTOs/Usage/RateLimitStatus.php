@@ -117,6 +117,17 @@ class RateLimitStatus
                 return null;
             }
 
+            // A non-numeric header is "no reading", not zero. Casting it would
+            // surface remaining=0 — indistinguishable from a genuinely
+            // exhausted quota — off a value the server never meant as a number
+            // (Copilot, PR #365). Surrounding whitespace is tolerated, since a
+            // padded value is still a real reading.
+            $value = is_string($value) ? trim($value) : $value;
+
+            if (! is_numeric($value)) {
+                return null;
+            }
+
             return (int) $value;
         }
 
