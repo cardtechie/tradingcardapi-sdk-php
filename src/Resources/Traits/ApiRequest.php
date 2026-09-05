@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace CardTechie\TradingCardApiSdk\Resources\Traits;
 
+use CardTechie\TradingCardApiSdk\DTOs\Usage\RateLimitStatus;
 use CardTechie\TradingCardApiSdk\Exceptions\AuthenticationException;
 use CardTechie\TradingCardApiSdk\Exceptions\TradingCardApiException;
 use CardTechie\TradingCardApiSdk\Services\ErrorResponseParser;
+use CardTechie\TradingCardApiSdk\Services\RateLimitTracker;
 use CardTechie\TradingCardApiSdk\Services\ResponseValidator;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use stdClass;
@@ -64,6 +67,15 @@ trait ApiRequest
     private ?string $scope = null;
 
     /**
+     * Holder for the rate-limit window observed on the last response.
+     *
+     * Injected by the client that created this resource so every resource of
+     * one client shares a single reading. Left null until injected or lazily
+     * created by this trait's `rateLimitTracker()` accessor below.
+     */
+    private ?RateLimitTracker $rateLimitTracker = null;
+
+    /**
      * Set authentication information on this resource.
      */
     public function setAuthInfo(string $authType, ?string $personalAccessToken, ?string $clientId, ?string $clientSecret, ?string $scope = null): void
@@ -73,6 +85,47 @@ trait ApiRequest
         $this->oauthClientId = $clientId;
         $this->oauthClientSecret = $clientSecret;
         $this->scope = $scope;
+    }
+
+    /**
+     * Share a rate-limit holder with this resource.
+     *
+     * Called by `TradingCardApi::createResource()` (and `InternalClient`'s
+     * equivalent) so every resource built by one client records into — and
+     * reads from — the same holder.
+     */
+    public function setRateLimitTracker(RateLimitTracker $tracker): void
+    {
+        $this->rateLimitTracker = $tracker;
+    }
+
+    /**
+     * The most recent rate-limit window seen by this resource's tracker, or
+     * null if no response has carried the `X-RateLimit-*` headers.
+     *
+     * Useful on a resource you keep a reference to:
+     * `$usage = $api->usage(); $usage->get(); $usage->getRateLimit();`
+     */
+    public function getRateLimit(): ?RateLimitStatus
+    {
+        return $this->rateLimitTracker()->get();
+    }
+
+    /**
+     * The holder this resource records into, lazily creating a per-instance one
+     * when no client injected a shared holder.
+     *
+     * The fallback matters for directly-constructed resources — every existing
+     * test builds resources that way — so a standalone resource still reports
+     * its own rate limit rather than silently discarding it.
+     */
+    private function rateLimitTracker(): RateLimitTracker
+    {
+        if ($this->rateLimitTracker === null) {
+            $this->rateLimitTracker = new RateLimitTracker;
+        }
+
+        return $this->rateLimitTracker;
     }
 
     /**
@@ -145,8 +198,35 @@ trait ApiRequest
             if (! $this->errorParser) {
                 $this->errorParser = new ErrorResponseParser;
             }
+
+            // Capture straight off the failed response, *before* parsing picks
+            // an exception subclass. The API's throttle middleware attaches the
+            // same `X-RateLimit-*` trio to every response it passes, so a 401,
+            // 403 or 5xx reports the caller's window just as truthfully as a
+            // 200 does — and throwing here would otherwise skip the
+            // success-path capture below, leaving a stale reading behind. An
+            // error is also precisely when a caller most wants to know where
+            // they stand. Reading the headers here rather than off
+            // RateLimitException's accessors keeps every status on the one
+            // case-insensitive lookup in RateLimitStatus::fromHeaders(), so
+            // capture no longer depends on a single exception subclass having
+            // parsed the trio itself.
+            if ($exception instanceof RequestException && $exception->hasResponse()) {
+                $this->rateLimitTracker()->recordFromHeaders(
+                    $exception->getResponse()->getHeaders()
+                );
+            }
+
             throw $this->errorParser->parseGuzzleException($exception);
         }
+
+        // Capture the passive rate-limit state that rides on every API
+        // response. This lives in makeRequest() and NOT in doRequest() on
+        // purpose: retrieveToken() also calls doRequest() for `/oauth/token`,
+        // whose responses carry the separate `X-OAuth-RateLimit-*` family from
+        // the API's `oauth.throttle` limiter. Capturing in doRequest() would
+        // mix two unrelated buckets into one reading.
+        $this->rateLimitTracker()->recordFromHeaders($response->getHeaders());
 
         $body = (string) $response->getBody();
 
