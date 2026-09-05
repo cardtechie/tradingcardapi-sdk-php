@@ -124,6 +124,31 @@ it('returns null when a header carries a non-numeric value', function () {
     expect($status)->toBeNull();
 });
 
+it('returns null for numeric-but-not-integer header values', function () {
+    // is_numeric() accepts these, but (int) mangles them: '1e3' -> 1 and
+    // '1000.5' -> 1000. A misparsed count is worse than no reading.
+    foreach (['1e3', '1000.5', '0x1A', '  '] as $bogus) {
+        $status = RateLimitStatus::fromHeaders([
+            'X-RateLimit-Limit' => ['1000'],
+            'X-RateLimit-Remaining' => [$bogus],
+            'X-RateLimit-Reset' => ['1790000000'],
+        ]);
+
+        expect($status)->toBeNull();
+    }
+});
+
+it('accepts an integer header supplied as a native int', function () {
+    $status = RateLimitStatus::fromHeaders([
+        'X-RateLimit-Limit' => 1000,
+        'X-RateLimit-Remaining' => 742,
+        'X-RateLimit-Reset' => 1790000000,
+    ]);
+
+    expect($status)->not->toBeNull();
+    expect($status->remaining)->toBe(742);
+});
+
 it('tolerates surrounding whitespace on an otherwise numeric header', function () {
     $status = RateLimitStatus::fromHeaders([
         'X-RateLimit-Limit' => [' 1000 '],

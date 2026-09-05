@@ -117,14 +117,16 @@ class RateLimitStatus
                 return null;
             }
 
-            // A non-numeric header is "no reading", not zero. Casting it would
-            // surface remaining=0 — indistinguishable from a genuinely
-            // exhausted quota — off a value the server never meant as a number
-            // (Copilot, PR #365). Surrounding whitespace is tolerated, since a
-            // padded value is still a real reading.
+            // The X-RateLimit-* contract is integer counts and a Unix
+            // timestamp, so only an integer string is a reading. Anything else
+            // is "no reading", not zero: casting would surface remaining=0,
+            // indistinguishable from a genuinely exhausted quota. is_numeric()
+            // is too loose here — it accepts "1e3" and "1000.5", which (int)
+            // then truncates to 1 and 1000. Surrounding whitespace is tolerated,
+            // since a padded value is still a real reading.
             $value = is_string($value) ? trim($value) : $value;
 
-            if (! is_numeric($value)) {
+            if (! is_int($value) && preg_match('/^-?\d+$/', (string) $value) !== 1) {
                 return null;
             }
 
