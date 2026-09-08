@@ -318,25 +318,44 @@ Worked examples of the different serial formats:
 
 ### Stats Resource
 
-The Stats resource provides analytics and tracking capabilities for entity counts:
+The Stats resource provides analytics and tracking capabilities for entity counts.
+
+> **Every figure the Stats endpoints return is relative to your token's status
+> posture.** A token holding `internal`, `read:all-status` or `read:draft` sees
+> the full published/draft split. Every other token — including the SDK's
+> default `read:published` scope (see [OAuth Scopes](#oauth-scopes)) — sees a
+> **published-only view**: `total` equals `published` and `draft` is always `0`.
+> The response shape is identical either way, so nothing in the payload tells
+> you which view you received. Read `published` when you mean "published";
+> do not read `total` and assume it counts drafts too.
+>
+> The examples below show what the **default `read:published` scope** actually
+> returns.
+
+Note that the `entity_type` carried in the counts, snapshots and growth payloads
+is **singular** (`set`, `card`, `player`, `team`), while the `stats()->get()`
+path segment is plural (`sets`, `cards`, ...).
 
 ```php
 // Get current counts for all entity types
 $counts = $api->stats()->getCounts();
 
-// Access counts for a specific entity type
-$setsCount = $counts->getByEntityType('sets');
-echo $setsCount->total;      // Total count
+// Access counts for a specific entity type (singular entity_type)
+$setsCount = $counts->getByEntityType('set');
 echo $setsCount->published;  // Published count
-echo $setsCount->draft;      // Draft count
-echo $setsCount->archived;   // Archived count
+echo $setsCount->total;      // On read:published this equals published, not the catalog total
+echo $setsCount->draft;      // On read:published this is always 0
+echo $setsCount->archived;   // Always 0 — the API sends the key but does not populate it
 
 // Get growth metrics (default: 7 days)
 $growth = $api->stats()->getGrowth();
 // Or specify a period: '7d', '30d', '90d', 'week', 'month'
 $growth = $api->stats()->getGrowth('30d');
 
-$setsGrowth = $growth->getByEntityType('sets');
+// On read:published these four figures are computed off the published series,
+// so they are not comparable with the same call made on a privileged token.
+// They are zero when the window carries no published data.
+$setsGrowth = $growth->getByEntityType('set');
 echo $setsGrowth->current;          // Current count
 echo $setsGrowth->previous;         // Previous period count
 echo $setsGrowth->change;           // Absolute change
@@ -345,19 +364,37 @@ echo $setsGrowth->percentageChange; // Percentage change
 // Get historical snapshots
 $snapshots = $api->stats()->getSnapshots();
 
-// With filters
+// With filters (entity_type takes the singular form)
 $snapshots = $api->stats()->getSnapshots([
-    'entity_type' => 'sets',
+    'entity_type' => 'set',
     'from' => '2024-11-01',
     'to' => '2024-11-30',
 ]);
 
 foreach ($snapshots->snapshots as $snapshot) {
     echo $snapshot->date;        // Snapshot date
-    echo $snapshot->entityType;  // Entity type
-    echo $snapshot->total;       // Total at that point
+    echo $snapshot->entityType;  // Entity type (singular)
+    echo $snapshot->published;   // Published at that point
+    echo $snapshot->total;       // On read:published this equals published
 }
+
+// Time-series for a single model type (plural path segment).
+// For 'sets' and 'cards' the series itself is filtered by your token's posture;
+// taxonomy types (players, teams, brands, genres, ...) are ungated.
+$cardStats = $api->stats()->get('cards');
 ```
+
+To read draft volume, request a scope that can see it — see
+[OAuth Scopes](#oauth-scopes):
+
+```env
+TRADINGCARDAPI_SCOPE="read:draft"
+```
+
+Note also that list endpoints (`/v1/players`, `/v1/teams`, `/v1/player-teams`,
+`/v1/card-images`, `/v1/set-sources`, `/v1/cards`) return published-derived rows
+only on a `read:published` token. They do **not** return the full catalog, and
+they signal this with fewer rows rather than an error.
 
 ### SetSource Resource
 

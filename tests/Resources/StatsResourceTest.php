@@ -627,3 +627,183 @@ it('handles empty growth response', function () {
     expect($result->period)->toBe('7d');
     expect($result->metrics)->toHaveCount(0);
 });
+
+it('hydrates a gated counts payload end-to-end on a read:published token', function () {
+    // The payload a customer-grade token receives since
+    // cardtechie/tradingcardapi-api#2435: total collapsed onto published, draft
+    // zeroed, archived zero, and singular entity_type values.
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'stats',
+                'attributes' => [
+                    'counts' => [
+                        [
+                            'entity_type' => 'set',
+                            'total' => 120,
+                            'published' => 120,
+                            'draft' => 0,
+                            'archived' => 0,
+                        ],
+                        [
+                            'entity_type' => 'card',
+                            'total' => 326000,
+                            'published' => 326000,
+                            'draft' => 0,
+                            'archived' => 0,
+                        ],
+                    ],
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->statsResource->getCounts();
+
+    expect($result)->toBeInstanceOf(CountsResponse::class);
+    expect($result->counts)->toHaveCount(2);
+
+    foreach ($result->counts as $count) {
+        expect($count)->toBeInstanceOf(EntityCount::class);
+        expect($count->total)->toBe($count->published);
+        expect($count->draft)->toBe(0);
+        expect($count->archived)->toBe(0);
+    }
+
+    // Lookup takes the API's singular entity_type.
+    expect($result->getByEntityType('set'))->not->toBeNull();
+    expect($result->getByEntityType('set')->published)->toBe(120);
+    expect($result->getByEntityType('card')->published)->toBe(326000);
+});
+
+it('hydrates a gated counts payload that omits total and draft', function () {
+    // Defensive: the shipped gate preserves the keys, but the DTO must not
+    // depend on that.
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'stats',
+                'attributes' => [
+                    'counts' => [
+                        [
+                            'entity_type' => 'set',
+                            'published' => 120,
+                        ],
+                    ],
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->statsResource->getCounts();
+
+    expect($result->counts)->toHaveCount(1);
+    expect($result->counts[0]->published)->toBe(120);
+    expect($result->counts[0]->total)->toBe(0);
+    expect($result->counts[0]->draft)->toBe(0);
+});
+
+it('hydrates a gated snapshots payload end-to-end on a read:published token', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'stats',
+                'attributes' => [
+                    'snapshots' => [
+                        [
+                            'date' => '2024-11-01',
+                            'entity_type' => 'set',
+                            'total' => 80,
+                            'published' => 80,
+                            'draft' => 0,
+                            'archived' => 0,
+                        ],
+                        [
+                            'date' => '2024-11-02',
+                            'entity_type' => 'set',
+                            'total' => 85,
+                            'published' => 85,
+                            'draft' => 0,
+                            'archived' => 0,
+                        ],
+                    ],
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->statsResource->getSnapshots();
+
+    expect($result)->toBeInstanceOf(SnapshotsResponse::class);
+    expect($result->snapshots)->toHaveCount(2);
+
+    foreach ($result->snapshots as $snapshot) {
+        expect($snapshot)->toBeInstanceOf(Snapshot::class);
+        expect($snapshot->entityType)->toBe('set');
+        expect($snapshot->total)->toBe($snapshot->published);
+        expect($snapshot->draft)->toBe(0);
+    }
+});
+
+it('hydrates a gated growth payload end-to-end on a read:published token', function () {
+    // The metric keys are unchanged by the gate; only the series behind them
+    // moves from total to published. Nothing in the payload signals the switch.
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'stats',
+                'attributes' => [
+                    'period' => '7d',
+                    'metrics' => [
+                        [
+                            'entity_type' => 'set',
+                            'current' => 120,
+                            'previous' => 110,
+                            'change' => 10,
+                            'percentage_change' => 9.09,
+                        ],
+                    ],
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->statsResource->getGrowth();
+
+    expect($result)->toBeInstanceOf(GrowthResponse::class);
+    expect($result->metrics)->toHaveCount(1);
+    expect($result->metrics[0])->toBeInstanceOf(GrowthMetric::class);
+    expect($result->metrics[0]->entityType)->toBe('set');
+    expect($result->metrics[0]->current)->toBe(120);
+});
+
+it('hydrates a zeroed growth payload when the window carries no published data', function () {
+    // getSdkGrowth() fails closed rather than falling back to totals the token
+    // may not see, so zeros are a legitimate response, not a deserialisation
+    // failure.
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                'type' => 'stats',
+                'attributes' => [
+                    'period' => '7d',
+                    'metrics' => [
+                        [
+                            'entity_type' => 'player',
+                            'current' => 0,
+                            'previous' => 0,
+                            'change' => 0,
+                            'percentage_change' => 0,
+                        ],
+                    ],
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->statsResource->getGrowth();
+
+    expect($result->metrics[0]->entityType)->toBe('player');
+    expect($result->metrics[0]->current)->toBe(0);
+    expect($result->metrics[0]->percentageChange)->toBe(0.0);
+});

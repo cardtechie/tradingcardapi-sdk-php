@@ -53,3 +53,38 @@ it('handles partial properties with defaults', function () {
     expect($snapshot->draft)->toBe(0);
     expect($snapshot->archived)->toBe(0);
 });
+
+it('deserialises the gated payload a read:published token receives', function () {
+    // Mirrors EntityCount: getSdkSnapshots() applies the same posture transform
+    // per row (cardtechie/tradingcardapi-api#2435).
+    $data = (object) [
+        'date' => '2024-11-30',
+        'entity_type' => 'card',
+        'total' => 4500,
+        'published' => 4500,
+        'draft' => 0,
+        'archived' => 0,
+    ];
+
+    $snapshot = Snapshot::fromObject($data);
+
+    expect($snapshot->entityType)->toBe('card');
+    expect($snapshot->total)->toBe($snapshot->published);
+    expect($snapshot->draft)->toBe(0);
+    expect($snapshot->archived)->toBe(0);
+});
+
+it('deserialises when the gate drops total and draft entirely', function () {
+    $data = (object) [
+        'date' => '2024-11-30',
+        'entity_type' => 'player',
+        'published' => 8200,
+    ];
+
+    $snapshot = Snapshot::fromObject($data);
+
+    expect($snapshot->entityType)->toBe('player');
+    expect($snapshot->published)->toBe(8200);
+    expect($snapshot->total)->toBe(0);
+    expect($snapshot->draft)->toBe(0);
+});
