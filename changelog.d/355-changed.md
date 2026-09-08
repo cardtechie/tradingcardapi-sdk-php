@@ -1,0 +1,2 @@
+- **[Issue #355]** Document that every stats figure is relative to the calling token's status posture.
+  - On the default `read:published` scope the API now returns `total == published` and `draft == 0`; no SDK field was added, removed or renamed.
