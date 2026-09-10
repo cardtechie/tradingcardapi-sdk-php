@@ -23,8 +23,13 @@ class Workflow
     /**
      * Get the actionable sets for the workflow dashboard.
      *
-     * Returns a typed {@see ActionableSetsResponse} wrapping the JSON:API
-     * collection of actionable sets.
+     * Returns a typed {@see ActionableSetsResponse} wrapping the collection of
+     * actionable sets plus the API's `meta` block (total, full_total, and the
+     * echoed filters).
+     *
+     * Targets the canonical `GET /internal/actionable-sets`. The former
+     * `/internal/workflow/actionable-sets` path is a deprecated alias carrying
+     * `deprecate.rfc8594` middleware.
      *
      * @param  array<string, mixed>  $params
      *
@@ -32,7 +37,7 @@ class Workflow
      */
     public function actionableSets(array $params = []): ActionableSetsResponse
     {
-        $url = '/internal/workflow/actionable-sets';
+        $url = '/internal/actionable-sets';
         if (! empty($params)) {
             $url .= '?'.http_build_query($params);
         }
@@ -47,18 +52,27 @@ class Workflow
      * object); this mutation endpoint returns the updated todo envelope
      * rather than a typed DTO.
      *
+     * Targets the canonical `PATCH /internal/sets/{set}/todos/{todo}`
+     * (`internal.sets.todos.update`). There is no todo-id-only route, so the
+     * set id is required.
+     *
+     * BREAKING (0.4.0): `$setId` was added as the first argument; the previous
+     * two-argument form targeted `/internal/set-todos/{todo}`, a route the API
+     * never registered. Actionable-set rows carry both `set_id` and `todo_id`,
+     * so callers iterating {@see actionableSets()} have both ids available.
+     *
      * @param  array<string, mixed>  $attributes
      * @return object The decoded JSON:API response (unstructured)
      *
      * @throws InvalidArgumentException
      */
-    public function updateSetTodo(string $todoId, array $attributes): object
+    public function updateSetTodo(string $setId, string $todoId, array $attributes): object
     {
-        $url = sprintf('/internal/set-todos/%s', $todoId);
+        $url = sprintf('/internal/sets/%s/todos/%s', $setId, $todoId);
         $request = [
             'json' => [
                 'data' => [
-                    'type' => 'set-todos',
+                    'type' => 'set_todos',
                     'id' => $todoId,
                     'attributes' => $attributes,
                 ],
@@ -75,6 +89,9 @@ class Workflow
      * `data.status`); this endpoint queues an async job and returns an
      * unstructured ack rather than a typed DTO.
      *
+     * Targets the canonical `POST /internal/todo-initialization-jobs`; the
+     * former `/internal/workflow/bulk-initialize` path is a deprecated alias.
+     *
      * @param  array<string, mixed>  $params
      * @return object The decoded job acknowledgement (unstructured)
      *
@@ -84,7 +101,7 @@ class Workflow
     {
         $request = ! empty($params) ? ['json' => $params] : [];
 
-        return $this->makeRequest('/internal/workflow/bulk-initialize', 'POST', $request);
+        return $this->makeRequest('/internal/todo-initialization-jobs', 'POST', $request);
     }
 
     /**
@@ -94,13 +111,17 @@ class Workflow
      * `data.status`, and progress fields); this endpoint reports async job
      * progress as an unstructured ack rather than a typed DTO.
      *
+     * Targets the canonical `GET /internal/todo-initialization-jobs/{job}`;
+     * the former `/internal/workflow/bulk-initialize/{job}` path is a
+     * deprecated alias.
+     *
      * @return object The decoded job status (unstructured)
      *
      * @throws InvalidArgumentException
      */
     public function getBulkInitializeStatus(string $jobId): object
     {
-        $url = sprintf('/internal/workflow/bulk-initialize/%s', $jobId);
+        $url = sprintf('/internal/todo-initialization-jobs/%s', $jobId);
 
         return $this->makeRequest($url, 'GET');
     }
@@ -111,11 +132,15 @@ class Workflow
      * Returns a typed {@see SetTodosResponse} wrapping the per-set todo
      * collection.
      *
+     * Targets the canonical `GET /internal/sets/{set}/todos`
+     * (`internal.sets.todos.index`); the previous `/internal/workflow/sets/...`
+     * path was never registered by the API and 404'd.
+     *
      * @throws InvalidArgumentException
      */
     public function getSetTodos(string $setId): SetTodosResponse
     {
-        $url = sprintf('/internal/workflow/sets/%s/todos', $setId);
+        $url = sprintf('/internal/sets/%s/todos', $setId);
 
         return SetTodosResponse::fromResponse($this->makeRequest($url, 'GET'));
     }
@@ -160,13 +185,16 @@ class Workflow
      * Delegates to {@see updateSetTodo()} and returns its raw decoded
      * JSON:API acknowledgement object.
      *
+     * BREAKING (0.4.0): `$setId` was added as the first argument, mirroring
+     * the {@see updateSetTodo()} signature change.
+     *
      * @return object The decoded JSON:API response (unstructured)
      *
      * @throws InvalidArgumentException
      */
-    public function flagForReview(string $todoId, string $reason): object
+    public function flagForReview(string $setId, string $todoId, string $reason): object
     {
-        return $this->updateSetTodo($todoId, [
+        return $this->updateSetTodo($setId, $todoId, [
             'status' => WorkflowStatus::REVIEW->value,
             'notes' => $reason,
         ]);
@@ -178,13 +206,16 @@ class Workflow
      * Delegates to {@see updateSetTodo()} and returns its raw decoded
      * JSON:API acknowledgement object.
      *
+     * BREAKING (0.4.0): `$setId` was added as the first argument, mirroring
+     * the {@see updateSetTodo()} signature change.
+     *
      * @return object The decoded JSON:API response (unstructured)
      *
      * @throws InvalidArgumentException
      */
-    public function resolveReview(string $todoId, string $notes = ''): object
+    public function resolveReview(string $setId, string $todoId, string $notes = ''): object
     {
-        return $this->updateSetTodo($todoId, [
+        return $this->updateSetTodo($setId, $todoId, [
             'status' => WorkflowStatus::PENDING->value,
             'notes' => $notes !== '' ? $notes : 'Resolved by human review',
         ]);

@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace CardTechie\TradingCardApiSdk\Resources\Traits;
 
+use CardTechie\TradingCardApiSdk\DTOs\Usage\RateLimitStatus;
 use CardTechie\TradingCardApiSdk\Exceptions\AuthenticationException;
 use CardTechie\TradingCardApiSdk\Exceptions\TradingCardApiException;
 use CardTechie\TradingCardApiSdk\Services\ErrorResponseParser;
+use CardTechie\TradingCardApiSdk\Services\RateLimitTracker;
 use CardTechie\TradingCardApiSdk\Services\ResponseValidator;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use stdClass;
@@ -64,6 +67,15 @@ trait ApiRequest
     private ?string $scope = null;
 
     /**
+     * Holder for the rate-limit window observed on the last response.
+     *
+     * Injected by the client that created this resource so every resource of
+     * one client shares a single reading. Left null until injected or lazily
+     * created by this trait's `rateLimitTracker()` accessor below.
+     */
+    private ?RateLimitTracker $rateLimitTracker = null;
+
+    /**
      * Set authentication information on this resource.
      */
     public function setAuthInfo(string $authType, ?string $personalAccessToken, ?string $clientId, ?string $clientSecret, ?string $scope = null): void
@@ -73,6 +85,69 @@ trait ApiRequest
         $this->oauthClientId = $clientId;
         $this->oauthClientSecret = $clientSecret;
         $this->scope = $scope;
+    }
+
+    /**
+     * Share a rate-limit holder with this resource.
+     *
+     * Called by `TradingCardApi::createResource()` (and `InternalClient`'s
+     * equivalent) so every resource built by one client records into — and
+     * reads from — the same holder.
+     */
+    public function setRateLimitTracker(RateLimitTracker $tracker): void
+    {
+        $this->rateLimitTracker = $tracker;
+    }
+
+    /**
+     * The most recent rate-limit window seen by this resource's tracker, or
+     * null if no response has carried the `X-RateLimit-*` headers.
+     *
+     * Useful on a resource you keep a reference to:
+     * `$usage = $api->usage(); $usage->get(); $usage->getRateLimit();`
+     */
+    public function getRateLimit(): ?RateLimitStatus
+    {
+        return $this->rateLimitTracker()->get();
+    }
+
+    /**
+     * The holder this resource records into, lazily creating a per-instance one
+     * when no client injected a shared holder.
+     *
+     * The fallback matters for directly-constructed resources — every existing
+     * test builds resources that way — so a standalone resource still reports
+     * its own rate limit rather than silently discarding it.
+     */
+    private function rateLimitTracker(): RateLimitTracker
+    {
+        if ($this->rateLimitTracker === null) {
+            $this->rateLimitTracker = new RateLimitTracker;
+        }
+
+        return $this->rateLimitTracker;
+    }
+
+    /**
+     * Pop the paginator-only `pageName` option out of a query-parameter array.
+     *
+     * `pageName` is a Laravel `LengthAwarePaginator` option, not an API filter.
+     * Leaving it in `$params` means `http_build_query()` sends it to the API as
+     * a query parameter on every list request, polluting outbound URLs, cache
+     * keys and logs. Resource `list()` methods call this immediately after
+     * merging their defaults — before building the URL — and pass the returned
+     * value straight into the paginator options.
+     *
+     * @param  array<string, mixed>  $params  Query parameters; the `pageName` key is removed in place
+     * @param  string  $default  Page name to use when the caller supplied none
+     * @return string The page name to hand to the paginator
+     */
+    protected function extractPageName(array &$params, string $default = 'page'): string
+    {
+        $pageName = $params['pageName'] ?? $default;
+        unset($params['pageName']);
+
+        return is_string($pageName) ? $pageName : $default;
     }
 
     /**
@@ -123,8 +198,35 @@ trait ApiRequest
             if (! $this->errorParser) {
                 $this->errorParser = new ErrorResponseParser;
             }
+
+            // Capture straight off the failed response, *before* parsing picks
+            // an exception subclass. The API's throttle middleware attaches the
+            // same `X-RateLimit-*` trio to every response it passes, so a 401,
+            // 403 or 5xx reports the caller's window just as truthfully as a
+            // 200 does — and throwing here would otherwise skip the
+            // success-path capture below, leaving a stale reading behind. An
+            // error is also precisely when a caller most wants to know where
+            // they stand. Reading the headers here rather than off
+            // RateLimitException's accessors keeps every status on the one
+            // case-insensitive lookup in RateLimitStatus::fromHeaders(), so
+            // capture no longer depends on a single exception subclass having
+            // parsed the trio itself.
+            if ($exception instanceof RequestException && $exception->hasResponse()) {
+                $this->rateLimitTracker()->recordFromHeaders(
+                    $exception->getResponse()->getHeaders()
+                );
+            }
+
             throw $this->errorParser->parseGuzzleException($exception);
         }
+
+        // Capture the passive rate-limit state that rides on every API
+        // response. This lives in makeRequest() and NOT in doRequest() on
+        // purpose: retrieveToken() also calls doRequest() for `/oauth/token`,
+        // whose responses carry the separate `X-OAuth-RateLimit-*` family from
+        // the API's `oauth.throttle` limiter. Capturing in doRequest() would
+        // mix two unrelated buckets into one reading.
+        $this->rateLimitTracker()->recordFromHeaders($response->getHeaders());
 
         $body = (string) $response->getBody();
 
@@ -282,6 +384,18 @@ trait ApiRequest
             'set-todos' => 'set-todo',
         ];
 
+        // `/v<n>/user/usage` is the caller's own rate-limit window. The generic
+        // `/v<n>/` branch below would resolve it to `user` (the sub-resource
+        // guard needs three segments after `/v<n>/` and this path has two), and
+        // `user` has no schema class, so every call would log "No schema defined
+        // for resource type: user". Map it explicitly here rather than adding
+        // `'user' => 'usage'` to $normalizedResources: that key matches the
+        // FIRST path segment, so it would wrongly claim `/v1/user/subscription`
+        // and every other `/v1/user/*` endpoint too.
+        if (preg_match('#^/v\d+/user/usage$#', $path)) {
+            return 'usage';
+        }
+
         // Match common API patterns
         if (preg_match('#/v\d+/([^/]+)#', $path, $matches)) {
             // Sub-resource paths (e.g. /v1/sets/123/workflow) are not JSON:API
@@ -322,6 +436,16 @@ trait ApiRequest
             // resources (set-todos, audit-logs) treat a second segment as a
             // record id and validate the single-resource response.
             if ($second !== null && $resource === 'workflow') {
+                return null;
+            }
+
+            // The canonical paths that replaced the deprecated `/internal/workflow/*`
+            // aliases sit at the top level, so the `workflow` skip above no longer
+            // covers them. Neither serves a JSON:API resource-object response —
+            // actionable-sets serves flat dashboard rows and the job endpoints serve
+            // an async ack — so they have no `*Schema` class and would otherwise log
+            // "No schema defined for resource type: ..." on every call.
+            if (in_array($resource, ['actionable-sets', 'todo-initialization-jobs'], true)) {
                 return null;
             }
 

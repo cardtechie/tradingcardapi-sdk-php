@@ -294,9 +294,10 @@ The SDK provides access to the following Trading Card API resources:
 | **ObjectAttributes** | Object attributes | `get()`, `list()`, `create()`, `update()`, `delete()` |
 | **SetSources** | Set data sources | `get()`, `list()`, `create()`, `update()`, `delete()`, `forSet($setId)` |
 | **Stats** | Entity statistics and analytics | `get($type)`, `getCounts()`, `getSnapshots()`, `getGrowth()` |
+| **Usage** | The calling credential's own rate-limit window | `get()` |
 | **Attributes** | Card attributes | `get()`, `list()`, `all()`, `create()`, `update()`, `delete()` |
 | **CardImages** | Card image upload and management | `list()`, `get($id)`, `upload($file, $cardId, $imageType)`, `update($id, $attributes)`, `delete($id)`, `getDownloadUrl($id, $size)` |
-| **Internal\Workflow** _(internal only)_ | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($todoId, $attributes)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)`, `getReviewQueue($step?, $params?)`, `flagForReview($todoId, $reason)`, `resolveReview($todoId, $notes?)` |
+| **Internal\Workflow** _(internal only)_ | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($setId, $todoId, $attributes)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)`, `getReviewQueue($step?, $params?)`, `flagForReview($setId, $todoId, $reason)`, `resolveReview($setId, $todoId, $notes?)` |
 | **Internal\AuditLog** _(internal only)_ | Audit log tracking and creation | `getAuditLogs($params?)`, `createAuditEvent($attributes?)` |
 
 ### Set Names and Serial Suffixes
@@ -396,6 +397,83 @@ Note also that list endpoints (`/v1/players`, `/v1/teams`, `/v1/player-teams`,
 only on a `read:published` token. They do **not** return the full catalog, and
 they signal this with fewer rows rather than an error.
 
+### Usage Resource
+
+The Usage resource answers "how much of my quota is left?" without waiting to be
+rate limited. It reads `GET /v1/user/usage`, which is scoped to the credential
+making the request — you always get your own window, never anyone else's — and
+the read is not metered against the bucket it reports on.
+
+```php
+$usage = $api->usage()->get();
+
+echo $usage->limit;     // 1000  — requests allowed in the current window
+echo $usage->remaining; // 742   — requests still available
+echo $usage->used();    // 258   — derived: limit - remaining, clamped at 0
+echo $usage->resetsAt;  // "2026-06-27T00:00:00+00:00" — when the window rolls over
+```
+
+> **Availability.** This endpoint is still gated to interactive portal sessions
+> until [cardtechie/tradingcardapi-api#2342](https://github.com/cardtechie/tradingcardapi-api/issues/2342)
+> ships. Until then an opaque `tc_` API key calling `$api->usage()->get()`
+> receives a 401, which the SDK surfaces as an `AuthenticationException`.
+
+This is the _proactive_ counterpart to the reactive
+`RateLimitException::getRetryAfter()` shown in [Error Handling](#error-handling):
+poll `usage()` to stay under your limit, and catch `RateLimitException` for the
+cases where you cross it anyway.
+
+### Rate-limit headers
+
+Where `usage()` above is a _proactive_ poll of a dedicated endpoint, the API also
+attaches the caller's current window to the `X-RateLimit-*` headers of ordinary
+responses. The SDK captures those headers as they go by, so you can read your
+quota off a request you were making anyway — no extra round trip:
+
+```php
+$api->card()->list(['limit' => 25]);
+
+$status = $api->rateLimit();
+
+if ($status !== null) {
+    echo $status->limit;               // 1000 — requests allowed in the window
+    echo $status->remaining;           // 999  — requests still available
+    echo $status->used();              // 1    — derived: limit - remaining, clamped at 0
+    echo $status->resetAt;             // 1790000000 — Unix timestamp
+    echo $status->secondsUntilReset(); // seconds left in the window, clamped at 0
+    $status->resetAtDateTime();        // \DateTimeImmutable
+}
+```
+
+`rateLimit()` reports the most recent response seen by **any** resource created
+from that client. If you keep a reference to one resource, its own
+`getRateLimit()` returns the same reading:
+
+```php
+$cards = $api->card();
+$cards->list();
+$status = $cards->getRateLimit();
+```
+
+Two things to know before you rely on it:
+
+- **`$status` is nullable.** The API does not guarantee the headers on every
+  response — its throttle middleware omits them under some limiter
+  configurations — and none have been seen before your first call. A response
+  that arrives without them leaves the previous reading in place rather than
+  clearing it, so a `null` means "nothing observed yet", not "quota exhausted".
+  Whether every successful response carries the trio depends on the API version
+  you are talking to, so treat the value as advisory and always null-check.
+- **`resetAt` is a Unix timestamp**, deliberately unlike
+  `UsageResponse::$resetsAt` from the section above, which is an ISO-8601
+  string. The two types report the same window in the two formats their
+  respective sources use; `RateLimitStatus` mirrors the header, `UsageResponse`
+  mirrors the endpoint document. Use `resetAtDateTime()` when you want a
+  comparable object.
+
+The reading is also updated on the 429 path, so a caught `RateLimitException`
+and a subsequent `$api->rateLimit()` agree.
+
 ### SetSource Resource
 
 The SetSource resource manages data sources for trading card sets (checklists, metadata, images):
@@ -462,11 +540,20 @@ The internal Workflow resource manages set workflow steps (todos) and bulk initi
 $workflow = $api->internal()->workflow();
 
 // Get sets that have actionable workflow steps
-// Returns a typed ActionableSetsResponse (->sets is an array of ActionableSet)
+// Returns a typed ActionableSetsResponse (->sets is an array of ActionableSet,
+// ->meta is a nullable ActionableSetsMeta)
 $actionable = $workflow->actionableSets();
 foreach ($actionable->sets as $set) {
-    echo $set->attributes->name;
+    echo $set->id;                     // the set id (from the row's set_id)
+    echo $set->todoId;                 // the workflow todo id for this row
+    echo $set->attributes->set_name;   // the API serves flat rows, preserved whole
+    echo $set->attributes->step;       // e.g. 'discover_sources'
+    echo $set->attributes->priority;
 }
+
+// `full_total` is the only way to know the page was truncated
+echo $actionable->meta?->total;
+echo $actionable->meta?->fullTotal;
 
 // Filter actionable sets
 $actionable = $workflow->actionableSets(['filter[sport]' => 'baseball']);
@@ -474,8 +561,10 @@ $actionable = $workflow->actionableSets(['filter[sport]' => 'baseball']);
 // Get workflow status for a specific set (via Set resource — still public)
 $workflowStatus = $api->set()->workflow('set-id');
 
-// Update a workflow step (set-todo) status
-$result = $workflow->updateSetTodo('todo-id', [
+// Update a workflow step (set-todo) status.
+// The canonical route is PATCH /internal/sets/{set}/todos/{todo}, so a set id
+// is required. Actionable-set rows carry both ids (`$set->id`, `$set->todoId`).
+$result = $workflow->updateSetTodo('set-id', 'todo-id', [
     'status' => 'completed',
 ]);
 
@@ -509,14 +598,14 @@ $reviewQueue = $workflow->getReviewQueue();
 $parseReview = $workflow->getReviewQueue('parse');
 
 // Flag a workflow step for human review
-$workflow->flagForReview('todo-id', 'Data quality issue detected');
+$workflow->flagForReview('set-id', 'todo-id', 'Data quality issue detected');
 
 // Resolve a review (resets to pending)
-$workflow->resolveReview('todo-id');
-$workflow->resolveReview('todo-id', 'Verified card data is correct');
+$workflow->resolveReview('set-id', 'todo-id');
+$workflow->resolveReview('set-id', 'todo-id', 'Verified card data is correct');
 
 // Use WorkflowStatus and WorkflowStep enums instead of magic strings
-$workflow->updateSetTodo('todo-id', [
+$workflow->updateSetTodo('set-id', 'todo-id', [
     'status' => \CardTechie\TradingCardApiSdk\Enums\WorkflowStatus::COMPLETED->value,
 ]);
 ```
@@ -729,6 +818,7 @@ This project maintains high code quality standards:
 - **[Error Handling Guide](docs/ERROR-HANDLING.md)** - Comprehensive guide to exception handling
 - **[Response Validation](docs/VALIDATION.md)** - Response validation and schema handling  
 - **[Version Management](docs/VERSION-MANAGEMENT.md)** - Release process and versioning
+- **[Dependency Scope Reference](docs/DEPENDENCIES.md)** - Why `laravel/framework` is runtime-scoped in `composer.lock` and how to triage Dependabot advisories
 - **[Trading Card API Documentation](https://docs.tradingcardapi.com)** - Complete API reference
 
 ### Upgrade Notes (0.3.0)

@@ -64,6 +64,15 @@ it('extracts resource type from API URLs correctly', function () {
     expect($resource->testExtractResourceType('/v1/object-attributes'))->toBe('object-attribute');
     expect($resource->testExtractResourceType('/v1/playerteams'))->toBe('playerteam');
     expect($resource->testExtractResourceType('/v1/stats/cards'))->toBe('stats');
+
+    // `/v1/user/usage` maps to the `usage` schema, not `user`.
+    expect($resource->testExtractResourceType('/v1/user/usage'))->toBe('usage');
+    expect($resource->testExtractResourceType('/v1/user/usage?foo=bar'))->toBe('usage');
+
+    // The mapping is exact: sibling `/v1/user/*` endpoints must NOT be claimed
+    // by the usage schema.
+    expect($resource->testExtractResourceType('/v1/user/subscription'))->not->toBe('usage');
+    expect($resource->testExtractResourceType('/v1/user/api-key'))->not->toBe('usage');
 });
 
 it('extracts resource type from internal endpoint URLs correctly', function () {
@@ -82,6 +91,22 @@ it('extracts resource type from internal endpoint URLs correctly', function () {
     expect($resource->testExtractResourceType('/internal/workflow/bulk-initialize'))->toBeNull();
     expect($resource->testExtractResourceType('/internal/workflow/sets/123/todos'))->toBeNull();
     expect($resource->testExtractResourceType('/internal/sets/123/workflow'))->toBeNull();
+});
+
+it('skips validation for the canonical internal workflow endpoints', function () {
+    $client = m::mock(Client::class);
+    $resource = new TestApiResource($client);
+
+    // The canonical paths that replaced the deprecated /internal/workflow/*
+    // aliases are not JSON:API resource-object responses and have no schema.
+    expect($resource->testExtractResourceType('/internal/actionable-sets'))->toBeNull();
+    expect($resource->testExtractResourceType('/internal/actionable-sets?status=review'))->toBeNull();
+    expect($resource->testExtractResourceType('/internal/todo-initialization-jobs'))->toBeNull();
+    expect($resource->testExtractResourceType('/internal/todo-initialization-jobs/job-abc'))->toBeNull();
+
+    // The canonical set-scoped todo routes are multi-segment sub-resources.
+    expect($resource->testExtractResourceType('/internal/sets/123/todos'))->toBeNull();
+    expect($resource->testExtractResourceType('/internal/sets/123/todos/todo-1'))->toBeNull();
 });
 
 it('returns null for non-API URLs', function () {

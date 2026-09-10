@@ -1,0 +1,2 @@
+- **[Issue #349]** Stop sending the paginator-only `pageName` option as an API query parameter on every list endpoint.
+  - Outbound list URLs no longer carry `pageName=page`; any consumer asserting on the full query string will need its expectation updated.

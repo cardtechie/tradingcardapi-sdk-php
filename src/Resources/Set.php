@@ -95,9 +95,9 @@ class Set
         $defaultParams = [
             'limit' => 50,
             'page' => 1,
-            'pageName' => 'page',
         ];
         $params = array_merge($defaultParams, $params);
+        $pageName = $this->extractPageName($params);
 
         $url = sprintf('/v1/sets?%s', http_build_query($params));
         $response = $this->makeRequest($url);
@@ -107,7 +107,7 @@ class Set
         $page = $response->meta->pagination->current_page;
         $options = [
             'path' => LengthAwarePaginator::resolveCurrentPath(),
-            'pageName' => $params['pageName'],
+            'pageName' => $pageName,
         ];
         $parsedResponse = Response::parse(json_encode($response) ?: '{}');
 

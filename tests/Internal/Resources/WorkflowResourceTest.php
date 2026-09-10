@@ -74,7 +74,7 @@ it('can get actionable sets', function () {
     expect($result->sets[1]->attributes->name)->toBe('2024 Panini Football');
 });
 
-it('uses /internal/workflow/actionable-sets URL', function () {
+it('uses the canonical /internal/actionable-sets URL', function () {
     $capturedRequest = null;
 
     $customHandler = new MockHandler([
@@ -92,7 +92,8 @@ it('uses /internal/workflow/actionable-sets URL', function () {
 
     $resource->actionableSets();
 
-    expect((string) $capturedRequest->getUri())->toContain('/internal/workflow/actionable-sets');
+    expect((string) $capturedRequest->getUri())->toContain('/internal/actionable-sets');
+    expect((string) $capturedRequest->getUri())->not->toContain('/internal/workflow/');
 });
 
 it('can get actionable sets with params', function () {
@@ -135,14 +136,14 @@ it('can update a set todo', function () {
         ]))
     );
 
-    $result = $this->workflowResource->updateSetTodo('todo-123', ['status' => 'completed']);
+    $result = $this->workflowResource->updateSetTodo('set-abc', 'todo-123', ['status' => 'completed']);
 
     expect($result)->toBeObject();
     expect($result->data->id)->toBe('todo-123');
     expect($result->data->attributes->status)->toBe('completed');
 });
 
-it('uses /internal/set-todos URL for updateSetTodo', function () {
+it('uses the canonical /internal/sets/{set}/todos/{todo} URL for updateSetTodo', function () {
     $capturedRequest = null;
 
     $customHandler = new MockHandler([
@@ -160,9 +161,10 @@ it('uses /internal/set-todos URL for updateSetTodo', function () {
     $client = new Client(['handler' => $handlerStack]);
     $resource = new Workflow($client);
 
-    $resource->updateSetTodo('todo-123', ['status' => 'completed']);
+    $resource->updateSetTodo('set-abc', 'todo-123', ['status' => 'completed']);
 
-    expect((string) $capturedRequest->getUri())->toContain('/internal/set-todos/todo-123');
+    expect((string) $capturedRequest->getUri())->toContain('/internal/sets/set-abc/todos/todo-123');
+    expect($capturedRequest->getMethod())->toBe('PATCH');
 });
 
 it('can bulk initialize workflow', function () {
@@ -182,7 +184,7 @@ it('can bulk initialize workflow', function () {
     expect($result->data->status)->toBe('queued');
 });
 
-it('uses /internal/workflow/bulk-initialize URL', function () {
+it('uses the canonical /internal/todo-initialization-jobs URL', function () {
     $capturedRequest = null;
 
     $customHandler = new MockHandler([
@@ -203,7 +205,8 @@ it('uses /internal/workflow/bulk-initialize URL', function () {
     $resource->bulkInitializeWorkflow(['set_ids' => ['1', '2']]);
 
     expect($capturedRequest->getMethod())->toBe('POST');
-    expect((string) $capturedRequest->getUri())->toContain('/internal/workflow/bulk-initialize');
+    expect((string) $capturedRequest->getUri())->toContain('/internal/todo-initialization-jobs');
+    expect((string) $capturedRequest->getUri())->not->toContain('/internal/workflow/');
 });
 
 it('can bulk initialize workflow with no params', function () {
@@ -242,7 +245,7 @@ it('can get bulk initialize status', function () {
     expect($result->data->processed)->toBe(150);
 });
 
-it('uses /internal/workflow/bulk-initialize URL for getBulkInitializeStatus', function () {
+it('uses the canonical /internal/todo-initialization-jobs URL for getBulkInitializeStatus', function () {
     $capturedRequest = null;
 
     $customHandler = new MockHandler([
@@ -262,7 +265,7 @@ it('uses /internal/workflow/bulk-initialize URL for getBulkInitializeStatus', fu
 
     $resource->getBulkInitializeStatus('my-job-id');
 
-    expect((string) $capturedRequest->getUri())->toContain('/internal/workflow/bulk-initialize/my-job-id');
+    expect((string) $capturedRequest->getUri())->toContain('/internal/todo-initialization-jobs/my-job-id');
 });
 
 it('builds the correct JSON:API envelope for updateSetTodo', function () {
@@ -287,10 +290,10 @@ it('builds the correct JSON:API envelope for updateSetTodo', function () {
     $client = new Client(['handler' => $handlerStack]);
     $resource = new Workflow($client);
 
-    $resource->updateSetTodo('todo-123', ['status' => 'completed']);
+    $resource->updateSetTodo('set-abc', 'todo-123', ['status' => 'completed']);
 
     $body = json_decode((string) $capturedRequest->getBody(), true);
-    expect($body['data']['type'])->toBe('set-todos');
+    expect($body['data']['type'])->toBe('set_todos');
     expect($body['data']['id'])->toBe('todo-123');
     expect($body['data']['attributes'])->toBe(['status' => 'completed']);
 });
@@ -302,7 +305,7 @@ it('throws an exception when updateSetTodo receives a 404', function () {
         ]))
     );
 
-    expect(fn () => $this->workflowResource->updateSetTodo('nonexistent-id', ['status' => 'completed']))
+    expect(fn () => $this->workflowResource->updateSetTodo('set-abc', 'nonexistent-id', ['status' => 'completed']))
         ->toThrow(ResourceNotFoundException::class);
 });
 
@@ -320,7 +323,7 @@ it('throws an exception when updateSetTodo receives a 422', function () {
         ]))
     );
 
-    expect(fn () => $this->workflowResource->updateSetTodo('todo-123', ['status' => 'invalid-status']))
+    expect(fn () => $this->workflowResource->updateSetTodo('set-abc', 'todo-123', ['status' => 'invalid-status']))
         ->toThrow(ValidationException::class);
 });
 
@@ -351,7 +354,7 @@ it('can get set todos', function () {
     expect($result->todos[0]->status)->toBe('completed');
 });
 
-it('uses /internal/workflow/sets URL for getSetTodos', function () {
+it('uses the canonical /internal/sets/{set}/todos URL for getSetTodos', function () {
     $capturedRequest = null;
 
     $customHandler = new MockHandler([
@@ -369,7 +372,8 @@ it('uses /internal/workflow/sets URL for getSetTodos', function () {
 
     $resource->getSetTodos('set-abc');
 
-    expect((string) $capturedRequest->getUri())->toContain('/internal/workflow/sets/set-abc/todos');
+    expect((string) $capturedRequest->getUri())->toContain('/internal/sets/set-abc/todos');
+    expect((string) $capturedRequest->getUri())->not->toContain('/internal/workflow/');
     expect($capturedRequest->getMethod())->toBe('GET');
 });
 
@@ -439,7 +443,7 @@ it('can get review queue', function () {
     expect($result->sets)->toBeArray();
     expect($result->sets)->toHaveCount(1);
     expect($result->sets[0]->attributes->status)->toBe('review');
-    expect((string) $capturedRequest->getUri())->toContain('/internal/workflow/actionable-sets');
+    expect((string) $capturedRequest->getUri())->toContain('/internal/actionable-sets');
     expect((string) $capturedRequest->getUri())->toContain('status=review');
 });
 
@@ -457,7 +461,7 @@ it('can flag a todo for review', function () {
         ]))
     );
 
-    $result = $this->workflowResource->flagForReview('todo-123', 'Data quality issue detected');
+    $result = $this->workflowResource->flagForReview('set-abc', 'todo-123', 'Data quality issue detected');
 
     expect($result)->toBeObject();
     expect($result->data->id)->toBe('todo-123');
@@ -547,10 +551,132 @@ it('can resolve a review with default notes', function () {
         ]))
     );
 
-    $result = $this->workflowResource->resolveReview('todo-789');
+    $result = $this->workflowResource->resolveReview('set-abc', 'todo-789');
 
     expect($result)->toBeObject();
     expect($result->data->id)->toBe('todo-789');
     expect($result->data->attributes->status)->toBe('pending');
     expect($result->data->attributes->notes)->toBe('Resolved by human review');
+});
+
+it('decodes the real flat-row actionable-sets payload and its meta block', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                [
+                    'todo_id' => 'todo-1',
+                    'set_id' => 'set-1',
+                    'set_name' => '2024 Topps Baseball',
+                    'genre' => 'baseball',
+                    'year' => 2024,
+                    'step' => 'discover_sources',
+                    'priority' => 'high',
+                    'card_count' => 350,
+                    'has_sources' => false,
+                    'notes' => null,
+                    'updated_at' => '2026-03-15T09:00:00+00:00',
+                ],
+            ],
+            'meta' => [
+                'total' => 1,
+                'full_total' => 42,
+                'step' => 'discover_sources',
+                'status' => 'pending',
+                'priority_filter' => 'high',
+            ],
+        ]))
+    );
+
+    $result = $this->workflowResource->actionableSets();
+
+    expect($result->sets)->toHaveCount(1);
+    expect($result->sets[0]->id)->toBe('set-1');
+    expect($result->sets[0]->todoId)->toBe('todo-1');
+    expect($result->sets[0]->attributes->set_name)->toBe('2024 Topps Baseball');
+    expect($result->sets[0]->attributes->card_count)->toBe(350);
+    expect($result->meta)->not->toBeNull();
+    expect($result->meta->total)->toBe(1);
+    expect($result->meta->fullTotal)->toBe(42);
+    expect($result->meta->priorityFilter)->toBe('high');
+});
+
+it('decodes the real JSON:API set-todos collection', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                [
+                    'type' => 'set_todos',
+                    'id' => 'uuid-123',
+                    'attributes' => [
+                        'step' => 'discover_sources',
+                        'status' => 'completed',
+                        'sort_order' => 0,
+                        'started_at' => '2026-03-15T09:00:00+00:00',
+                        'completed_at' => '2026-03-15T09:15:00+00:00',
+                    ],
+                ],
+            ],
+        ]))
+    );
+
+    $result = $this->workflowResource->getSetTodos('set-abc');
+
+    expect($result->todos)->toHaveCount(1);
+    expect($result->todos[0]->id)->toBe('uuid-123');
+    expect($result->todos[0]->step)->toBe('discover_sources');
+    expect($result->todos[0]->status)->toBe('completed');
+    expect($result->todos[0]->sortOrder)->toBe(0);
+    expect($result->todos[0]->completedAt)->toBe('2026-03-15T09:15:00+00:00');
+});
+
+it('routes flagForReview through the canonical set-scoped todo URL', function () {
+    $capturedRequest = null;
+
+    $customHandler = new MockHandler([
+        new GuzzleResponse(200, [], json_encode([
+            'data' => ['id' => 'todo-123', 'type' => 'set_todos', 'attributes' => ['status' => 'review']],
+        ])),
+    ]);
+
+    $middleware = Middleware::tap(function (RequestInterface $request) use (&$capturedRequest) {
+        $capturedRequest = $request;
+    });
+
+    $handlerStack = HandlerStack::create($customHandler);
+    $handlerStack->push($middleware);
+    $client = new Client(['handler' => $handlerStack]);
+    $resource = new Workflow($client);
+
+    $resource->flagForReview('set-abc', 'todo-123', 'Data quality issue detected');
+
+    expect((string) $capturedRequest->getUri())->toContain('/internal/sets/set-abc/todos/todo-123');
+    $body = json_decode((string) $capturedRequest->getBody(), true);
+    expect($body['data']['attributes']['status'])->toBe('review');
+    expect($body['data']['attributes']['notes'])->toBe('Data quality issue detected');
+});
+
+it('routes resolveReview through the canonical set-scoped todo URL', function () {
+    $capturedRequest = null;
+
+    $customHandler = new MockHandler([
+        new GuzzleResponse(200, [], json_encode([
+            'data' => ['id' => 'todo-789', 'type' => 'set_todos', 'attributes' => ['status' => 'pending']],
+        ])),
+    ]);
+
+    $middleware = Middleware::tap(function (RequestInterface $request) use (&$capturedRequest) {
+        $capturedRequest = $request;
+    });
+
+    $handlerStack = HandlerStack::create($customHandler);
+    $handlerStack->push($middleware);
+    $client = new Client(['handler' => $handlerStack]);
+    $resource = new Workflow($client);
+
+    $resource->resolveReview('set-abc', 'todo-789', 'Verified card data is correct');
+
+    expect((string) $capturedRequest->getUri())->toContain('/internal/sets/set-abc/todos/todo-789');
+    $body = json_decode((string) $capturedRequest->getBody(), true);
+    expect($body['data']['attributes']['status'])->toBe('pending');
+    expect($body['data']['attributes']['notes'])->toBe('Verified card data is correct');
 });
