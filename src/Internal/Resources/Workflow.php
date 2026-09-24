@@ -53,8 +53,11 @@ class Workflow
      *
      * BREAKING (0.3.2): `$setId` was added as the first argument; the previous
      * two-argument form targeted `/internal/set-todos/{todo}`, a route the API
-     * never registered. Actionable-set rows carry both `set_id` and `todo_id`,
-     * so callers iterating {@see actionableSets()} have both ids available.
+     * never registered. {@see actionableSets()} / {@see getReviewQueue()} do
+     * NOT yet expose a usable `set_id`/`todo_id` pair on this branch — their
+     * DTO still assumes the old JSON:API shape against the API's real flat-row
+     * response (see #384) — so {@see getSetTodos()} is the supported source
+     * for both ids today.
      *
      * @param  array<string, mixed>  $attributes
      * @return object The decoded JSON:API response (unstructured)
