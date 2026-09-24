@@ -1,0 +1,2 @@
+- **[Issue #381]** Point `Internal\Workflow::getSetTodos()` and `updateSetTodo()` at the `/internal/sets/{set}/todos` routes the API registers, and parse the JSON:API todo collection it returns.
+  - `updateSetTodo()`, `flagForReview()` and `resolveReview()` now take a set id as their first argument; the old form only ever 404'd.
