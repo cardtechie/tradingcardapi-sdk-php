@@ -8,8 +8,9 @@ namespace CardTechie\TradingCardApiSdk\DTOs\Workflow;
  * Typed response for the per-set workflow todos endpoint
  * (`Workflow::getSetTodos`).
  *
- * Models the `todos` collection returned by
- * `GET /internal/workflow/sets/{id}/todos`.
+ * Models the JSON:API `data` collection returned by
+ * `GET /internal/sets/{set}/todos`, falling back to the legacy flat `todos`
+ * key so both shapes decode.
  */
 class SetTodosResponse
 {
@@ -22,8 +23,10 @@ class SetTodosResponse
 
     public static function fromResponse(object $response): self
     {
+        $items = $response->data ?? $response->todos ?? [];
+
         $todos = [];
-        foreach ($response->todos ?? [] as $item) {
+        foreach ($items as $item) {
             $todos[] = SetTodo::fromObject($item);
         }
 

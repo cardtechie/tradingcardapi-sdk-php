@@ -296,7 +296,7 @@ The SDK provides access to the following Trading Card API resources:
 | **Stats** | Entity statistics and analytics | `get($type)`, `getCounts()`, `getSnapshots()`, `getGrowth()` |
 | **Attributes** | Card attributes | `get()`, `list()`, `all()`, `create()`, `update()`, `delete()` |
 | **CardImages** | Card image upload and management | `list()`, `get($id)`, `upload($file, $cardId, $imageType)`, `update($id, $attributes)`, `delete($id)`, `getDownloadUrl($id, $size)` |
-| **Internal\Workflow** _(internal only)_ | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($todoId, $attributes)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)`, `getReviewQueue($step?, $params?)`, `flagForReview($todoId, $reason)`, `resolveReview($todoId, $notes?)` |
+| **Internal\Workflow** _(internal only)_ | Set workflow management and bulk operations | `actionableSets()`, `updateSetTodo($setId, $todoId, $attributes)`, `bulkInitializeWorkflow()`, `getBulkInitializeStatus($jobId)`, `getSetTodos($setId)`, `getReviewQueue($step?, $params?)`, `flagForReview($setId, $todoId, $reason)`, `resolveReview($setId, $todoId, $notes?)` |
 | **Internal\AuditLog** _(internal only)_ | Audit log tracking and creation | `getAuditLogs($params?)`, `createAuditEvent($attributes?)` |
 
 ### Set Names and Serial Suffixes
@@ -438,7 +438,7 @@ $actionable = $workflow->actionableSets(['filter[sport]' => 'baseball']);
 $workflowStatus = $api->set()->workflow('set-id');
 
 // Update a workflow step (set-todo) status
-$result = $workflow->updateSetTodo('todo-id', [
+$result = $workflow->updateSetTodo('set-id', 'todo-id', [
     'status' => 'completed',
 ]);
 
@@ -472,14 +472,14 @@ $reviewQueue = $workflow->getReviewQueue();
 $parseReview = $workflow->getReviewQueue('parse');
 
 // Flag a workflow step for human review
-$workflow->flagForReview('todo-id', 'Data quality issue detected');
+$workflow->flagForReview('set-id', 'todo-id', 'Data quality issue detected');
 
 // Resolve a review (resets to pending)
-$workflow->resolveReview('todo-id');
-$workflow->resolveReview('todo-id', 'Verified card data is correct');
+$workflow->resolveReview('set-id', 'todo-id');
+$workflow->resolveReview('set-id', 'todo-id', 'Verified card data is correct');
 
 // Use WorkflowStatus and WorkflowStep enums instead of magic strings
-$workflow->updateSetTodo('todo-id', [
+$workflow->updateSetTodo('set-id', 'todo-id', [
     'status' => \CardTechie\TradingCardApiSdk\Enums\WorkflowStatus::COMPLETED->value,
 ]);
 ```
