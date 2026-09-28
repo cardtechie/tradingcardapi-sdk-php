@@ -220,8 +220,8 @@ class Model
      * docblock rather than a native return type. A native `never` on a public
      * magic method makes the class unmockable: Mockery's generated override
      * completes normally, which PHP treats as a hard fatal rather than a
-     * catchable error, aborting the entire test process. See issue #351 — do
-     * not re-add `: never` here as a tidy-up.
+     * catchable error, aborting the entire test process. See issues #351 and
+     * #377 — do not re-add `: never` here as a tidy-up.
      *
      * @param  array<int, mixed>  $arguments
      * @return never

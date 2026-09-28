@@ -22,13 +22,17 @@ use CardTechie\TradingCardApiSdk\Models\Year;
 use Mockery\MockInterface;
 
 /**
- * Regression coverage for issue #351.
+ * Regression coverage for issues #351 and #377.
  *
  * `Models\Model::__call()` used to declare a native `never` return type.
  * Mockery's generated override for such a method completes normally, which PHP
  * treats as a hard fatal ("A never-returning method must not return") rather
  * than a catchable error — so `Mockery::mock()` aborted the whole test process
  * for every SDK model. These tests fail loudly if the native type is re-added.
+ *
+ * #377 is the same defect reported again from downstream (the `main` line still
+ * carried the native type after #351's fix landed on `develop` only); this file
+ * is the port of that fix onto `main` for the 0.3.1 hotfix release.
  */
 afterEach(function () {
     Mockery::close();

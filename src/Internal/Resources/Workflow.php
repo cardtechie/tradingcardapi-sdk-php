@@ -56,7 +56,7 @@ class Workflow
      * (`internal.sets.todos.update`). There is no todo-id-only route, so the
      * set id is required.
      *
-     * BREAKING (0.4.0): `$setId` was added as the first argument; the previous
+     * BREAKING (0.3.2): `$setId` was added as the first argument; the previous
      * two-argument form targeted `/internal/set-todos/{todo}`, a route the API
      * never registered. Actionable-set rows carry both `set_id` and `todo_id`,
      * so callers iterating {@see actionableSets()} have both ids available.
@@ -185,7 +185,7 @@ class Workflow
      * Delegates to {@see updateSetTodo()} and returns its raw decoded
      * JSON:API acknowledgement object.
      *
-     * BREAKING (0.4.0): `$setId` was added as the first argument, mirroring
+     * BREAKING (0.3.2): `$setId` was added as the first argument, mirroring
      * the {@see updateSetTodo()} signature change.
      *
      * @return object The decoded JSON:API response (unstructured)
@@ -206,7 +206,7 @@ class Workflow
      * Delegates to {@see updateSetTodo()} and returns its raw decoded
      * JSON:API acknowledgement object.
      *
-     * BREAKING (0.4.0): `$setId` was added as the first argument, mirroring
+     * BREAKING (0.3.2): `$setId` was added as the first argument, mirroring
      * the {@see updateSetTodo()} signature change.
      *
      * @return object The decoded JSON:API response (unstructured)

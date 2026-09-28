@@ -12,6 +12,20 @@ release time those fragments are collated into a versioned section. That
 collation is manual today — make changelog-update does not read changelog.d/
 fragments yet. See changelog.d/README.md. -->
 
+## [0.3.2] - 2026-09-24
+
+### Fixed
+
+- **[Issue #381]** Point `Internal\Workflow::getSetTodos()` and `updateSetTodo()` at the `/internal/sets/{set}/todos` routes the API registers, and parse the JSON:API todo collection it returns.
+  - `updateSetTodo()`, `flagForReview()` and `resolveReview()` now take a set id as their first argument; the old form only ever 404'd.
+
+## [0.3.1] - 2026-09-22
+
+### Fixed
+
+- **[Issue #377]** Remove the native `never` return type from `Models\Model::__call()` so consumers can mock SDK model classes without a hard PHP fatal.
+  - The `@return never` docblock is retained, so PHPStan behaviour is unchanged; only the reflectable native type is dropped.
+
 ## [0.3.0] - 2026-07-18
 
 ### Added
@@ -555,7 +569,9 @@ fragments yet. See changelog.d/README.md. -->
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.0...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.2...HEAD
+[0.3.2]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.1...0.3.2
+[0.3.1]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.26...0.3.0
 [0.2.26]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.25...0.2.26
 [0.2.25]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.24...0.2.25

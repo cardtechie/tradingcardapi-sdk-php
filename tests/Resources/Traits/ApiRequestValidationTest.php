@@ -91,6 +91,10 @@ it('extracts resource type from internal endpoint URLs correctly', function () {
     expect($resource->testExtractResourceType('/internal/workflow/bulk-initialize'))->toBeNull();
     expect($resource->testExtractResourceType('/internal/workflow/sets/123/todos'))->toBeNull();
     expect($resource->testExtractResourceType('/internal/sets/123/workflow'))->toBeNull();
+
+    // The canonical set-scoped todo routes are multi-segment sub-resources.
+    expect($resource->testExtractResourceType('/internal/sets/123/todos'))->toBeNull();
+    expect($resource->testExtractResourceType('/internal/sets/123/todos/456'))->toBeNull();
 });
 
 it('skips validation for the canonical internal workflow endpoints', function () {
