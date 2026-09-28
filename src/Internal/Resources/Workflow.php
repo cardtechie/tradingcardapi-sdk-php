@@ -23,8 +23,13 @@ class Workflow
     /**
      * Get the actionable sets for the workflow dashboard.
      *
-     * Returns a typed {@see ActionableSetsResponse} wrapping the JSON:API
-     * collection of actionable sets.
+     * Returns a typed {@see ActionableSetsResponse} wrapping the collection of
+     * actionable sets plus the API's `meta` block (total, full_total, and the
+     * echoed filters).
+     *
+     * Targets the canonical `GET /internal/actionable-sets`. The former
+     * `/internal/workflow/actionable-sets` path is a deprecated alias carrying
+     * `deprecate.rfc8594` middleware.
      *
      * @param  array<string, mixed>  $params
      *
@@ -32,7 +37,7 @@ class Workflow
      */
     public function actionableSets(array $params = []): ActionableSetsResponse
     {
-        $url = '/internal/workflow/actionable-sets';
+        $url = '/internal/actionable-sets';
         if (! empty($params)) {
             $url .= '?'.http_build_query($params);
         }
@@ -53,11 +58,8 @@ class Workflow
      *
      * BREAKING (0.3.2): `$setId` was added as the first argument; the previous
      * two-argument form targeted `/internal/set-todos/{todo}`, a route the API
-     * never registered. {@see actionableSets()} / {@see getReviewQueue()} do
-     * NOT yet expose a usable `set_id`/`todo_id` pair on this branch — their
-     * DTO still assumes the old JSON:API shape against the API's real flat-row
-     * response (see #384) — so {@see getSetTodos()} is the supported source
-     * for both ids today.
+     * never registered. Actionable-set rows carry both `set_id` and `todo_id`,
+     * so callers iterating {@see actionableSets()} have both ids available.
      *
      * @param  array<string, mixed>  $attributes
      * @return object The decoded JSON:API response (unstructured)
@@ -87,6 +89,9 @@ class Workflow
      * `data.status`); this endpoint queues an async job and returns an
      * unstructured ack rather than a typed DTO.
      *
+     * Targets the canonical `POST /internal/todo-initialization-jobs`; the
+     * former `/internal/workflow/bulk-initialize` path is a deprecated alias.
+     *
      * @param  array<string, mixed>  $params
      * @return object The decoded job acknowledgement (unstructured)
      *
@@ -96,7 +101,7 @@ class Workflow
     {
         $request = ! empty($params) ? ['json' => $params] : [];
 
-        return $this->makeRequest('/internal/workflow/bulk-initialize', 'POST', $request);
+        return $this->makeRequest('/internal/todo-initialization-jobs', 'POST', $request);
     }
 
     /**
@@ -106,13 +111,17 @@ class Workflow
      * `data.status`, and progress fields); this endpoint reports async job
      * progress as an unstructured ack rather than a typed DTO.
      *
+     * Targets the canonical `GET /internal/todo-initialization-jobs/{job}`;
+     * the former `/internal/workflow/bulk-initialize/{job}` path is a
+     * deprecated alias.
+     *
      * @return object The decoded job status (unstructured)
      *
      * @throws InvalidArgumentException
      */
     public function getBulkInitializeStatus(string $jobId): object
     {
-        $url = sprintf('/internal/workflow/bulk-initialize/%s', $jobId);
+        $url = sprintf('/internal/todo-initialization-jobs/%s', $jobId);
 
         return $this->makeRequest($url, 'GET');
     }

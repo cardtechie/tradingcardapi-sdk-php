@@ -102,9 +102,16 @@ job to create the GitHub Release — you do not configure it.
 1. Ensure `develop` is green and contains everything you want to ship.
 2. Open a PR from `develop` (or a `release/X.Y.Z` branch) into `main` and merge
    it once CI passes. The **Release Validation** check
-   (`changelog-check.yml`) enforces that PRs to `main` carry a
-   `## [X.Y.Z]` section in `CHANGELOG.md` and that `composer.json` has **no**
-   hardcoded `version` field.
+   (`changelog-check.yml`) enforces two things. First, `composer.json` must have
+   **no** hardcoded `version` field — this applies to *every* PR to `main`,
+   including Dependabot's. Second, **release-shaped** head refs (`release/*`,
+   `develop`, `hotfix/*`) must carry a `## [X.Y.Z]` section in `CHANGELOG.md` for
+   the version the release will actually tag, which the check derives with
+   `build/version.sh --branch=main` — the same call `build-release.yml` makes
+   after the merge. Other head refs skip that section check. Satisfy it by
+   collating the pending `changelog.d/` fragments into the new section (see
+   [`changelog.d/README.md`](../changelog.d/README.md)), not by hand-adding an
+   empty heading.
 3. The push to `main` triggers **Build and Release** automatically. Watch it in
    the **Actions** tab.
 4. Verify the result (see *Verifying a release* below).
@@ -179,6 +186,17 @@ There is no "un-release" button; recover forward.
   `composer.json` to avoid Packagist publishing conflicts (see
   [VERSION-MANAGEMENT.md](VERSION-MANAGEMENT.md)). The Release Validation check
   fails any PR to `main` that reintroduces a hardcoded version.
+- **Hotfix releases (`hotfix/* -> main`) are releases.** Merging a `hotfix/*`
+  branch into `main` triggers **Build and Release** exactly like any other push
+  to `main`, so the PR must be prepared as a release: collate the pending
+  `changelog.d/` fragments into a `## [X.Y.Z]` section (where `X.Y.Z` is
+  `bash build/version.sh --branch=main`) and delete the fragments you consumed.
+  Release Validation checks for that section on `hotfix/*` heads. Note the
+  `hotfix/*` version string from `build/version.sh` — `X.Y.(Z+1)-hotfix.name.N` —
+  is a *branch build identifier* for CI artifacts and is never what gets tagged;
+  the tagged version always comes from the `main` case. If the fix has no
+  urgency, prefer shipping it to `develop` and letting the next normal release
+  promote it.
 - **Tags are not prefixed with `v`** — use `X.Y.Z` (e.g. `0.3.0`), not
   `vX.Y.Z`. The version script tolerates a legacy `v`-prefixed tag, but new
   tags must be bare.

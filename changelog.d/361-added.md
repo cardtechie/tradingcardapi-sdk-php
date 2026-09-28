@@ -1,0 +1,2 @@
+- **[Issue #361]** Expose the rate-limit headers that ride on every API response via `TradingCardApi::rateLimit()` and a per-resource `getRateLimit()`.
+  - `RateLimitStatus::$resetAt` is a Unix timestamp, unlike `UsageResponse::$resetsAt`, which is an ISO-8601 string.

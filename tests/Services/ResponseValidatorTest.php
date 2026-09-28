@@ -431,6 +431,42 @@ it('handles empty collection responses', function () {
     expect($validator->isValid())->toBeTrue();
 });
 
+it('does not warn on an empty set collection carrying a populated pagination block', function () {
+    // Regression pin for #349 (carried over from #278 / PR #299): this is the
+    // exact payload that produced a spurious
+    // `production.WARNING: API response validation failed for set` before
+    // BaseSchema::getJsonApiCollectionRules() moved `data` from
+    // `required|array` to `present|array`. `set` is the meaningful resource
+    // type — SetSchema layers a non-`sometimes` `data.*.type` rule on top of
+    // the base collection rules, which the `player` case above does not.
+    Log::shouldReceive('warning')->never();
+
+    $validator = new ResponseValidator;
+
+    $emptySetCollection = [
+        'data' => [],
+        'meta' => [
+            'pagination' => [
+                'total' => 0,
+                'count' => 0,
+                'per_page' => 10,
+                'current_page' => 1,
+                'total_pages' => 1,
+            ],
+        ],
+    ];
+
+    $result = $validator->validate(
+        'set',
+        $emptySetCollection,
+        '/v1/sets?limit=10&page=1&genre=8b1f6c9e-4f5a-4a1e-9c1e-2b7d3a5f0c11&order_by=created_at'
+    );
+
+    expect($result)->toBeTrue();
+    expect($validator->isValid())->toBeTrue();
+    expect($validator->getErrors())->toBeEmpty();
+});
+
 it('validates playerteam collection responses', function () {
     $validator = new ResponseValidator;
 
