@@ -1,2 +1,0 @@
-- **[Issue #377]** Remove the native `never` return type from `Models\Model::__call()` so consumers can mock SDK model classes without a hard PHP fatal.
-  - The `@return never` docblock is retained, so PHPStan behaviour is unchanged; only the reflectable native type is dropped.
