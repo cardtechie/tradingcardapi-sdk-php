@@ -11,14 +11,14 @@ it('can create CountsResponse from response object', function () {
             'attributes' => (object) [
                 'counts' => [
                     (object) [
-                        'entity_type' => 'sets',
+                        'entity_type' => 'set',
                         'total' => 150,
                         'published' => 120,
                         'draft' => 20,
                         'archived' => 10,
                     ],
                     (object) [
-                        'entity_type' => 'cards',
+                        'entity_type' => 'card',
                         'total' => 5000,
                         'published' => 4500,
                         'draft' => 400,
@@ -34,8 +34,8 @@ it('can create CountsResponse from response object', function () {
     expect($countsResponse)->toBeInstanceOf(CountsResponse::class);
     expect($countsResponse->counts)->toHaveCount(2);
     expect($countsResponse->counts[0])->toBeInstanceOf(EntityCount::class);
-    expect($countsResponse->counts[0]->entityType)->toBe('sets');
-    expect($countsResponse->counts[1]->entityType)->toBe('cards');
+    expect($countsResponse->counts[0]->entityType)->toBe('set');
+    expect($countsResponse->counts[1]->entityType)->toBe('card');
 });
 
 it('handles response with missing counts attribute', function () {
@@ -66,7 +66,7 @@ it('getByEntityType returns null when no match found', function () {
             'attributes' => (object) [
                 'counts' => [
                     (object) [
-                        'entity_type' => 'sets',
+                        'entity_type' => 'set',
                         'total' => 150,
                         'published' => 120,
                         'draft' => 20,
@@ -78,7 +78,7 @@ it('getByEntityType returns null when no match found', function () {
     ];
 
     $countsResponse = CountsResponse::fromResponse($response);
-    $result = $countsResponse->getByEntityType('players');
+    $result = $countsResponse->getByEntityType('player');
 
     expect($result)->toBeNull();
 });
@@ -89,14 +89,14 @@ it('getByEntityType returns correct count when match found', function () {
             'attributes' => (object) [
                 'counts' => [
                     (object) [
-                        'entity_type' => 'sets',
+                        'entity_type' => 'set',
                         'total' => 150,
                         'published' => 120,
                         'draft' => 20,
                         'archived' => 10,
                     ],
                     (object) [
-                        'entity_type' => 'cards',
+                        'entity_type' => 'card',
                         'total' => 5000,
                         'published' => 4500,
                         'draft' => 400,
@@ -108,9 +108,9 @@ it('getByEntityType returns correct count when match found', function () {
     ];
 
     $countsResponse = CountsResponse::fromResponse($response);
-    $result = $countsResponse->getByEntityType('cards');
+    $result = $countsResponse->getByEntityType('card');
 
     expect($result)->toBeInstanceOf(EntityCount::class);
-    expect($result->entityType)->toBe('cards');
+    expect($result->entityType)->toBe('card');
     expect($result->total)->toBe(5000);
 });

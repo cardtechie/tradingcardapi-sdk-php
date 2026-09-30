@@ -254,14 +254,14 @@ it('can get entity counts', function () {
                 'attributes' => [
                     'counts' => [
                         [
-                            'entity_type' => 'sets',
+                            'entity_type' => 'set',
                             'total' => 150,
                             'published' => 120,
                             'draft' => 20,
                             'archived' => 10,
                         ],
                         [
-                            'entity_type' => 'cards',
+                            'entity_type' => 'card',
                             'total' => 5000,
                             'published' => 4500,
                             'draft' => 400,
@@ -278,12 +278,12 @@ it('can get entity counts', function () {
     expect($result)->toBeInstanceOf(CountsResponse::class);
     expect($result->counts)->toHaveCount(2);
     expect($result->counts[0])->toBeInstanceOf(EntityCount::class);
-    expect($result->counts[0]->entityType)->toBe('sets');
+    expect($result->counts[0]->entityType)->toBe('set');
     expect($result->counts[0]->total)->toBe(150);
     expect($result->counts[0]->published)->toBe(120);
     expect($result->counts[0]->draft)->toBe(20);
     expect($result->counts[0]->archived)->toBe(10);
-    expect($result->counts[1]->entityType)->toBe('cards');
+    expect($result->counts[1]->entityType)->toBe('card');
     expect($result->counts[1]->total)->toBe(5000);
 });
 
@@ -295,14 +295,14 @@ it('can get entity count by type', function () {
                 'attributes' => [
                     'counts' => [
                         [
-                            'entity_type' => 'sets',
+                            'entity_type' => 'set',
                             'total' => 150,
                             'published' => 120,
                             'draft' => 20,
                             'archived' => 10,
                         ],
                         [
-                            'entity_type' => 'cards',
+                            'entity_type' => 'card',
                             'total' => 5000,
                             'published' => 4500,
                             'draft' => 400,
@@ -315,8 +315,8 @@ it('can get entity count by type', function () {
     );
 
     $result = $this->statsResource->getCounts();
-    $setsCount = $result->getByEntityType('sets');
-    $cardsCount = $result->getByEntityType('cards');
+    $setsCount = $result->getByEntityType('set');
+    $cardsCount = $result->getByEntityType('card');
     $unknownCount = $result->getByEntityType('unknown');
 
     expect($setsCount)->toBeInstanceOf(EntityCount::class);
@@ -354,7 +354,7 @@ it('can get snapshots without filters', function () {
                     'snapshots' => [
                         [
                             'date' => '2024-11-01',
-                            'entity_type' => 'sets',
+                            'entity_type' => 'set',
                             'total' => 100,
                             'published' => 80,
                             'draft' => 15,
@@ -362,7 +362,7 @@ it('can get snapshots without filters', function () {
                         ],
                         [
                             'date' => '2024-11-02',
-                            'entity_type' => 'sets',
+                            'entity_type' => 'set',
                             'total' => 105,
                             'published' => 85,
                             'draft' => 15,
@@ -380,7 +380,7 @@ it('can get snapshots without filters', function () {
     expect($result->snapshots)->toHaveCount(2);
     expect($result->snapshots[0])->toBeInstanceOf(Snapshot::class);
     expect($result->snapshots[0]->date)->toBe('2024-11-01');
-    expect($result->snapshots[0]->entityType)->toBe('sets');
+    expect($result->snapshots[0]->entityType)->toBe('set');
     expect($result->snapshots[0]->total)->toBe(100);
     expect($result->snapshots[0]->published)->toBe(80);
     expect($result->snapshots[1]->date)->toBe('2024-11-02');
@@ -393,11 +393,11 @@ it('can get snapshots with entity_type filter', function () {
             'data' => [
                 'type' => 'stats',
                 'attributes' => [
-                    'entity_type' => 'cards',
+                    'entity_type' => 'card',
                     'snapshots' => [
                         [
                             'date' => '2024-11-01',
-                            'entity_type' => 'cards',
+                            'entity_type' => 'card',
                             'total' => 5000,
                             'published' => 4500,
                             'draft' => 400,
@@ -409,12 +409,12 @@ it('can get snapshots with entity_type filter', function () {
         ]))
     );
 
-    $result = $this->statsResource->getSnapshots(['entity_type' => 'cards']);
+    $result = $this->statsResource->getSnapshots(['entity_type' => 'card']);
 
     expect($result)->toBeInstanceOf(SnapshotsResponse::class);
-    expect($result->entityType)->toBe('cards');
+    expect($result->entityType)->toBe('card');
     expect($result->snapshots)->toHaveCount(1);
-    expect($result->snapshots[0]->entityType)->toBe('cards');
+    expect($result->snapshots[0]->entityType)->toBe('card');
 });
 
 it('can get snapshots with date range filter', function () {
@@ -428,7 +428,7 @@ it('can get snapshots with date range filter', function () {
                     'snapshots' => [
                         [
                             'date' => '2024-11-15',
-                            'entity_type' => 'sets',
+                            'entity_type' => 'set',
                             'total' => 120,
                             'published' => 100,
                             'draft' => 15,
@@ -479,14 +479,14 @@ it('can get growth with default period', function () {
                     'period' => '7d',
                     'metrics' => [
                         [
-                            'entity_type' => 'sets',
+                            'entity_type' => 'set',
                             'current' => 150,
                             'previous' => 140,
                             'change' => 10,
                             'percentage_change' => 7.14,
                         ],
                         [
-                            'entity_type' => 'cards',
+                            'entity_type' => 'card',
                             'current' => 5000,
                             'previous' => 4800,
                             'change' => 200,
@@ -504,7 +504,7 @@ it('can get growth with default period', function () {
     expect($result->period)->toBe('7d');
     expect($result->metrics)->toHaveCount(2);
     expect($result->metrics[0])->toBeInstanceOf(GrowthMetric::class);
-    expect($result->metrics[0]->entityType)->toBe('sets');
+    expect($result->metrics[0]->entityType)->toBe('set');
     expect($result->metrics[0]->current)->toBe(150);
     expect($result->metrics[0]->previous)->toBe(140);
     expect($result->metrics[0]->change)->toBe(10);
@@ -520,7 +520,7 @@ it('can get growth with custom period', function () {
                     'period' => '30d',
                     'metrics' => [
                         [
-                            'entity_type' => 'sets',
+                            'entity_type' => 'set',
                             'current' => 150,
                             'previous' => 120,
                             'change' => 30,
@@ -550,14 +550,14 @@ it('can get growth metric by entity type', function () {
                     'period' => '7d',
                     'metrics' => [
                         [
-                            'entity_type' => 'sets',
+                            'entity_type' => 'set',
                             'current' => 150,
                             'previous' => 140,
                             'change' => 10,
                             'percentage_change' => 7.14,
                         ],
                         [
-                            'entity_type' => 'cards',
+                            'entity_type' => 'card',
                             'current' => 5000,
                             'previous' => 4800,
                             'change' => 200,
@@ -570,8 +570,8 @@ it('can get growth metric by entity type', function () {
     );
 
     $result = $this->statsResource->getGrowth();
-    $setsGrowth = $result->getByEntityType('sets');
-    $cardsGrowth = $result->getByEntityType('cards');
+    $setsGrowth = $result->getByEntityType('set');
+    $cardsGrowth = $result->getByEntityType('card');
     $unknownGrowth = $result->getByEntityType('unknown');
 
     expect($setsGrowth)->toBeInstanceOf(GrowthMetric::class);
@@ -590,7 +590,7 @@ it('handles negative growth', function () {
                     'period' => '7d',
                     'metrics' => [
                         [
-                            'entity_type' => 'cards',
+                            'entity_type' => 'card',
                             'current' => 4500,
                             'previous' => 5000,
                             'change' => -500,

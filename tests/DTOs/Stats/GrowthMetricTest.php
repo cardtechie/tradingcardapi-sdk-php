@@ -6,7 +6,7 @@ use CardTechie\TradingCardApiSdk\DTOs\Stats\GrowthMetric;
 
 it('can create GrowthMetric from object with all properties', function () {
     $data = (object) [
-        'entity_type' => 'cards',
+        'entity_type' => 'card',
         'current' => 5000,
         'previous' => 4800,
         'change' => 200,
@@ -16,7 +16,7 @@ it('can create GrowthMetric from object with all properties', function () {
     $metric = GrowthMetric::fromObject($data);
 
     expect($metric)->toBeInstanceOf(GrowthMetric::class);
-    expect($metric->entityType)->toBe('cards');
+    expect($metric->entityType)->toBe('card');
     expect($metric->current)->toBe(5000);
     expect($metric->previous)->toBe(4800);
     expect($metric->change)->toBe(200);
@@ -37,7 +37,7 @@ it('handles missing properties with defaults', function () {
 
 it('handles negative growth correctly', function () {
     $data = (object) [
-        'entity_type' => 'cards',
+        'entity_type' => 'card',
         'current' => 4500,
         'previous' => 5000,
         'change' => -500,
@@ -52,7 +52,7 @@ it('handles negative growth correctly', function () {
 
 it('handles zero change correctly', function () {
     $data = (object) [
-        'entity_type' => 'sets',
+        'entity_type' => 'set',
         'current' => 150,
         'previous' => 150,
         'change' => 0,
