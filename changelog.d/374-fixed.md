@@ -1,0 +1,1 @@
+- **[Issue #374]** Correct the stats test fixtures to use the API's singular `entity_type` values (`set`, `card`, `player`, `team`) instead of plural, so the mocked suite exercises the shape production actually sends.
