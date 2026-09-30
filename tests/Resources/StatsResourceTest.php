@@ -14,7 +14,9 @@ use CardTechie\TradingCardApiSdk\Resources\Stats;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
+use Psr\Http\Message\RequestInterface;
 
 beforeEach(function () {
     // Set up configuration
@@ -388,7 +390,13 @@ it('can get snapshots without filters', function () {
 });
 
 it('can get snapshots with entity_type filter', function () {
-    $this->mockHandler->append(
+    // Capture the outgoing request so the assertions below verify the
+    // singular `entity_type=card` filter is actually sent on the wire, not
+    // just that the mocked response is parsed correctly (#386 review).
+    $container = [];
+    $history = Middleware::history($container);
+
+    $mockHandler = new MockHandler([
         new GuzzleResponse(200, [], json_encode([
             'data' => [
                 'type' => 'stats',
@@ -406,10 +414,27 @@ it('can get snapshots with entity_type filter', function () {
                     ],
                 ],
             ],
-        ]))
-    );
+        ])),
+    ]);
 
-    $result = $this->statsResource->getSnapshots(['entity_type' => 'card']);
+    $handlerStack = HandlerStack::create($mockHandler);
+    $handlerStack->push($history);
+    $client = new Client(['handler' => $handlerStack]);
+
+    // Pre-populate cache with token to avoid OAuth requests
+    cache()->put(tokenCacheKey(), 'test-token', 60);
+
+    $statsResource = new Stats($client);
+    $result = $statsResource->getSnapshots(['entity_type' => 'card']);
+
+    expect($container)->toHaveCount(1);
+
+    $request = $container[0]['request'];
+    expect($request)->toBeInstanceOf(RequestInterface::class);
+
+    parse_str($request->getUri()->getQuery(), $query);
+    expect($query)->toHaveKey('entity_type');
+    expect($query['entity_type'])->toBe('card');
 
     expect($result)->toBeInstanceOf(SnapshotsResponse::class);
     expect($result->entityType)->toBe('card');
