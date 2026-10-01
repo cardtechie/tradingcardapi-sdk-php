@@ -12,12 +12,6 @@ release time those fragments are collated into a versioned section. That
 collation is manual today — make changelog-update does not read changelog.d/
 fragments yet. See changelog.d/README.md. -->
 
-## [0.3.3] - 2026-09-30
-
-### Fixed
-
-- **[Issue #374]** Correct the stats test fixtures to use the API's singular `entity_type` values (`set`, `card`, `player`, `team`) instead of plural, so the mocked suite exercises the shape production actually sends.
-
 ## [0.3.2] - 2026-09-24
 
 ### Fixed
@@ -575,8 +569,7 @@ fragments yet. See changelog.d/README.md. -->
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.3...HEAD
-[0.3.3]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.2...0.3.3
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.2...HEAD
 [0.3.2]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.1...0.3.2
 [0.3.1]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.2.26...0.3.0
