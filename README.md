@@ -325,7 +325,7 @@ The Stats resource provides analytics and tracking capabilities for entity count
 $counts = $api->stats()->getCounts();
 
 // Access counts for a specific entity type
-$setsCount = $counts->getByEntityType('sets');
+$setsCount = $counts->getByEntityType('set');
 echo $setsCount->total;      // Total count
 echo $setsCount->published;  // Published count
 echo $setsCount->draft;      // Draft count
@@ -336,7 +336,7 @@ $growth = $api->stats()->getGrowth();
 // Or specify a period: '7d', '30d', '90d', 'week', 'month'
 $growth = $api->stats()->getGrowth('30d');
 
-$setsGrowth = $growth->getByEntityType('sets');
+$setsGrowth = $growth->getByEntityType('set');
 echo $setsGrowth->current;          // Current count
 echo $setsGrowth->previous;         // Previous period count
 echo $setsGrowth->change;           // Absolute change
@@ -347,7 +347,7 @@ $snapshots = $api->stats()->getSnapshots();
 
 // With filters
 $snapshots = $api->stats()->getSnapshots([
-    'entity_type' => 'sets',
+    'entity_type' => 'set',
     'from' => '2024-11-01',
     'to' => '2024-11-30',
 ]);
