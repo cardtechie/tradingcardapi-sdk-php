@@ -12,6 +12,12 @@ release time those fragments are collated into a versioned section. That
 collation is manual today — make changelog-update does not read changelog.d/
 fragments yet. See changelog.d/README.md. -->
 
+## [0.3.4] - 2026-10-08
+
+### Security
+
+- **[Issue #372]** Bump `league/commonmark` to 2.10.0 and `guzzlehttp/guzzle` to 7.15.5 on `main` to clear open security advisories.
+
 ## [0.3.3] - 2026-09-30
 
 ### Fixed
@@ -575,7 +581,8 @@ fragments yet. See changelog.d/README.md. -->
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.3...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.4...HEAD
+[0.3.4]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.3...0.3.4
 [0.3.3]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.2...0.3.3
 [0.3.2]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.1...0.3.2
 [0.3.1]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.0...0.3.1
