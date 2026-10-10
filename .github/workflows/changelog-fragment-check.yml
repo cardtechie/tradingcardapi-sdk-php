@@ -68,8 +68,17 @@ jobs:
           # fragment rather than duplicating it (#376). Only counts on main:
           # every other base still collects fragments for a later release.
           if [[ "$BASE_REF" == "main" ]]; then
+            # Count only headings whose version is genuinely new: a heading that
+            # merely moved or was reflowed shows as a '+' line too, but its
+            # version already exists on the base branch.
+            BASE_VERSIONS=$(git show "origin/${BASE_REF}:CHANGELOG.md" 2>/dev/null \
+              | grep -oE '^## \[[0-9]+\.[0-9]+\.[0-9]+\]' || true)
             ADDED_RELEASE_HEADING=$(git diff "origin/${BASE_REF}...HEAD" -- CHANGELOG.md \
-              | grep -E '^\+## \[[0-9]+\.[0-9]+\.[0-9]+\]' || true)
+              | grep -E '^\+## \[[0-9]+\.[0-9]+\.[0-9]+\]' \
+              | while IFS= read -r line; do
+                  heading=$(printf '%s\n' "${line#+}" | grep -oE '^## \[[0-9]+\.[0-9]+\.[0-9]+\]')
+                  grep -qxF "$heading" <<<"$BASE_VERSIONS" || printf '%s\n' "$line"
+                done || true)
             if [[ -n "$ADDED_RELEASE_HEADING" ]]; then
               echo "✅ Release collation detected (new versioned CHANGELOG section) — satisfies the changelog requirement:"
               echo "${ADDED_RELEASE_HEADING#+}"
