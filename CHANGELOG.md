@@ -12,6 +12,13 @@ release time those fragments are collated into a versioned section. That
 collation is manual today — make changelog-update does not read changelog.d/
 fragments yet. See changelog.d/README.md. -->
 
+## [0.3.4] - 2026-10-09
+
+### Fixed
+
+- **[Issue #376]** Let a collated versioned `CHANGELOG.md` section satisfy the changelog fragment gate on PRs to `main`, and re-run both changelog gates when a PR is retargeted.
+  - Release-shaped PRs to `main` (`release/*`, `develop`, `hotfix/*`) now carry their entry in the new versioned section only — no duplicate `changelog.d/` fragment.
+
 ## [0.3.3] - 2026-09-30
 
 ### Fixed
