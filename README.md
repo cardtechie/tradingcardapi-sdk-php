@@ -578,7 +578,7 @@ return [
 
 ### Authentication
 
-The SDK supports two authentication modes.
+The SDK supports three authentication modes: OAuth `client_credentials`, a portal API key, and a legacy personal access token.
 
 **OAuth `client_credentials`** (default) exchanges a client ID and secret for a token:
 
@@ -604,6 +604,14 @@ $api = TradingCardApi::withApiKey('tc_live_your_key');
 With no `auth_type` set, an API key is used when no complete client ID and secret pair is configured. If both are set, OAuth is used. Set `auth_type` to `api_key` or `oauth2` in the config to choose explicitly.
 
 Portal API keys are read-only (`read:published`), and the `scope` setting is ignored in this mode. Write calls and the `Internal\` namespace need OAuth credentials and fail with the API's 403 when called with a key.
+
+**Personal access token** (legacy) is unchanged and still available:
+
+```php
+$api = TradingCardApi::withPersonalAccessToken($token);
+```
+
+A `personal_access_token` with no OAuth pair is also auto-detected as `pat` mode; an API key wins when both are set.
 
 ### HTTP Timeouts
 
