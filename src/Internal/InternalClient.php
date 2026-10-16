@@ -20,7 +20,7 @@ use GuzzleHttp\Client;
 class InternalClient
 {
     /**
-     * Authentication type ('oauth2' or 'pat')
+     * Authentication type ('oauth2', 'api_key' or 'pat')
      */
     private string $authType;
 

@@ -44,6 +44,8 @@ Add your API credentials to your `.env` file:
 TRADINGCARDAPI_URL=https://api.tradingcardapi.com
 TRADINGCARDAPI_CLIENT_ID=your_client_id
 TRADINGCARDAPI_CLIENT_SECRET=your_client_secret
+# ...or, instead of a client ID and secret, a portal-issued API key:
+# TRADINGCARDAPI_API_KEY=tc_live_your_key
 TRADINGCARDAPI_SSL_VERIFY=true
 
 # HTTP timeouts (seconds) — defaults shown; 0 disables a timeout
@@ -562,6 +564,7 @@ return [
     'ssl_verify' => (bool) env('TRADINGCARDAPI_SSL_VERIFY', true),
     'client_id' => env('TRADINGCARDAPI_CLIENT_ID', ''),
     'client_secret' => env('TRADINGCARDAPI_CLIENT_SECRET', ''),
+    'api_key' => env('TRADINGCARDAPI_API_KEY', ''),
     'scope' => env('TRADINGCARDAPI_SCOPE', 'read:published'),
     'timeout' => (float) env('TRADINGCARDAPI_TIMEOUT', 10),
     'connect_timeout' => (float) env('TRADINGCARDAPI_CONNECT_TIMEOUT', 5),
@@ -572,6 +575,35 @@ return [
     ],
 ];
 ```
+
+### Authentication
+
+The SDK supports two authentication modes.
+
+**OAuth `client_credentials`** (default) exchanges a client ID and secret for a token:
+
+```env
+TRADINGCARDAPI_CLIENT_ID=your_client_id
+TRADINGCARDAPI_CLIENT_SECRET=your_client_secret
+```
+
+```php
+$api = TradingCardApi::withClientCredentials($clientId, $clientSecret);
+```
+
+**API key** sends the `tc_live_` / `tc_test_` key issued by the portal as a bearer token, with no OAuth token request:
+
+```env
+TRADINGCARDAPI_API_KEY=tc_live_your_key
+```
+
+```php
+$api = TradingCardApi::withApiKey('tc_live_your_key');
+```
+
+With no `auth_type` set, an API key is used when no complete client ID and secret pair is configured. If both are set, OAuth is used. Set `auth_type` to `api_key` or `oauth2` in the config to choose explicitly.
+
+Portal API keys are read-only (`read:published`), and the `scope` setting is ignored in this mode. Write calls and the `Internal\` namespace need OAuth credentials and fail with the API's 403 when called with a key.
 
 ### HTTP Timeouts
 
