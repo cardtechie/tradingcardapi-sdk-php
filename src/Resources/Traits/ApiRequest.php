@@ -39,7 +39,7 @@ trait ApiRequest
     private ?ErrorResponseParser $errorParser = null;
 
     /**
-     * Authentication type ('oauth2' or 'pat')
+     * Authentication type ('oauth2', 'api_key' or 'pat')
      */
     private string $authType = 'oauth2';
 
@@ -160,6 +160,16 @@ trait ApiRequest
      */
     private function retrieveToken(): void
     {
+        // API key path: a portal-issued key is a plain bearer token, no OAuth
+        if ($this->authType === 'api_key') {
+            if (empty($this->personalAccessToken)) {
+                throw new AuthenticationException('API key is required');
+            }
+            $this->token = $this->personalAccessToken;
+
+            return;
+        }
+
         // PAT path: skip OAuth entirely, use token directly
         if ($this->authType === 'pat') {
             if (empty($this->personalAccessToken)) {

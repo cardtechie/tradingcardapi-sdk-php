@@ -447,6 +447,50 @@ it('throws AuthenticationException when PAT is empty string', function () {
         ->toThrow(AuthenticationException::class, 'Personal Access Token is required');
 });
 
+it('sends an API key as a bearer token without making an OAuth token request', function () {
+    $client = m::mock(Client::class);
+
+    $apiResponse = new GuzzleResponse(200, [], json_encode(['data' => ['id' => '123']]));
+
+    $client->shouldNotReceive('request')->with('POST', '/oauth/token', m::type('array'));
+
+    $client->shouldReceive('request')
+        ->with('GET', '/test', m::on(function ($request) {
+            return isset($request['headers']['Authorization']) &&
+                   $request['headers']['Authorization'] === 'Bearer tc_live_abc_secret';
+        }))
+        ->once()
+        ->andReturn($apiResponse);
+
+    $instance = new TestApiRequestClass($client);
+    $instance->setAuthInfo('api_key', 'tc_live_abc_secret', null, null);
+    $result = $instance->testMakeRequest('/test');
+
+    expect($result->data->id)->toBe('123');
+});
+
+it('throws AuthenticationException when the API key is null', function () {
+    $client = m::mock(Client::class);
+    $client->shouldNotReceive('request');
+
+    $instance = new TestApiRequestClass($client);
+    $instance->setAuthInfo('api_key', null, null, null);
+
+    expect(fn () => $instance->testMakeRequest('/test'))
+        ->toThrow(AuthenticationException::class, 'API key is required');
+});
+
+it('throws AuthenticationException when the API key is an empty string', function () {
+    $client = m::mock(Client::class);
+    $client->shouldNotReceive('request');
+
+    $instance = new TestApiRequestClass($client);
+    $instance->setAuthInfo('api_key', '', null, null);
+
+    expect(fn () => $instance->testMakeRequest('/test'))
+        ->toThrow(AuthenticationException::class, 'API key is required');
+});
+
 it('uses instance OAuth credentials over config credentials', function () {
     $client = m::mock(Client::class);
 
