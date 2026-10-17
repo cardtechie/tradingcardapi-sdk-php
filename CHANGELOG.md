@@ -12,12 +12,19 @@ release time those fragments are collated into a versioned section. That
 collation is manual today — make changelog-update does not read changelog.d/
 fragments yet. See changelog.d/README.md. -->
 
-## [0.3.4] - 2026-10-09
+## [0.3.5] - 2026-10-17
 
 ### Fixed
 
 - **[Issue #376]** Let a collated versioned `CHANGELOG.md` section satisfy the changelog fragment gate on PRs to `main`, and re-run both changelog gates when a PR is retargeted.
   - Release-shaped PRs to `main` (`release/*`, `develop`, `hotfix/*`) now carry their entry in the new versioned section only — no duplicate `changelog.d/` fragment.
+
+## [0.3.4] - 2026-10-15
+
+### Added
+
+- **[Issue #393]** Add an `api_key` auth mode so the SDK can authenticate with a portal-issued `tc_` key.
+  - Configure it with `TRADINGCARDAPI_API_KEY` or `TradingCardApi::withApiKey()`; `tc_` keys are read-only, so write and `Internal\` calls still need OAuth.
 
 ## [0.3.3] - 2026-09-30
 
@@ -582,7 +589,8 @@ fragments yet. See changelog.d/README.md. -->
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.3...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.4...HEAD
+[0.3.4]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.3...0.3.4
 [0.3.3]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.2...0.3.3
 [0.3.2]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.1...0.3.2
 [0.3.1]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.0...0.3.1
