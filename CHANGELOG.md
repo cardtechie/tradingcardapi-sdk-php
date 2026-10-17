@@ -12,6 +12,12 @@ release time those fragments are collated into a versioned section. That
 collation is manual today — make changelog-update does not read changelog.d/
 fragments yet. See changelog.d/README.md. -->
 
+## [0.3.5] - 2026-10-16
+
+### Security
+
+- **[Issue #372]** Bump `league/commonmark` to 2.10.0 and `guzzlehttp/guzzle` to 7.15.5 on `main` to clear open security advisories.
+
 ## [0.3.4] - 2026-10-15
 
 ### Added
