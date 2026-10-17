@@ -1,11 +1,22 @@
 name: Changelog Fragment Check
 
-# Escape hatch: add the `skip-changelog` label to opt a PR out of this gate
-# (e.g. release/collation PRs that remove fragments rather than adding one).
+# On a PR to main, a newly added versioned `## [X.Y.Z]` section in CHANGELOG.md
+# satisfies this gate in place of a fragment. A PR into main IS the release, so
+# release-shaped PRs (release/*, develop, hotfix/*) collate - they fold the
+# pending fragments into that section and carry their own entry there - and
+# Release Validation (changelog-check.yml) requires the section. Collation PRs
+# therefore no longer need the `skip-changelog` label (#376).
+#
+# Escape hatch: add the `skip-changelog` label to opt a PR out of this gate.
+#
+# `edited` re-runs the gate when a PR is retargeted, so a stale failure from the
+# old base is replaced on the same head SHA (#376). Title/body edits re-run it
+# too; that is deliberate - a skipped run reports as passing, so guarding
+# `edited` with an `if` would let an edit turn a failing gate green.
 on:
   pull_request:
     branches: [main, develop]
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
 
 permissions:
   contents: read
@@ -29,6 +40,10 @@ jobs:
       - name: Verify PR adds a changelog.d fragment
         if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changelog') }}
         shell: bash
+        env:
+          # Branch names are author-controlled; pass via env, never inline ${{ }}
+          # in the script body, to avoid shell injection.
+          HEAD_REF: ${{ github.head_ref }}
         run: |
           set -euo pipefail
 
@@ -48,6 +63,29 @@ jobs:
             exit 0
           fi
 
+          # On a PR to main, collating into a new versioned CHANGELOG.md section
+          # is the release step and carries this PR's entry - it replaces the
+          # fragment rather than duplicating it (#376). Only counts on main:
+          # every other base still collects fragments for a later release.
+          if [[ "$BASE_REF" == "main" ]]; then
+            # Count only headings whose version is genuinely new: a heading that
+            # merely moved or was reflowed shows as a '+' line too, but its
+            # version already exists on the base branch.
+            BASE_VERSIONS=$(git show "origin/${BASE_REF}:CHANGELOG.md" 2>/dev/null \
+              | grep -oE '^## \[[0-9]+\.[0-9]+\.[0-9]+\]' || true)
+            ADDED_RELEASE_HEADING=$(git diff "origin/${BASE_REF}...HEAD" -- CHANGELOG.md \
+              | grep -E '^\+## \[[0-9]+\.[0-9]+\.[0-9]+\]' \
+              | while IFS= read -r line; do
+                  heading=$(printf '%s\n' "${line#+}" | grep -oE '^## \[[0-9]+\.[0-9]+\.[0-9]+\]')
+                  grep -qxF "$heading" <<<"$BASE_VERSIONS" || printf '%s\n' "$line"
+                done || true)
+            if [[ -n "$ADDED_RELEASE_HEADING" ]]; then
+              echo "✅ Release collation detected (new versioned CHANGELOG section) — satisfies the changelog requirement:"
+              echo "${ADDED_RELEASE_HEADING#+}"
+              exit 0
+            fi
+          fi
+
           # A fragment is a newly-added markdown file under changelog.d/ that
           # follows the documented <num>-<type>.md naming convention, where
           # <type> is one of: added | changed | fixed | security | removed |
@@ -63,6 +101,23 @@ jobs:
             exit 0
           fi
 
+          if [[ "$BASE_REF" == "main" ]]; then
+            case "$HEAD_REF" in
+              release/*|develop|hotfix/*)
+                echo "::error::This release-shaped PR to main changes src/ or tests/ but adds no versioned CHANGELOG.md section."
+                echo ""
+                echo "A PR into main IS the release, so it collates instead of adding a fragment:"
+                echo "  1. Run: bash build/version.sh --branch=main   (the version that will be tagged)"
+                echo "  2. Add a '## [X.Y.Z] - YYYY-MM-DD' section to CHANGELOG.md below ## [Unreleased]"
+                echo "  3. Fold the pending changelog.d/ fragments into it and delete the ones you consumed"
+                echo "  4. Put this PR's own entry directly in that section - no changelog.d/ fragment"
+                echo ""
+                echo "Release Validation requires the same section. See changelog.d/README.md."
+                exit 1
+                ;;
+            esac
+          fi
+
           echo "::error::This PR changes src/ or tests/ but adds no changelog fragment."
           echo ""
           echo "Add a one-line fragment at changelog.d/<issue>-<type>.md, where <type> is one of:"
@@ -72,5 +127,6 @@ jobs:
           echo "  changelog.d/245-added.md"
           echo ""
           echo "See changelog.d/README.md for the convention. Do NOT edit the shared"
-          echo "## [Unreleased] section of CHANGELOG.md — that is collated at release time."
+          echo "## [Unreleased] section of CHANGELOG.md — that is collated at release time"
+          echo "(by the release-shaped PR into main, which adds a versioned section)."
           exit 1
