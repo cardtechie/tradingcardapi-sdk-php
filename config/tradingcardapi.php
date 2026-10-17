@@ -50,6 +50,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Trading Card API Key
+    |--------------------------------------------------------------------------
+    |
+    | A portal-issued API key (tc_live_... or tc_test_...) sent as a bearer
+    | token, with no OAuth token request. Keys are read-only. When a client ID
+    | and secret are also set, OAuth is used instead unless 'auth_type' is set
+    | to 'api_key'. Keep the key in your environment file, not in your code.
+    */
+    'api_key' => env('TRADINGCARDAPI_API_KEY', ''),
+
+    /*
+    |--------------------------------------------------------------------------
     | OAuth Scopes
     |--------------------------------------------------------------------------
     |
