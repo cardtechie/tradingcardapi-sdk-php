@@ -1,2 +1,0 @@
-- **[Issue #393]** Add an `api_key` auth mode so the SDK can authenticate with a portal-issued `tc_` key.
-  - Configure it with `TRADINGCARDAPI_API_KEY` or `TradingCardApi::withApiKey()`; `tc_` keys are read-only, so write and `Internal\` calls still need OAuth.
