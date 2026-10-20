@@ -215,7 +215,7 @@ it('can list cards with pagination', function () {
         ->andReturn($tokenResponse);
 
     $client->shouldReceive('request')
-        ->with('GET', '/v1/cards?limit=50&page=1&pageName=page', m::type('array'))
+        ->with('GET', '/v1/cards?limit=50&page=1', m::type('array'))
         ->once()
         ->andReturn($listResponse);
 

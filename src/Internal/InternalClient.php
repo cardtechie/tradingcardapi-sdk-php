@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace CardTechie\TradingCardApiSdk\Internal;
 
+use CardTechie\TradingCardApiSdk\DTOs\Usage\RateLimitStatus;
 use CardTechie\TradingCardApiSdk\Internal\Resources\AuditLog;
 use CardTechie\TradingCardApiSdk\Internal\Resources\Workflow;
+use CardTechie\TradingCardApiSdk\Services\RateLimitTracker;
 use GuzzleHttp\Client;
 
 /**
@@ -44,19 +46,31 @@ class InternalClient
      */
     private ?string $scope;
 
+    /**
+     * Holder for the rate-limit window observed on the most recent response.
+     *
+     * `TradingCardApi::internal()` passes its own holder in so internal-scope
+     * calls feed the same reading the facade's `rateLimit()` returns. The
+     * parameter is optional and trailing so the pre-existing constructor
+     * signature keeps working for direct callers.
+     */
+    private RateLimitTracker $rateLimitTracker;
+
     public function __construct(
         private Client $client,
         string $authType = 'oauth2',
         ?string $personalAccessToken = null,
         ?string $clientId = null,
         ?string $clientSecret = null,
-        ?string $scope = null
+        ?string $scope = null,
+        ?RateLimitTracker $rateLimitTracker = null
     ) {
         $this->authType = $authType;
         $this->personalAccessToken = $personalAccessToken;
         $this->clientId = $clientId;
         $this->clientSecret = $clientSecret;
         $this->scope = $scope;
+        $this->rateLimitTracker = $rateLimitTracker ?? new RateLimitTracker;
     }
 
     /**
@@ -81,7 +95,21 @@ class InternalClient
             );
         }
 
+        if (method_exists($resource, 'setRateLimitTracker')) {
+            $resource->setRateLimitTracker($this->rateLimitTracker);
+        }
+
         return $resource;
+    }
+
+    /**
+     * The rate-limit window carried by the most recent response seen by any
+     * resource created from this internal client, or null if none has carried
+     * the `X-RateLimit-*` headers.
+     */
+    public function rateLimit(): ?RateLimitStatus
+    {
+        return $this->rateLimitTracker->get();
     }
 
     /**

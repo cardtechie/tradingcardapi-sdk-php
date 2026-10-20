@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CardTechie\TradingCardApiSdk;
 
+use CardTechie\TradingCardApiSdk\DTOs\Usage\RateLimitStatus;
 use CardTechie\TradingCardApiSdk\Http\RetryMiddleware;
 use CardTechie\TradingCardApiSdk\Internal\InternalClient;
 use CardTechie\TradingCardApiSdk\Resources\Attribute;
@@ -19,7 +20,9 @@ use CardTechie\TradingCardApiSdk\Resources\Set;
 use CardTechie\TradingCardApiSdk\Resources\SetSource;
 use CardTechie\TradingCardApiSdk\Resources\Stats;
 use CardTechie\TradingCardApiSdk\Resources\Team;
+use CardTechie\TradingCardApiSdk\Resources\Usage;
 use CardTechie\TradingCardApiSdk\Resources\Year;
+use CardTechie\TradingCardApiSdk\Services\RateLimitTracker;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 
@@ -78,6 +81,15 @@ class TradingCardApi
     private $scope;
 
     /**
+     * Holder for the rate-limit window observed on the most recent response.
+     *
+     * Owned by the client rather than by a resource because `createResource()`
+     * builds a fresh resource per accessor call, so per-resource state would be
+     * discarded before the caller could read it.
+     */
+    private RateLimitTracker $rateLimitTracker;
+
+    /**
      * Constructor
      *
      * @param  array<string, mixed>  $options  Optional configuration overrides
@@ -85,6 +97,8 @@ class TradingCardApi
      */
     public function __construct(array $options = [])
     {
+        $this->rateLimitTracker = new RateLimitTracker;
+
         $config = config('tradingcardapi') ?: [];
         $mergedConfig = array_merge($config, $options);
 
@@ -265,7 +279,28 @@ class TradingCardApi
             );
         }
 
+        // Share the client's rate-limit holder so a reading taken by any
+        // resource is visible through `TradingCardApi::rateLimit()`.
+        if (method_exists($resource, 'setRateLimitTracker')) {
+            $resource->setRateLimitTracker($this->rateLimitTracker);
+        }
+
         return $resource;
+    }
+
+    /**
+     * The rate-limit window carried by the most recent response seen by any
+     * resource created from this client, or null if no response has carried
+     * the `X-RateLimit-*` headers yet.
+     *
+     * This is the passive counterpart to `usage()`, which polls
+     * `GET /v1/user/usage` on demand. Note that
+     * `RateLimitStatus::$resetAt` is a Unix timestamp, whereas
+     * `UsageResponse::$resetsAt` is an ISO-8601 string.
+     */
+    public function rateLimit(): ?RateLimitStatus
+    {
+        return $this->rateLimitTracker->get();
     }
 
     /**
@@ -284,7 +319,8 @@ class TradingCardApi
             $this->bearerToken(),
             $this->clientId,
             $this->clientSecret,
-            $this->scope
+            $this->scope,
+            $this->rateLimitTracker
         );
     }
 
@@ -398,5 +434,14 @@ class TradingCardApi
     public function stats(): Stats
     {
         return $this->createResource(Stats::class);
+    }
+
+    /**
+     * Retrieve the usage resource, which reports the calling credential's own
+     * rate-limit window.
+     */
+    public function usage(): Usage
+    {
+        return $this->createResource(Usage::class);
     }
 }

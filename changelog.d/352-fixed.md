@@ -1,0 +1,2 @@
+- **[Issue #352]** Align the internal workflow resource and its DTOs with the routes and payload shapes the API actually serves.
+  - Breaking: `updateSetTodo()`, `flagForReview()`, and `resolveReview()` now take a set id as their first argument, since the canonical route is `PATCH /internal/sets/{set}/todos/{todo}`.

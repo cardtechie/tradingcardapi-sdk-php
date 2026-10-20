@@ -63,3 +63,63 @@ it('defaults id, type, and attributes when absent on an item', function () {
     expect($result->sets[0]->type)->toBe('sets');
     expect($result->sets[0]->attributes)->toBeObject();
 });
+
+it('decodes the real flat-row payload the API serves', function () {
+    $response = (object) [
+        'data' => [
+            (object) [
+                'todo_id' => 'todo-1',
+                'set_id' => 'set-1',
+                'set_name' => '2024 Topps Baseball',
+                'step' => 'discover_sources',
+                'priority' => 'high',
+                'card_count' => 350,
+            ],
+            (object) [
+                'todo_id' => 'todo-2',
+                'set_id' => 'set-2',
+                'set_name' => '2024 Panini Football',
+                'step' => 'validate',
+                'priority' => 'normal',
+                'card_count' => 200,
+            ],
+        ],
+    ];
+
+    $result = ActionableSetsResponse::fromResponse($response);
+
+    expect($result->sets)->toHaveCount(2);
+    expect($result->sets[0]->id)->toBe('set-1');
+    expect($result->sets[0]->todoId)->toBe('todo-1');
+    expect($result->sets[0]->attributes->set_name)->toBe('2024 Topps Baseball');
+    expect($result->sets[1]->id)->toBe('set-2');
+    expect($result->sets[1]->attributes->step)->toBe('validate');
+});
+
+it('exposes the meta block when the API returns one', function () {
+    $response = (object) [
+        'data' => [],
+        'meta' => (object) [
+            'total' => 0,
+            'full_total' => 120,
+            'step' => 'validate',
+            'status' => 'review',
+            'priority_filter' => 'high',
+        ],
+    ];
+
+    $result = ActionableSetsResponse::fromResponse($response);
+
+    expect($result->meta)->not->toBeNull();
+    expect($result->meta->total)->toBe(0);
+    expect($result->meta->fullTotal)->toBe(120);
+    expect($result->meta->step)->toBe('validate');
+    expect($result->meta->status)->toBe('review');
+    expect($result->meta->priorityFilter)->toBe('high');
+});
+
+it('leaves meta null when the response has no meta block', function () {
+    $result = ActionableSetsResponse::fromResponse((object) ['data' => []]);
+
+    expect($result->meta)->toBeNull();
+});

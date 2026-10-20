@@ -196,6 +196,14 @@ $endpointNotFound = ResourceNotFoundException::endpoint('/api/invalid');
 
 Thrown when API rate limits are exceeded. Provides rate limit information for retry logic.
 
+> **You do not have to wait for a 429 to read these numbers.** The same
+> `X-RateLimit-*` window rides on ordinary responses, and the SDK captures it as
+> it goes by: call `$api->rateLimit()` after any request for a nullable
+> `RateLimitStatus` carrying the same limit/remaining/reset trio. See
+> [Rate-limit headers](../README.md#rate-limit-headers) in the README. The
+> passive reading is also refreshed on the 429 path below, so the exception and
+> a subsequent `rateLimit()` call agree.
+
 ```php
 use CardTechie\TradingCardApiSdk\Exceptions\RateLimitException;
 

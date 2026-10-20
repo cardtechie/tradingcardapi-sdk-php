@@ -1,0 +1,2 @@
+- **[Issue #356]** Add a `Usage` resource exposing the caller's own rate-limit window via `GET /v1/user/usage`.
+  - The endpoint stays gated to interactive portal sessions until cardtechie/tradingcardapi-api#2342 ships, so `tc_` keys receive an `AuthenticationException` until then.
