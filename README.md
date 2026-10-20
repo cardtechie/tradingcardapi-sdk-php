@@ -691,6 +691,7 @@ return [
     'client_id' => env('TRADINGCARDAPI_CLIENT_ID', ''),
     'client_secret' => env('TRADINGCARDAPI_CLIENT_SECRET', ''),
     'api_key' => env('TRADINGCARDAPI_API_KEY', ''),
+    'auth_type' => env('TRADINGCARDAPI_AUTH_TYPE'),
     'scope' => env('TRADINGCARDAPI_SCOPE', 'read:published'),
     'timeout' => (float) env('TRADINGCARDAPI_TIMEOUT', 10),
     'connect_timeout' => (float) env('TRADINGCARDAPI_CONNECT_TIMEOUT', 5),
