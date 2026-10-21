@@ -41,13 +41,13 @@ jobs:
         if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changelog') }}
         shell: bash
         env:
-          # Branch names are author-controlled; pass via env, never inline ${{ }}
+          # Branch names (head and base) are author-controlled; pass via env, never inline ${{ }}
           # in the script body, to avoid shell injection.
           HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
           set -euo pipefail
 
-          BASE_REF="${{ github.base_ref }}"
           git fetch --no-tags origin "$BASE_REF"
 
           # Files changed in this PR relative to the merge base with the target branch.
