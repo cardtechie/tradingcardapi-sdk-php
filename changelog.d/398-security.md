@@ -1,0 +1,2 @@
+- **[Issue #398]** Require PHP2Shell-fixed patch levels (8.2.35 / 8.3.36 / 8.4.27) in CI and the dev image, and disable `session.upload_progress` in the dev image.
+  - CI and dev only; the composer `php` constraint stays `^8.2`, so consumers are unaffected.
