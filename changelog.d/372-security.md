@@ -1,1 +1,0 @@
-- **[Issue #372]** Bump `league/commonmark` to 2.10.0 and `guzzlehttp/guzzle` to 7.15.5 on `main` to clear open security advisories.

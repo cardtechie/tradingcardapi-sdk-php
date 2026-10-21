@@ -16,7 +16,8 @@ fragments yet. See changelog.d/README.md. -->
 
 ### Security
 
-- **[Issue #372]** Bump `league/commonmark` to 2.10.0 and `guzzlehttp/guzzle` to 7.15.5 on `main` to clear open security advisories.
+- **[Issue #372]** Bump `league/commonmark` to 2.10.0 and `guzzlehttp/guzzle` to 7.15.5 on `main` to clear the guzzle advisories and the commonmark advisories fixed in 2.10.0.
+  - commonmark 2.10.0 is still affected by GHSA-3q6v-r5mr-hxv8 and GHSA-97jj-33gv-5xf9, which need 2.10.2.
 
 ## [0.3.4] - 2026-10-15
 
