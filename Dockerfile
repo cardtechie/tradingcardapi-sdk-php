@@ -51,7 +51,8 @@ RUN add-apt-repository ppa:ondrej/php \
     && ln -s /usr/sbin/php-fpm${PHP_MINOR} /usr/local/sbin/php-fpm
 
 # Refuse to build on a PHP patch level below the PHP2Shell fix (#398)
-RUN php -r 'exit(version_compare(PHP_VERSION, getenv("PHP_MIN_VERSION"), ">=") ? 0 : 1);' \
+RUN test -n "${PHP_MIN_VERSION}" \
+    && php -r 'exit(version_compare(PHP_VERSION, getenv("PHP_MIN_VERSION"), ">=") ? 0 : 1);' \
     || (echo "PHP $(php -r 'echo PHP_VERSION;') is below ${PHP_MIN_VERSION} (PHP2Shell CVE-2026-109618 / CVE-2026-109619)" >&2; exit 1)
 
 # Apply PHP Defaults
