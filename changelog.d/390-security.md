@@ -1,0 +1,2 @@
+- **[Issue #390]** Refresh `composer.lock` to league/commonmark 2.10.4, laravel/framework 12.70.1 and league/flysystem 3.36.0, clearing the remaining commonmark, framework and flysystem Dependabot alerts.
+  - Lock-only change; published consumers resolve against `composer.json` constraints and are unaffected.
