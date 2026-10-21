@@ -12,6 +12,13 @@ release time those fragments are collated into a versioned section. That
 collation is manual today — make changelog-update does not read changelog.d/
 fragments yet. See changelog.d/README.md. -->
 
+## [0.3.5] - 2026-10-21
+
+### Security
+
+- **[Issue #398]** Require PHP2Shell-fixed patch levels (8.2.35 / 8.3.36 / 8.4.27) in CI and the dev image, and disable `session.upload_progress` in the dev image.
+  - CI and dev only; the composer `php` constraint stays `^8.2`, so consumers are unaffected.
+
 ## [0.3.4] - 2026-10-15
 
 ### Added
@@ -582,7 +589,8 @@ fragments yet. See changelog.d/README.md. -->
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.4...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.5...HEAD
+[0.3.5]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.4...0.3.5
 [0.3.4]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.3...0.3.4
 [0.3.3]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.2...0.3.3
 [0.3.2]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.1...0.3.2
