@@ -45,11 +45,15 @@ The SDK follows [Semantic Versioning 2.0.0](https://semver.org/):
 | `hotfix/*` | `X.Y.Z+1-hotfix.<name>.N` | `1.2.4-hotfix.securityfix.3` | Critical fixes |
 | `feature/*` | `X.Y.Z-alpha.N` | `1.2.3-alpha.5` | Feature development |
 
-> **Only the `main` row is ever tagged.** Every other pattern in this table is a
-> *branch build identifier* — a label for CI artifacts and diagnostics. In
-> particular a `hotfix/*` string like `1.2.4-hotfix.securityfix.3` is never the
-> released version; when the hotfix merges to `main`, `build-release.yml` runs
-> `build/version.sh --branch=main` and tags whatever the `main` case emits.
+> **Only the `main` row is ever tagged as a stable release.** The one other
+> tagged pattern is `develop`: a manual `workflow_dispatch` of
+> `build-release.yml` on `develop` creates a `X.Y+1.0.beta-N` tag as a GitHub
+> *prerelease*. The `release/*`, `hotfix/*`, and `feature/*` patterns are never
+> tagged — they are *branch build identifiers*, labels for CI artifacts and
+> diagnostics. In particular a `hotfix/*` string like
+> `1.2.4-hotfix.securityfix.3` is never the released version; when the hotfix
+> merges to `main`, `build-release.yml` runs `build/version.sh --branch=main`
+> and tags whatever the `main` case emits.
 
 ## Build Scripts
 
