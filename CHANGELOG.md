@@ -12,6 +12,13 @@ release time those fragments are collated into a versioned section. That
 collation is manual today — make changelog-update does not read changelog.d/
 fragments yet. See changelog.d/README.md. -->
 
+## [0.3.5] - 2026-10-21
+
+### Security
+
+- **[Issue #390]** Refresh `composer.lock` to league/commonmark 2.10.4, laravel/framework 12.70.1 and league/flysystem 3.36.0, clearing the remaining commonmark, framework and flysystem Dependabot alerts.
+  - Lock-only change; published consumers resolve against `composer.json` constraints and are unaffected.
+
 ## [0.3.4] - 2026-10-15
 
 ### Added
@@ -582,7 +589,8 @@ fragments yet. See changelog.d/README.md. -->
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.4...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.5...HEAD
+[0.3.5]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.4...0.3.5
 [0.3.4]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.3...0.3.4
 [0.3.3]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.2...0.3.3
 [0.3.2]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.1...0.3.2
