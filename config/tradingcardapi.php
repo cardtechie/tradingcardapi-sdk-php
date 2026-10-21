@@ -50,6 +50,30 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Trading Card API Key
+    |--------------------------------------------------------------------------
+    |
+    | A portal-issued API key (tc_live_... or tc_test_...) sent as a bearer
+    | token, with no OAuth token request. Keys are read-only. When a client ID
+    | and secret are also set, OAuth is used instead unless 'auth_type' is set
+    | to 'api_key'. Keep the key in your environment file, not in your code.
+    */
+    'api_key' => env('TRADINGCARDAPI_API_KEY', ''),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Authentication Type
+    |--------------------------------------------------------------------------
+    |
+    | Leave unset (null) to auto-detect: an API key or personal access token is
+    | used when no complete client ID and secret pair is configured, otherwise
+    | OAuth. Set to 'api_key', 'pat' or 'oauth2' to choose explicitly, for
+    | example to force 'api_key' when OAuth credentials are also present.
+    */
+    'auth_type' => env('TRADINGCARDAPI_AUTH_TYPE'),
+
+    /*
+    |--------------------------------------------------------------------------
     | OAuth Scopes
     |--------------------------------------------------------------------------
     |

@@ -146,6 +146,64 @@ it('can be instantiated with personal access token', function () {
     expect($api->getPersonalAccessToken())->toBe('test-pat-token');
 });
 
+it('can be instantiated with an API key', function () {
+    $api = TradingCardApi::withApiKey('tc_live_abc_secret');
+
+    expect($api->getAuthType())->toBe('api_key');
+    expect($api->getApiKey())->toBe('tc_live_abc_secret');
+});
+
+it('passes the API key to resources', function () {
+    $card = TradingCardApi::withApiKey('tc_live_abc_secret')->card();
+
+    $reflection = new ReflectionClass($card);
+    $authType = $reflection->getProperty('authType');
+    $authType->setAccessible(true);
+    $token = $reflection->getProperty('personalAccessToken');
+    $token->setAccessible(true);
+
+    expect($authType->getValue($card))->toBe('api_key');
+    expect($token->getValue($card))->toBe('tc_live_abc_secret');
+});
+
+it('auto-detects API key mode when the key is set and OAuth2 credentials are empty', function () {
+    config(['tradingcardapi.api_key' => 'tc_live_abc_secret']);
+    config(['tradingcardapi.client_id' => '']);
+    config(['tradingcardapi.client_secret' => '']);
+
+    $api = new TradingCardApi;
+
+    expect($api->getAuthType())->toBe('api_key');
+    expect($api->getApiKey())->toBe('tc_live_abc_secret');
+});
+
+it('defaults to OAuth2 when both an API key and OAuth2 credentials are set', function () {
+    config(['tradingcardapi.api_key' => 'tc_live_abc_secret']);
+    config(['tradingcardapi.client_id' => 'client-id']);
+    config(['tradingcardapi.client_secret' => 'client-secret']);
+
+    expect((new TradingCardApi)->getAuthType())->toBe('oauth2');
+});
+
+it('prefers an API key over a PAT when OAuth2 credentials are empty', function () {
+    config(['tradingcardapi.api_key' => 'tc_live_abc_secret']);
+    config(['tradingcardapi.personal_access_token' => 'test-pat-token']);
+    config(['tradingcardapi.client_id' => '']);
+    config(['tradingcardapi.client_secret' => '']);
+
+    expect((new TradingCardApi)->getAuthType())->toBe('api_key');
+});
+
+it('lets an explicit auth_type override API key auto-detection', function () {
+    config(['tradingcardapi.api_key' => 'tc_live_abc_secret']);
+    config(['tradingcardapi.client_id' => '']);
+    config(['tradingcardapi.client_secret' => '']);
+
+    $api = new TradingCardApi(['auth_type' => 'oauth2']);
+
+    expect($api->getAuthType())->toBe('oauth2');
+});
+
 it('can be instantiated with client credentials', function () {
     $api = TradingCardApi::withClientCredentials('test-client-id', 'test-client-secret');
 

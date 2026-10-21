@@ -39,7 +39,7 @@ class TradingCardApi
     private $client;
 
     /**
-     * Authentication type ('oauth2' or 'pat')
+     * Authentication type ('oauth2', 'api_key' or 'pat')
      *
      * @var string
      */
@@ -51,6 +51,13 @@ class TradingCardApi
      * @var string|null
      */
     private $personalAccessToken;
+
+    /**
+     * Portal-issued API key (for API key auth mode)
+     *
+     * @var string|null
+     */
+    private $apiKey;
 
     /**
      * OAuth2 Client ID (for OAuth2 auth mode)
@@ -126,11 +133,15 @@ class TradingCardApi
 
         // Auto-detect auth type if not explicitly set
         if (! isset($mergedConfig['auth_type'])) {
-            // If PAT is set and OAuth2 credentials are empty, default to PAT mode
+            // If an API key or PAT is set and OAuth2 credentials are empty,
+            // use that mode. An API key wins over a PAT.
+            $hasApiKey = ! empty($mergedConfig['api_key']);
             $hasPat = ! empty($mergedConfig['personal_access_token']);
             $hasOAuth = ! empty($mergedConfig['client_id']) && ! empty($mergedConfig['client_secret']);
 
-            if ($hasPat && ! $hasOAuth) {
+            if ($hasApiKey && ! $hasOAuth) {
+                $mergedConfig['auth_type'] = 'api_key';
+            } elseif ($hasPat && ! $hasOAuth) {
                 $mergedConfig['auth_type'] = 'pat';
             }
         }
@@ -142,6 +153,10 @@ class TradingCardApi
 
         if (isset($mergedConfig['personal_access_token'])) {
             $this->personalAccessToken = $mergedConfig['personal_access_token'];
+        }
+
+        if (isset($mergedConfig['api_key'])) {
+            $this->apiKey = $mergedConfig['api_key'];
         }
 
         if (isset($mergedConfig['client_id'])) {
@@ -167,6 +182,22 @@ class TradingCardApi
         return new self([
             'auth_type' => 'pat',
             'personal_access_token' => $token,
+        ]);
+    }
+
+    /**
+     * Create a new instance using a portal-issued API key (tc_live_ / tc_test_)
+     *
+     * The key is sent as a bearer token. Portal keys are read-only, so write
+     * calls and the Internal namespace still require OAuth credentials.
+     *
+     * @param  string  $apiKey  The portal-issued API key
+     */
+    public static function withApiKey(string $apiKey): self
+    {
+        return new self([
+            'auth_type' => 'api_key',
+            'api_key' => $apiKey,
         ]);
     }
 
@@ -202,6 +233,22 @@ class TradingCardApi
     }
 
     /**
+     * Get the portal-issued API key
+     */
+    public function getApiKey(): ?string
+    {
+        return $this->apiKey;
+    }
+
+    /**
+     * Get the bearer credential handed to resources for the current mode
+     */
+    private function bearerToken(): ?string
+    {
+        return $this->authType === 'api_key' ? $this->apiKey : $this->personalAccessToken;
+    }
+
+    /**
      * Get the OAuth2 scope
      */
     public function getScope(): ?string
@@ -225,7 +272,7 @@ class TradingCardApi
         if (method_exists($resource, 'setAuthInfo')) {
             $resource->setAuthInfo(
                 $this->authType,
-                $this->personalAccessToken,
+                $this->bearerToken(),
                 $this->clientId,
                 $this->clientSecret,
                 $this->scope
@@ -269,7 +316,7 @@ class TradingCardApi
         return new InternalClient(
             $this->client,
             $this->authType,
-            $this->personalAccessToken,
+            $this->bearerToken(),
             $this->clientId,
             $this->clientSecret,
             $this->scope,

@@ -12,14 +12,14 @@ it('can create GrowthResponse from response object', function () {
                 'period' => '7d',
                 'metrics' => [
                     (object) [
-                        'entity_type' => 'sets',
+                        'entity_type' => 'set',
                         'current' => 150,
                         'previous' => 140,
                         'change' => 10,
                         'percentage_change' => 7.14,
                     ],
                     (object) [
-                        'entity_type' => 'cards',
+                        'entity_type' => 'card',
                         'current' => 5000,
                         'previous' => 4800,
                         'change' => 200,
@@ -36,8 +36,8 @@ it('can create GrowthResponse from response object', function () {
     expect($growthResponse->period)->toBe('7d');
     expect($growthResponse->metrics)->toHaveCount(2);
     expect($growthResponse->metrics[0])->toBeInstanceOf(GrowthMetric::class);
-    expect($growthResponse->metrics[0]->entityType)->toBe('sets');
-    expect($growthResponse->metrics[1]->entityType)->toBe('cards');
+    expect($growthResponse->metrics[0]->entityType)->toBe('set');
+    expect($growthResponse->metrics[1]->entityType)->toBe('card');
 });
 
 it('handles response with missing metrics array', function () {
@@ -88,7 +88,7 @@ it('getByEntityType returns null when no match found', function () {
                 'period' => '7d',
                 'metrics' => [
                     (object) [
-                        'entity_type' => 'sets',
+                        'entity_type' => 'set',
                         'current' => 150,
                         'previous' => 140,
                         'change' => 10,
@@ -100,7 +100,7 @@ it('getByEntityType returns null when no match found', function () {
     ];
 
     $growthResponse = GrowthResponse::fromResponse($response);
-    $result = $growthResponse->getByEntityType('players');
+    $result = $growthResponse->getByEntityType('player');
 
     expect($result)->toBeNull();
 });
@@ -112,14 +112,14 @@ it('getByEntityType returns correct metric when match found', function () {
                 'period' => '7d',
                 'metrics' => [
                     (object) [
-                        'entity_type' => 'sets',
+                        'entity_type' => 'set',
                         'current' => 150,
                         'previous' => 140,
                         'change' => 10,
                         'percentage_change' => 7.14,
                     ],
                     (object) [
-                        'entity_type' => 'cards',
+                        'entity_type' => 'card',
                         'current' => 5000,
                         'previous' => 4800,
                         'change' => 200,
@@ -131,9 +131,9 @@ it('getByEntityType returns correct metric when match found', function () {
     ];
 
     $growthResponse = GrowthResponse::fromResponse($response);
-    $result = $growthResponse->getByEntityType('cards');
+    $result = $growthResponse->getByEntityType('card');
 
     expect($result)->toBeInstanceOf(GrowthMetric::class);
-    expect($result->entityType)->toBe('cards');
+    expect($result->entityType)->toBe('card');
     expect($result->change)->toBe(200);
 });

@@ -7,7 +7,7 @@ use CardTechie\TradingCardApiSdk\DTOs\Stats\Snapshot;
 it('can create Snapshot from object with all properties', function () {
     $data = (object) [
         'date' => '2024-11-30',
-        'entity_type' => 'cards',
+        'entity_type' => 'card',
         'total' => 5000,
         'published' => 4500,
         'draft' => 400,
@@ -18,7 +18,7 @@ it('can create Snapshot from object with all properties', function () {
 
     expect($snapshot)->toBeInstanceOf(Snapshot::class);
     expect($snapshot->date)->toBe('2024-11-30');
-    expect($snapshot->entityType)->toBe('cards');
+    expect($snapshot->entityType)->toBe('card');
     expect($snapshot->total)->toBe(5000);
     expect($snapshot->published)->toBe(4500);
     expect($snapshot->draft)->toBe(400);
@@ -41,13 +41,13 @@ it('handles missing properties with defaults', function () {
 it('handles partial properties with defaults', function () {
     $data = (object) [
         'date' => '2024-11-15',
-        'entity_type' => 'sets',
+        'entity_type' => 'set',
     ];
 
     $snapshot = Snapshot::fromObject($data);
 
     expect($snapshot->date)->toBe('2024-11-15');
-    expect($snapshot->entityType)->toBe('sets');
+    expect($snapshot->entityType)->toBe('set');
     expect($snapshot->total)->toBe(0);
     expect($snapshot->published)->toBe(0);
     expect($snapshot->draft)->toBe(0);

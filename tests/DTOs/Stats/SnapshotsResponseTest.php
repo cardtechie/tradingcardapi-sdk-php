@@ -9,13 +9,13 @@ it('can create SnapshotsResponse from response object', function () {
     $response = (object) [
         'data' => (object) [
             'attributes' => (object) [
-                'entity_type' => 'cards',
+                'entity_type' => 'card',
                 'from' => '2024-11-01',
                 'to' => '2024-11-30',
                 'snapshots' => [
                     (object) [
                         'date' => '2024-11-15',
-                        'entity_type' => 'cards',
+                        'entity_type' => 'card',
                         'total' => 5000,
                         'published' => 4500,
                         'draft' => 400,
@@ -23,7 +23,7 @@ it('can create SnapshotsResponse from response object', function () {
                     ],
                     (object) [
                         'date' => '2024-11-20',
-                        'entity_type' => 'cards',
+                        'entity_type' => 'card',
                         'total' => 5100,
                         'published' => 4600,
                         'draft' => 400,
@@ -38,7 +38,7 @@ it('can create SnapshotsResponse from response object', function () {
 
     expect($snapshotsResponse)->toBeInstanceOf(SnapshotsResponse::class);
     expect($snapshotsResponse->snapshots)->toHaveCount(2);
-    expect($snapshotsResponse->entityType)->toBe('cards');
+    expect($snapshotsResponse->entityType)->toBe('card');
     expect($snapshotsResponse->from)->toBe('2024-11-01');
     expect($snapshotsResponse->to)->toBe('2024-11-30');
     expect($snapshotsResponse->snapshots[0])->toBeInstanceOf(Snapshot::class);
@@ -51,7 +51,7 @@ it('handles response with missing optional attributes', function () {
                 'snapshots' => [
                     (object) [
                         'date' => '2024-11-15',
-                        'entity_type' => 'sets',
+                        'entity_type' => 'set',
                         'total' => 150,
                         'published' => 120,
                         'draft' => 20,
@@ -74,7 +74,7 @@ it('handles response with missing snapshots array', function () {
     $response = (object) [
         'data' => (object) [
             'attributes' => (object) [
-                'entity_type' => 'cards',
+                'entity_type' => 'card',
             ],
         ],
     ];
@@ -82,7 +82,7 @@ it('handles response with missing snapshots array', function () {
     $snapshotsResponse = SnapshotsResponse::fromResponse($response);
 
     expect($snapshotsResponse->snapshots)->toHaveCount(0);
-    expect($snapshotsResponse->entityType)->toBe('cards');
+    expect($snapshotsResponse->entityType)->toBe('card');
 });
 
 it('handles response with missing attributes', function () {
