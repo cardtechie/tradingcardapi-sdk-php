@@ -23,6 +23,24 @@ jobs:
         with:
           php-version: '8.4'
           coverage: none
+          update: true
+
+      - name: Assert PHP patch floor (PHP2Shell)
+        # setup-php installs the newest patch it can find for a major.minor, so
+        # an exact patch cannot be pinned. Fail loudly instead of silently
+        # testing on a patch level vulnerable to PHP2Shell
+        # (CVE-2026-109618 / CVE-2026-109619). (#398)
+        shell: bash
+        env:
+          PHP_FLOOR: '8.4.27'
+        run: |
+          # An empty floor would make version_compare pass vacuously.
+          if [ -z "$PHP_FLOOR" ]; then echo "::error::No PHP floor set for this job"; exit 1; fi
+          echo "PHP_VERSION=$(php -r 'echo PHP_VERSION;') floor=$PHP_FLOOR"
+          if ! php -r 'exit(version_compare(PHP_VERSION, getenv("PHP_FLOOR"), ">=") ? 0 : 1);'; then
+            echo "::error::PHP $(php -r 'echo PHP_VERSION;') is below $PHP_FLOOR, the PHP2Shell fix (CVE-2026-109618 / CVE-2026-109619)"
+            exit 1
+          fi
 
       - name: Install composer dependencies
         uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # v4 (4.0.0)
