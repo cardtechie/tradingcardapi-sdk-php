@@ -46,6 +46,12 @@ RUN add-apt-repository ppa:ondrej/php \
     # We still must support the pre-7.4 PHP images that look for php-fpm in the local/sbin
     && ln -s /usr/sbin/php-fpm${PHP_MINOR} /usr/local/sbin/php-fpm
 
+# Refuse to build on a PHP patch level below the PHP2Shell fix
+# (CVE-2026-109618 / CVE-2026-109619). The floor is a literal rather than an
+# ARG so that --build-arg cannot lower it below the fixed patch. (#398)
+RUN php -r 'exit(version_compare(PHP_VERSION, "8.4.27", ">=") ? 0 : 1);' \
+    || (echo "PHP $(php -r 'echo PHP_VERSION;') is below 8.4.27 (PHP2Shell CVE-2026-109618 / CVE-2026-109619)" >&2; exit 1)
+
 # Apply PHP Defaults
 ENV PHP_OPCACHE_ENABLE=0 \
     PHP_OPCACHE_MEMORY_CONSUMPTION=64 \
