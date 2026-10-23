@@ -12,12 +12,19 @@ release time those fragments are collated into a versioned section. That
 collation is manual today — make changelog-update does not read changelog.d/
 fragments yet. See changelog.d/README.md. -->
 
-## [0.3.5] - 2026-10-21
+## [0.3.6] - 2026-10-22
 
 ### Security
 
 - **[Issue #390]** Refresh `composer.lock` to league/commonmark 2.10.4, laravel/framework 12.70.1 and league/flysystem 3.36.0, clearing the remaining commonmark, framework and flysystem Dependabot alerts.
   - Lock-only change; published consumers resolve against `composer.json` constraints and are unaffected.
+
+## [0.3.5] - 2026-10-21
+
+### Security
+
+- **[Issue #398]** Require PHP2Shell-fixed patch levels (8.2.35 / 8.3.36 / 8.4.27) in CI and the dev image, and disable `session.upload_progress` in the dev image.
+  - CI and dev only; the composer `php` constraint stays `^8.2`, so consumers are unaffected.
 
 ## [0.3.4] - 2026-10-15
 
