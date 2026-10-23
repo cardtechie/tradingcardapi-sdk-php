@@ -59,5 +59,31 @@ release flow.
 > The goal of the ship-now slice is to stop the conflict generation at the
 > source; automating release assembly follows.
 
+## PRs to `main`
+
+A PR into `main` is a release — `build-release.yml` tags on every push to
+`main` — so two CI gates check its changelog, and they agree on one rule (#376):
+
+- **Feature, bugfix and dependabot heads** add a fragment as usual. Release
+  Validation skips them.
+- **Release-shaped heads** (`release/*`, `develop`, `hotfix/*`) **collate**
+  instead:
+  1. Add a `## [X.Y.Z] - YYYY-MM-DD` section below `## [Unreleased]`, where
+     `X.Y.Z` is the output of `bash build/version.sh --branch=main`.
+  2. Fold every pending fragment into it under its `### Added` / `### Fixed` /
+     … heading, and `git rm` the fragments you consumed. A fragment whose line is
+     already in an earlier versioned section is deleted, not collated again.
+  3. Put this PR's own entry straight into that section. **Do not** also add a
+     `changelog.d/` fragment for it — that duplicates the line.
+
+| Gate | Workflow | Satisfied by |
+| --- | --- | --- |
+| Check for changelog fragment | `changelog-fragment-check.yml` | a new `changelog.d/<num>-<type>.md`, **or** (PRs to `main` only) a newly added `## [X.Y.Z]` heading in `CHANGELOG.md` |
+| Validate Release Requirements | `changelog-check.yml` | for release-shaped heads into `main`, a `## [X.Y.Z]` section matching `build/version.sh --branch=main` |
+
+A collated release section is therefore accepted by both gates, and a release
+PR no longer needs the `skip-changelog` label. Both gates also re-run when a PR
+is retargeted, so moving a PR off `main` replaces its stale release-gate result.
+
 The `.gitkeep` file keeps this directory tracked in git when no fragments are
 pending.

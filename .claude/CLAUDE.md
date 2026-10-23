@@ -137,6 +137,18 @@ release step — a **manual** step today: `make changelog-update` /
 release operator collates them by hand until dedicated tooling ships. See
 [`changelog.d/README.md`](../changelog.d/README.md) for the convention.
 
+**PRs to `main` are the exception (#376).** A PR into `main` is a release, and two
+gates check it: *Changelog Fragment Check* (`changelog-fragment-check.yml`) and
+*Release Validation* (`changelog-check.yml`). For a release-shaped head
+(`release/*`, `develop`, `hotfix/*`) targeting `main`, **collate instead of writing
+a fragment**: add a `## [X.Y.Z] - YYYY-MM-DD` section (version from
+`bash build/version.sh --branch=main`), fold the pending fragments into it and
+delete them, and put this PR's own entry directly in that section — no
+`changelog.d/` file for it. The fragment gate accepts that new versioned heading
+in place of a fragment on `main`, and Release Validation requires it. Feature,
+bugfix and dependabot PRs to `main` still write a fragment. Both gates re-run on a
+retarget, so moving a PR off `main` clears its stale release-gate failure.
+
 ## Issue Creation
 
 Always use the `create_cross_repo_issues` MCP tool (from `picklewagon-mcp`) to

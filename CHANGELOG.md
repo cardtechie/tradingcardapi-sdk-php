@@ -12,6 +12,13 @@ release time those fragments are collated into a versioned section. That
 collation is manual today — make changelog-update does not read changelog.d/
 fragments yet. See changelog.d/README.md. -->
 
+## [0.3.7] - 2026-10-23
+
+### Fixed
+
+- **[Issue #376]** Let a collated versioned `CHANGELOG.md` section satisfy the changelog fragment gate on PRs to `main`, and re-run both changelog gates when a PR is retargeted.
+  - Release-shaped PRs to `main` (`release/*`, `develop`, `hotfix/*`) now carry their entry in the new versioned section only — no duplicate `changelog.d/` fragment.
+
 ## [0.3.6] - 2026-10-22
 
 ### Security
@@ -596,7 +603,8 @@ fragments yet. See changelog.d/README.md. -->
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.6...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.7...HEAD
+[0.3.7]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.6...0.3.7
 [0.3.6]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.5...0.3.6
 [0.3.5]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.4...0.3.5
 [0.3.4]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.3...0.3.4
