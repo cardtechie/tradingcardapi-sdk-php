@@ -596,7 +596,8 @@ fragments yet. See changelog.d/README.md. -->
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.5...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.6...HEAD
+[0.3.6]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.5...0.3.6
 [0.3.5]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.4...0.3.5
 [0.3.4]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.3...0.3.4
 [0.3.3]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.2...0.3.3
