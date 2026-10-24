@@ -12,12 +12,26 @@ release time those fragments are collated into a versioned section. That
 collation is manual today — make changelog-update does not read changelog.d/
 fragments yet. See changelog.d/README.md. -->
 
-## [0.3.5] - 2026-10-16
+## [0.3.7] - 2026-10-24
 
 ### Security
 
-- **[Issue #372]** Bump `league/commonmark` to 2.10.0 and `guzzlehttp/guzzle` to 7.15.5 on `main` to clear the guzzle advisories and the commonmark advisories fixed in 2.10.0.
-  - commonmark 2.10.0 is still affected by GHSA-3q6v-r5mr-hxv8 and GHSA-97jj-33gv-5xf9, which need 2.10.2.
+- **[Issue #372]** Refresh `composer.lock` to guzzlehttp/guzzle 7.16.0, clearing the guzzle advisories fixed in 7.15.5.
+  - Lock-only change; published consumers resolve against `composer.json` constraints and are unaffected.
+
+## [0.3.6] - 2026-10-22
+
+### Security
+
+- **[Issue #390]** Refresh `composer.lock` to league/commonmark 2.10.4, laravel/framework 12.70.1 and league/flysystem 3.36.0, clearing the remaining commonmark, framework and flysystem Dependabot alerts.
+  - Lock-only change; published consumers resolve against `composer.json` constraints and are unaffected.
+
+## [0.3.5] - 2026-10-21
+
+### Security
+
+- **[Issue #398]** Require PHP2Shell-fixed patch levels (8.2.35 / 8.3.36 / 8.4.27) in CI and the dev image, and disable `session.upload_progress` in the dev image.
+  - CI and dev only; the composer `php` constraint stays `^8.2`, so consumers are unaffected.
 
 ## [0.3.4] - 2026-10-15
 
@@ -589,7 +603,10 @@ fragments yet. See changelog.d/README.md. -->
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.4...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.7...HEAD
+[0.3.7]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.6...0.3.7
+[0.3.6]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.5...0.3.6
+[0.3.5]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.4...0.3.5
 [0.3.4]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.3...0.3.4
 [0.3.3]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.2...0.3.3
 [0.3.2]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.1...0.3.2
