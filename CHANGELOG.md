@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.7] - 2026-10-24
+
+### Security
+
+- **[Issue #372]** Refresh `composer.lock` to guzzlehttp/guzzle 7.16.0, clearing the guzzle advisories fixed in 7.15.5.
+  - Lock-only change; published consumers resolve against `composer.json` constraints and are unaffected.
+
 ## [0.3.6] - 2026-10-22
 
 ### Security
@@ -591,7 +598,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.6...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.7...HEAD
+[0.3.7]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.6...0.3.7
 [0.3.6]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.5...0.3.6
 [0.3.5]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.4...0.3.5
 [0.3.4]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.3...0.3.4
