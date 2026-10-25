@@ -280,6 +280,20 @@ refuse_case "already-collated fragment (#403)" \
 refuse_case "missing [Unreleased] link" \
     'sed -i.bak "/^\[Unreleased\]: /d" "$repo/CHANGELOG.md"; rm -f "$repo/CHANGELOG.md.bak"; echo "- **[Issue #1]** X." > "$repo/changelog.d/1-fixed.md"' "refusing to guess the previous version"
 
+refuse_case "heading-bearing fragment" \
+    'printf "### Fixed\n\n- **[Issue #1]** X.\n" > "$repo/changelog.d/1-fixed.md"' "containing a Markdown heading"
+
+# A heading-bearing fragment is refused by the collator called directly too,
+# and CHANGELOG.md and the fragment are left untouched.
+repo=$(new_repo)
+printf '### Fixed\n\n- **[Issue #1]** X.\n' > "$repo/changelog.d/1-fixed.md"
+before_cl=$(cat "$repo/CHANGELOG.md")
+rc=0; out=$(cd "$repo" && bash build/collate-changelog.sh 2>&1) || rc=$?
+assert_eq "collator direct: heading-bearing fails" "1" "$rc"
+assert_contains "collator direct: names the heading file" "1-fixed.md" "$out"
+assert_eq "collator direct: CHANGELOG.md untouched" "$before_cl" "$(cat "$repo/CHANGELOG.md")"
+assert_eq "collator direct: fragment kept" "yes" "$([[ -f "$repo/changelog.d/1-fixed.md" ]] && echo yes || echo no)"
+
 # A badly named fragment is also refused by the collator called directly.
 repo=$(new_repo)
 echo "- **[Issue #1]** X." > "$repo/changelog.d/notes.md"

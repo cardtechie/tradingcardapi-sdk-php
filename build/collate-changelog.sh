@@ -147,6 +147,24 @@ for frag in "${FRAGMENTS[@]}"; do
     fi
 done
 
+# A fragment body is list lines only; the ### <Type> heading comes from the
+# filename. A heading inside the body (e.g. `### Fixed` above the bullet) would
+# be copied verbatim into [Unreleased], nesting a duplicate subsection inside
+# the real one. Refuse before touching anything. awk reads the whole file in
+# one stream (no SIGPIPE under pipefail), and the pattern avoids {n,m}
+# intervals, which mawk does not support: up to three leading spaces, then #.
+HEADING_FRAGMENTS=()
+for frag in "${FRAGMENTS[@]}"; do
+    if awk '/^[ ]?[ ]?[ ]?#/ { found = 1 } END { exit !found }' "$frag"; then
+        HEADING_FRAGMENTS+=("$frag")
+    fi
+done
+if [[ ${#HEADING_FRAGMENTS[@]} -gt 0 ]]; then
+    echo "❌ Error: changelog fragment(s) containing a Markdown heading: ${HEADING_FRAGMENTS[*]}" >&2
+    echo "   A fragment holds only its list line(s); the type heading comes from the filename. Remove the heading, then re-run." >&2
+    exit 1
+fi
+
 if [[ ! -f "$CHANGELOG_FILE" ]]; then
     echo "❌ Error: ${CHANGELOG_FILE} not found" >&2
     exit 1

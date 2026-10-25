@@ -50,7 +50,8 @@ adds one.
 On each push to `main`, `build/commit-changelog-back.sh`:
 
 1. refuses any fragment that is empty, heading-only, a symlink, misnamed, or
-   whose line is already in `CHANGELOG.md` (it names the file);
+   whose line is already in `CHANGELOG.md` (it names the file); the collator
+   also refuses any fragment whose body contains a heading;
 2. runs `build/collate-changelog.sh`, which groups every fragment's line under
    the matching `### Added` / `### Changed` / `### Deprecated` / `### Removed` /
    `### Fixed` / `### Security` heading in `## [Unreleased]` and deletes the
