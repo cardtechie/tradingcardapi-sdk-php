@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.8] - 2026-10-25
+
+### Changed
+
+- **[Issue #406]** Collate `changelog.d/` fragments into `CHANGELOG.md` after merge in the release workflow, and stop requiring a hand-written version section on PRs into `main`.
+
 ## [0.3.7] - 2026-10-24
 
 ### Security
@@ -598,7 +604,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.7...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.8...HEAD
+[0.3.8]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.7...0.3.8
 [0.3.7]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.6...0.3.7
 [0.3.6]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.5...0.3.6
 [0.3.5]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.4...0.3.5
