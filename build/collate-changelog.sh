@@ -3,7 +3,7 @@
 #
 # Collate changelog.d/*.md fragments into the "## [Unreleased]" section of
 # CHANGELOG.md, grouped under the matching "### <Type>" heading, then delete the
-# consumed fragments. Invoked by build/manual-version-bump.sh ahead of the
+# consumed fragments. Invoked by build/commit-changelog-back.sh ahead of the
 # [Unreleased] -> [VERSION] promotion, so the assembled entries become the new
 # versioned section's content.
 #

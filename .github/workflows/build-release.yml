@@ -93,14 +93,17 @@ jobs:
     # github.event.sender.login (the authenticated pusher), not the commit's
     # author name, which is free text a PR author could spoof. Subject format:
     # build/commit-changelog-back.sh. workflow_dispatch has no head_commit, so
-    # it is unaffected.
+    # it is unaffected. The ref guard keeps this job main-only: the version
+    # job also reports should_release=true for a develop beta or a tag, and
+    # this job collates, commits back to and tags main.
     if: >-
       ${{ needs.version.outputs.should_release == 'true'
+      && github.ref == 'refs/heads/main'
       && !(startsWith(github.event.head_commit.message, 'chore(release): collate CHANGELOG for ')
       && github.event.sender.login == 'cardtechie-ops-bot[bot]') }}
     outputs:
       version: ${{ steps.version.outputs.version }}
-      release: ${{ steps.commit_back.outputs.release }}
+      release: ${{ steps.commit_back.outputs.release || steps.tip.outputs.release }}
       sha: ${{ steps.commit_back.outputs.sha }}
     steps:
       # cardtechie-ops-bot App installation token, never GITHUB_TOKEN or
@@ -119,23 +122,53 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # The branch tip, not github.sha, so the commit-back push
-          # fast-forwards even when main moved after this run was queued.
-          ref: main
+          # The SHA the test job ran against, never the moving branch tip, so
+          # what is tagged and released is exactly what was tested.
+          ref: ${{ github.sha }}
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
           # Never persist the App token into .git/config. The commit-back step
           # supplies it to its own push only, through the environment.
           persist-credentials: false
 
+      # If main moved past the tested SHA, another merge landed while the tests
+      # ran. Its own run is queued behind this one (concurrency group, never
+      # cancelled) and releases everything pending, so this run stands down
+      # rather than release code that was never tested. The one exception is a
+      # rerun after this SHA's own commit-back landed: the tip is then that
+      # bot commit, touching only the changelog, and the release resumes from
+      # it (commit-changelog-back.sh re-validates the resume by content).
+      - name: Check main is still the tested commit
+        id: tip
+        run: |
+          git fetch --quiet origin main
+          TIP=$(git rev-parse FETCH_HEAD)
+          if [[ "$TIP" == "$GITHUB_SHA" ]]; then
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          TIP_PARENT=$(git rev-parse --verify --quiet "${TIP}^" || true)
+          if [[ "$TIP_PARENT" == "$GITHUB_SHA" ]] \
+            && bash build/commit-changelog-back.sh --is-collation-commit \
+              "$(git log -1 --format=%s "$TIP")" "$(git log -1 --format=%an "$TIP")"; then
+            echo "Tip is this commit's own changelog commit-back; resuming from it."
+            git checkout --quiet --detach "$TIP"
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "::notice::main moved from the tested $GITHUB_SHA to $TIP while tests ran. Not releasing untested code; the queued run for $TIP releases what is pending."
+          echo "proceed=false" >> "$GITHUB_OUTPUT"
+          echo "release=false" >> "$GITHUB_OUTPUT"
+
       - name: Generate version
         id: version
+        if: steps.tip.outputs.proceed == 'true'
         env:
           PLANNED_VERSION: ${{ needs.version.outputs.version }}
         run: |
           VERSION=$(bash build/version.sh --branch=main)
           if [[ "$VERSION" != "$PLANNED_VERSION" ]]; then
-            echo "::warning::main moved since the version job ran: it planned $PLANNED_VERSION, the checked-out tip gives $VERSION. Using $VERSION."
+            echo "::warning::the version job planned $PLANNED_VERSION, the checked-out commit gives $VERSION. Using $VERSION."
           fi
           if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "::error::build/version.sh gave '$VERSION' on main, which is not a release version."
@@ -156,6 +189,7 @@ jobs:
       # Packagist.
       - name: Collate changelog and commit back
         id: commit_back
+        if: steps.tip.outputs.proceed == 'true'
         env:
           APP_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
@@ -235,8 +269,8 @@ jobs:
             {
               echo "## ℹ️ Nothing released"
               echo ""
-              echo "No pending changelog entries in changelog.d/, so nothing was released."
-              echo "Pending changes ship with the next merge that adds a fragment."
+              echo "Nothing was released: either changelog.d/ held no pending fragments, or main"
+              echo "moved past the tested commit and the queued run for the newer tip releases it."
             } >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi

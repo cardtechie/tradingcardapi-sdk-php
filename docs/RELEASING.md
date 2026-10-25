@@ -47,9 +47,13 @@ push to main (or workflow_dispatch)
   1. mints a **cardtechie-ops-bot** GitHub App token (`contents: write`, this
      repository only) from the `CARDTECHIE_BOT` / `CARDTECHIE_BOT_PRIVATE_KEY`
      org secrets;
-  2. checks out the tip of `main` without persisting credentials;
-  3. recomputes the version on that tip (warns if `main` moved since the
-     `version` job);
+  2. checks out the commit the `test` job ran against (`github.sha`), not
+     the moving tip, without persisting credentials. If `main` has moved past
+     it while tests ran, the job stands down with `release=false`: the run
+     queued for the newer tip releases what is pending, so untested code is
+     never tagged. A rerun whose tip is this commit's own commit-back resumes
+     from that commit-back instead (see below);
+  3. recomputes the version on that commit;
   4. runs `build/commit-changelog-back.sh`, which collates `changelog.d/` into
      `## [X.Y.Z] - <date>`, updates the compare links, commits it as
      `cardtechie-ops-bot[bot]` with the subject
@@ -58,7 +62,10 @@ push to main (or workflow_dispatch)
   6. creates the GitHub Release and the `X.Y.Z` tag **on the commit-back SHA**.
 
   Steps 5 and 6 run only when step 4 reports `release=true`. With no pending
-  fragments it reports `release=false` and nothing is tagged or published.
+  fragments it reports `release=false` and nothing is tagged or published,
+  even if `## [Unreleased]` already holds lines: a release is driven by
+  fragments only. The job runs only for `main`; a manual dispatch on
+  `develop` or a tag never collates or tags `main`.
 - **`packagist`** — pings the Packagist update API. Runs only when the
   `release` job actually published (`release == 'true'`) off `main`.
 - **`notify`** — writes a release summary, or "nothing released", to the run's

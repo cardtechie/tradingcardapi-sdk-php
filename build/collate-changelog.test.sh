@@ -144,6 +144,28 @@ assert_eq "no-op: exit 0" "0" "$RC"
 assert_eq "no-op: release=false" "release=false" "$RESULT"
 assert_eq "no-op: no commit" "$before" "$(commit_count "$repo")"
 
+# No fragment, but a line already under [Unreleased]: still release=false.
+repo=$(new_repo)
+sed -i.bak 's/^## \[Unreleased\]$/## [Unreleased]\
+\
+- Hand-left line./' "$repo/CHANGELOG.md" && rm -f "$repo/CHANGELOG.md.bak"
+git -C "$repo" commit -q -am "hand-left unreleased line"
+before=$(commit_count "$repo")
+run_commit_back "$repo" 0.3.7 --branch main
+assert_eq "no fragments + [Unreleased] content: release=false" "release=false" "$RESULT"
+assert_eq "no fragments + [Unreleased] content: no commit" "$before" "$(commit_count "$repo")"
+assert_not_contains "no fragments + [Unreleased] content: not promoted" "## [0.3.7]" "$(cat "$repo/CHANGELOG.md")"
+
+# A heading-led fragment whose entry is already collated is still refused.
+repo=$(new_repo)
+add_fragment "$repo" 406-changed.md "- **[Issue #406]** Collate fragments after merge."
+run_commit_back "$repo" 0.3.7 --branch main
+printf '### Fixed\n\n- **[Issue #406]** Collate fragments after merge.\n' > "$repo/changelog.d/407-fixed.md"
+git -C "$repo" add -A && git -C "$repo" commit -q -m "heading-led duplicate"
+run_commit_back "$repo" 0.3.8 --branch main
+assert_eq "heading-led duplicate: exit 1" "1" "$RC"
+assert_contains "heading-led duplicate: refused" "already collated" "$OUT"
+
 # --- 3. full commit-back: promote, links, bot commit, push -------------------
 repo=$(new_repo)
 add_fragment "$repo" 406-changed.md "- **[Issue #406]** Collate fragments after merge."

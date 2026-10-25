@@ -25,8 +25,8 @@
 #      collated CHANGELOG. Build and Release skips itself through its
 #      job-level guard instead.
 #
-# A clean no-op (exit 0, nothing committed, release=false) when nothing is
-# pending. Refuses to run when CHANGELOG.md already has a `## [VERSION]`
+# A clean no-op (exit 0, nothing committed, release=false) when changelog.d/
+# holds no fragment, even if `## [Unreleased]` already has content. Refuses to run when CHANGELOG.md already has a `## [VERSION]`
 # section, so a re-run can never write the same version twice — UNLESS that
 # section was written by this script's own commit-back AND that commit is still
 # HEAD, in which case a committing run RESUMES: it writes nothing and reports release=true, so a
@@ -37,7 +37,7 @@
 # The collator would consume one while adding no content, and with nothing
 # else pending that deletion would never be committed.
 #
-# A fragment whose first non-blank line already appears verbatim in
+# A fragment whose first non-blank, non-heading line already appears verbatim in
 # CHANGELOG.md is also rejected (issue #403): it was collated once already and
 # collating it again would print the entry twice. The error names the file;
 # delete it once you have confirmed the entry is in CHANGELOG.md.
@@ -306,16 +306,38 @@ if [[ ${#EMPTY_FRAGMENTS[@]} -gt 0 ]]; then
     exit 1
 fi
 
+# Nothing pending: a release is driven by fragments, never by whatever already
+# sits under `## [Unreleased]`. Without this gate, a line left there by hand
+# would be promoted and released on a push that added no fragment.
+# Any entry other than the directory's bookkeeping files counts as pending, so
+# a misnamed one still reaches the collator, which refuses it.
+PENDING=0
+shopt -s nullglob dotglob
+for entry in changelog.d/*; do
+    case "$(basename "$entry")" in
+        README.md|.gitkeep|.markdownlint.json) ;;
+        *) PENDING=$((PENDING + 1)) ;;
+    esac
+done
+shopt -u nullglob dotglob
+if [[ "$PENDING" -eq 0 ]]; then
+    echo "ℹ️  No changelog.d/ fragments pending — nothing to release (clean no-op)."
+    write_result false
+    exit 0
+fi
+
 # Refuse fragments that were already collated (issue #403). The first
-# non-blank line is the entry itself; if CHANGELOG.md already holds that exact
-# line, collating it again would print the entry a second time. Read the line
-# with awk (one stream, no SIGPIPE) and compare with a fixed-string,
-# whole-line grep so regex metacharacters in the entry cannot widen the match.
+# non-blank, non-heading line is the entry itself (a heading such as
+# `### Fixed` is skipped, as the empty-fragment check above skips it); if
+# CHANGELOG.md already holds that exact line, collating it again would print
+# the entry a second time. Read the line with awk (one stream, no SIGPIPE) and
+# compare with a fixed-string, whole-line grep so regex metacharacters in the
+# entry cannot widen the match.
 shopt -s nullglob
 DUPLICATE_FRAGMENTS=()
 for frag in changelog.d/*.md; do
     [[ "$(basename "$frag")" == "README.md" ]] && continue
-    first_line=$(awk '/[^[:space:]]/ { print; exit }' "$frag")
+    first_line=$(awk '!/^[[:space:]]*#/ && /[^[:space:]]/ { print; exit }' "$frag")
     [[ -z "$first_line" ]] && continue
     if grep -Fxq -- "$first_line" "$CHANGELOG_FILE"; then
         DUPLICATE_FRAGMENTS+=("$frag")
