@@ -264,8 +264,13 @@ BEGIN {
     in_unreleased = 1
     next
 }
-in_unreleased == 1 && /^## \[/ {
+in_unreleased == 1 && (/^## \[/ || /^\[[^]]+\]:/) {
     # Leaving Unreleased: flush the active subsection, then create missing ones.
+    # A link-reference definition ("[Unreleased]: https://...") also ends the
+    # section: when [Unreleased] is the last "##" section (no release yet) the
+    # compare links follow it directly, and without this the END block would
+    # emit the new subsections after the links, outside the version block once
+    # it is promoted.
     flush_subsection()
     create_missing()
     in_unreleased = 0

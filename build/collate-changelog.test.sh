@@ -136,6 +136,29 @@ assert_contains "collate: security subsection created" "### Security" "$section"
 assert_eq "collate: fragments consumed" "" "$(find "$repo/changelog.d" -name '[0-9]*' -print)"
 assert_eq "collate: README and .gitkeep kept" "yes" "$([[ -f "$repo/changelog.d/README.md" && -f "$repo/changelog.d/.gitkeep" ]] && echo yes || echo no)"
 
+# --- 1b. [Unreleased] as the last section: new subsections land before links -
+repo=$(new_repo)
+cat > "$repo/CHANGELOG.md" <<EOF
+# Changelog
+
+## [Unreleased]
+
+### Fixed
+
+- **[Issue #300]** Already pending.
+
+[Unreleased]: ${REPO_URL}/commits/HEAD
+EOF
+git -C "$repo" commit -q -am "first-release changelog"
+add_fragment "$repo" 301-fixed.md "- **[Issue #301]** Fix two."
+add_fragment "$repo" 302-added.md "- **[Issue #302]** Add one."
+(cd "$repo" && bash build/collate-changelog.sh >/dev/null)
+before_links=$(sed '/^\[Unreleased\]:/,$d' "$repo/CHANGELOG.md")
+assert_contains "last-section: new fixed before links" "**[Issue #301]** Fix two." "$before_links"
+assert_contains "last-section: added subsection before links" "### Added" "$before_links"
+assert_contains "last-section: added entry before links" "**[Issue #302]** Add one." "$before_links"
+assert_eq "last-section: links are the final line" "[Unreleased]: ${REPO_URL}/commits/HEAD" "$(tail -n 1 "$repo/CHANGELOG.md")"
+
 # --- 2. empty changelog.d -> release=false, no commit ------------------------
 repo=$(new_repo)
 before=$(commit_count "$repo")
