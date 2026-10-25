@@ -265,12 +265,21 @@ jobs:
           VERSION="${RELEASE_VERSION:-${{ needs.version.outputs.version }}}"
           IS_RELEASE="${{ needs.version.outputs.is_release }}"
 
-          if [[ "$RELEASED" == "false" ]]; then
+          # Anything other than a literal "true" is the no-release path: a failed or
+          # skipped release job leaves the output empty, not "false".
+          if [[ "$RELEASED" != "true" ]]; then
             {
               echo "## ℹ️ Nothing released"
               echo ""
-              echo "Nothing was released: either changelog.d/ held no pending fragments, or main"
-              echo "moved past the tested commit and the queued run for the newer tip releases it."
+              echo "- **Release job**: ${{ needs.release.result }}"
+              echo ""
+              if [[ "$RELEASED" == "false" ]]; then
+                echo "Nothing was released: either changelog.d/ held no pending fragments, or main"
+                echo "moved past the tested commit and the queued run for the newer tip releases it."
+              else
+                echo "Nothing was released: the release job did not report a release (it failed,"
+                echo "was skipped, or ran on a ref other than main). Check the release job's log."
+              fi
             } >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
