@@ -27,13 +27,17 @@
 # Avoids bash 4 associative arrays (macOS ships bash 3.2) — buckets are six
 # plain variables keyed by the fixed type set.
 #
-# Usage: build/collate-changelog.sh [--changelog FILE] [--fragments-dir DIR]
+# Usage: build/collate-changelog.sh [--changelog FILE] [--fragments-dir DIR] [--check]
+#
+# --check runs the fragment validation (names, symlinks, headings) and exits
+# before reading or writing CHANGELOG.md or removing anything.
 #
 
 set -euo pipefail
 
 CHANGELOG_FILE="CHANGELOG.md"
 FRAGMENTS_DIR="changelog.d"
+CHECK_ONLY=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -45,8 +49,12 @@ while [[ $# -gt 0 ]]; do
             FRAGMENTS_DIR="$2"
             shift 2
             ;;
+        --check)
+            CHECK_ONLY=true
+            shift
+            ;;
         --help|-h)
-            echo "Usage: $0 [--changelog FILE] [--fragments-dir DIR]"
+            echo "Usage: $0 [--changelog FILE] [--fragments-dir DIR] [--check]"
             exit 0
             ;;
         *)
@@ -163,6 +171,10 @@ if [[ ${#HEADING_FRAGMENTS[@]} -gt 0 ]]; then
     echo "❌ Error: changelog fragment(s) containing a Markdown heading: ${HEADING_FRAGMENTS[*]}" >&2
     echo "   A fragment holds only its list line(s); the type heading comes from the filename. Remove the heading, then re-run." >&2
     exit 1
+fi
+
+if [[ "$CHECK_ONLY" == "true" ]]; then
+    exit 0
 fi
 
 if [[ ! -f "$CHANGELOG_FILE" ]]; then

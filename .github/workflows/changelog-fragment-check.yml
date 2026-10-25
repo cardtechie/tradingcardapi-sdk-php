@@ -30,6 +30,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Run the commit-back's own fragment validator (empty, heading-only,
+      # headings, symlinks, names) so a bad fragment fails this PR instead of
+      # the post-merge release. Runs for every PR, trivial or not, because any
+      # PR can add or edit a fragment.
+      - name: Validate changelog.d fragment content
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changelog') }}
+        shell: bash
+        run: bash build/commit-changelog-back.sh --check-fragments
+
       - name: Verify PR adds a changelog.d fragment
         if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changelog') }}
         shell: bash

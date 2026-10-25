@@ -179,7 +179,9 @@ assert_eq "no fragments + [Unreleased] content: release=false" "release=false" "
 assert_eq "no fragments + [Unreleased] content: no commit" "$before" "$(commit_count "$repo")"
 assert_not_contains "no fragments + [Unreleased] content: not promoted" "## [0.3.7]" "$(cat "$repo/CHANGELOG.md")"
 
-# A heading-led fragment whose entry is already collated is still refused.
+# A heading-led fragment whose entry is already collated is still refused. Since
+# headings are rejected outright, that refusal now comes from the shared
+# fragment validator, before the duplicate check is reached.
 repo=$(new_repo)
 add_fragment "$repo" 406-changed.md "- **[Issue #406]** Collate fragments after merge."
 run_commit_back "$repo" 0.3.7 --branch main
@@ -187,7 +189,7 @@ printf '### Fixed\n\n- **[Issue #406]** Collate fragments after merge.\n' > "$re
 git -C "$repo" add -A && git -C "$repo" commit -q -m "heading-led duplicate"
 run_commit_back "$repo" 0.3.8 --branch main
 assert_eq "heading-led duplicate: exit 1" "1" "$RC"
-assert_contains "heading-led duplicate: refused" "already collated" "$OUT"
+assert_contains "heading-led duplicate: refused" "containing a Markdown heading" "$OUT"
 
 # --- 3. full commit-back: promote, links, bot commit, push -------------------
 repo=$(new_repo)
@@ -300,6 +302,45 @@ echo "- **[Issue #1]** X." > "$repo/changelog.d/notes.md"
 rc=0; out=$(cd "$repo" && bash build/collate-changelog.sh 2>&1) || rc=$?
 assert_eq "collator direct: badly named fails" "1" "$rc"
 assert_contains "collator direct: names the file" "notes.md" "$out"
+
+# --- 8b. --check-fragments (the PR-time gate) runs the same validation --------
+# Each refusal the commit-back makes on fragment content is made by
+# --check-fragments too, without touching CHANGELOG.md or the fragments.
+check_case() {
+    local label="$1" setup="$2" needle="$3" repo before_cl rc out
+    repo=$(new_repo)
+    eval "$setup"
+    before_cl=$(cat "$repo/CHANGELOG.md")
+    rc=0; out=$(cd "$repo" && bash build/commit-changelog-back.sh --check-fragments 2>&1) || rc=$?
+    assert_eq "check $label: exit 1" "1" "$rc"
+    assert_contains "check $label: message" "$needle" "$out"
+    assert_eq "check $label: CHANGELOG.md untouched" "$before_cl" "$(cat "$repo/CHANGELOG.md")"
+}
+check_case "empty fragment" \
+    ': > "$repo/changelog.d/1-fixed.md"' "no release-note line"
+check_case "heading-only fragment" \
+    'printf "### Fixed\n\n" > "$repo/changelog.d/1-fixed.md"' "no release-note line"
+check_case "heading-bearing fragment" \
+    'printf "### Fixed\n\n- **[Issue #1]** X.\n" > "$repo/changelog.d/1-fixed.md"' "containing a Markdown heading"
+check_case "symlinked fragment" \
+    'echo secret > "$repo/../secret.txt"; ln -s "$repo/../secret.txt" "$repo/changelog.d/1-fixed.md"' "not regular files"
+check_case "badly named fragment" \
+    'echo "- **[Issue #1]** X." > "$repo/changelog.d/1-fix.md"' "not named <num>-<type>.md"
+
+repo=$(new_repo)
+echo "- **[Issue #1]** X." > "$repo/changelog.d/1-fixed.md"
+rc=0; out=$(cd "$repo" && bash build/commit-changelog-back.sh --check-fragments 2>&1) || rc=$?
+assert_eq "check valid fragment: exit 0" "0" "$rc"
+assert_eq "check valid fragment: fragment kept" "yes" "$([[ -f "$repo/changelog.d/1-fixed.md" ]] && echo yes || echo no)"
+
+repo=$(new_repo)
+rc=0; out=$(cd "$repo" && bash build/commit-changelog-back.sh --check-fragments 2>&1) || rc=$?
+assert_eq "check no fragments: exit 0" "0" "$rc"
+
+# The workflow gate calls exactly this mode.
+assert_contains "check: Changelog Fragment Check runs --check-fragments" \
+    "build/commit-changelog-back.sh --check-fragments" \
+    "$(cat "$SCRIPT_DIR/../.github/workflows/changelog-fragment-check.yml")"
 
 # --- 9. large valid fragment passes (SIGPIPE regression) ----------------------
 repo=$(new_repo)

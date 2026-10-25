@@ -53,11 +53,16 @@
 # script's own commit-back. It is the canonical form of the Build and Release
 # self-trigger guard and is what build/collate-changelog.test.sh pins.
 #
+# `--check-fragments` runs only the fragment content validation (empty,
+# heading-only, headings, symlinks, names) and exits 0 when every fragment
+# would be accepted. The PR-time Changelog Fragment Check runs it.
+#
 # Bash 3.2-safe (macOS), matching build/collate-changelog.sh.
 #
 # Usage:
 #   build/commit-changelog-back.sh VERSION [--branch BRANCH] [--no-commit] [--no-push] [--output FILE]
 #   build/commit-changelog-back.sh --is-collation-commit SUBJECT AUTHOR
+#   build/commit-changelog-back.sh --check-fragments
 #
 
 set -euo pipefail
@@ -78,6 +83,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 show_usage() {
     echo "Usage: $0 VERSION [--branch BRANCH] [--no-commit] [--no-push] [--output FILE]"
     echo "       $0 --is-collation-commit SUBJECT AUTHOR"
+    echo "       $0 --check-fragments"
     echo ""
     echo "Collate changelog.d/ fragments, promote [Unreleased] to [VERSION] - DATE,"
     echo "and commit the result back to BRANCH (default: main)."
@@ -87,6 +93,65 @@ show_usage() {
     echo "  --no-push         Commit but do not push"
     echo "  --output FILE     Append release=true|false to FILE (e.g. \$GITHUB_OUTPUT)"
 }
+
+# Validate every changelog.d/ fragment's content without touching anything.
+# Shared by the commit-back below and by the PR-time Changelog Fragment Check
+# (--check-fragments), so a bad fragment fails its PR instead of the release.
+# The name, symlink and heading rules come from the collator's own --check
+# mode rather than being restated here.
+validate_fragments() {
+    # Reject fragments with no release-note content BEFORE the collator touches
+    # anything: an empty file, or one holding only blank lines and headings (e.g. a
+    # bare `### Added`). The collator would consume it while adding no content;
+    # with nothing else pending, [Unreleased] stays empty (the count below ignores
+    # headings), the no-op path returns without committing, and the deletion never
+    # reaches main, so every later push repeats the same no-op.
+    shopt -s nullglob
+    EMPTY_FRAGMENTS=()
+    NON_REGULAR=()
+    for frag in changelog.d/*.md; do
+        [[ "$(basename "$frag")" == "README.md" ]] && continue
+        # A symlink (or any non-regular path) named like a fragment would be
+        # followed by the reads below and by the collator, committing whatever it
+        # points at into CHANGELOG.md and the release notes. -L first: -f follows
+        # symlinks. collate-changelog.sh carries the same guard for direct callers.
+        if [[ -L "$frag" || ! -f "$frag" ]]; then
+            NON_REGULAR+=("$frag")
+            continue
+        fi
+        # Single-stream check: a `grep | grep -q` pipeline under pipefail can
+        # SIGPIPE the first grep when grep -q exits early, misreading a valid
+        # fragment as empty. awk reads the whole file before deciding.
+        if ! awk '!/^[[:space:]]*#/ && /[^[:space:]]/ { found = 1 } END { exit !found }' "$frag"; then
+            EMPTY_FRAGMENTS+=("$frag")
+        fi
+    done
+    shopt -u nullglob
+    if [[ ${#NON_REGULAR[@]} -gt 0 ]]; then
+        echo "❌ Error: changelog fragment(s) that are not regular files (symlink or other): ${NON_REGULAR[*]}" >&2
+        echo "   Replace each with a plain file holding its changelog line, then re-run." >&2
+        return 1
+    fi
+    if [[ ${#EMPTY_FRAGMENTS[@]} -gt 0 ]]; then
+        echo "❌ Error: changelog fragment(s) with no release-note line: ${EMPTY_FRAGMENTS[*]}" >&2
+        echo "   Give each one a changelog line (e.g. '- **[Issue #N]** ...'), or delete it, then re-run." >&2
+        return 1
+    fi
+
+    # Name, symlink and heading rules: the collator's own validator.
+    bash "${PROJECT_ROOT}/build/collate-changelog.sh" --check
+}
+
+if [[ "${1:-}" == "--check-fragments" ]]; then
+    if [[ $# -ne 1 ]]; then
+        echo "❌ Error: --check-fragments takes no arguments" >&2
+        exit 2
+    fi
+    cd "$PROJECT_ROOT"
+    validate_fragments || exit 1
+    echo "✅ changelog.d/ fragments are valid."
+    exit 0
+fi
 
 if [[ "${1:-}" == "--is-collation-commit" ]]; then
     if [[ $# -ne 3 ]]; then
@@ -268,43 +333,7 @@ if [[ "$PREV_VERSION" == "$VERSION" ]]; then
     exit 1
 fi
 
-# Reject fragments with no release-note content BEFORE the collator touches
-# anything: an empty file, or one holding only blank lines and headings (e.g. a
-# bare `### Added`). The collator would consume it while adding no content;
-# with nothing else pending, [Unreleased] stays empty (the count below ignores
-# headings), the no-op path returns without committing, and the deletion never
-# reaches main, so every later push repeats the same no-op.
-shopt -s nullglob
-EMPTY_FRAGMENTS=()
-NON_REGULAR=()
-for frag in changelog.d/*.md; do
-    [[ "$(basename "$frag")" == "README.md" ]] && continue
-    # A symlink (or any non-regular path) named like a fragment would be
-    # followed by the reads below and by the collator, committing whatever it
-    # points at into CHANGELOG.md and the release notes. -L first: -f follows
-    # symlinks. collate-changelog.sh carries the same guard for direct callers.
-    if [[ -L "$frag" || ! -f "$frag" ]]; then
-        NON_REGULAR+=("$frag")
-        continue
-    fi
-    # Single-stream check: a `grep | grep -q` pipeline under pipefail can
-    # SIGPIPE the first grep when grep -q exits early, misreading a valid
-    # fragment as empty. awk reads the whole file before deciding.
-    if ! awk '!/^[[:space:]]*#/ && /[^[:space:]]/ { found = 1 } END { exit !found }' "$frag"; then
-        EMPTY_FRAGMENTS+=("$frag")
-    fi
-done
-shopt -u nullglob
-if [[ ${#NON_REGULAR[@]} -gt 0 ]]; then
-    echo "❌ Error: changelog fragment(s) that are not regular files (symlink or other): ${NON_REGULAR[*]}" >&2
-    echo "   Replace each with a plain file holding its changelog line, then re-run." >&2
-    exit 1
-fi
-if [[ ${#EMPTY_FRAGMENTS[@]} -gt 0 ]]; then
-    echo "❌ Error: changelog fragment(s) with no release-note line: ${EMPTY_FRAGMENTS[*]}" >&2
-    echo "   Give each one a changelog line (e.g. '- **[Issue #N]** ...'), or delete it, then re-run." >&2
-    exit 1
-fi
+validate_fragments || exit 1
 
 # Nothing pending: a release is driven by fragments, never by whatever already
 # sits under `## [Unreleased]`. Without this gate, a line left there by hand
