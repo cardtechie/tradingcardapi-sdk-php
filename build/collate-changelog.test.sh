@@ -326,6 +326,19 @@ check_case "symlinked fragment" \
     'echo secret > "$repo/../secret.txt"; ln -s "$repo/../secret.txt" "$repo/changelog.d/1-fixed.md"' "not regular files"
 check_case "badly named fragment" \
     'echo "- **[Issue #1]** X." > "$repo/changelog.d/1-fix.md"' "not named <num>-<type>.md"
+check_case "symlinked fragments directory" \
+    'mkdir "$repo/../outside" && echo "- **[Issue #1]** X." > "$repo/../outside/1-fixed.md" && rm -rf "$repo/changelog.d" && ln -s "$repo/../outside" "$repo/changelog.d"' "is a symlink"
+
+# The collator refuses a symlinked fragments directory on its own, too.
+repo=$(new_repo)
+mkdir "$repo/../outside-direct"
+echo "- **[Issue #1]** X." > "$repo/../outside-direct/1-fixed.md"
+rm -rf "$repo/changelog.d"
+ln -s "$repo/../outside-direct" "$repo/changelog.d"
+rc=0; out=$(cd "$repo" && bash build/collate-changelog.sh 2>&1) || rc=$?
+assert_eq "collator direct: symlinked fragments dir fails" "1" "$rc"
+assert_contains "collator direct: symlinked dir message" "is a symlink" "$out"
+assert_eq "collator direct: external fragment untouched" "yes" "$([[ -f "$repo/../outside-direct/1-fixed.md" ]] && echo yes || echo no)"
 
 repo=$(new_repo)
 echo "- **[Issue #1]** X." > "$repo/changelog.d/1-fixed.md"

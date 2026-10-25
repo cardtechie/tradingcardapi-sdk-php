@@ -40,10 +40,18 @@ jobs:
           # PRs into main must not hand-write a version section (#406). The
           # cardtechie-ops-bot App is exempt: its commit-back is the one
           # writer of version sections.
+          #
+          # Removing or renaming an existing `## [X.Y.Z]` heading is refused
+          # too: build/version.sh reads the newest heading, and the commit-back's
+          # resume check matches on it. Editing a released section's CONTENT
+          # stays allowed — docs/RELEASING.md → Rollback fixes bad notes that way.
           if [ "$PR_BASE_BRANCH" = "main" ] && [ "$PR_AUTHOR" != "cardtechie-ops-bot[bot]" ]; then
             git fetch --no-tags origin main
-            ADDED_SECTIONS=$(git diff "origin/main...HEAD" -- CHANGELOG.md \
+            CHANGELOG_DIFF=$(git diff "origin/main...HEAD" -- CHANGELOG.md)
+            ADDED_SECTIONS=$(printf '%s\n' "$CHANGELOG_DIFF" \
               | grep -E '^\+## \[[0-9]+\.[0-9]+\.[0-9]+\]' || true)
+            REMOVED_SECTIONS=$(printf '%s\n' "$CHANGELOG_DIFF" \
+              | grep -E '^-## \[[0-9]+\.[0-9]+\.[0-9]+\]' || true)
             if [ -n "$ADDED_SECTIONS" ]; then
               echo "❌ This PR adds a version section to CHANGELOG.md:"
               printf '   %s\n' "${ADDED_SECTIONS//+## /## }"
@@ -51,8 +59,16 @@ jobs:
               echo "   (build/commit-changelog-back.sh). Remove the section and add a"
               echo "   changelog.d/<issue>-<type>.md fragment instead (see changelog.d/README.md)."
               VALIDATION_FAILED=true
-            else
-              echo "✅ No hand-written version section in CHANGELOG.md"
+            fi
+            if [ -n "$REMOVED_SECTIONS" ]; then
+              echo "❌ This PR removes or renames a released version heading in CHANGELOG.md:"
+              printf '   %s\n' "${REMOVED_SECTIONS//-## /## }"
+              echo "   build/version.sh and the release commit-back key on these headings."
+              echo "   Restore the heading; edit the section's content instead if the notes are wrong."
+              VALIDATION_FAILED=true
+            fi
+            if [ -z "$ADDED_SECTIONS" ] && [ -z "$REMOVED_SECTIONS" ]; then
+              echo "✅ No hand-written or removed version section in CHANGELOG.md"
             fi
           else
             echo "ℹ️  Version-section check skipped (base $PR_BASE_BRANCH, author $PR_AUTHOR)"

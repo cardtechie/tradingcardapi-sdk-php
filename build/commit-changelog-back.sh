@@ -106,6 +106,13 @@ validate_fragments() {
     # with nothing else pending, [Unreleased] stays empty (the count below ignores
     # headings), the no-op path returns without committing, and the deletion never
     # reaches main, so every later push repeats the same no-op.
+    # A symlinked changelog.d/ would make every read below follow it outside
+    # the checkout. The collator's --check refuses it too; refuse here first,
+    # before this loop reads anything through it.
+    if [[ -L changelog.d ]]; then
+        echo "❌ Error: changelog.d is a symlink — refusing to read fragments through it." >&2
+        return 1
+    fi
     shopt -s nullglob
     EMPTY_FRAGMENTS=()
     NON_REGULAR=()

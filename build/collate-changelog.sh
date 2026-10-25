@@ -109,6 +109,15 @@ is_bookkeeping() {
 # (e.g. 412-fix.md, notes.md, 412-added.txt) would otherwise be silently left
 # behind and its entry would never reach CHANGELOG.md. Refuse before touching
 # anything.
+#
+# The directory itself must not be a symlink either: a merged tree could point
+# changelog.d/ outside the checkout, and the per-entry symlink check below would
+# then pass every regular file it finds there. -L first: -d follows symlinks.
+if [[ -L "$FRAGMENTS_DIR" ]]; then
+    echo "❌ Error: fragments directory '${FRAGMENTS_DIR}' is a symlink — refusing to collate." >&2
+    echo "   Replace it with a real directory holding the fragments." >&2
+    exit 1
+fi
 if [[ -d "$FRAGMENTS_DIR" ]]; then
     shopt -s nullglob dotglob
     BAD_NAMES=()
