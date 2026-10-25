@@ -1,5 +1,9 @@
 name: Changelog Fragment Check
 
+# PRs add a changelog.d/<num>-<type>.md fragment. Fragments are collated into
+# CHANGELOG.md automatically after merge to main, by
+# build/commit-changelog-back.sh in build-release.yml (#406).
+#
 # Escape hatch: add the `skip-changelog` label to opt a PR out of this gate
 # (e.g. release/collation PRs that remove fragments rather than adding one).
 on:
@@ -71,6 +75,6 @@ jobs:
           echo "Example:"
           echo "  changelog.d/245-added.md"
           echo ""
-          echo "See changelog.d/README.md for the convention. Do NOT edit the shared"
-          echo "## [Unreleased] section of CHANGELOG.md — that is collated at release time."
+          echo "See changelog.d/README.md for the convention. Do NOT edit CHANGELOG.md:"
+          echo "fragments are collated into it automatically after merge to main."
           exit 1
