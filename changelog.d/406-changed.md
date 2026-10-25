@@ -1,0 +1,1 @@
+- **[Issue #406]** Collate `changelog.d/` fragments into `CHANGELOG.md` after merge in the release workflow, and stop requiring a hand-written version section on PRs into `main`.

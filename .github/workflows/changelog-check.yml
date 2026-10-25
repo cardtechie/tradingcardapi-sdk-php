@@ -1,8 +1,20 @@
 name: "Release Validation"
 
+# Version sections in CHANGELOG.md are written after merge, by
+# build/commit-changelog-back.sh in build-release.yml (#406). So a PR into
+# main must NOT add its own `## [X.Y.Z]` section: it would be collated over,
+# claim a version another PR may also claim, and break the commit-back's
+# resume check, which relies on only the bot's commit introducing a version
+# section. Changes go in a changelog.d/ fragment instead.
+#
+# `edited` re-runs the check when a PR is retargeted onto main.
 on:
   pull_request:
     branches: [ main ]
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
 
 jobs:
   validate-release:
@@ -14,54 +26,54 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Make build scripts executable
-        run: chmod +x build/*.sh
-
       - name: Check release requirements
         env:
           PR_HEAD_REF: ${{ github.head_ref }}
           PR_BASE_BRANCH: ${{ github.base_ref }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
-          echo "🔍 Validating release requirements..."
+          echo "🔍 Validating release requirements for $PR_HEAD_REF → $PR_BASE_BRANCH..."
           echo ""
-          
+
           VALIDATION_FAILED=false
-          
-          # Get version that would be generated for this PR's branch
-          # Use the PR head ref (supplied via the step-level env: block) to get the actual branch name
-          if [[ -n "$PR_HEAD_REF" ]]; then
-            # Use the actual branch name from the PR
-            CURRENT_VERSION=$(bash build/version.sh --branch="$PR_HEAD_REF")
-          else
-            # Fallback to current branch detection
-            CURRENT_VERSION=$(bash build/version.sh)
-          fi
-          
-          echo "Generated version for this branch: $CURRENT_VERSION"
-          echo ""
-          
-          # For PRs to main, we expect a proper release version in changelog
-          # (PR_BASE_BRANCH is supplied via the step-level env: block)
-          if [ "$PR_BASE_BRANCH" = "main" ]; then
-            echo "🎯 PR targets main branch - release changelog validation required"
-            
-            # Extract the base semantic version (remove RC/hotfix suffixes like .rc-N or -hotfix.xxx)
-            RELEASE_VERSION=$(echo "$CURRENT_VERSION" | sed 's/[.-]rc[.-][0-9]*$//' | sed 's/-.*$//')
-            echo "Expected release version: $RELEASE_VERSION"
-            
-            # Check that CHANGELOG.md has section for this release version
-            if grep -q "^## \[$RELEASE_VERSION\]" CHANGELOG.md; then
-              echo "✅ Version section [$RELEASE_VERSION] found in CHANGELOG.md"
-            else
-              echo "❌ No version section [$RELEASE_VERSION] found in CHANGELOG.md"
-              echo "   PRs to main must have a changelog section for the release version"
-              echo "   Add a section like: ## [$RELEASE_VERSION] - $(date +%Y-%m-%d)"
+
+          # PRs into main must not hand-write a version section (#406). The
+          # cardtechie-ops-bot App is exempt: its commit-back is the one
+          # writer of version sections.
+          #
+          # Removing or renaming an existing `## [X.Y.Z]` heading is refused
+          # too: build/version.sh reads the newest heading, and the commit-back's
+          # resume check matches on it. Editing a released section's CONTENT
+          # stays allowed — docs/RELEASING.md → Rollback fixes bad notes that way.
+          if [ "$PR_BASE_BRANCH" = "main" ] && [ "$PR_AUTHOR" != "cardtechie-ops-bot[bot]" ]; then
+            git fetch --no-tags origin main
+            CHANGELOG_DIFF=$(git diff "origin/main...HEAD" -- CHANGELOG.md)
+            ADDED_SECTIONS=$(printf '%s\n' "$CHANGELOG_DIFF" \
+              | grep -E '^\+## \[[0-9]+\.[0-9]+\.[0-9]+\]' || true)
+            REMOVED_SECTIONS=$(printf '%s\n' "$CHANGELOG_DIFF" \
+              | grep -E '^-## \[[0-9]+\.[0-9]+\.[0-9]+\]' || true)
+            if [ -n "$ADDED_SECTIONS" ]; then
+              echo "❌ This PR adds a version section to CHANGELOG.md:"
+              printf '   %s\n' "${ADDED_SECTIONS//+## /## }"
+              echo "   Version sections are written after merge by build-release.yml"
+              echo "   (build/commit-changelog-back.sh). Remove the section and add a"
+              echo "   changelog.d/<issue>-<type>.md fragment instead (see changelog.d/README.md)."
               VALIDATION_FAILED=true
             fi
+            if [ -n "$REMOVED_SECTIONS" ]; then
+              echo "❌ This PR removes or renames a released version heading in CHANGELOG.md:"
+              printf '   %s\n' "${REMOVED_SECTIONS//-## /## }"
+              echo "   build/version.sh and the release commit-back key on these headings."
+              echo "   Restore the heading; edit the section's content instead if the notes are wrong."
+              VALIDATION_FAILED=true
+            fi
+            if [ -z "$ADDED_SECTIONS" ] && [ -z "$REMOVED_SECTIONS" ]; then
+              echo "✅ No hand-written or removed version section in CHANGELOG.md"
+            fi
           else
-            echo "ℹ️  PR targets $PR_BASE_BRANCH branch - no release validation needed"
+            echo "ℹ️  Version-section check skipped (base $PR_BASE_BRANCH, author $PR_AUTHOR)"
           fi
-          
+
           # Verify composer.json does NOT have hardcoded version (to prevent Packagist issues)
           if grep -q '"version"' composer.json; then
             echo "❌ Hardcoded version found in composer.json"
@@ -71,19 +83,10 @@ jobs:
           else
             echo "✅ No hardcoded version in composer.json (managed by git tags)"
           fi
-          
-          if [ "$VALIDATION_FAILED" = true ]; then
-            echo ""
-            echo "📝 To fix validation issues:"
-            echo "1. Ensure no 'version' field exists in composer.json"
-            echo "2. Add version section to CHANGELOG.md for: $RELEASE_VERSION"
-            echo "3. All PRs to main branch must have a release version section"
-            echo ""
-            echo "📚 See .claude/CLAUDE.md for complete release process documentation"
-          fi
-          
+
           echo ""
           if [ "$VALIDATION_FAILED" = true ]; then
+            echo "📚 See docs/RELEASING.md for the release process."
             echo "❌ Validation failed - please address the issues above"
             exit 1
           else

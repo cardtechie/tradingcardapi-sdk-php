@@ -11,15 +11,19 @@ This runbook is the operational companion: *how to actually ship*.
 
 ## TL;DR
 
-1. Merge release-ready code into `main`.
-2. The **Build and Release** workflow fires automatically on the push to
-   `main`, generates the next stable version (`X.Y.Z`), runs the test suite,
-   creates a GitHub Release with generated notes, and pings Packagist.
+1. Every PR adds a `changelog.d/<issue>-<type>.md` fragment. No PR edits
+   `CHANGELOG.md` or writes a `## [X.Y.Z]` section.
+2. Merge into `main`. The **Build and Release** workflow runs the tests,
+   collates the pending fragments into a new `## [X.Y.Z]` section, commits that
+   back to `main` as **cardtechie-ops-bot**, tags the commit-back `X.Y.Z`,
+   creates the GitHub Release with that section as its notes, and pings
+   Packagist.
 3. Verify the [GitHub Release](https://github.com/cardtechie/tradingcardapi-sdk-php/releases)
    and the [Packagist page](https://packagist.org/packages/cardtechie/tradingcardapi-sdk-php).
 
-There is no separate "publish" command — **merging to `main` is the release
-trigger.**
+There is no separate "publish" command: **merging to `main` is the release
+trigger.** A merge with no pending fragments releases nothing; its changes ship
+with the next merge that adds a fragment.
 
 ## How a release is cut
 
@@ -34,80 +38,124 @@ push to main (or workflow_dispatch)
                                   └──►  notify
 ```
 
-- **`version`** — runs `build/version.sh --branch=<ref>` to compute the next
-  version from the latest git tag and the current branch. On `main` with a
-  stable `X.Y.Z` result it sets `is_release=true` and `should_release=true`.
-- **`test`** — runs the full PHPUnit suite via the reusable `run-tests.yml`
-  workflow. The `release` job will not run unless tests pass.
-- **`release`** — generates release notes with
-  `build/generate-release-notes.sh` (AI-assisted when `CLAUDE_API_KEY` is set,
-  template fallback otherwise) and creates a GitHub Release tagged with the
-  generated version. The tag is created by the release action itself; you do
-  **not** tag by hand for the normal flow.
-- **`packagist`** — pings the Packagist update API so the published package
-  picks up the new tag. Gated on `is_release == 'true'` **and**
-  `github.ref == 'refs/heads/main'`, so only stable releases off `main` update
-  Packagist.
-- **`notify`** — writes a release summary to the workflow run's job summary.
+- **`version`** — runs `build/version.sh --branch=<ref>` to plan the next
+  version. On `main` with a stable `X.Y.Z` result it sets `should_release=true`.
+- **`test`** — runs the full test suite via the reusable `run-tests.yml`
+  workflow. The `release` job will not run unless tests pass, so nothing is
+  committed back to `main` from a red build.
+- **`release`** — in order:
+  1. mints a **cardtechie-ops-bot** GitHub App token (`contents: write`, this
+     repository only) from the `CARDTECHIE_BOT` / `CARDTECHIE_BOT_PRIVATE_KEY`
+     org secrets;
+  2. checks out the commit the `test` job ran against (`github.sha`), not
+     the moving tip, without persisting credentials. If `main` has moved past
+     it while tests ran, the job stands down with `release=false`: the run
+     queued for the newer tip releases what is pending, so untested code is
+     never tagged. A rerun whose tip is this commit's own commit-back resumes
+     from that commit-back instead (see below);
+  3. recomputes the version on that commit;
+  4. runs `build/commit-changelog-back.sh`, which collates `changelog.d/` into
+     `## [X.Y.Z] - <date>`, updates the compare links, commits it as
+     `cardtechie-ops-bot[bot]` with the subject
+     `chore(release): collate CHANGELOG for X.Y.Z`, and pushes it to `main`;
+  5. extracts that section as the release notes;
+  6. creates the GitHub Release and the `X.Y.Z` tag **on the commit-back SHA**.
+
+  Steps 5 and 6 run only when step 4 reports `release=true`. With no pending
+  fragments it reports `release=false` and nothing is tagged or published,
+  even if `## [Unreleased]` already holds lines: a release is driven by
+  fragments only. The job runs only for `main`; a manual dispatch on
+  `develop` or a tag never collates or tags `main`.
+- **`packagist`** — pings the Packagist update API. Runs only when the
+  `release` job actually published (`release == 'true'`) off `main`.
+- **`notify`** — writes a release summary, or "nothing released", to the run's
+  job summary.
+
+The commit-back carries **no `[skip ci]`**, so its push starts
+`back-merge-stable-to-develop.yml` and `develop` receives the collated
+`CHANGELOG.md`. Build and Release does not run again for it: both the `version`
+and `release` jobs skip a push whose head commit subject has the form
+`chore(release): collate CHANGELOG for X.Y.Z` **and** whose pusher is
+`cardtechie-ops-bot[bot]`.
+
+### Write path to `main`
+
+`main` has classic branch protection that requires a pull request. The
+cardtechie-ops-bot App (Integration 1882441) is listed in its
+`bypass_pull_request_allowances`, which is what lets the commit-back push
+directly. `GITHUB_TOKEN` and `PROJECT_TOKEN` are never used for this push.
+
+If the push is rejected, the `release` job **fails** and nothing is tagged,
+released or sent to Packagist, so a release never ships without its notes. The
+error names the likely causes: the bypass allowance was removed, a ruleset was
+added on `main` without the App as a bypass actor, or `main` moved during the
+run (non-fast-forward). Fix the cause and re-run the workflow.
+
+### Re-running after a failure (resume)
+
+If a run fails **after** the commit-back landed (for example the GitHub Release
+step), re-run the workflow. `version.sh` sees `## [X.Y.Z]` newer than the
+latest tag and re-emits `X.Y.Z`, and `commit-changelog-back.sh` sees that HEAD
+is its own commit-back for that version, so it writes nothing and reports
+`release=true`. The tag and release are then created on that commit.
+
+The resume only works while the commit-back is still the tip of `main`. If
+another merge landed after it, the script refuses (rather than tagging later
+code as `X.Y.Z`); tag and release the commit-back by hand instead.
 
 ### What version gets cut
 
-Version generation is branch-aware (`build/version.sh`). For the release flow
-the relevant case is `main`:
+`build/version.sh --branch=main` decides, in this order:
 
-- On `main`, exactly on the latest tag → the version equals that tag. Note that
-  `should_release` only checks for a stable `X.Y.Z` result on `main` — it does
-  **not** compare against existing tags, so the `release` job will still run and
-  attempt to (re)create a GitHub Release for that tag. Avoid pushing to `main`
-  with no new commits since the last tag unless you intend that.
-- On `main`, with N commits since the latest tag → the **patch** is
-  incremented (`X.Y.Z` → `X.Y.(Z+1)`).
+1. HEAD exactly on the latest tag → that tag.
+2. `CHANGELOG.md`'s newest `## [X.Y.Z]` is newer than the latest tag → that
+   version (the resume case above).
+3. Otherwise, from the pending fragments: any `changelog.d/<num>-added.md` →
+   next **minor**; anything else → next **patch**.
+
+A **major** release is a deliberate act: create and push the tag yourself (see
+*Manual / emergency tagging* below).
 
 To preview what would be generated before merging:
 
 ```bash
 bash build/version.sh --branch=main      # next stable version off main
 bash build/version.sh --branch=develop   # next beta (X.Y+1.0.beta-N)
-make changelog-preview                    # commits that would be included
 ```
-
-> **Minor/major bumps.** `version.sh` only auto-increments the patch on `main`.
-> To cut a new minor or major release, create and push the target tag yourself
-> (see *Manual / emergency tagging* below), then run the workflow on `main` via
-> `workflow_dispatch` — `version.sh` reads the just-pushed tag and generates the
-> matching version. The **Build and Release** workflow triggers only on pushes
-> to `main` and `workflow_dispatch`; pushing a tag alone does **not** start it.
 
 ## Required repository secrets
 
-Configure these under **Settings → Secrets and variables → Actions**. None are
-strictly required for the workflow to *run* — the pipeline degrades gracefully
-when any are absent (release notes fall back to a template; the Packagist ping
-no-ops with a logged message). For a *fully* working release the two Packagist
-secrets are needed to auto-update the published package, while `CLAUDE_API_KEY`
-is optional and only upgrades release-note generation from template to
-AI-assisted.
-
 | Secret | Used by | Required? | Purpose |
 | --- | --- | --- | --- |
+| `CARDTECHIE_BOT` | `release` job | **Yes** | cardtechie-ops-bot App id (org secret). Mints the token for the commit-back push. |
+| `CARDTECHIE_BOT_PRIVATE_KEY` | `release` job | **Yes** | cardtechie-ops-bot App private key (org secret). |
 | `PACKAGIST_USERNAME` | `packagist` job | For Packagist auto-update | Packagist account username for the update API call. |
 | `PACKAGIST_TOKEN` | `packagist` job | For Packagist auto-update | Packagist API token paired with the username. |
-| `CLAUDE_API_KEY` | `release` job (release-note generation) | Optional | Enables AI-generated release notes. Without it, `generate-release-notes.sh` falls back to a template-based summary (still well-formed markdown). |
 
-`GITHUB_TOKEN` is provided automatically by Actions and is used by the release
-job to create the GitHub Release — you do not configure it.
+Without the two App secrets the `release` job fails before anything is pushed.
+Without the Packagist secrets the ping no-ops with a logged message.
+`GITHUB_TOKEN` is provided automatically and is used only to create the GitHub
+Release.
 
 ## Cutting a release (normal flow)
 
-1. Ensure `develop` is green and contains everything you want to ship.
-2. Open a PR from `develop` (or a `release/X.Y.Z` branch) into `main` and merge
-   it once CI passes. The **Release Validation** check
-   (`changelog-check.yml`) enforces that PRs to `main` carry a
-   `## [X.Y.Z]` section in `CHANGELOG.md` and that `composer.json` has **no**
-   hardcoded `version` field.
+1. Ensure `develop` is green and contains everything you want to ship, each
+   change with its `changelog.d/` fragment.
+2. Open a PR from `develop` (or a `release/X.Y.Z` / `hotfix/*` branch) into
+   `main` and merge it once CI passes. The **Release Validation** check
+   (`changelog-check.yml`) fails a PR into `main` that adds a `## [X.Y.Z]`
+   section to `CHANGELOG.md`, and one that adds a hardcoded `version` to
+   `composer.json`.
 3. The push to `main` triggers **Build and Release** automatically. Watch it in
    the **Actions** tab.
-4. Verify the result (see *Verifying a release* below).
+4. Verify the result (see *Verifying a release* below), including the bot's
+   `chore(release): collate CHANGELOG for X.Y.Z` commit on `main`.
+
+### Manual / recovery collation
+
+`make changelog-collate VERSION=X.Y.Z` runs the same script with `--no-commit`:
+it collates, promotes and stages, and leaves the commit to you. Use it only to
+recover from a broken automated run.
 
 ## Triggering a release manually (workflow_dispatch)
 
@@ -158,7 +206,8 @@ After the workflow completes:
 
 There is no "un-release" button; recover forward.
 
-- **Bad release notes only:** edit the GitHub Release body in place
+- **Bad release notes only:** edit the GitHub Release body in place, and fix
+  the section in `CHANGELOG.md` with a normal PR
   (`gh release edit X.Y.Z --notes-file notes.md`) — the published package is
   unaffected.
 - **Bad release (broken code shipped):** cut a new patch release with the fix.
