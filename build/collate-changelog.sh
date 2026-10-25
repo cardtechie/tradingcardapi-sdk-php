@@ -190,13 +190,25 @@ done
 # the matching existing ### subsection, and create any missing subsections at
 # the end of the Unreleased block in canonical order.
 TEMP_OUT="$(mktemp "${TMPDIR:-/tmp}/collate-changelog.XXXXXX")"
-trap 'rm -f "$TEMP_OUT"' EXIT
+BUCKET_DIR="$(mktemp -d "${TMPDIR:-/tmp}/collate-changelog-buckets.XXXXXX")"
+trap 'rm -f "$TEMP_OUT"; rm -rf "$BUCKET_DIR"' EXIT
 
-# Export buckets so awk can read them via ENVIRON[] (avoids quoting hazards from
-# passing multi-line bodies as -v assignments).
-export BUCKET_ADDED BUCKET_CHANGED BUCKET_DEPRECATED BUCKET_REMOVED BUCKET_FIXED BUCKET_SECURITY
+# Hand the buckets to awk through files, one per type. Not -v (quoting hazards
+# with multi-line bodies) and not the environment: Linux caps every single
+# argv/envp string at 128 KiB (MAX_ARG_STRLEN), so a large bucket exported for
+# ENVIRON[] makes execve fail with E2BIG and awk never starts (exit 126).
+write_bucket() {
+    [[ -n "$2" ]] && printf '%s\n' "$2" > "${BUCKET_DIR}/$1"
+    return 0
+}
+write_bucket added      "$BUCKET_ADDED"
+write_bucket changed    "$BUCKET_CHANGED"
+write_bucket deprecated "$BUCKET_DEPRECATED"
+write_bucket removed    "$BUCKET_REMOVED"
+write_bucket fixed      "$BUCKET_FIXED"
+write_bucket security   "$BUCKET_SECURITY"
 
-awk '
+awk -v bucket_dir="$BUCKET_DIR" '
 function title_case(s) {
     return toupper(substr(s, 1, 1)) substr(s, 2)
 }
@@ -236,12 +248,16 @@ BEGIN {
     sub_n = 0
     cur_type = ""
     split("added changed deprecated removed fixed security", order, " ")
-    if (ENVIRON["BUCKET_ADDED"]      != "") additions["added"]      = ENVIRON["BUCKET_ADDED"]
-    if (ENVIRON["BUCKET_CHANGED"]    != "") additions["changed"]    = ENVIRON["BUCKET_CHANGED"]
-    if (ENVIRON["BUCKET_DEPRECATED"] != "") additions["deprecated"] = ENVIRON["BUCKET_DEPRECATED"]
-    if (ENVIRON["BUCKET_REMOVED"]    != "") additions["removed"]    = ENVIRON["BUCKET_REMOVED"]
-    if (ENVIRON["BUCKET_FIXED"]      != "") additions["fixed"]      = ENVIRON["BUCKET_FIXED"]
-    if (ENVIRON["BUCKET_SECURITY"]   != "") additions["security"]   = ENVIRON["BUCKET_SECURITY"]
+    # A missing file means an empty bucket. Lines are rejoined with "\n" and
+    # no trailing newline, the exact string the bash bucket held.
+    for (i = 1; i <= 6; i++) {
+        f = bucket_dir "/" order[i]
+        n = 0
+        while ((getline line < f) > 0) {
+            additions[order[i]] = (n++ ? additions[order[i]] "\n" : "") line
+        }
+        close(f)
+    }
 }
 /^## \[Unreleased\]/ {
     print
@@ -290,6 +306,7 @@ END {
 # before our appended bullets.
 awk '/^$/ { if (blank++ < 1) print; next } { blank = 0; print }' "$TEMP_OUT" > "$CHANGELOG_FILE"
 rm -f "$TEMP_OUT"
+rm -rf "$BUCKET_DIR"
 trap - EXIT
 
 # Remove the consumed fragments. Use git rm when the file is tracked so the
