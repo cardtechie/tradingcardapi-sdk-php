@@ -67,8 +67,8 @@ push to main (or workflow_dispatch)
 The commit-back carries **no `[skip ci]`**, so its push starts
 `back-merge-stable-to-develop.yml` and `develop` receives the collated
 `CHANGELOG.md`. Build and Release does not run again for it: both the `version`
-and `release` jobs skip a push whose head commit subject starts with
-`chore(release): collate CHANGELOG for ` **and** whose pusher is
+and `release` jobs skip a push whose head commit subject has the form
+`chore(release): collate CHANGELOG for X.Y.Z` **and** whose pusher is
 `cardtechie-ops-bot[bot]`.
 
 ### Write path to `main`
