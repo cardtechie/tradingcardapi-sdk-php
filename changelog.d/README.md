@@ -41,23 +41,33 @@ what's in the linked issue.
 
 ## Collation into `CHANGELOG.md`
 
-Fragments are collated into the human-readable `CHANGELOG.md` **once, at the
-release step**. Collation reads every `changelog.d/<num>-<type>.md` fragment,
-groups the lines under the correct `### Added` / `### Changed` / `### Fixed` /
-`### Security` / `### Removed` / `### Deprecated` headings in the new versioned
-section, writes `CHANGELOG.md`, and deletes the collated fragments. See
-[`docs/VERSION-MANAGEMENT.md`](../docs/VERSION-MANAGEMENT.md) for this repo's
-release flow.
+Fragments are collated **automatically, after merge to `main`**, by the
+**Build and Release** workflow (`.github/workflows/build-release.yml`, #406).
+Never collate inside a PR, and never hand-write a `## [X.Y.Z]` section in
+`CHANGELOG.md`: the **Release Validation** check fails any PR into `main` that
+adds one.
 
-> **This is a manual step today — no tooling reads fragments yet.** Automated
-> collation is deferred to the Release workflow milestone (see #672), and the
-> current release tooling (`build/update-changelog.sh` / `make changelog-update`)
-> does **not** consume `changelog.d/` fragments — it works off the existing
-> `## [Unreleased]` content and/or git commits. Until automation lands, fragments
-> accumulate here and the release operator collates them by hand (or with a
-> throwaway script) when cutting a version, then deletes the collated fragments.
-> The goal of the ship-now slice is to stop the conflict generation at the
-> source; automating release assembly follows.
+On each push to `main`, `build/commit-changelog-back.sh`:
+
+1. refuses any fragment that is empty, heading-only, a symlink, misnamed, or
+   whose line is already in `CHANGELOG.md` (it names the file);
+2. runs `build/collate-changelog.sh`, which groups every fragment's line under
+   the matching `### Added` / `### Changed` / `### Deprecated` / `### Removed` /
+   `### Fixed` / `### Security` heading in `## [Unreleased]` and deletes the
+   fragments;
+3. promotes `## [Unreleased]` to `## [X.Y.Z] - <date>`, adds a fresh empty
+   `## [Unreleased]`, and updates the compare links;
+4. commits that as `cardtechie-ops-bot[bot]` and pushes it to `main`. The
+   release is tagged on that commit, with the new section as its notes.
+
+When no fragments are pending, nothing is collated and nothing is released.
+The version comes from `build/version.sh`: any pending `added` fragment means
+the next minor, otherwise the next patch. See
+[`docs/RELEASING.md`](../docs/RELEASING.md).
+
+`## [Unreleased]` in `CHANGELOG.md` stays empty between releases. To collate by
+hand (recovery only), run `make changelog-collate VERSION=X.Y.Z`, which
+collates and stages without committing.
 
 The `.gitkeep` file keeps this directory tracked in git when no fragments are
 pending.
