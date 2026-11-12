@@ -1,0 +1,2 @@
+- **[Issue #417]** Bump Symfony yaml, http-foundation, http-kernel and routing to 7.4.23, clearing the 2026-11-04 advisories.
+  - Lock-only change; published consumers resolve against `composer.json` constraints and are unaffected.

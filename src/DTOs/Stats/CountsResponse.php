@@ -4,6 +4,15 @@ declare(strict_types=1);
 
 namespace CardTechie\TradingCardApiSdk\DTOs\Stats;
 
+/**
+ * The /v1/stats/counts payload: one EntityCount per entity type.
+ *
+ * Every figure carried by the EntityCount rows below is relative to the calling
+ * token's status posture — on the SDK's default `read:published` scope `total`
+ * equals `published` and `draft` is 0. See EntityCount for the full rule.
+ *
+ * @see EntityCount
+ */
 class CountsResponse
 {
     /**
@@ -34,6 +43,14 @@ class CountsResponse
 
     /**
      * Get entity count by type with O(1) indexed lookup.
+     *
+     * $entityType is the API's singular form — `set`, `card`, `player`, `team` —
+     * not the plural used by the /v1/stats/{type} path segment. An unknown type
+     * returns null.
+     *
+     * The returned figures are posture-relative; see EntityCount.
+     *
+     * @see EntityCount
      */
     public function getByEntityType(string $entityType): ?EntityCount
     {
