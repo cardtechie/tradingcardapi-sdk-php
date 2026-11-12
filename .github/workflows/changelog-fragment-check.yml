@@ -16,9 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # The back-merge workflow's sync PR carries already-released history from
-      # main, so it needs no fragment (#422, #423). Require the head repo to be
+      # main, so it needs no fragment (#422, #423). Require the develop base and the head repo to be
       # this repository so a fork cannot bypass the gate by naming its branch alike.
-      IS_SYNC_PR: ${{ github.head_ref == 'auto/sync-main-to-develop' && github.event.pull_request.head.repo.full_name == github.repository }}
+      IS_SYNC_PR: ${{ github.base_ref == 'develop' && github.head_ref == 'auto/sync-main-to-develop' && github.event.pull_request.head.repo.full_name == github.repository }}
     steps:
       - name: Skip when 'skip-changelog' label is present
         if: contains(github.event.pull_request.labels.*.name, 'skip-changelog')
