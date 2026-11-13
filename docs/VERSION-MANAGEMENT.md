@@ -39,7 +39,7 @@ The SDK follows [Semantic Versioning 2.0.0](https://semver.org/):
 
 | Branch Type | Version Pattern | Example | Purpose |
 | --- | --- | --- | --- |
-| `main`/`master` | `X.Y.Z` or `X.Y.Z+1` | `1.2.3` | Production releases |
+| `main`/`master` | `X.Y.Z`, derived from pending fragments | `1.2.3` | Production releases |
 | `develop` | `X.Y+1.0.beta-N` | `1.3.0.beta-12` | Pre-release testing |
 | `release/X.Y.Z` | `X.Y.Z.rc-N` | `1.3.0.rc-2` | Release candidates |
 | `hotfix/*` | `X.Y.Z+1-hotfix.<name>.N` | `1.2.4-hotfix.securityfix.3` | Critical fixes |
@@ -48,8 +48,8 @@ The SDK follows [Semantic Versioning 2.0.0](https://semver.org/):
 > **Only the `main` row is ever tagged.** Every other pattern in this table is a
 > *branch build identifier* — a label for CI artifacts and diagnostics. In
 > particular a `hotfix/*` string like `1.2.4-hotfix.securityfix.3` is never the
-> released version; when the hotfix merges to `main`, `build-release.yml` runs
-> `build/version.sh --branch=main` and tags whatever the `main` case emits.
+> released version; when the hotfix merges to `main`, `build-release.yml` derives
+> the version from the pending `changelog.d/` fragments and tags that.
 
 ## Build Scripts
 
@@ -145,13 +145,27 @@ Creates comprehensive GitHub release notes with AI-powered summaries.
    make version  # Shows: 1.3.0.beta-12
    ```
 
-Fragment collation into a versioned `CHANGELOG.md` section is a **release-step**
-operation (see the Release Process below), not a per-PR step. Note that
-`make changelog-update` / `build/update-changelog.sh` does **not** currently read
-`changelog.d/` fragments — it derives the new version section from the existing
-`## [Unreleased]` content and/or git commits. Until dedicated fragment-collation
-tooling ships, the release operator collates the accumulated fragments into
-`CHANGELOG.md` by hand.
+Fragment collation into a versioned `CHANGELOG.md` section happens
+**automatically after merge to `main`**, in the Build and Release workflow
+(`build/commit-changelog-back.sh`, #406) — never in a PR. Do not hand-write a
+`## [X.Y.Z]` section; Release Validation fails any PR into `main` that adds one.
+
+### Main-branch version derivation
+
+On `main`, `build/version.sh` picks the release version in this order:
+
+1. HEAD is exactly on the latest tag → that tag.
+2. The newest `## [X.Y.Z]` section in `CHANGELOG.md` is newer than the latest
+   tag → that version. After the bot's commit-back lands, this is what makes a
+   rerun of Build and Release re-emit the same version (resume).
+3. Otherwise the release has not been collated yet, so the bump comes from the
+   pending `changelog.d/` fragments:
+   - any `changelog.d/<num>-added.md` → next **minor** (`X.(Y+1).0`);
+   - anything else → next **patch** (`X.Y.(Z+1)`).
+
+A **major** bump is a deliberate operator act (tag it by hand, see
+[RELEASING.md](RELEASING.md)). `removed` / `deprecated` fragments do not
+auto-major while the package is `0.x`.
 
 ### Release Process
 
@@ -162,14 +176,12 @@ tooling ships, the release operator collates the accumulated fragments into
    make version  # Shows: 1.3.0.rc-1
    ```
 
-2. **Prepare Release**
+2. **Prepare Release** — nothing to edit in `CHANGELOG.md`. Each change already
+   carries its `changelog.d/` fragment; preview the version with
+   `bash build/version.sh --branch=main`.
 
-   ```bash
-   make changelog-update
-   make release-notes-preview
-   ```
-
-3. **Merge to Main**
+3. **Merge to Main** — Build and Release collates the fragments, commits the
+   new section back to `main`, and tags it.
 
    ```bash
    git checkout main
@@ -186,35 +198,9 @@ tooling ships, the release operator collates the accumulated fragments into
    make version  # Shows: 1.2.4-hotfix.securityfix.1
    ```
 
-2. **Collate the changelog for the release**
-
-   A `hotfix/* -> main` PR *is* a release, so it must carry the collated
-   `CHANGELOG.md` section — this is the one place where folding `changelog.d/`
-   fragments into `CHANGELOG.md` belongs in a PR. Determine the version the
-   release will tag, then fold the pending fragments into a new section and
-   delete the ones you consumed:
-
-   ```bash
-   bash build/version.sh --branch=main   # e.g. 1.2.4 - the version that gets tagged
-   # Add "## [1.2.4] - YYYY-MM-DD" below "## [Unreleased]" and move each
-   # changelog.d/<issue>-<type>.md line under its Added/Changed/Fixed/... heading,
-   # then: git rm changelog.d/<the fragments you collated>
-   ```
-
-   **Release Validation** (`.github/workflows/changelog-check.yml`) checks for
-   exactly this section on `release/*`, `develop`, and `hotfix/*` head refs; other
-   head refs skip the check. See [`changelog.d/README.md`](../changelog.d/README.md)
-   and [RELEASING.md](RELEASING.md).
-
-3. **Merge to Main**
-
-   ```bash
-   git checkout main
-   git merge hotfix/security-fix
-   ```
-
-   The push to `main` triggers **Build and Release**, which tags the version
-   from the `main` case — not the `hotfix/*` build identifier.
+2. **Apply Fix and Release** — add a `changelog.d/<issue>-<type>.md` fragment
+   with the fix, open a PR into `main`, and merge it. Build and Release
+   collates and tags after merge.
 
 ## Makefile Commands
 
@@ -222,7 +208,9 @@ tooling ships, the release operator collates the accumulated fragments into
 
 - `make version` - Show current version
 - `make version-preview --branch=<name>` - Preview version for branch
-- `make changelog-update` - Update changelog for current version
+- `make changelog-collate VERSION=x.y.z` - Collate fragments into a `## [x.y.z]` section and stage it, without committing (manual / recovery path)
+- `make test-changelog` - Run the changelog collation regression harness
+- `make changelog-update` - Legacy commit-based changelog update; does not read `changelog.d/`
 - `make changelog-preview` - Preview recent changes
 - `make release-notes-preview` - Generate release notes preview
 - `make release-notes VERSION=x.x.x` - Generate release notes for specific version
@@ -331,11 +319,9 @@ Per-PR changelog entries are written as **fragments** under `changelog.d/`
 `## [Unreleased]` section of `CHANGELOG.md`. Because each PR adds a unique new
 path, concurrent PRs never conflict on the changelog — there is no shared
 section to merge. See [`changelog.d/README.md`](../changelog.d/README.md) for
-the convention. Collating fragments into a versioned `CHANGELOG.md` section is a
-**release-step** operation, not per-PR work. Today that collation is manual:
-`make changelog-update` / `build/update-changelog.sh` does not yet consume
-`changelog.d/` fragments, so the release operator merges them into `CHANGELOG.md`
-by hand until dedicated tooling lands.
+the convention. Collating fragments into a versioned `CHANGELOG.md` section
+happens automatically after merge to `main` (Build and Release,
+`build/commit-changelog-back.sh`), never in a PR.
 
 ## Best Practices
 

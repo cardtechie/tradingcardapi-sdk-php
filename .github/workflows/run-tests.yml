@@ -118,3 +118,7 @@ jobs:
 
       - name: Run version.sh regression harness
         run: bash build/version.test.sh
+
+      - name: Run changelog collation regression harness
+        # build/collate-changelog.sh + build/commit-changelog-back.sh (#406).
+        run: bash build/collate-changelog.test.sh

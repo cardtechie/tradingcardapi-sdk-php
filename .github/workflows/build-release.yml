@@ -7,6 +7,10 @@ on:
 
 # Serialize release runs on a given ref but NEVER cancel one in progress —
 # a release must run to completion (version, tests, GitHub release, Packagist).
+# Collation (#406) reads main, commits back, and pushes, so two merges landing
+# close together would otherwise compute the same version and the second
+# push would be rejected as a non-fast-forward. Cancelling an in-flight run
+# could strand a collated CHANGELOG on main with no tag or release.
 concurrency:
   group: build-release-${{ github.ref }}
   cancel-in-progress: false
@@ -20,6 +24,11 @@ jobs:
   version:
     name: "Generate Version"
     runs-on: ubuntu-latest
+    # Self-trigger guard (#406), same as the release job below: the bot's
+    # commit-back push must not start a second release run.
+    if: >-
+      ${{ !(startsWith(github.event.head_commit.message, 'chore(release): collate CHANGELOG for ')
+      && github.event.sender.login == 'cardtechie-ops-bot[bot]') }}
     outputs:
       version: ${{ steps.version.outputs.version }}
       is_release: ${{ steps.version.outputs.is_release }}
@@ -75,49 +84,164 @@ jobs:
     name: "Create Release"
     runs-on: ubuntu-latest
     needs: [version, test]
-    if: needs.version.outputs.should_release == 'true'
+    # Self-trigger guard (#406). The commit-back below deliberately carries no
+    # [skip ci]: its push must start back-merge-stable-to-develop.yml so
+    # develop receives the collated CHANGELOG. This guard is what stops that
+    # push from starting a second release. BOTH halves are required: the
+    # subject is an anchored prefix (startsWith), never a substring, and the
+    # push must come from the cardtechie-ops-bot App. The identity half reads
+    # github.event.sender.login (the authenticated pusher), not the commit's
+    # author name, which is free text a PR author could spoof. Subject format:
+    # build/commit-changelog-back.sh. workflow_dispatch has no head_commit, so
+    # it is unaffected. The ref guard keeps this job main-only: the version
+    # job also reports should_release=true for a develop beta or a tag, and
+    # this job collates, commits back to and tags main.
+    if: >-
+      ${{ needs.version.outputs.should_release == 'true'
+      && github.ref == 'refs/heads/main'
+      && !(startsWith(github.event.head_commit.message, 'chore(release): collate CHANGELOG for ')
+      && github.event.sender.login == 'cardtechie-ops-bot[bot]') }}
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release: ${{ steps.commit_back.outputs.release || steps.tip.outputs.release }}
+      sha: ${{ steps.commit_back.outputs.sha }}
     steps:
+      # cardtechie-ops-bot App installation token, never GITHUB_TOKEN or
+      # PROJECT_TOKEN (#406). main's classic branch protection requires PRs;
+      # the App is listed in its bypass_pull_request_allowances, so its token
+      # is what may push the commit-back directly. Scoped to this repository
+      # with contents: write only.
+      - name: Create CardTechie App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.CARDTECHIE_BOT }}
+          private-key: ${{ secrets.CARDTECHIE_BOT_PRIVATE_KEY }}
+          permission-contents: write
+
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # The SHA the test job ran against, never the moving branch tip, so
+          # what is tagged and released is exactly what was tested.
+          ref: ${{ github.sha }}
           fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+          # Never persist the App token into .git/config. The commit-back step
+          # supplies it to its own push only, through the environment.
+          persist-credentials: false
 
-      - name: Make build scripts executable
-        run: chmod +x build/*.sh
-
-      - name: Generate release notes
-        id: release_notes
+      # If main moved past the tested SHA, another merge landed while the tests
+      # ran. Its own run is queued behind this one (concurrency group, never
+      # cancelled) and releases everything pending, so this run stands down
+      # rather than release code that was never tested. The one exception is a
+      # rerun after this SHA's own commit-back landed: the tip is then that
+      # bot commit, touching only the changelog, and the release resumes from
+      # it (commit-changelog-back.sh re-validates the resume by content).
+      - name: Check main is still the tested commit
+        id: tip
         run: |
-          VERSION="${{ needs.version.outputs.version }}"
-          echo "Generating release notes for version: $VERSION"
-          
-          # Set Claude API key if provided
-          if [[ -n "${{ secrets.CLAUDE_API_KEY }}" ]]; then
-            export CLAUDE_API_KEY="${{ secrets.CLAUDE_API_KEY }}"
+          git fetch --quiet origin main
+          TIP=$(git rev-parse FETCH_HEAD)
+          if [[ "$TIP" == "$GITHUB_SHA" ]]; then
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
-          
-          # Generate release notes
-          RELEASE_NOTES=$(bash build/generate-release-notes.sh "$VERSION")
-          
-          # Save to file for GitHub release
-          echo "$RELEASE_NOTES" > release_notes.md
+          TIP_PARENT=$(git rev-parse --verify --quiet "${TIP}^" || true)
+          if [[ "$TIP_PARENT" == "$GITHUB_SHA" ]] \
+            && bash build/commit-changelog-back.sh --is-collation-commit \
+              "$(git log -1 --format=%s "$TIP")" "$(git log -1 --format=%an "$TIP")"; then
+            echo "Tip is this commit's own changelog commit-back; resuming from it."
+            git checkout --quiet --detach "$TIP"
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "::notice::main moved from the tested $GITHUB_SHA to $TIP while tests ran. Not releasing untested code; the queued run for $TIP releases what is pending."
+          echo "proceed=false" >> "$GITHUB_OUTPUT"
+          echo "release=false" >> "$GITHUB_OUTPUT"
+
+      - name: Generate version
+        id: version
+        if: steps.tip.outputs.proceed == 'true'
+        env:
+          PLANNED_VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          VERSION=$(bash build/version.sh --branch=main)
+          if [[ "$VERSION" != "$PLANNED_VERSION" ]]; then
+            echo "::warning::the version job planned $PLANNED_VERSION, the checked-out commit gives $VERSION. Using $VERSION."
+          fi
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::build/version.sh gave '$VERSION' on main, which is not a release version."
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Release version: $VERSION"
+
+      # Collation (#406): changelog.d/ fragments become a `## [VERSION]`
+      # section here, AFTER the merge, never in a PR. It runs before the
+      # release so the tag and the release notes both include the new
+      # section. The script reports release=true|false; every later step runs
+      # only on true, so a push with nothing pending stays a no-op instead of
+      # publishing an empty release. A rerun after a failure past the
+      # commit-back reports true without re-collating (resume). A rejected
+      # push fails this step, so nothing is tagged, released or sent to
+      # Packagist.
+      - name: Collate changelog and commit back
+        id: commit_back
+        if: steps.tip.outputs.proceed == 'true'
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          # Push credential for this step only, as cardtechie-ops-bot. Set via
+          # GIT_CONFIG_* so it lives in this process's environment and is never
+          # written to .git/config (checkout runs with persist-credentials: false).
+          export GIT_CONFIG_COUNT=1
+          export GIT_CONFIG_KEY_0=http.https://github.com/.extraheader
+          basic_auth=$(printf 'x-access-token:%s' "$APP_TOKEN" | base64 -w0)
+          # The runner masks the raw token, not its base64 form.
+          echo "::add-mask::${basic_auth}"
+          export GIT_CONFIG_VALUE_0="AUTHORIZATION: basic ${basic_auth}"
+          bash build/commit-changelog-back.sh "$VERSION" --branch main --output "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Extract changelog
+        if: steps.commit_back.outputs.release == 'true'
+        run: |
+          # The `## [VERSION]` block, up to the next version heading or the
+          # compare-link definitions at the bottom of CHANGELOG.md.
+          awk -v ver="$VERSION" '
+            index($0, "## [" ver "]") == 1 { found = 1; next }
+            found && (/^## \[/ || /^\[[^]]+\]: /) { exit }
+            found { print }
+          ' CHANGELOG.md > release_notes.md
+          if [[ ! -s release_notes.md ]]; then
+            echo "::error::No '## [$VERSION]' section found in CHANGELOG.md after the commit-back."
+            exit 1
+          fi
+          cat release_notes.md
 
       - name: Create GitHub Release
+        if: steps.commit_back.outputs.release == 'true'
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ needs.version.outputs.version }}
-          name: ${{ needs.version.outputs.version }}
+          tag_name: ${{ steps.version.outputs.version }}
+          name: ${{ steps.version.outputs.version }}
           body_path: release_notes.md
+          # Tag the commit-back, not the triggering merge, so the tag carries
+          # the collated section.
+          target_commitish: ${{ steps.commit_back.outputs.sha }}
           draft: false
-          prerelease: ${{ needs.version.outputs.is_release != 'true' }}
+          prerelease: false
 
   packagist:
     name: "Update Packagist"
     runs-on: ubuntu-latest
     needs: [version, release]
-    if: needs.version.outputs.is_release == 'true' && github.ref == 'refs/heads/main'
+    # Only when the release job actually published a release (#406).
+    if: needs.release.outputs.release == 'true' && github.ref == 'refs/heads/main'
     steps:
       - name: Update Packagist
         run: |
@@ -134,10 +258,32 @@ jobs:
     if: always() && needs.version.outputs.should_release == 'true'
     steps:
       - name: Release Summary
+        env:
+          RELEASED: ${{ needs.release.outputs.release }}
+          RELEASE_VERSION: ${{ needs.release.outputs.version }}
         run: |
-          VERSION="${{ needs.version.outputs.version }}"
+          VERSION="${RELEASE_VERSION:-${{ needs.version.outputs.version }}}"
           IS_RELEASE="${{ needs.version.outputs.is_release }}"
-          
+
+          # Anything other than a literal "true" is the no-release path: a failed or
+          # skipped release job leaves the output empty, not "false".
+          if [[ "$RELEASED" != "true" ]]; then
+            {
+              echo "## ℹ️ Nothing released"
+              echo ""
+              echo "- **Release job**: ${{ needs.release.result }}"
+              echo ""
+              if [[ "$RELEASED" == "false" ]]; then
+                echo "Nothing was released: either changelog.d/ held no pending fragments, or main"
+                echo "moved past the tested commit and the queued run for the newer tip releases it."
+              else
+                echo "Nothing was released: the release job did not report a release (it failed,"
+                echo "was skipped, or ran on a ref other than main). Check the release job's log."
+              fi
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
           {
             echo "## 🚀 Release Summary"
             echo ""
