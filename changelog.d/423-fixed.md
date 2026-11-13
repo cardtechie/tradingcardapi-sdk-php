@@ -1,0 +1,1 @@
+- **[Issue #423]** Restore the back-merge of main into develop for merges made without a push event.

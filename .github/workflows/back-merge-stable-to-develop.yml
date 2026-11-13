@@ -7,9 +7,18 @@ name: Back-merge stable into develop
 # The sync is asymmetric on purpose: develop -> main promotion is a deliberate
 # release step and is NOT automated here.
 
+# Why more than `push`: a push made by a workflow using GITHUB_TOKEN (for example
+# dependabot-auto-merge.yml's `gh pr merge --auto`) does not trigger `on: push`
+# workflows. Those merges reached main on 2026-11-02 and 2026-11-09 and were never
+# back-merged, leaving develop 38 commits behind. The daily schedule is the safety
+# net: the idempotency check below makes a run with nothing to do exit in seconds.
+# workflow_dispatch allows a manual catch-up. Both run on the default branch (main).
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: '17 5 * * *'
+  workflow_dispatch:
 
 # All git and gh operations use the PROJECT_TOKEN PAT (checkout token + GH_TOKEN),
 # so the default GITHUB_TOKEN needs no permissions. Drop them to minimize blast
@@ -136,14 +145,11 @@ jobs:
           fi
 
           # Open the conflict PR. The changelog-fragment check
-          # (.github/workflows/changelog-fragment-check.yml) is keyed on changed
-          # paths, not PR labels: it exempts PRs that touch no src/ or tests/
-          # files and otherwise requires a changelog.d/<num>-<type>.md fragment.
-          # There is no label-based bypass, so we create the PR without one and
-          # call out the fragment requirement in the body for whoever resolves
-          # the conflicts.
+          # (.github/workflows/changelog-fragment-check.yml) exempts PRs whose head
+          # branch is $SYNC_BRANCH (from this repository), because the content is
+          # already-released history from main, not new work needing a fragment.
           gh pr create \
             --base develop \
             --head "$SYNC_BRANCH" \
             --title "Sync main into develop" \
-            --body "Automated back-merge of \`main\` into \`develop\` could not be applied cleanly; resolve the conflicts here. If the resolution touches \`src/\` or \`tests/\`, the changelog-fragment check requires a \`changelog.d/<num>-<type>.md\` fragment before this PR can merge."
+            --body "Automated back-merge of \`main\` into \`develop\` could not be applied cleanly; resolve the conflicts here. The changelog-fragment check is skipped for this branch."
