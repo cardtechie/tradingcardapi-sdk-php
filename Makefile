@@ -1,4 +1,4 @@
-.PHONY: help test test-version test-coverage analyse format install up down shell status build ensure-running lint-md fix-md
+.PHONY: help test test-version test-changelog changelog-collate test-coverage analyse format install up down shell status build ensure-running lint-md fix-md
 
 # Default target
 help: ## Show this help message
@@ -45,6 +45,9 @@ test: ## Run all tests using Pest
 
 test-version: ## Run the build/version.sh regression harness (host bash, no Docker)
 	@bash build/version.test.sh
+
+test-changelog: ## Run the changelog collation regression harness (host bash, no Docker)
+	@bash build/collate-changelog.test.sh
 
 test-coverage: ## Run tests with coverage report
 	@make ensure-running
@@ -99,6 +102,13 @@ version: ## Generate version number for current branch
 
 version-preview: ## Preview version for specific branch (use --branch=<name>)
 	@bash build/version.sh $(filter-out $@,$(MAKECMDGOALS))
+
+changelog-collate: ## Collate changelog.d/ into a [VERSION] section and stage it, no commit (recovery; use VERSION=x.y.z)
+	@if [ -z "$(VERSION)" ]; then \
+		echo "ERROR: VERSION is required. Usage: make changelog-collate VERSION=1.0.0"; \
+		exit 1; \
+	fi
+	@bash build/commit-changelog-back.sh "$(VERSION)" --no-commit
 
 changelog-update: ## Update changelog for next version
 	@echo "Updating changelog for version: $$(bash build/version.sh)"

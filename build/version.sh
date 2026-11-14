@@ -80,9 +80,26 @@ case "$branch" in
             # documented in CHANGELOG.md so minor/major bumps tag correctly
             version="$changelog_version"
         else
-            # Fallback: CHANGELOG missing/unparseable, or not ahead of the latest
-            # tag - next patch version
-            version="$major.$minor.$((patch + 1))"
+            # CHANGELOG is not ahead of the latest tag, so the release has not
+            # been collated yet (#406). Derive the bump from the pending
+            # changelog.d/ fragments that build/commit-changelog-back.sh is
+            # about to collate: any `added` fragment -> next minor, otherwise
+            # -> next patch. A major bump stays a deliberate operator act, and
+            # removed/deprecated do not auto-major while the package is 0.x.
+            # After the commit-back lands, `## [X.Y.Z]` is newer than the tag,
+            # so the branch above re-emits the same version on a rerun.
+            has_added_fragment=""
+            for fragment in "$repo_root"/changelog.d/[0-9]*-added.md; do
+                if [[ -f "$fragment" && ! -L "$fragment" ]]; then
+                    has_added_fragment="yes"
+                    break
+                fi
+            done
+            if [[ -n "$has_added_fragment" ]]; then
+                version="$major.$((minor + 1)).0"
+            else
+                version="$major.$minor.$((patch + 1))"
+            fi
         fi
         ;;
     develop)
