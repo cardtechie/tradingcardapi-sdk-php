@@ -7,10 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-<!-- New entries go to changelog.d/<issue>-<type>.md fragments, not here. At
-release time those fragments are collated into a versioned section. That
-collation is manual today — make changelog-update does not read changelog.d/
-fragments yet. See changelog.d/README.md. -->
+## [0.3.8] - 2026-10-25
+
+### Changed
+
+- **[Issue #406]** Collate `changelog.d/` fragments into `CHANGELOG.md` after merge in the release workflow, and stop requiring a hand-written version section on PRs into `main`.
+
+## [0.3.7] - 2026-10-24
+
+### Security
+
+- **[Issue #372]** Refresh `composer.lock` to guzzlehttp/guzzle 7.16.0, clearing the guzzle advisories fixed in 7.15.5.
+  - Lock-only change; published consumers resolve against `composer.json` constraints and are unaffected.
+
+## [0.3.6] - 2026-10-22
+
+### Security
+
+- **[Issue #390]** Refresh `composer.lock` to league/commonmark 2.10.4, laravel/framework 12.70.1 and league/flysystem 3.36.0, clearing the remaining commonmark, framework and flysystem Dependabot alerts.
+  - Lock-only change; published consumers resolve against `composer.json` constraints and are unaffected.
 
 ## [0.3.5] - 2026-10-21
 
@@ -589,7 +604,10 @@ fragments yet. See changelog.d/README.md. -->
 - Test matrix compatibility issues with Laravel 11+ and prefer-lowest strategy
 - PHPStan static analysis errors in ErrorResponseParser
 
-[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.5...HEAD
+[Unreleased]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.8...HEAD
+[0.3.8]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.7...0.3.8
+[0.3.7]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.6...0.3.7
+[0.3.6]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.5...0.3.6
 [0.3.5]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.4...0.3.5
 [0.3.4]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.3...0.3.4
 [0.3.3]: https://github.com/cardtechie/tradingcardapi-sdk-php/compare/0.3.2...0.3.3

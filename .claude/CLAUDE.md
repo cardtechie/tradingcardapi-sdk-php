@@ -131,11 +131,12 @@ Per-PR work writes a **changelog fragment**, not an edit to `CHANGELOG.md`.
 Add a one-line `changelog.d/<issue>-<type>.md` file, where `<type>` is one of
 `added | changed | fixed | security | removed | deprecated`. Do **not** append
 to the shared `## [Unreleased]` section — fragments avoid the merge conflicts
-that section caused. Fragments are collated into `CHANGELOG.md` once, at the
-release step — a **manual** step today: `make changelog-update` /
-`build/update-changelog.sh` does not read `changelog.d/` fragments yet, so the
-release operator collates them by hand until dedicated tooling ships. See
-[`changelog.d/README.md`](../changelog.d/README.md) for the convention.
+that section caused. Fragments are collated into `CHANGELOG.md` automatically
+after merge to `main`, by the Build and Release workflow
+(`build/commit-changelog-back.sh`). **Never hand-write a `## [X.Y.Z]` version
+section** — Release Validation fails any PR into `main` that adds one; add a
+fragment instead. See [`changelog.d/README.md`](../changelog.d/README.md) for
+the convention and [`docs/RELEASING.md`](../docs/RELEASING.md) for the flow.
 
 ## Issue Creation
 
@@ -157,16 +158,12 @@ When creating releases, follow these rules to prevent Packagist publishing issue
    - ❌ `"version": "0.1.3"` - causes Packagist validation failures and webhook 403 errors
    - ✅ Let git tags define versions automatically
 
-2. **Release Process**:
-   ```bash
-   # 1. Update CHANGELOG.md with new version details
-   # 2. Commit changes (without version in composer.json)
-   # 3. Create and push git tag
-   git tag -a 0.1.4 -m "v0.1.4 - Feature description"
-   git push origin 0.1.4
-   # 4. Create GitHub release from the tag
-   gh release create 0.1.4 --title "v0.1.4 - Feature description" --generate-notes
-   ```
+2. **Release Process**: merging to `main` is the release. Build and Release
+   collates the pending `changelog.d/` fragments into a `## [X.Y.Z]` section,
+   commits it back to `main` as cardtechie-ops-bot, tags that commit `X.Y.Z`
+   (no `v` prefix), creates the GitHub release and updates Packagist. Do not
+   edit `CHANGELOG.md` or tag by hand for a normal release; see
+   [`docs/RELEASING.md`](../docs/RELEASING.md).
 
 3. **Why this matters**:
    - Hardcoded versions that don't match git tags cause Packagist to reject updates

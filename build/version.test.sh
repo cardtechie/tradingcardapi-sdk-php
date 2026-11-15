@@ -182,6 +182,35 @@ commit "$repo"; tag "$repo" 0.2.0; commit "$repo"
 write_changelog "$repo" 0.2.0
 assert_version "main patch-fallback when CHANGELOG equals tag" "0.2.1" "$repo" --branch=main
 
+# --- main: pending `added` fragment -> next minor (#406) ---------------------
+# CHANGELOG not ahead of the tag (not collated yet) + an added fragment.
+repo=$(new_repo)
+commit "$repo"; tag "$repo" 0.3.6; commit "$repo"
+write_changelog "$repo" 0.3.6
+mkdir -p "$repo/changelog.d"
+echo "- **[Issue #1]** Add a thing." > "$repo/changelog.d/1-added.md"
+echo "- **[Issue #2]** Fix a thing." > "$repo/changelog.d/2-fixed.md"
+assert_version "main minor bump from pending added fragment" "0.4.0" "$repo" --branch=main
+
+# --- main: only non-added fragments -> next patch (#406) ---------------------
+repo=$(new_repo)
+commit "$repo"; tag "$repo" 0.3.6; commit "$repo"
+write_changelog "$repo" 0.3.6
+mkdir -p "$repo/changelog.d"
+echo "- **[Issue #2]** Fix a thing." > "$repo/changelog.d/2-fixed.md"
+echo "- **[Issue #3]** Remove a thing." > "$repo/changelog.d/3-removed.md"
+echo "# Changelog fragments" > "$repo/changelog.d/README.md"
+assert_version "main patch bump from non-added fragments" "0.3.7" "$repo" --branch=main
+
+# --- main: CHANGELOG newer than tag still wins over fragments (#406) ---------
+# The resume case: after the commit-back, [0.3.7] is on main ahead of the tag.
+repo=$(new_repo)
+commit "$repo"; tag "$repo" 0.3.6; commit "$repo"
+write_changelog "$repo" 0.3.7
+mkdir -p "$repo/changelog.d"
+echo "- **[Issue #1]** Add a thing." > "$repo/changelog.d/1-added.md"
+assert_version "main CHANGELOG newer than tag beats fragment bump" "0.3.7" "$repo" --branch=main
+
 # --- main: exact tag emits the tag itself ------------------------------------
 repo=$(new_repo)
 commit "$repo"; tag "$repo" 0.2.0
