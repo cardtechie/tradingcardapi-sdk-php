@@ -1,0 +1,1 @@
+- **[Issue #358]** Correct the `hotfix/*` build identifier in `docs/VERSION-MANAGEMENT.md` and note that only the `main` version is ever tagged.

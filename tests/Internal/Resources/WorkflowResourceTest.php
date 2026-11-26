@@ -74,7 +74,7 @@ it('can get actionable sets', function () {
     expect($result->sets[1]->attributes->name)->toBe('2024 Panini Football');
 });
 
-it('uses /internal/workflow/actionable-sets URL', function () {
+it('uses the canonical /internal/actionable-sets URL', function () {
     $capturedRequest = null;
 
     $customHandler = new MockHandler([
@@ -92,7 +92,8 @@ it('uses /internal/workflow/actionable-sets URL', function () {
 
     $resource->actionableSets();
 
-    expect((string) $capturedRequest->getUri())->toContain('/internal/workflow/actionable-sets');
+    expect((string) $capturedRequest->getUri())->toContain('/internal/actionable-sets');
+    expect((string) $capturedRequest->getUri())->not->toContain('/internal/workflow/');
 });
 
 it('can get actionable sets with params', function () {
@@ -183,7 +184,7 @@ it('can bulk initialize workflow', function () {
     expect($result->data->status)->toBe('queued');
 });
 
-it('uses /internal/workflow/bulk-initialize URL', function () {
+it('uses the canonical /internal/todo-initialization-jobs URL', function () {
     $capturedRequest = null;
 
     $customHandler = new MockHandler([
@@ -204,7 +205,8 @@ it('uses /internal/workflow/bulk-initialize URL', function () {
     $resource->bulkInitializeWorkflow(['set_ids' => ['1', '2']]);
 
     expect($capturedRequest->getMethod())->toBe('POST');
-    expect((string) $capturedRequest->getUri())->toContain('/internal/workflow/bulk-initialize');
+    expect((string) $capturedRequest->getUri())->toContain('/internal/todo-initialization-jobs');
+    expect((string) $capturedRequest->getUri())->not->toContain('/internal/workflow/');
 });
 
 it('can bulk initialize workflow with no params', function () {
@@ -243,7 +245,7 @@ it('can get bulk initialize status', function () {
     expect($result->data->processed)->toBe(150);
 });
 
-it('uses /internal/workflow/bulk-initialize URL for getBulkInitializeStatus', function () {
+it('uses the canonical /internal/todo-initialization-jobs URL for getBulkInitializeStatus', function () {
     $capturedRequest = null;
 
     $customHandler = new MockHandler([
@@ -263,7 +265,7 @@ it('uses /internal/workflow/bulk-initialize URL for getBulkInitializeStatus', fu
 
     $resource->getBulkInitializeStatus('my-job-id');
 
-    expect((string) $capturedRequest->getUri())->toContain('/internal/workflow/bulk-initialize/my-job-id');
+    expect((string) $capturedRequest->getUri())->toContain('/internal/todo-initialization-jobs/my-job-id');
 });
 
 it('builds the correct JSON:API envelope for updateSetTodo', function () {
@@ -441,7 +443,7 @@ it('can get review queue', function () {
     expect($result->sets)->toBeArray();
     expect($result->sets)->toHaveCount(1);
     expect($result->sets[0]->attributes->status)->toBe('review');
-    expect((string) $capturedRequest->getUri())->toContain('/internal/workflow/actionable-sets');
+    expect((string) $capturedRequest->getUri())->toContain('/internal/actionable-sets');
     expect((string) $capturedRequest->getUri())->toContain('status=review');
 });
 
@@ -555,6 +557,47 @@ it('can resolve a review with default notes', function () {
     expect($result->data->id)->toBe('todo-789');
     expect($result->data->attributes->status)->toBe('pending');
     expect($result->data->attributes->notes)->toBe('Resolved by human review');
+});
+
+it('decodes the real flat-row actionable-sets payload and its meta block', function () {
+    $this->mockHandler->append(
+        new GuzzleResponse(200, [], json_encode([
+            'data' => [
+                [
+                    'todo_id' => 'todo-1',
+                    'set_id' => 'set-1',
+                    'set_name' => '2024 Topps Baseball',
+                    'genre' => 'baseball',
+                    'year' => 2024,
+                    'step' => 'discover_sources',
+                    'priority' => 'high',
+                    'card_count' => 350,
+                    'has_sources' => false,
+                    'notes' => null,
+                    'updated_at' => '2026-03-15T09:00:00+00:00',
+                ],
+            ],
+            'meta' => [
+                'total' => 1,
+                'full_total' => 42,
+                'step' => 'discover_sources',
+                'status' => 'pending',
+                'priority_filter' => 'high',
+            ],
+        ]))
+    );
+
+    $result = $this->workflowResource->actionableSets();
+
+    expect($result->sets)->toHaveCount(1);
+    expect($result->sets[0]->id)->toBe('set-1');
+    expect($result->sets[0]->todoId)->toBe('todo-1');
+    expect($result->sets[0]->attributes->set_name)->toBe('2024 Topps Baseball');
+    expect($result->sets[0]->attributes->card_count)->toBe(350);
+    expect($result->meta)->not->toBeNull();
+    expect($result->meta->total)->toBe(1);
+    expect($result->meta->fullTotal)->toBe(42);
+    expect($result->meta->priorityFilter)->toBe('high');
 });
 
 it('decodes the real JSON:API set-todos collection', function () {

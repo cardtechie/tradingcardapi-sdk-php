@@ -62,6 +62,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Authentication Type
+    |--------------------------------------------------------------------------
+    |
+    | Leave unset (null) to auto-detect: an API key or personal access token is
+    | used when no complete client ID and secret pair is configured, otherwise
+    | OAuth. Set to 'api_key', 'pat' or 'oauth2' to choose explicitly, for
+    | example to force 'api_key' when OAuth credentials are also present.
+    */
+    'auth_type' => env('TRADINGCARDAPI_AUTH_TYPE'),
+
+    /*
+    |--------------------------------------------------------------------------
     | OAuth Scopes
     |--------------------------------------------------------------------------
     |

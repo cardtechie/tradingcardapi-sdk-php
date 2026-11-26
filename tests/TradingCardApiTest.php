@@ -15,6 +15,7 @@ use CardTechie\TradingCardApiSdk\Resources\Set;
 use CardTechie\TradingCardApiSdk\Resources\SetSource;
 use CardTechie\TradingCardApiSdk\Resources\Stats;
 use CardTechie\TradingCardApiSdk\Resources\Team;
+use CardTechie\TradingCardApiSdk\Resources\Usage;
 use CardTechie\TradingCardApiSdk\Resources\Year;
 use CardTechie\TradingCardApiSdk\TradingCardApi;
 use GuzzleHttp\Client;
@@ -104,6 +105,12 @@ it('returns stats resource', function () {
     $api = new TradingCardApi;
     $stats = $api->stats();
     expect($stats)->toBeInstanceOf(Stats::class);
+});
+
+it('returns usage resource', function () {
+    $api = new TradingCardApi;
+    $usage = $api->usage();
+    expect($usage)->toBeInstanceOf(Usage::class);
 });
 
 it('returns set source resource', function () {

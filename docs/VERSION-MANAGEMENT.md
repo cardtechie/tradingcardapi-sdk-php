@@ -42,8 +42,14 @@ The SDK follows [Semantic Versioning 2.0.0](https://semver.org/):
 | `main`/`master` | `X.Y.Z`, derived from pending fragments | `1.2.3` | Production releases |
 | `develop` | `X.Y+1.0.beta-N` | `1.3.0.beta-12` | Pre-release testing |
 | `release/X.Y.Z` | `X.Y.Z.rc-N` | `1.3.0.rc-2` | Release candidates |
-| `hotfix/*` | `X.Y.Z+1-hotfix.name.N` | `1.2.4-security-fix.3` | Critical fixes |
+| `hotfix/*` | `X.Y.Z+1-hotfix.<name>.N` | `1.2.4-hotfix.securityfix.3` | Critical fixes |
 | `feature/*` | `X.Y.Z-alpha.N` | `1.2.3-alpha.5` | Feature development |
+
+> **Only the `main` row is ever tagged.** Every other pattern in this table is a
+> *branch build identifier* — a label for CI artifacts and diagnostics. In
+> particular a `hotfix/*` string like `1.2.4-hotfix.securityfix.3` is never the
+> released version; when the hotfix merges to `main`, `build-release.yml` derives
+> the version from the pending `changelog.d/` fragments and tags that.
 
 ## Build Scripts
 
@@ -189,7 +195,7 @@ auto-major while the package is `0.x`.
 
    ```bash
    git checkout -b hotfix/security-fix
-   make version  # Shows: 1.2.4-security-fix.1
+   make version  # Shows: 1.2.4-hotfix.securityfix.1
    ```
 
 2. **Apply Fix and Release** — add a `changelog.d/<issue>-<type>.md` fragment

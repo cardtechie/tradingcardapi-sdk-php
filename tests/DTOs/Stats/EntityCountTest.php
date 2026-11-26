@@ -49,3 +49,41 @@ it('handles partial properties with defaults', function () {
     expect($entityCount->draft)->toBe(0);
     expect($entityCount->archived)->toBe(0);
 });
+
+it('deserialises the gated payload a read:published token receives', function () {
+    // Since cardtechie/tradingcardapi-api#2435 a token without internal,
+    // read:all-status or read:draft receives total collapsed onto published and
+    // draft zeroed. The keys are still present, so this pins the shape a
+    // customer-grade token actually sees.
+    $data = (object) [
+        'entity_type' => 'set',
+        'total' => 120,
+        'published' => 120,
+        'draft' => 0,
+        'archived' => 0,
+    ];
+
+    $entityCount = EntityCount::fromObject($data);
+
+    expect($entityCount->entityType)->toBe('set');
+    expect($entityCount->total)->toBe($entityCount->published);
+    expect($entityCount->published)->toBe(120);
+    expect($entityCount->draft)->toBe(0);
+    expect($entityCount->archived)->toBe(0);
+});
+
+it('deserialises when the gate drops total and draft entirely', function () {
+    // Defensive: the shipped gate preserves the keys, but a future API build
+    // that omits them rather than collapsing them must not break the DTO.
+    $data = (object) [
+        'entity_type' => 'card',
+        'published' => 326000,
+    ];
+
+    $entityCount = EntityCount::fromObject($data);
+
+    expect($entityCount->entityType)->toBe('card');
+    expect($entityCount->published)->toBe(326000);
+    expect($entityCount->total)->toBe(0);
+    expect($entityCount->draft)->toBe(0);
+});
