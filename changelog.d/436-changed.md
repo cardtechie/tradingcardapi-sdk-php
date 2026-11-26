@@ -1,0 +1,1 @@
+- **[Issue #436]** Document why Dependabot auto-merge keeps GITHUB_TOKEN and relies on the daily back-merge schedule to reach develop.

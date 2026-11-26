@@ -17,6 +17,15 @@ jobs:
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           
+      # This merge deliberately uses GITHUB_TOKEN. A push made with GITHUB_TOKEN
+      # does not trigger `on: push` workflows, so merging a Dependabot PR into main
+      # starts neither build-release.yml nor back-merge-stable-to-develop.yml.
+      # That is intentional: a PAT-authored push to main would run
+      # build-release.yml and cut and publish a patch release for every Dependabot
+      # merge. The back-merge of these commits into develop is instead caught by
+      # the daily `schedule` (and `workflow_dispatch`) in
+      # back-merge-stable-to-develop.yml (#423, #436). Do not switch this step to
+      # PROJECT_TOKEN without deciding release cadence first.
       - name: Auto-merge Dependabot PRs for semver-patch updates
         if: ${{steps.metadata.outputs.update-type == 'version-update:semver-patch'}}
         run: gh pr merge --auto --merge "$PR_URL"
