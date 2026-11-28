@@ -1,0 +1,1 @@
+- **[Issue #392]** Add the merge_group trigger to the PR-check workflows so a merge queue can run them.

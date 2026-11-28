@@ -5,6 +5,8 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  merge_group:
+    types: [checks_requested]
 
 # Cancel superseded runs on the same ref so a new push stops the previous
 # in-flight PHPStan/Pint/coverage jobs early.
